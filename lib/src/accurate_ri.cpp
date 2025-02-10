@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include "logger.h"
+
 void hello() {
-    std::cout << "Hello, World!" << std::endl;
+    LOG_DEBUG("Hello, World!");
 }
