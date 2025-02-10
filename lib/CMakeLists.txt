@@ -21,7 +21,9 @@ endif()
 
 
 add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger.h
-        src/utils/timer.h)
+        src/utils/timer.h
+        src/point/PointUtils.cpp
+        src/point/PointUtils.h)
 target_include_directories(accurate_ri PUBLIC include)
 
 install(TARGETS accurate_ri DESTINATION lib)
