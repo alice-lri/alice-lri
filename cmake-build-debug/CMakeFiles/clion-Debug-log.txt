@@ -1,5 +1,0 @@
-/home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/bin/ninja -DCMAKE_C_COMPILER=/home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/bin/x86_64-conda-linux-gnu-cc -G Ninja -S /home/samuel.soutullo/GitHub/AccurateRI -B /home/samuel.soutullo/GitHub/AccurateRI/cmake-build-debug
--- Found pybind11: /home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/include (found version "2.13.6")
--- Configuring done
--- Generating done
--- Build files have been written to: /home/samuel.soutullo/GitHub/AccurateRI/cmake-build-debug

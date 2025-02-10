@@ -1,13 +1,13 @@
 name: accurate_ri_env
 channels:
-  - conda-forge
+  - https://repo.anaconda.com/pkgs/main
+  - https://repo.anaconda.com/pkgs/r
 dependencies:
-  - python=3.10
   - cmake=3.22
-  - ninja
-  - gxx_linux-64
-  - llvm-openmp
-  - pybind11
-  - pytest
-  - gtest
-  - gdb
+  - gtest=1.16.0
+  - gxx_linux-64=14.2.0
+  - ninja=1.12.1
+  - pybind11=2.13.6
+  - pytest=8.3.4
+  - python=3.10
+  - gdb=14.2

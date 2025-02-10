@@ -1,7 +1,0 @@
-# ninja log v6
-153	181	1739176478547947049	libAccurateRI.so	b6b24757f0e3bc8f
-1	190	1739183754263048363	lib/CMakeFiles/accurate_ri.dir/src/accurate_ri.cpp.o	bd608ab64fa5eefe
-1	18	1739183754263048363	examples/CMakeFiles/examples.dir/main.cpp.o	bd3863e599cb5912
-1	153	1739180923716146113	lib/CMakeFiles/accurate_ri.dir/src/library.cpp.o	cb61fc8f33d59ec8
-190	223	1739183754452049891	lib/libaccurate_ri.so	94796e1f548a0c2e
-223	255	1739183754485050158	examples/examples	b60e49c5bed70f6f
