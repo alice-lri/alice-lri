@@ -25,7 +25,7 @@
 				{
 					"build" : "lib",
 					"hasInstallRule" : true,
-					"jsonFile" : "directory-lib-Debug-422fbefee11a9d566155.json",
+					"jsonFile" : "directory-lib-Debug-bfda5c21046afe9a437b.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.22"
@@ -111,28 +111,28 @@
 				{
 					"directoryIndex" : 4,
 					"id" : "_accurate_ri::@e1ac5446165bc0cf31e4",
-					"jsonFile" : "target-_accurate_ri-Debug-e3af2bb41afcb6d1121a.json",
+					"jsonFile" : "target-_accurate_ri-Debug-88a82ce48d70d0a6136d.json",
 					"name" : "_accurate_ri",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 1,
 					"id" : "accurate_ri::@306ed2d68c6501e8728f",
-					"jsonFile" : "target-accurate_ri-Debug-3daaa3395d34f0f8b926.json",
+					"jsonFile" : "target-accurate_ri-Debug-383158bf3c14723ff207.json",
 					"name" : "accurate_ri",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 2,
 					"id" : "examples::@714eac15f71a94114fdf",
-					"jsonFile" : "target-examples-Debug-09b73f9a955436943baf.json",
+					"jsonFile" : "target-examples-Debug-f3af06ba21e6eaab7920.json",
 					"name" : "examples",
 					"projectIndex" : 0
 				},
 				{
 					"directoryIndex" : 3,
 					"id" : "run_tests::@a44f0ac069e85531cdee",
-					"jsonFile" : "target-run_tests-Debug-c94e4fd04ba8b6b9b274.json",
+					"jsonFile" : "target-run_tests-Debug-d1b0858343aedf264990.json",
 					"name" : "run_tests",
 					"projectIndex" : 0
 				}
@@ -142,12 +142,12 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "/IdeaProjects/AccurateRI/cmake-build-debug",
-		"source" : "/IdeaProjects/AccurateRI"
+		"build" : "/home/samuel.soutullo/GitHub/AccurateRI/cmake-build-debug",
+		"source" : "/home/samuel.soutullo/GitHub/AccurateRI"
 	},
 	"version" : 
 	{
 		"major" : 2,
-		"minor" : 7
+		"minor" : 3
 	}
 }

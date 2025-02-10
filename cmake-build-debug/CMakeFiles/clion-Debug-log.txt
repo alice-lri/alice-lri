@@ -1,34 +1,5 @@
-/.jbdevcontainer/JetBrains/RemoteDev/dist/e711b5c5788a8_CLion-251.18673.49/bin/cmake/linux/x64/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/.jbdevcontainer/JetBrains/RemoteDev/dist/e711b5c5788a8_CLion-251.18673.49/bin/ninja/linux/x64/ninja -G Ninja -S /IdeaProjects/AccurateRI -B /IdeaProjects/AccurateRI/cmake-build-debug
--- The C compiler identification is GNU 11.4.0
--- The CXX compiler identification is GNU 11.4.0
--- Detecting C compiler ABI info
--- Detecting C compiler ABI info - done
--- Check for working C compiler: /usr/bin/cc - skipped
--- Detecting C compile features
--- Detecting C compile features - done
--- Detecting CXX compiler ABI info
--- Detecting CXX compiler ABI info - done
--- Check for working CXX compiler: /usr/bin/c++ - skipped
--- Detecting CXX compile features
--- Detecting CXX compile features - done
--- Found GTest: /usr/lib/x86_64-linux-gnu/cmake/GTest/GTestConfig.cmake (found version "1.11.0")
-CMake Warning (dev) at /usr/lib/cmake/pybind11/FindPythonLibsNew.cmake:98 (find_package):
-  Policy CMP0148 is not set: The FindPythonInterp and FindPythonLibs modules
-  are removed.  Run "cmake --help-policy CMP0148" for policy details.  Use
-  the cmake_policy command to set the policy and suppress this warning.
-
-Call Stack (most recent call first):
-  /usr/lib/cmake/pybind11/pybind11Tools.cmake:50 (find_package)
-  /usr/lib/cmake/pybind11/pybind11Common.cmake:206 (include)
-  /usr/lib/cmake/pybind11/pybind11Config.cmake:250 (include)
-  python/CMakeLists.txt:1 (find_package)
-This warning is for project developers.  Use -Wno-dev to suppress it.
-
--- Found PythonInterp: /usr/bin/python3.10 (found version "3.10.12")
--- Found PythonLibs: /usr/lib/x86_64-linux-gnu/libpython3.10.so
--- Performing Test HAS_FLTO
--- Performing Test HAS_FLTO - Success
--- Found pybind11: /usr/include (found version "2.9.1")
--- Configuring done (0.3s)
--- Generating done (0.0s)
--- Build files have been written to: /IdeaProjects/AccurateRI/cmake-build-debug
+/home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/bin/ninja -DCMAKE_C_COMPILER=/home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/bin/x86_64-conda-linux-gnu-cc -G Ninja -S /home/samuel.soutullo/GitHub/AccurateRI -B /home/samuel.soutullo/GitHub/AccurateRI/cmake-build-debug
+-- Found pybind11: /home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/include (found version "2.13.6")
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /home/samuel.soutullo/GitHub/AccurateRI/cmake-build-debug

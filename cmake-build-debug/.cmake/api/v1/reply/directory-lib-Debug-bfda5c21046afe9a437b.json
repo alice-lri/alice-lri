@@ -43,17 +43,6 @@
 			"type" : "target"
 		},
 		{
-			"backtrace" : 1,
-			"component" : "Unspecified",
-			"cxxModuleBmiTarget" : 
-			{
-				"id" : "accurate_ri::@306ed2d68c6501e8728f",
-				"index" : 1
-			},
-			"destination" : "lib",
-			"type" : "cxxModuleBmi"
-		},
-		{
 			"backtrace" : 2,
 			"component" : "Unspecified",
 			"destination" : "include",

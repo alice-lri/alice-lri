@@ -1,0 +1,13 @@
+name: accurate_ri_env
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - cmake=3.22
+  - ninja
+  - gxx_linux-64
+  - llvm-openmp
+  - pybind11
+  - pytest
+  - gtest
+  - gdb

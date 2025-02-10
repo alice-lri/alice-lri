@@ -16,7 +16,7 @@
 		],
 		"files" : 
 		[
-			"/usr/lib/cmake/pybind11/pybind11Tools.cmake",
+			"/home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/share/cmake/pybind11/pybind11Tools.cmake",
 			"python/CMakeLists.txt"
 		],
 		"nodes" : 
@@ -33,7 +33,7 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 165,
+				"line" : 181,
 				"parent" : 1
 			},
 			{
@@ -45,7 +45,7 @@
 			{
 				"command" : 2,
 				"file" : 0,
-				"line" : 167,
+				"line" : 183,
 				"parent" : 1
 			}
 		]
@@ -56,7 +56,10 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g -std=gnu++20 -fPIC -fvisibility=hidden -fdiagnostics-color=always"
+					"fragment" : "-g -fPIC -fvisibility=hidden"
+				},
+				{
+					"fragment" : "-std=gnu++20"
 				}
 			],
 			"defines" : 
@@ -69,7 +72,12 @@
 			[
 				{
 					"backtrace" : 3,
-					"path" : "/IdeaProjects/AccurateRI/lib/include"
+					"path" : "/home/samuel.soutullo/GitHub/AccurateRI/lib/include"
+				},
+				{
+					"backtrace" : 4,
+					"isSystem" : true,
+					"path" : "/home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/include"
 				},
 				{
 					"backtrace" : 4,
@@ -111,7 +119,7 @@
 				"role" : "flags"
 			},
 			{
-				"fragment" : "-Wl,-rpath,/IdeaProjects/AccurateRI/cmake-build-debug/lib",
+				"fragment" : "-Wl,-rpath,/home/samuel.soutullo/GitHub/AccurateRI/cmake-build-debug/lib",
 				"role" : "libraries"
 			},
 			{

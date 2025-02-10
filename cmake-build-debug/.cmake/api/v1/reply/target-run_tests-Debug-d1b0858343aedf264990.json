@@ -2,7 +2,7 @@
 	"artifacts" : 
 	[
 		{
-			"path" : "examples/examples"
+			"path" : "tests/run_tests"
 		}
 	],
 	"backtrace" : 1,
@@ -15,7 +15,7 @@
 		],
 		"files" : 
 		[
-			"examples/CMakeLists.txt"
+			"tests/CMakeLists.txt"
 		],
 		"nodes" : 
 		[
@@ -25,13 +25,13 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 1,
+				"line" : 2,
 				"parent" : 0
 			},
 			{
 				"command" : 1,
 				"file" : 0,
-				"line" : 2,
+				"line" : 3,
 				"parent" : 0
 			}
 		]
@@ -42,14 +42,29 @@
 			"compileCommandFragments" : 
 			[
 				{
-					"fragment" : "-g -std=gnu++20 -fdiagnostics-color=always"
+					"fragment" : "-g"
+				},
+				{
+					"fragment" : "-std=gnu++20"
+				}
+			],
+			"defines" : 
+			[
+				{
+					"backtrace" : 2,
+					"define" : "GTEST_LINKED_AS_SHARED_LIBRARY=1"
 				}
 			],
 			"includes" : 
 			[
 				{
 					"backtrace" : 2,
-					"path" : "/IdeaProjects/AccurateRI/lib/include"
+					"path" : "/home/samuel.soutullo/GitHub/AccurateRI/lib/include"
+				},
+				{
+					"backtrace" : 2,
+					"isSystem" : true,
+					"path" : "/home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/include"
 				}
 			],
 			"language" : "CXX",
@@ -57,7 +72,7 @@
 			{
 				"backtraces" : 
 				[
-					1
+					2
 				],
 				"standard" : "20"
 			},
@@ -74,7 +89,7 @@
 			"id" : "accurate_ri::@306ed2d68c6501e8728f"
 		}
 	],
-	"id" : "examples::@714eac15f71a94114fdf",
+	"id" : "run_tests::@a44f0ac069e85531cdee",
 	"link" : 
 	{
 		"commandFragments" : 
@@ -88,23 +103,35 @@
 				"role" : "flags"
 			},
 			{
-				"fragment" : "-Wl,-rpath,/IdeaProjects/AccurateRI/cmake-build-debug/lib",
+				"fragment" : "-Wl,-rpath,/home/samuel.soutullo/GitHub/AccurateRI/cmake-build-debug/lib",
 				"role" : "libraries"
 			},
 			{
 				"backtrace" : 2,
 				"fragment" : "lib/libaccurate_ri.so",
 				"role" : "libraries"
+			},
+			{
+				"fragment" : "/home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/lib/libgtest_main.so.1.16.0",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "/home/samuel.soutullo/.miniconda3/envs/accurate_ri_env/lib/libgtest.so.1.16.0",
+				"role" : "libraries"
+			},
+			{
+				"fragment" : "-lpthread",
+				"role" : "libraries"
 			}
 		],
 		"language" : "CXX"
 	},
-	"name" : "examples",
-	"nameOnDisk" : "examples",
+	"name" : "run_tests",
+	"nameOnDisk" : "run_tests",
 	"paths" : 
 	{
-		"build" : "examples",
-		"source" : "examples"
+		"build" : "tests",
+		"source" : "tests"
 	},
 	"sourceGroups" : 
 	[
@@ -121,7 +148,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "examples/main.cpp",
+			"path" : "tests/tests.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],
