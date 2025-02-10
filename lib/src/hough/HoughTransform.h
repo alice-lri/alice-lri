@@ -11,7 +11,7 @@ namespace accurate_ri {
     class HoughTransform {
     private:
         std::vector<double> accumulator; ///< Accumulator array for votes.
-        std::vector<uint64_t> hashAccumulator; ///< Hash accumulator for unique point identification.
+        std::vector<uint64_t> hashAccumulator; ///< Hash accumulator for unique point combination identification.
 
         double xMin; ///< Minimum x value.
         double xMax; ///< Maximum x value.
