@@ -1,7 +1,7 @@
 #pragma once
 #include <chrono>
 #include <iostream>
-#include "logger.h"
+#include "Logger.h"
 
 #ifdef ENABLE_PROFILING
 #define PROFILE_SCOPE(name) Timer timer##__LINE__ (name)

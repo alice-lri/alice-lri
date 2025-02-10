@@ -20,10 +20,20 @@ if(ENABLE_PROFILING)
 endif()
 
 
-add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger.h
-        src/utils/timer.h
+add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
+        src/utils/Timer.h
         src/point/PointUtils.cpp
-        src/point/PointUtils.h)
+        src/point/PointUtils.h
+        src/intrinsics/VerticalIntrinsicsEstimator.cpp
+        src/intrinsics/VerticalIntrinsicsEstimator.h
+        src/intrinsics/IntrinsicsEstimator.cpp
+        src/intrinsics/IntrinsicsEstimator.h
+        src/intrinsics/HorizontalIntrinsicsEstimator.cpp
+        src/intrinsics/HorizontalIntrinsicsEstimator.h
+        src/hough/HoughTransform.cpp
+        src/hough/HoughTransform.h
+        src/hash/HashUtils.cpp
+        src/hash/HashUtils.h)
 target_include_directories(accurate_ri PUBLIC include)
 
 install(TARGETS accurate_ri DESTINATION lib)

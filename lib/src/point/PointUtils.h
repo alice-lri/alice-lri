@@ -14,5 +14,9 @@ namespace accurate_ri {
 
         static std::vector<double> computeThetas(const std::vector<double> &x,
                                                  const std::vector<double> &y);
+
+        static double computeCoordsEps(const std::vector<double> &x,
+                                       const std::vector<double> &y,
+                                       const std::vector<double> &z);
     };
 } // accurate_ri
