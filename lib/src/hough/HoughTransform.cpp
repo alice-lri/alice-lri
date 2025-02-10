@@ -1,5 +1,6 @@
 #include "HoughTransform.h"
 #include "../hash/HashUtils.h"
+#include "../utils/Logger.h"
 #include <cmath>
 
 namespace accurate_ri {
@@ -11,6 +12,8 @@ HoughTransform::HoughTransform(double xMin, double xMax, double xStep, double yM
 
     accumulator.resize(xCount * yCount);
     hashAccumulator.resize(xCount * yCount);
+
+    LOG_INFO("HoughTransform initialized with xCount:", xCount, "yCount:", yCount);
 }
 
 void HoughTransform::computeAccumulator(const std::vector<double> &ranges, const std::vector<double> &phis) {
@@ -22,9 +25,13 @@ void HoughTransform::computeAccumulator(const std::vector<double> &ranges, const
         yValues[i] = yMin + i * yStep;
     }
 
+    LOG_INFO("Starting accumulator computation for", ranges.size(), "points");
+
     for (uint64_t i = 0; i < ranges.size(); i++) {
         updateAccumulatorForPoint(i, ranges, phis, xValues);
     }
+
+    LOG_INFO("Accumulator computation completed.");
 }
 
 inline void HoughTransform::updateAccumulatorForPoint(uint64_t pointIndex, const std::vector<double> &ranges,

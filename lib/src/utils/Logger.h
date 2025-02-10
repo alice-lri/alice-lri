@@ -34,33 +34,22 @@ enum LogLevel {
 
 class Logger {
 public:
-    static void setLogFile(const std::string& filename) {
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
-        std::lock_guard<std::mutex> lock(getInstance().logMutex);
-        getInstance().logFile.open(filename, std::ios::out | std::ios::app);
-#endif
-    }
-
-#if LOG_LEVEL <= LOG_LEVEL_ERROR
-    static void log(LogLevel level, const std::string& msg, const char* file, int line) {
+    // Core logging function using variadic template for `<<` support
+    template <typename... Args>
+    static void log(LogLevel level, const char* file, int line, Args&&... args) {
         std::ostringstream logStream;
-        logStream << getTimestamp() << " [" << getLogLevelString(level) << "] " << msg
-                  << " (" << file << ":" << line << ")\n";
+        logStream << getTimestamp() << " [" << getLogLevelString(level) << "] ";
+        (logStream << ... << std::forward<Args>(args));  // Fold expression for variadic logging
+        logStream << " (" << file << ":" << line << ")\n";
 
         std::lock_guard<std::mutex> lock(getInstance().logMutex);
-
-        if (getInstance().logFile.is_open()) {
-            getInstance().logFile << logStream.str();
-            getInstance().logFile.flush();
-        } else {
             std::cerr << getColor(level) << logStream.str() << COLOR_RESET;
         }
-    }
 #endif
 
 private:
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
-    std::ofstream logFile;
     std::mutex logMutex;
 #endif
 
@@ -101,27 +90,27 @@ private:
 #endif
 };
 
-// **Compile-Time Optimized Logging Macros**
+// **Compile-Time Optimized Logging Macros (Now with `<<` support!)**
 #if LOG_LEVEL <= LOG_LEVEL_DEBUG
-    #define LOG_DEBUG(msg) Logger::log(Debug, msg, __FILE__, __LINE__)
+    #define LOG_DEBUG(...) Logger::log(Debug, __FILE__, __LINE__, __VA_ARGS__)
 #else
-    #define LOG_DEBUG(msg) do {} while (0)
+    #define LOG_DEBUG(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
-    #define LOG_INFO(msg) Logger::log(Info, msg, __FILE__, __LINE__)
+    #define LOG_INFO(...) Logger::log(Info, __FILE__, __LINE__, __VA_ARGS__)
 #else
-    #define LOG_INFO(msg) do {} while (0)
+    #define LOG_INFO(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_WARN
-    #define LOG_WARN(msg) Logger::log(Warn, msg, __FILE__, __LINE__)
+    #define LOG_WARN(...) Logger::log(Warn, __FILE__, __LINE__, __VA_ARGS__)
 #else
-    #define LOG_WARN(msg) do {} while (0)
+    #define LOG_WARN(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
-    #define LOG_ERROR(msg) Logger::log(Error, msg, __FILE__, __LINE__)
+    #define LOG_ERROR(...) Logger::log(Error, __FILE__, __LINE__, __VA_ARGS__)
 #else
-    #define LOG_ERROR(msg) do {} while (0)
+    #define LOG_ERROR(...) do {} while (0)
 #endif
