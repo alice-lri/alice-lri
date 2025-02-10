@@ -1,0 +1,6 @@
+#ifndef ACCURATERI_LIBRARY_H
+#define ACCURATERI_LIBRARY_H
+
+void hello();
+
+#endif //ACCURATERI_LIBRARY_H

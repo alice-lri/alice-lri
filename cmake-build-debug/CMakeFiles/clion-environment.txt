@@ -1,0 +1,4 @@
+ToolSet: 1.0 (local)Ninja: 1.12.1@/.jbdevcontainer/JetBrains/RemoteDev/dist/e711b5c5788a8_CLion-251.18673.49/bin/ninja/linux/x64/ninja
+Options: 
+
+Options:-DCMAKE_MAKE_PROGRAM=/.jbdevcontainer/JetBrains/RemoteDev/dist/e711b5c5788a8_CLion-251.18673.49/bin/ninja/linux/x64/ninja

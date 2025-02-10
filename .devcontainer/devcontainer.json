@@ -1,0 +1,7 @@
+{
+  "name": "C++ & Python DevContainer",
+  "dockerFile": "Dockerfile",
+  "postCreateCommand": "source /workspace/venv/bin/activate && pip install -r requirements.txt",
+  "remoteUser": "vscode",
+  "containerUser": "vscode"
+}
