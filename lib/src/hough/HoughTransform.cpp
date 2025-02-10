@@ -1,6 +1,6 @@
 #include "HoughTransform.h"
-#include "../hash/HashUtils.h"
-#include "../utils/Logger.h"
+#include "hash/HashUtils.h"
+#include "utils/Logger.h"
 #include <cmath>
 
 namespace accurate_ri {

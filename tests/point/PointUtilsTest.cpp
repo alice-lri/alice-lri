@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "../../lib/src/point/PointUtils.h"
+#include "point/PointUtils.h"
 #include <vector>
 #include <cmath>
 

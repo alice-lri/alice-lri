@@ -34,7 +34,11 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/hough/HoughTransform.h
         src/hash/HashUtils.cpp
         src/hash/HashUtils.h)
-target_include_directories(accurate_ri PUBLIC include)
+
+target_include_directories(accurate_ri
+        PUBLIC include
+        PRIVATE src
+)
 
 install(TARGETS accurate_ri DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)

@@ -1,5 +1,5 @@
 #include "IntrinsicsEstimator.h"
-#include "../point/PointUtils.h"
+#include "point/PointUtils.h"
 
 namespace accurate_ri {
     void IntrinsicsEstimator::estimate(const std::vector<double> &x,
