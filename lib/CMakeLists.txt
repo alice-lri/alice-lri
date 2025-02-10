@@ -15,8 +15,13 @@ else()
     message(FATAL_ERROR "Invalid LOG_LEVEL: Choose DEBUG, INFO, WARN, ERROR, or NONE")
 endif()
 
+if(ENABLE_PROFILING)
+    add_definitions(-DENABLE_PROFILING)
+endif()
 
-add_library(accurate_ri SHARED src/accurate_ri.cpp src/logger.h)
+
+add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger.h
+        src/utils/timer.h)
 target_include_directories(accurate_ri PUBLIC include)
 
 install(TARGETS accurate_ri DESTINATION lib)
