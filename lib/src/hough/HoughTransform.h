@@ -52,7 +52,7 @@ namespace accurate_ri {
          */
         inline void updateAccumulatorForPoint(uint64_t pointIndex, const std::vector<double> &ranges,
                                               const std::vector<double> &phis,
-                                              std::vector<double> xValues);
+                                              const std::vector<double> &xValues);
 
         /**
          * @brief Votes for discontinuities in the accumulator to avoid gaps.
@@ -66,11 +66,11 @@ namespace accurate_ri {
          * representation of the detected lines.
          *
          * @param pointIndex Index of the point being processed.
-         * @param previousY The y value of the previous point.
          * @param x The current x index in the accumulator.
          * @param y The current y value in the accumulator.
          * @param voteVal The value to be added to the accumulator for the current point.
+         * @param previousY The y value of the previous point.
          */
-        inline void voteForDiscontinuities(uint64_t pointIndex, int32_t previousY, size_t x, int32_t y, double voteVal);
+        inline void voteForDiscontinuities(uint64_t pointIndex, size_t x, int32_t y, double voteVal, int32_t previousY);
     };
 } // accurate_ri
