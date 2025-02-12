@@ -1,22 +1,23 @@
 #pragma once
 #include <vector>
 
+#include "PointArray.h"
+
 namespace accurate_ri {
     class PointUtils {
     public:
-        static std::vector<double> computeRanges(const std::vector<double> &x,
-                                                 const std::vector<double> &y,
-                                                 const std::vector<double> &z);
+        template <PointArrayLayout T>
+        static std::vector<double> computeRanges(const PointArray<T>& points);
 
-        static std::vector<double> computePhis(const std::vector<double> &x,
-                                               const std::vector<double> &z,
-                                               const std::vector<double> &ranges);
+        template <PointArrayLayout T>
+        static std::vector<double> computePhis(const PointArray<T>& points);
 
-        static std::vector<double> computeThetas(const std::vector<double> &x,
-                                                 const std::vector<double> &y);
+        template <PointArrayLayout T>
+        static std::vector<double> computeThetas(const PointArray<T>& points);
 
-        static double computeCoordsEps(const std::vector<double> &x,
-                                       const std::vector<double> &y,
-                                       const std::vector<double> &z);
+        template <PointArrayLayout T>
+        static double computeCoordsEps(const PointArray<T>& points);
     };
+
+
 } // accurate_ri

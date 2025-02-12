@@ -6,44 +6,52 @@
 #define MIN_COORDS_EPS (1e-6 / 2)
 
 namespace accurate_ri {
-
-    std::vector<double> PointUtils::computeRanges(const std::vector<double> &x,
-                                                  const std::vector<double> &y,
-                                                  const std::vector<double> &z) {
+    template<PointArrayLayout T>
+    std::vector<double> PointUtils::computeRanges(const PointArray<T> &points) {
         std::vector<double> ranges;
-        ranges.reserve(x.size());
-        for (size_t i = 0; i < x.size(); ++i) {
-            ranges.push_back(std::sqrt(x[i] * x[i] + y[i] * y[i] + z[i] * z[i]));
+        ranges.reserve(points.size());
+
+        for (size_t i = 0; i < points.size(); ++i) {
+            const double x = points.getX(i);
+            const double y = points.getY(i);
+            const double z = points.getZ(i);
+
+            ranges.emplace_back(std::sqrt(x * x + y * y + z * z));
         }
+
         return ranges;
     }
 
-    std::vector<double> PointUtils::computePhis(const std::vector<double> &x,
-                                                const std::vector<double> &z,
-                                                const std::vector<double> &ranges) {
+    template<PointArrayLayout T>
+    std::vector<double> PointUtils::computePhis(const PointArray<T> &points) {
         std::vector<double> phis;
-        phis.reserve(x.size());
-        for (size_t i = 0; i < x.size(); ++i) {
-            phis.push_back(std::asin(z[i] / ranges[i]));
+        phis.reserve(points.size());
+
+        for (size_t i = 0; i < points.size(); ++i) {
+            phis.emplace_back(std::asin(points.getZ(i) / points.getRange(i)));
         }
+
         return phis;
     }
 
-    std::vector<double> PointUtils::computeThetas(const std::vector<double> &x,
-                                                  const std::vector<double> &y) {
+    template<PointArrayLayout T>
+    std::vector<double> PointUtils::computeThetas(const PointArray<T> &points) {
         std::vector<double> thetas;
-        thetas.reserve(x.size());
-        for (size_t i = 0; i < x.size(); ++i) {
-            thetas.push_back(std::atan2(y[i], x[i]));
+        thetas.reserve(points.size());
+
+        for (size_t i = 0; i < points.size(); ++i) {
+            thetas.emplace_back(std::atan2(points.getY(i), points.getX(i)));
         }
+
         return thetas;
     }
 
-    double PointUtils::computeCoordsEps(const std::vector<double> &x, const std::vector<double> &y,
-                                        const std::vector<double> &z) {
-        std::vector<double> sorted_x = x;
-        std::vector<double> sorted_y = y;
-        std::vector<double> sorted_z = z;
+    template<PointArrayLayout T>
+    double PointUtils::computeCoordsEps(const PointArray<T> &points) {
+        std::vector<double> sorted_x = points.getX();
+        std::vector<double> sorted_y = points.getX();
+        std::vector<double> sorted_z = points.getX();
+
 
         std::ranges::sort(sorted_x);
         std::ranges::sort(sorted_y);
@@ -59,4 +67,6 @@ namespace accurate_ri {
 
         return std::max(min_diff, MIN_COORDS_EPS);
     }
+
+
 } // accurate_ri

@@ -1,12 +1,15 @@
 #pragma once
 #include <vector>
 
+#include "point/PointArray.h"
+#include "point/PointUtils.h"
+
 namespace accurate_ri {
 
 class IntrinsicsEstimator {
 
 public:
-    void estimate(const std::vector<double> &x, const std::vector<double> &y, const std::vector<double> &z);
+    template <PointArrayLayout T>
+    void estimate(const PointArray<T>& points);
 };
-
 } // accurate_ri
