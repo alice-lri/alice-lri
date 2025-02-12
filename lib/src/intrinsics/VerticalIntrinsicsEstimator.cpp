@@ -3,7 +3,11 @@
 #include <algorithm>
 
 namespace accurate_ri {
+    // TODO extract these constants somewhere
     constexpr uint64_t MAX_ITERATIONS = 10000;
+    constexpr double MAX_OFFSET = 0.5;
+    constexpr double OFFSET_STEP = 1e-3;
+    constexpr double ANGLE_STEP = 1e-4;
 
     void VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
         initHough(points);
@@ -19,29 +23,27 @@ namespace accurate_ri {
                 break;
             }
 
-            const std::optional<std::pair<uint64_t, uint64_t>> maxIndices = hough->findMaximum(std::nullopt);
+            const std::optional<std::pair<uint64_t, uint64_t> > maxIndices = hough->findMaximum(std::nullopt);
 
             if (!maxIndices) {
                 break;
             }
 
             const auto [maxOffset, maxAngle] = *maxIndices;
-
-
-
         }
     }
 
-    // TODO extract these constants somewhere
     void VerticalIntrinsicsEstimator::initHough(const PointArray &points) {
-        double offsetStep = 1e-3;
-        double offsetMax = std::min(std::ranges::min(points.getRanges()), 0.5) - offsetStep;
+        double offsetMax = std::min(std::ranges::min(points.getRanges()), MAX_OFFSET) - OFFSET_STEP;
         double offsetMin = -offsetMax;
 
-        double angleStep = 1e-4;
-        double angleMax = M_PI / 2 - angleStep;
+        double angleMax = M_PI / 2 - ANGLE_STEP;
         double angleMin = -angleMax;
 
-        hough = std::make_unique<HoughTransform>(offsetMin, offsetMax, offsetStep, angleMin, angleMax, angleStep);
+        hough = std::make_unique<HoughTransform>(offsetMin, offsetMax, OFFSET_STEP, angleMin, angleMax, ANGLE_STEP);
+    }
+
+    std::tuple<std::vector<double>, std::vector<double>, std::vector<double> > computeErrorBounds(PointArray& points) {
+
     }
 } // namespace accurate_ri

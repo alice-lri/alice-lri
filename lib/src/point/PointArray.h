@@ -6,7 +6,7 @@
 
 namespace accurate_ri {
     struct PointArrayExtraInfo {
-        std::vector<double> range, phi, theta = {};
+        std::vector<double> range, rangeXy, phi, theta = {};
         double coordsEps = 0;
     };
 

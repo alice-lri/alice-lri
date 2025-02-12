@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <tuple>
 
 #include "hough/HoughTransform.h"
 #include "point/PointArray.h"
