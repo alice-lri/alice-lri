@@ -1,10 +1,35 @@
 #include "VerticalIntrinsicsEstimator.h"
 
+#include <algorithm>
+
 namespace accurate_ri {
+    constexpr uint64_t MAX_ITERATIONS = 10000;
+
     void VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
         initHough(points);
 
         hough->computeAccumulator(points);
+
+        int64_t unassignedPoints = points.size();
+        int64_t iteration = -1;
+
+        while (unassignedPoints > 0) {
+            iteration++;
+            if (iteration > MAX_ITERATIONS) {
+                break;
+            }
+
+            const std::optional<std::pair<uint64_t, uint64_t>> maxIndices = hough->findMaximum(std::nullopt);
+
+            if (!maxIndices) {
+                break;
+            }
+
+            const auto [maxOffset, maxAngle] = *maxIndices;
+
+
+
+        }
     }
 
     // TODO extract these constants somewhere

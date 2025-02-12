@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <optional>
 #include <vector>
 
 #include "point/PointArray.h"
@@ -42,6 +43,8 @@ namespace accurate_ri {
          * @param points
          */
         void computeAccumulator(const PointArray &points);
+
+        std::optional<std::pair<uint64_t, uint64_t>> findMaximum(std::optional<double> averageX);
 
     private:
         /**

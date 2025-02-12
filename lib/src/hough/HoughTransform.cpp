@@ -1,5 +1,6 @@
 #include "HoughTransform.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "hash/HashUtils.h"
@@ -33,6 +34,47 @@ namespace accurate_ri {
         }
 
         LOG_INFO("Accumulator computation completed.");
+    }
+
+    std::optional<std::pair<uint64_t, uint64_t>> HoughTransform::findMaximum(std::optional<double> averageX) {
+        std::vector<std::pair<size_t, size_t>> maxIndices;
+        double maxVal = -std::numeric_limits<double>::infinity();
+
+        for (size_t y = 0; y < yCount; y++) {
+            for (size_t x = 0; x < xCount; x++) {
+                const double val = accumulator[y * xCount + x];
+                if (val > maxVal) {
+                    maxVal = val;
+                    maxIndices = {{x, y}};
+                } else if (val == maxVal) {
+                    maxIndices.emplace_back(x, y);
+                }
+            }
+        }
+
+        if (maxVal <= 1e-6 || maxIndices.empty()) {
+            LOG_INFO("No maxima found in the accumulator.");
+            return std::nullopt;
+        }
+
+        if (maxIndices.size() == 1 || !averageX) {
+            return maxIndices[maxIndices.size() / 2];
+        }
+
+        auto closestPair = maxIndices[0];
+        double minDistance = std::numeric_limits<double>::infinity();
+
+        for (const auto &[x, y] : maxIndices) {
+            const double xValue = xMin + xStep * static_cast<double>(x);
+            const double distance = std::abs(xValue - *averageX);
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestPair = {x, y};
+            }
+        }
+
+        return closestPair;
     }
 
     inline void HoughTransform::updateAccumulatorForPoint(
