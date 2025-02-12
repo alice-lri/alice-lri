@@ -1,14 +1,18 @@
-
 #pragma once
+#include <memory>
+
+#include "hough/HoughTransform.h"
 #include "point/PointArray.h"
 
 namespace accurate_ri {
+    class VerticalIntrinsicsEstimator {
+    private:
+        std::unique_ptr<HoughTransform> hough = nullptr;
 
-class VerticalIntrinsicsEstimator {
+    public:
+        void estimate(const PointArray &points);
 
-public:
-    template <PointArrayLayout T>
-    void estimate(const PointArray<T>& points);
-};
-
-} // accurate_ri
+    private:
+        void initHough(const PointArray &points);
+    };
+} // namespace accurate_ri

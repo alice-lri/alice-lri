@@ -34,7 +34,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/hough/HoughTransform.h
         src/hash/HashUtils.cpp
         src/hash/HashUtils.h
-        src/point/PointArray.h)
+        src/point/PointArray.h
+        src/point/PointArray.cpp)
 
 target_include_directories(accurate_ri
         PUBLIC include

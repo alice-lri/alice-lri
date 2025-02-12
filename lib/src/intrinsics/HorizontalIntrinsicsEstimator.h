@@ -1,9 +1,10 @@
-
 #pragma once
+#include "point/PointArray.h"
 namespace accurate_ri {
 
 class HorizontalIntrinsicsEstimator {
-
+   public:
+    void estimate(const PointArray& points);
 };
 
-} // accurate_ri
+}  // namespace accurate_ri

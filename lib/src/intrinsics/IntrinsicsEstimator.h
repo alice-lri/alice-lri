@@ -1,15 +1,17 @@
 #pragma once
-#include <vector>
-
+#include "HorizontalIntrinsicsEstimator.h"
+#include "VerticalIntrinsicsEstimator.h"
 #include "point/PointArray.h"
-#include "point/PointUtils.h"
+
 
 namespace accurate_ri {
 
 class IntrinsicsEstimator {
+private:
+    HorizontalIntrinsicsEstimator horizontalIntrinsicsEstimator;
+    VerticalIntrinsicsEstimator verticalIntrinsicsEstimator;
 
 public:
-    template <PointArrayLayout T>
-    void estimate(const PointArray<T>& points);
+    void estimate(const PointArray& points);
 };
 } // accurate_ri

@@ -2,6 +2,8 @@
 #include <cstdint>
 #include <vector>
 
+#include "point/PointArray.h"
+
 namespace accurate_ri {
     /**
      * @class HoughTransform
@@ -37,22 +39,20 @@ namespace accurate_ri {
 
         /**
          * @brief Computes the accumulator array based on the given ranges and phis.
-         * @param ranges Vector of range values.
-         * @param phis Vector of phi values.
+         * @param points
          */
-        void computeAccumulator(const std::vector<double> &ranges, const std::vector<double> &phis);
+        void computeAccumulator(const PointArray &points);
 
     private:
         /**
          * @brief Updates the accumulator for a specific point.
          * @param pointIndex Index of the point.
-         * @param ranges Vector of range values.
-         * @param phis Vector of phi values.
+         * @param points Vector of phi values.
          * @param xValues Precomputed x values.
          */
-        inline void updateAccumulatorForPoint(uint64_t pointIndex, const std::vector<double> &ranges,
-                                              const std::vector<double> &phis,
-                                              const std::vector<double> &xValues);
+        inline void updateAccumulatorForPoint(
+            uint64_t pointIndex, const PointArray &points,
+            const std::vector<double> &xValues);
 
         /**
          * @brief Votes for discontinuities in the accumulator to avoid gaps.

@@ -1,6 +1,8 @@
 #ifndef ACCURATERI_LIBRARY_H
 #define ACCURATERI_LIBRARY_H
 
-void hello();
+namespace accurate_ri {
+    void hello();
+}
 
 #endif //ACCURATERI_LIBRARY_H

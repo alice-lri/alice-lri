@@ -1,5 +1,5 @@
 #include "accurate_ri.h"
 
 int main() {
-    hello();
+    accurate_ri::hello();
 }

@@ -6,8 +6,7 @@
 #define MIN_COORDS_EPS (1e-6 / 2)
 
 namespace accurate_ri {
-    template<PointArrayLayout T>
-    std::vector<double> PointUtils::computeRanges(const PointArray<T> &points) {
+    std::vector<double> PointUtils::computeRanges(const PointArray &points) {
         std::vector<double> ranges;
         ranges.reserve(points.size());
 
@@ -22,8 +21,7 @@ namespace accurate_ri {
         return ranges;
     }
 
-    template<PointArrayLayout T>
-    std::vector<double> PointUtils::computePhis(const PointArray<T> &points) {
+    std::vector<double> PointUtils::computePhis(const PointArray &points) {
         std::vector<double> phis;
         phis.reserve(points.size());
 
@@ -34,8 +32,7 @@ namespace accurate_ri {
         return phis;
     }
 
-    template<PointArrayLayout T>
-    std::vector<double> PointUtils::computeThetas(const PointArray<T> &points) {
+    std::vector<double> PointUtils::computeThetas(const PointArray &points) {
         std::vector<double> thetas;
         thetas.reserve(points.size());
 
@@ -46,27 +43,23 @@ namespace accurate_ri {
         return thetas;
     }
 
-    template<PointArrayLayout T>
-    double PointUtils::computeCoordsEps(const PointArray<T> &points) {
-        std::vector<double> sorted_x = points.getX();
-        std::vector<double> sorted_y = points.getX();
-        std::vector<double> sorted_z = points.getX();
+    double PointUtils::computeCoordsEps(const PointArray &points) {
+        std::vector<double> sortedX = points.getX();
+        std::vector<double> sortedY = points.getY();
+        std::vector<double> sortedZ = points.getZ();
 
+        std::ranges::sort(sortedX);
+        std::ranges::sort(sortedY);
+        std::ranges::sort(sortedZ);
 
-        std::ranges::sort(sorted_x);
-        std::ranges::sort(sorted_y);
-        std::ranges::sort(sorted_z);
+        double minDiff = std::numeric_limits<double>::max();
 
-        double min_diff = std::numeric_limits<double>::max();
-
-        for (size_t i = 1; i < sorted_x.size(); i++) {
-            min_diff = std::min(min_diff, sorted_x[i] - sorted_x[i - 1]);
-            min_diff = std::min(min_diff, sorted_y[i] - sorted_y[i - 1]);
-            min_diff = std::min(min_diff, sorted_z[i] - sorted_z[i - 1]);
+        for (size_t i = 1; i < sortedX.size(); i++) {
+            minDiff = std::min(minDiff, sortedX[i] - sortedX[i - 1]);
+            minDiff = std::min(minDiff, sortedY[i] - sortedY[i - 1]);
+            minDiff = std::min(minDiff, sortedZ[i] - sortedZ[i - 1]);
         }
 
-        return std::max(min_diff, MIN_COORDS_EPS);
+        return std::max(minDiff, MIN_COORDS_EPS);
     }
-
-
 } // accurate_ri
