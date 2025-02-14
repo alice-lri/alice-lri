@@ -19,6 +19,11 @@ if(ENABLE_PROFILING)
     add_definitions(-DENABLE_PROFILING)
 endif()
 
+find_package(Eigen3 REQUIRED)
+include_directories(EIGEN3_INCLUDE_DIR)
+
+#print out the EIGEN3_INCLUDE_DIR
+message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
 
 add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/utils/Timer.h

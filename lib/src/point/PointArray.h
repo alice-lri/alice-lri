@@ -3,10 +3,11 @@
 #include <cassert>
 #include <vector>
 #include <cmath>
+#include <eigen3/Eigen/Dense>
 
 namespace accurate_ri {
     struct PointArrayExtraInfo {
-        std::vector<double> range, rangeXy, phi, theta = {};
+        Eigen::VectorXd range;
         double coordsEps = 0;
     };
 
