@@ -13,18 +13,18 @@ namespace accurate_ri {
      */
     class HoughTransform {
     private:
-        std::vector<double> accumulator; ///< Accumulator array for votes.
-        std::vector<uint64_t> hashAccumulator; ///< Hash accumulator for unique point combination identification.
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> accumulator;
+        Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> hashAccumulator;
 
-        double xMin; ///< Minimum x value.
-        double xMax; ///< Maximum x value.
-        double xStep; ///< Step size in x direction.
-        double yMin; ///< Minimum y value.
-        double yMax; ///< Maximum y value.
-        double yStep; ///< Step size in y direction.
+        double xMin;
+        double xMax;
+        double xStep;
+        double yMin;
+        double yMax;
+        double yStep;
 
-        uint32_t xCount; ///< Number of steps in x direction.
-        uint32_t yCount; ///< Number of steps in y direction.
+        uint32_t xCount;
+        uint32_t yCount;
 
     public:
         /**
@@ -51,11 +51,8 @@ namespace accurate_ri {
          * @brief Updates the accumulator for a specific point.
          * @param pointIndex Index of the point.
          * @param points Vector of phi values.
-         * @param xValues Precomputed x values.
          */
-        inline void updateAccumulatorForPoint(
-            uint64_t pointIndex, const PointArray &points,
-            const std::vector<double> &xValues);
+        inline void updateAccumulatorForPoint(uint64_t pointIndex, const PointArray &points);
 
         /**
          * @brief Votes for discontinuities in the accumulator to avoid gaps.

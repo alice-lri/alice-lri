@@ -13,23 +13,23 @@ namespace accurate_ri {
 
     class PointArray {
     private:
-        std::vector<double> x, y, z;
+        Eigen::VectorXd x, y, z;
         mutable PointArrayExtraInfo extraInfo;
 
     public:
-        PointArray(std::vector<double> &&x_, std::vector<double> &&y_, std::vector<double> &&z_)
+        PointArray(Eigen::VectorXd &&x_, Eigen::VectorXd &&y_, Eigen::VectorXd &&z_)
             : x(std::move(x_)), y(std::move(y_)), z(std::move(z_)) {
             computeExtraInfo();
         }
 
-        PointArray(const std::vector<double> &x_, const std::vector<double> &y_, const std::vector<double> &z_)
+        PointArray(const Eigen::VectorXd &x_, const Eigen::VectorXd &y_, const Eigen::VectorXd &z_)
             : x(x_), y(y_), z(z_) {
             computeExtraInfo();
         }
 
-        [[nodiscard]] inline const std::vector<double>& getX() const { return x; }
-        [[nodiscard]] inline const std::vector<double>& getY() const { return y; }
-        [[nodiscard]] inline const std::vector<double>& getZ() const { return z; }
+        [[nodiscard]] inline const Eigen::VectorXd& getX() const { return x; }
+        [[nodiscard]] inline const Eigen::VectorXd& getY() const { return y; }
+        [[nodiscard]] inline const Eigen::VectorXd& getZ() const { return z; }
 
         [[nodiscard]] inline double getX(const size_t index) const { return x[index]; }
         [[nodiscard]] inline double getY(const size_t index) const { return y[index]; }

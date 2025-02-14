@@ -6,9 +6,9 @@
 namespace accurate_ri {
     class PointUtils {
     public:
-        static std::vector<double> computeRanges(const PointArray& points);
-        static std::vector<double> computePhis(const PointArray& points);
-        static std::vector<double> computeThetas(const PointArray& points);
+        static Eigen::VectorXd computeRanges(const PointArray& points);
+        static Eigen::VectorXd computePhis(const PointArray& points);
+        static Eigen::VectorXd computeThetas(const PointArray& points);
         static double computeCoordsEps(const PointArray& points);
     };
 

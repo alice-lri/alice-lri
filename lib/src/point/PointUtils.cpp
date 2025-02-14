@@ -6,47 +6,47 @@
 #define MIN_COORDS_EPS (1e-6 / 2)
 
 namespace accurate_ri {
-    std::vector<double> PointUtils::computeRanges(const PointArray &points) {
-        std::vector<double> ranges;
-        ranges.reserve(points.size());
+    Eigen::VectorXd PointUtils::computeRanges(const PointArray &points) {
+        Eigen::VectorXd ranges;
+        ranges.resize(points.size());
 
         for (size_t i = 0; i < points.size(); ++i) {
             const double x = points.getX(i);
             const double y = points.getY(i);
             const double z = points.getZ(i);
 
-            ranges.emplace_back(std::sqrt(x * x + y * y + z * z));
+            ranges[i] = std::sqrt(x * x + y * y + z * z);
         }
 
         return ranges;
     }
 
-    std::vector<double> PointUtils::computePhis(const PointArray &points) {
-        std::vector<double> phis;
-        phis.reserve(points.size());
+    Eigen::VectorXd PointUtils::computePhis(const PointArray &points) {
+        Eigen::VectorXd phis;
+        phis.resize(points.size());
 
         for (size_t i = 0; i < points.size(); ++i) {
-            phis.emplace_back(std::asin(points.getZ(i) / points.getRange(i)));
+            phis[i] = std::asin(points.getZ(i) / points.getRange(i));
         }
 
         return phis;
     }
 
-    std::vector<double> PointUtils::computeThetas(const PointArray &points) {
-        std::vector<double> thetas;
-        thetas.reserve(points.size());
+    Eigen::VectorXd PointUtils::computeThetas(const PointArray &points) {
+        Eigen::VectorXd thetas;
+        thetas.resize(points.size());
 
         for (size_t i = 0; i < points.size(); ++i) {
-            thetas.emplace_back(std::atan2(points.getY(i), points.getX(i)));
+            thetas[i] = std::atan2(points.getY(i), points.getX(i));
         }
 
         return thetas;
     }
 
     double PointUtils::computeCoordsEps(const PointArray &points) {
-        std::vector<double> sortedX = points.getX();
-        std::vector<double> sortedY = points.getY();
-        std::vector<double> sortedZ = points.getZ();
+        Eigen::VectorXd sortedX = points.getX();
+        Eigen::VectorXd sortedY = points.getY();
+        Eigen::VectorXd sortedZ = points.getZ();
 
         std::ranges::sort(sortedX);
         std::ranges::sort(sortedY);

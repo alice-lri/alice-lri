@@ -11,38 +11,37 @@ namespace accurate_ri {
         const double xMin, const double xMax, const double xStep, const double yMin, const double yMax,
         const double yStep
     ) : xMin(xMin), xMax(xMax), xStep(xStep), yMin(yMin), yMax(yMax), yStep(yStep) {
+        accumulator = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(
+            static_cast<int>(std::floor((yMax - yMin) / yStep)),
+            static_cast<int>(std::floor((xMax - xMin) / xStep))
+        );
+
+        hashAccumulator = Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(
+            static_cast<int>(std::floor((yMax - yMin) / yStep)),
+            static_cast<int>(std::floor((xMax - xMin) / xStep))
+        );
+
         xCount = std::floor((xMax - xMin) / xStep);
         yCount = std::floor((yMax - yMin) / yStep);
-
-        accumulator.resize(xCount * yCount);
-        hashAccumulator.resize(xCount * yCount);
 
         LOG_INFO("HoughTransform initialized with xCount:", xCount, "yCount:", yCount);
     }
 
     void HoughTransform::computeAccumulator(const PointArray &points) {
-        auto xValues = std::vector<double>(xCount);
-
-        for (size_t i = 0; i < xCount; i++) {
-            xValues[i] = xMin + xStep * static_cast<double>(i);
-        }
-
         LOG_INFO("Starting accumulator computation for", points.size(), "points");
 
         for (uint64_t i = 0; i < points.size(); i++) {
-            updateAccumulatorForPoint(i, points, xValues);
+            updateAccumulatorForPoint(i, points);
         }
 
         LOG_INFO("Accumulator computation completed.");
     }
 
-    inline void HoughTransform::updateAccumulatorForPoint(
-        const uint64_t pointIndex, const PointArray &points, const std::vector<double> &xValues
-    ) {
+    inline void HoughTransform::updateAccumulatorForPoint(const uint64_t pointIndex, const PointArray &points) {
         int32_t previousY = -1;
 
         for (size_t x = 0; x < xCount; x++) {
-            const double xVal = xValues[x];
+            const double xVal = xMin + xStep * static_cast<double>(x);
             const double rangeVal = points.getRange(pointIndex);
             const double yVal = points.getPhi(pointIndex) - asin(xVal / rangeVal);
             const auto y = static_cast<int32_t>(std::round((yVal - yMin) / yStep));
@@ -53,8 +52,8 @@ namespace accurate_ri {
 
             const double voteVal = rangeVal;
 
-            accumulator[y * xCount + x] += voteVal;
-            hashAccumulator[y * xCount + x] ^= HashUtils::knuth_uint(pointIndex);
+            accumulator(y, x) += voteVal;
+            hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
 
             if (previousY != -1) {
                 voteForDiscontinuities(pointIndex, x, y, voteVal, previousY);
@@ -67,6 +66,8 @@ namespace accurate_ri {
     inline void HoughTransform::voteForDiscontinuities(
         const uint64_t pointIndex, const size_t x, const int32_t y, const double voteVal, const int32_t previousY
     ) {
+        assert(x > 0);
+
         const int32_t yMin = std::min(previousY, y);
         const int32_t yMax = std::max(previousY, y);
 
@@ -74,11 +75,11 @@ namespace accurate_ri {
         // previous and current y This is done to avoid discontinuities in the lines
         // of the accumulator
         for (int32_t yBetween = yMin + 1; yBetween < yMax; yBetween++) {
-            accumulator[yBetween * xCount + x - 1] += voteVal;
-            accumulator[yBetween * xCount + x] += voteVal;
+            accumulator(yBetween, x - 1) += voteVal;
+            accumulator(yBetween, x) += voteVal;
 
-            hashAccumulator[yBetween * xCount + x - 1] ^= HashUtils::knuth_uint(pointIndex);
-            hashAccumulator[yBetween * xCount + x] ^= HashUtils::knuth_uint(pointIndex);
+            hashAccumulator(yBetween, x - 1) ^= HashUtils::knuth_uint(pointIndex);
+            hashAccumulator(yBetween, x) ^= HashUtils::knuth_uint(pointIndex);
         }
     }
 
@@ -88,7 +89,7 @@ namespace accurate_ri {
 
         for (size_t y = 0; y < yCount; y++) {
             for (size_t x = 0; x < xCount; x++) {
-                const double val = accumulator[y * xCount + x];
+                const double val = accumulator(y * xCount + x);
                 if (val > maxVal) {
                     maxVal = val;
                     maxIndices = {{x, y}};
