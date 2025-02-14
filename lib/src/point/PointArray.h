@@ -36,11 +36,13 @@ namespace accurate_ri {
         [[nodiscard]] inline double getZ(const size_t index) const { return z[index]; }
 
         [[nodiscard]] inline double getRange(const size_t index) const { return extraInfo.range[index]; }
+        [[nodiscard]] inline double getRangeXy(const size_t index) const { return extraInfo.rangeXy[index]; }
         [[nodiscard]] inline double getPhi(const size_t index) const { return extraInfo.phi[index]; }
         [[nodiscard]] inline double getTheta(const size_t index) const { return extraInfo.theta[index]; }
         [[nodiscard]] inline double getCoordsEps() const { return extraInfo.coordsEps; }
 
         [[nodiscard]] inline const Eigen::VectorXd& getRanges() const { return extraInfo.range; }
+        [[nodiscard]] inline const Eigen::VectorXd& getRangesXy() const { return extraInfo.rangeXy; }
         [[nodiscard]] inline const Eigen::VectorXd& getPhis() const { return extraInfo.phi; }
         [[nodiscard]] inline const Eigen::VectorXd& getThetas() const { return extraInfo.theta; }
 

@@ -23,13 +23,15 @@ namespace accurate_ri {
                 break;
             }
 
-            const std::optional<std::pair<uint64_t, uint64_t> > maxIndices = hough->findMaximum(std::nullopt);
+            const std::optional<std::pair<uint64_t, uint64_t>> maxIndices = hough->findMaximum(std::nullopt);
 
             if (!maxIndices) {
                 break;
             }
 
             const auto [maxOffset, maxAngle] = *maxIndices;
+
+
         }
     }
 
@@ -43,7 +45,28 @@ namespace accurate_ri {
         hough = std::make_unique<HoughTransform>(offsetMin, offsetMax, OFFSET_STEP, angleMin, angleMax, ANGLE_STEP);
     }
 
-    std::tuple<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd > computeErrorBounds(PointArray& points) {
+    std::tuple<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd> computeErrorBounds(
+        const PointArray &points, const double maxOffset
+    ) {
+        double coordsEps = points.getCoordsEps();
+        const auto& zs = points.getZ();
+        const auto& rangesXy = points.getRangesXy();
+        const auto& ranges = points.getRanges();
 
+        const auto rangeXySquared = rangesXy.array().square();
+        const auto rangeSquared = ranges.array().square();
+        const auto zsOverRangesXy = zs.array() / rangesXy.array();
+        const auto sqrtFactor = 1 + zsOverRangesXy.square();
+
+        const auto phisUpperBound = (coordsEps * std::sqrt(2) * zs.cwiseAbs() + coordsEps * rangesXy).array()
+                              / (rangeXySquared.array() * sqrtFactor.array());
+
+        const auto correctionUpperBound = maxOffset * coordsEps * std::sqrt(3)
+                                    / (rangeSquared.array() * (1 - (maxOffset / ranges.array()).square()).sqrt());
+
+        const auto finalUpperBound = phisUpperBound + correctionUpperBound;
+
+
+        return {phisUpperBound, correctionUpperBound, finalUpperBound};
     }
 } // namespace accurate_ri
