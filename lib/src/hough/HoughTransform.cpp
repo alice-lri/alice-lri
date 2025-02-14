@@ -41,9 +41,8 @@ namespace accurate_ri {
         int32_t previousY = -1;
 
         for (size_t x = 0; x < xCount; x++) {
-            const double xVal = xMin + xStep * static_cast<double>(x);
             const double rangeVal = points.getRange(pointIndex);
-            const double yVal = points.getPhi(pointIndex) - asin(xVal / rangeVal);
+            const double yVal = points.getPhi(pointIndex) - asin(getXValue(x) / rangeVal);
             const auto y = static_cast<int32_t>(std::round((yVal - yMin) / yStep));
 
             if (y < 0 || y >= yCount) {
@@ -110,8 +109,7 @@ namespace accurate_ri {
         double minDistance = std::numeric_limits<double>::infinity();
 
         for (const auto &[x, y]: maxIndices) {
-            const double xValue = xMin + xStep * static_cast<double>(x);
-            const double distance = std::abs(xValue - *averageX);
+            const double distance = std::abs(getXValue(x) - *averageX);
 
             if (distance < minDistance) {
                 minDistance = distance;
@@ -120,5 +118,13 @@ namespace accurate_ri {
         }
 
         return closestPair;
+    }
+
+    double HoughTransform::getXValue(const size_t index) const {
+        return xMin + xStep * static_cast<double>(index);
+    }
+
+    double HoughTransform::getYValue(const size_t index) const {
+        return yMin + yStep * static_cast<double>(index);
     }
 } // namespace accurate_ri

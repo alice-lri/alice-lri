@@ -11,5 +11,7 @@ namespace accurate_ri {
         extraInfo.range = (rangeXySquared + z.array().square()).sqrt();
         extraInfo.phi = (z.array() / extraInfo.range.array()).asin();
         extraInfo.theta = y.binaryExpr(x, [](double yi, double xi) { return std::atan2(yi, xi); });
+
+        extraInfo.invRange = extraInfo.range.array().inverse();
     }
 }

@@ -44,7 +44,42 @@ namespace accurate_ri {
          */
         void computeAccumulator(const PointArray &points);
 
-        std::optional<std::pair<uint64_t, uint64_t>> findMaximum(std::optional<double> averageX);
+        /**
+         * @brief Finds the maximum value in the accumulator and returns its coordinates.
+         * @param averageX Optional average x value to find the closest maximum.
+         * @return Optional pair of coordinates (x, y) of the maximum value.
+         */
+        std::optional<std::pair<uint64_t, uint64_t> > findMaximum(std::optional<double> averageX);
+
+        /**
+         * @brief Gets the x value given an index.
+         * @param index The index.
+         * @return The x value.
+         */
+        [[nodiscard]] double getXValue(size_t index) const;
+
+        /**
+         * @brief Gets the y value given an index.
+         * @param index The index.
+         * @return The y value.
+         */
+        [[nodiscard]] double getYValue(size_t index) const;
+
+        [[nodiscard]] double getXMin() const { return xMin; }
+
+        [[nodiscard]] double getXMax() const { return xMax; }
+
+        [[nodiscard]] double getXStep() const { return xStep; }
+
+        [[nodiscard]] double getYMin() const { return yMin; }
+
+        [[nodiscard]] double getYMax() const { return yMax; }
+
+        [[nodiscard]] double getYStep() const { return yStep; }
+
+        [[nodiscard]] uint32_t getXCount() const { return xCount; }
+
+        [[nodiscard]] uint32_t getYCount() const { return yCount; }
 
     private:
         /**
