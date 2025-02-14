@@ -71,20 +71,18 @@ namespace accurate_ri {
         const int32_t yMin = std::min(previousY, y);
         const int32_t yMax = std::max(previousY, y);
 
-        // We do not vote only the current y cell, but also the cells between the
-        // previous and current y This is done to avoid discontinuities in the lines
-        // of the accumulator
-        for (int32_t yBetween = yMin + 1; yBetween < yMax; yBetween++) {
-            accumulator(yBetween, x - 1) += voteVal;
-            accumulator(yBetween, x) += voteVal;
+        accumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() += voteVal;
 
-            hashAccumulator(yBetween, x - 1) ^= HashUtils::knuth_uint(pointIndex);
-            hashAccumulator(yBetween, x) ^= HashUtils::knuth_uint(pointIndex);
-        }
+        hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() =
+                hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).unaryExpr(
+                    [&](uint64_t val) {
+                        return val ^ HashUtils::knuth_uint(pointIndex); // Equivalent to ^= but for Eigen
+                    }
+                );
     }
 
-    std::optional<std::pair<uint64_t, uint64_t>> HoughTransform::findMaximum(std::optional<double> averageX) {
-        std::vector<std::pair<size_t, size_t>> maxIndices;
+    std::optional<std::pair<uint64_t, uint64_t> > HoughTransform::findMaximum(std::optional<double> averageX) {
+        std::vector<std::pair<size_t, size_t> > maxIndices;
         double maxVal = -std::numeric_limits<double>::infinity();
 
         for (size_t y = 0; y < yCount; y++) {
@@ -111,7 +109,7 @@ namespace accurate_ri {
         auto closestPair = maxIndices[0];
         double minDistance = std::numeric_limits<double>::infinity();
 
-        for (const auto &[x, y] : maxIndices) {
+        for (const auto &[x, y]: maxIndices) {
             const double xValue = xMin + xStep * static_cast<double>(x);
             const double distance = std::abs(xValue - *averageX);
 

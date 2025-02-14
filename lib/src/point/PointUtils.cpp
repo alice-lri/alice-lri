@@ -6,42 +6,6 @@
 #define MIN_COORDS_EPS (1e-6 / 2)
 
 namespace accurate_ri {
-    Eigen::VectorXd PointUtils::computeRanges(const PointArray &points) {
-        Eigen::VectorXd ranges;
-        ranges.resize(points.size());
-
-        for (size_t i = 0; i < points.size(); ++i) {
-            const double x = points.getX(i);
-            const double y = points.getY(i);
-            const double z = points.getZ(i);
-
-            ranges[i] = std::sqrt(x * x + y * y + z * z);
-        }
-
-        return ranges;
-    }
-
-    Eigen::VectorXd PointUtils::computePhis(const PointArray &points) {
-        Eigen::VectorXd phis;
-        phis.resize(points.size());
-
-        for (size_t i = 0; i < points.size(); ++i) {
-            phis[i] = std::asin(points.getZ(i) / points.getRange(i));
-        }
-
-        return phis;
-    }
-
-    Eigen::VectorXd PointUtils::computeThetas(const PointArray &points) {
-        Eigen::VectorXd thetas;
-        thetas.resize(points.size());
-
-        for (size_t i = 0; i < points.size(); ++i) {
-            thetas[i] = std::atan2(points.getY(i), points.getX(i));
-        }
-
-        return thetas;
-    }
 
     double PointUtils::computeCoordsEps(const PointArray &points) {
         Eigen::VectorXd sortedX = points.getX();

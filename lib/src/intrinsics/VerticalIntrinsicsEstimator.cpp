@@ -43,7 +43,7 @@ namespace accurate_ri {
         hough = std::make_unique<HoughTransform>(offsetMin, offsetMax, OFFSET_STEP, angleMin, angleMax, ANGLE_STEP);
     }
 
-    std::tuple<std::vector<double>, std::vector<double>, std::vector<double> > computeErrorBounds(PointArray& points) {
+    std::tuple<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd > computeErrorBounds(PointArray& points) {
 
     }
 } // namespace accurate_ri

@@ -5,25 +5,11 @@ namespace accurate_ri {
     void PointArray::computeExtraInfo() {
         extraInfo.coordsEps = PointUtils::computeCoordsEps(*this);
 
-        extraInfo.range.resize(size());
-        extraInfo.rangeXy.resize(size());
-        extraInfo.phi.resize(size());
-        extraInfo.theta.resize(size());
+        auto rangeXySquared = x.array().square() + y.array().square();
 
-        for (size_t i = 0; i < size(); ++i) {
-            const double x = getX(i);
-            const double y = getY(i);
-            const double z = getZ(i);
-            const double rangeXySquared = x * x + y * y;
-            const double range = std::sqrt(rangeXySquared + z * z);
-            const double rangeXy = std::sqrt(rangeXySquared);
-            const double phi = std::asin(z / range);
-            const double theta = std::atan2(y, x);
-
-            extraInfo.range[i] = range;
-            extraInfo.rangeXy[i] = rangeXy;
-            extraInfo.phi[i] = phi;
-            extraInfo.theta[i] = theta;
-        }
+        extraInfo.rangeXy = rangeXySquared.sqrt();
+        extraInfo.range = (rangeXySquared + z.array().square()).sqrt();
+        extraInfo.phi = (z.array() / extraInfo.range.array()).asin();
+        extraInfo.theta = y.binaryExpr(x, [](double yi, double xi) { return std::atan2(yi, xi); });
     }
 }
