@@ -11,6 +11,7 @@ namespace accurate_ri {
     class VerticalIntrinsicsEstimator {
     private:
         std::unique_ptr<HoughTransform> hough = nullptr;
+        std::unordered_map<uint32_t, ScanlineInfo> scanlineInfoMap;
 
     public:
         void estimate(const PointArray &points);
@@ -20,12 +21,12 @@ namespace accurate_ri {
 
         static VerticalBounds computeErrorBounds(const PointArray &points, double offset);
 
-        ScanlineLimits computeScanlineLimits(
+        [[nodiscard]] ScanlineLimits computeScanlineLimits(
             const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
             const OffsetAngleMargin &margin, double invRangesShift
         ) const;
 
-        ScanlineFitResult tryFitScanline(
+        [[nodiscard]] ScanlineFitResult tryFitScanline(
             const PointArray &points, const OffsetAngle &scanlineAttributes, const VerticalBounds &errorBounds,
             const ScanlineLimits &scanlineLimits
         ) const;
@@ -33,5 +34,7 @@ namespace accurate_ri {
         static LinearFitResult performLinearFit(
             const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &bounds
         );
+
+        HeuristicScanline computeHeuristicScanline(double invRangesMean, double phisMean) const;
     };
 } // namespace accurate_ri

@@ -52,4 +52,16 @@ namespace accurate_ri {
         std::optional<LinearFitResult> fit;
         std::optional<ScanlineLimits> limits;
     };
+
+    struct ScanlineInfo {
+        OffsetAngle values;
+        OffsetAngleMargin ci;
+        double uncertainty;
+    };
+
+    struct HeuristicScanline {
+        double offset;
+        RealMargin offsetCi;
+        std::vector<uint32_t> dependencies;
+    };
 }

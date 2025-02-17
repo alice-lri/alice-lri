@@ -49,16 +49,31 @@ namespace accurate_ri {
                 points, errorBounds.final, houghMax.maxValues, margin, 0
             );
 
-            const ScanlineFitResult scanlineFit = tryFitScanline(
-                points, houghMax.maxValues, errorBounds, scanlineLimits
-            );
+            bool requiresHeuristicFitting = true;
+            bool fitSuccess = false;
 
-            if (!scanlineFit.success) {
-                // TODO
-                break;
+            if (scanlineLimits.indices.size() > 2) {
+                const ScanlineFitResult scanlineFit = tryFitScanline(
+                    points, houghMax.maxValues, errorBounds, scanlineLimits
+                );
+
+                requiresHeuristicFitting = scanlineFit.ciTooWide;
+                fitSuccess = scanlineFit.success;
+
+                if (fitSuccess and !requiresHeuristicFitting) {
+                    scanlineLimits = *scanlineFit.limits;
+                    // TODO At this point, we know that the fit was successful, make the code more readable
+                }
             }
 
-            scanlineLimits = *scanlineFit.limits;
+            if (requiresHeuristicFitting and scanlineLimits.indices.size() > 0) {
+                // TODO: in theory it can only ever be zero if it was before, perhaps break or something earlier
+                const Eigen::ArrayXd invRanges = points.getInvRanges()(scanlineLimits.mask);
+                const Eigen::ArrayXd phis = points.getPhis()(scanlineLimits.mask);
+
+                double invRangesMean = invRanges.mean();
+                double phisMean = phis.mean();
+            }
         }
     }
 
@@ -291,6 +306,62 @@ namespace accurate_ri {
             .variance = {covariance(0, 0), covariance(1, 1)},
             .ci = ci,
             .aic = aic
+        };
+    }
+
+    HeuristicScanline VerticalIntrinsicsEstimator::computeHeuristicScanline(
+        double invRangesMean, double phisMean
+    ) const {
+        std::optional<uint32_t> closestScanlineIdTop = std::nullopt;
+        std::optional<uint32_t> closestScanlineIdBottom = std::nullopt;
+        double closestScanlineTopDistance = std::numeric_limits<double>::infinity();
+        double closestScanlineBottomDistance = std::numeric_limits<double>::infinity();
+
+        for (const auto &[scanlineId, scanline]: scanlineInfoMap) {
+            const double scanlinePhi = std::asin(scanline.values.offset * invRangesMean) + scanline.values.angle;
+            if (scanlinePhi > phisMean) {
+                const double distance = scanlinePhi - phisMean;
+                if (distance < closestScanlineTopDistance) {
+                    closestScanlineIdTop = scanlineId;
+                    closestScanlineTopDistance = distance;
+                }
+            }
+            if (scanlinePhi < phisMean) {
+                const double distance = phisMean - scanlinePhi;
+                if (distance < closestScanlineBottomDistance) {
+                    closestScanlineIdBottom = scanlineId;
+                    closestScanlineBottomDistance = distance;
+                }
+            }
+        }
+
+        std::vector<uint32_t> validScanlineIds;
+        if (closestScanlineIdTop) {
+            validScanlineIds.emplace_back(*closestScanlineIdTop);
+        }
+        if (closestScanlineIdBottom) {
+            validScanlineIds.emplace_back(*closestScanlineIdBottom);
+        }
+
+        assert(!validScanlineIds.empty() && "No valid scanlines found");
+
+        std::vector<double> offsetDiffs;
+        for (const auto &scanlineId: validScanlineIds) {
+            const auto &scanline = scanlineInfoMap.at(scanlineId);
+            double offsetDiff = scanline.ci.offset.upper - scanline.ci.offset.lower;
+            offsetDiffs.emplace_back(offsetDiff);
+        }
+
+        const double maxOffsetDiff = std::ranges::max(offsetDiffs);
+        double meanOffset = 0;
+        for (const auto &scanlineId: validScanlineIds) {
+            meanOffset += scanlineInfoMap.at(scanlineId).values.offset / static_cast<double>(validScanlineIds.size());
+        }
+
+        return HeuristicScanline{
+            .offset = meanOffset,
+            .offsetCi = {meanOffset - maxOffsetDiff / 2, meanOffset + maxOffsetDiff / 2},
+            .dependencies = validScanlineIds
         };
     }
 } // namespace accurate_ri
