@@ -24,7 +24,25 @@ namespace accurate_ri {
 
     struct ScanlineLimits {
         Eigen::ArrayXi indices;
+        Eigen::ArrayX<bool> mask;
         Eigen::ArrayXd lowerLimit;
         Eigen::ArrayXd upperLimit;
+    };
+
+    struct ConfidenceInterval {
+        double lower;
+        double upper;
+    };
+
+    struct OffsetAngleCI {
+        ConfidenceInterval offset;
+        ConfidenceInterval angle;
+    };
+
+    struct LinearFitResult {
+        OffsetAngle values;
+        OffsetAngle variance;
+        OffsetAngleCI confidenceInterval;
+        double aic;
     };
 }

@@ -18,12 +18,16 @@ namespace accurate_ri {
     private:
         void initHough(const PointArray &points);
 
-        static VerticalBounds computeErrorBounds(
-            const PointArray &points, double offset
-        );
+        static VerticalBounds computeErrorBounds(const PointArray &points, double offset);
 
         ScanlineLimits computeScanlineLimits(
-            const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes, double invRangesShift
+            const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
+            double invRangesShift
+        ) const;
+
+        void tryFitScanline(
+            const PointArray &points, const OffsetAngle &scanlineAttributes, const VerticalBounds &errorBounds,
+            const ScanlineLimits &scanlineLimits
         ) const;
     };
 } // namespace accurate_ri

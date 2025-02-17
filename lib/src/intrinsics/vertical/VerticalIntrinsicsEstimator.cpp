@@ -1,5 +1,6 @@
 #include "VerticalIntrinsicsEstimator.h"
 #include <algorithm>
+#include <boost/math/distributions/students_t.hpp>
 
 namespace accurate_ri {
     // TODO extract these constants somewhere
@@ -7,6 +8,13 @@ namespace accurate_ri {
     constexpr double MAX_OFFSET = 0.5;
     constexpr double OFFSET_STEP = 1e-3;
     constexpr double ANGLE_STEP = 1e-4;
+    constexpr uint64_t MAX_FIT_ATTEMPTS = 10;
+
+    enum FitConvergenceState {
+        INITIAL,
+        CONVERGED,
+        CONFIRMED,
+    };
 
     // TODO probably make dedicated structs for all the tuples
     void VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
@@ -32,7 +40,6 @@ namespace accurate_ri {
             const auto houghMax = *houghMaxOpt;
             const auto errorBounds = computeErrorBounds(points, houghMax.maxValues.offset);
             const auto scanlineLimits = computeScanlineLimits(points, errorBounds.final, houghMax.maxValues, 0);
-
         }
     }
 
@@ -115,18 +122,89 @@ namespace accurate_ri {
         scanlineLowerLimit += deltaLower - lowerAngleMargin - errorBounds.array();
 
         auto scanlineIndices = Eigen::ArrayXi(points.size());
+        Eigen::ArrayX<bool> mask = scanlineLowerLimit.array() <= phis.array()
+                                   && phis.array() <= scanlineUpperLimit.array();
 
         int32_t count = 0;
         for (int32_t i = 0; i < points.size(); i++) {
-            if (scanlineLowerLimit[i] <= phis[i] && phis[i] <= scanlineUpperLimit[i]) {
+            if (mask[i]) {
                 scanlineIndices[count++] = i;
             }
         }
 
         scanlineIndices.conservativeResize(count);
 
-        return {scanlineIndices, scanlineLowerLimit, scanlineUpperLimit};
+
+        return {scanlineIndices, mask, scanlineLowerLimit, scanlineUpperLimit};
     }
 
+    void VerticalIntrinsicsEstimator::tryFitScanline(
+        const PointArray &points, const OffsetAngle &scanlineAttributes, const VerticalBounds &errorBounds,
+        const ScanlineLimits &scanlineLimits
+    ) const {
+        const Eigen::ArrayXi &currentScanlineIndices = scanlineLimits.indices;
+        const Eigen::ArrayXd &ranges = points.getRanges().array();
+        FitConvergenceState state = INITIAL;
 
+        for (uint64_t attempt = 0; attempt < MAX_FIT_ATTEMPTS; attempt++) {
+            if (currentScanlineIndices.size() <= 2) {
+                break;
+            }
+
+            Eigen::ArrayX<bool> const *pointsToFitMask = &scanlineLimits.mask;
+            Eigen::ArrayX<bool> newPointsToFitMask;
+
+            if (state == INITIAL) {
+                newPointsToFitMask = *pointsToFitMask && (ranges >= 2);
+                pointsToFitMask = &newPointsToFitMask;
+
+                if (pointsToFitMask->size() <= 2) {
+                    pointsToFitMask = &scanlineLimits.mask;
+                }
+            }
+        }
+    }
+
+    LinearFitResult performLinearFit(const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &bounds) {
+        Eigen::ArrayXd weights = 1 / bounds.square();
+
+        // Weighted least squares, variables use matrix notation from the standard formula, invRanges is X, phis is y
+        Eigen::MatrixXd X = Eigen::MatrixXd(phis.size(), 2);
+        X.col(0) = Eigen::VectorXd::Ones(phis.size());
+        X.col(1) = invRanges;
+
+        Eigen::MatrixXd W = weights.matrix().asDiagonal();
+        Eigen::MatrixXd XtW = X.transpose() * W;
+        Eigen::MatrixXd XtWX = XtW * X;
+        Eigen::MatrixXd XtWy = XtW * phis.matrix();
+
+        Eigen::VectorXd beta = XtWX.ldlt().solve(XtWy);
+        Eigen::VectorXd residuals = phis.matrix() - X * beta;
+        double sigma2 = (residuals.transpose() * W * residuals).value() / (phis.size() - 2);
+
+        Eigen::MatrixXd covariance = XtWX.inverse() * sigma2;
+        double log_likelihood = -0.5 * (phis.size() * std::log(2 * M_PI * sigma2) +
+                                        (residuals.transpose() * W * residuals).sum() / sigma2);
+        double aic = -2 * log_likelihood + 2 * 2; // 2 parameters
+
+        int df = phis.size() - 2;  // Degrees of freedom = n - k (k=2 for intercept & slope)
+        boost::math::students_t dist(df);
+        double tCritical = quantile(complement(dist, 0.025));  // 95% CI
+
+        OffsetAngleCI ci = {};
+        for (int i = 0; i < 2; ++i) {
+            const double standardError = std::sqrt(covariance(i, i));  // Standard error of beta[i]
+            ConfidenceInterval &currentCi = (i == 0) ? ci.offset : ci.angle;
+
+            currentCi.lower = beta[i] - tCritical * standardError;
+            currentCi.upper = beta[i] + tCritical * standardError;
+        }
+
+        return {
+            { beta[0], beta[1]},
+            { covariance(0, 0), covariance(1, 1) },
+            ci,
+            aic
+        };
+    }
 } // namespace accurate_ri
