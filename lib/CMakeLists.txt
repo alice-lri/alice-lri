@@ -1,3 +1,5 @@
+# TODO define release mode where we disable eigen debug and optimize the code for the native platform and so on
+
 option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
 
 # Convert human-readable log level to numeric values
@@ -29,8 +31,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/utils/Timer.h
         src/point/PointUtils.cpp
         src/point/PointUtils.h
-        src/intrinsics/VerticalIntrinsicsEstimator.cpp
-        src/intrinsics/VerticalIntrinsicsEstimator.h
+        src/intrinsics/vertical/VerticalIntrinsicsEstimator.cpp
+        src/intrinsics/vertical/VerticalIntrinsicsEstimator.h
         src/intrinsics/IntrinsicsEstimator.cpp
         src/intrinsics/IntrinsicsEstimator.h
         src/intrinsics/HorizontalIntrinsicsEstimator.cpp
@@ -40,7 +42,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/hash/HashUtils.cpp
         src/hash/HashUtils.h
         src/point/PointArray.h
-        src/point/PointArray.cpp)
+        src/point/PointArray.cpp
+        src/intrinsics/vertical/VerticalStructs.h)
 
 target_include_directories(accurate_ri
         PUBLIC include

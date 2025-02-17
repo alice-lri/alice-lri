@@ -3,6 +3,7 @@
 #include <optional>
 #include <vector>
 
+#include "intrinsics/vertical/VerticalStructs.h"
 #include "point/PointArray.h"
 
 namespace accurate_ri {
@@ -49,7 +50,7 @@ namespace accurate_ri {
          * @param averageX Optional average x value to find the closest maximum.
          * @return Optional pair of coordinates (x, y) of the maximum value.
          */
-        std::optional<std::pair<uint64_t, uint64_t> > findMaximum(std::optional<double> averageX);
+        std::optional<HoughCell> findMaximum(std::optional<double> averageX);
 
         /**
          * @brief Gets the x value given an index.
@@ -107,5 +108,7 @@ namespace accurate_ri {
          * @param previousY The y value of the previous point.
          */
         inline void voteForDiscontinuities(uint64_t pointIndex, size_t x, int32_t y, double voteVal, int32_t previousY);
+
+        HoughCell indicesToCell(const std::pair<size_t, size_t> &indices);
     };
 } // accurate_ri

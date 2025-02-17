@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include "hash/HashUtils.h"
+#include "intrinsics/vertical/VerticalStructs.h"
 #include "utils/Logger.h"
 
 namespace accurate_ri {
@@ -80,7 +81,7 @@ namespace accurate_ri {
                 );
     }
 
-    std::optional<std::pair<uint64_t, uint64_t> > HoughTransform::findMaximum(std::optional<double> averageX) {
+    std::optional<HoughCell> HoughTransform::findMaximum(std::optional<double> averageX) {
         std::vector<std::pair<size_t, size_t> > maxIndices;
         double maxVal = -std::numeric_limits<double>::infinity();
 
@@ -102,7 +103,7 @@ namespace accurate_ri {
         }
 
         if (maxIndices.size() == 1 || !averageX) {
-            return maxIndices[maxIndices.size() / 2];
+            return indicesToCell(maxIndices[maxIndices.size() / 2]);
         }
 
         auto closestPair = maxIndices[0];
@@ -117,7 +118,8 @@ namespace accurate_ri {
             }
         }
 
-        return closestPair;
+
+        return indicesToCell(closestPair);
     }
 
     double HoughTransform::getXValue(const size_t index) const {
@@ -126,5 +128,16 @@ namespace accurate_ri {
 
     double HoughTransform::getYValue(const size_t index) const {
         return yMin + yStep * static_cast<double>(index);
+    }
+
+    HoughCell HoughTransform::indicesToCell(const std::pair<size_t, size_t> &indices) {
+        return {
+            indices.first,
+            indices.second,
+            getXValue(indices.first),
+            getYValue(indices.second),
+            accumulator(indices.second, indices.first),
+            hashAccumulator(indices.second, indices.first)
+        };
     }
 } // namespace accurate_ri

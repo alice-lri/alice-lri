@@ -1,7 +1,7 @@
 #pragma once
 #include "HorizontalIntrinsicsEstimator.h"
-#include "VerticalIntrinsicsEstimator.h"
 #include "point/PointArray.h"
+#include "vertical/VerticalIntrinsicsEstimator.h"
 
 
 namespace accurate_ri {

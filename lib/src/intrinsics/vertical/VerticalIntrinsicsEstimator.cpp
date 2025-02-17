@@ -1,5 +1,4 @@
 #include "VerticalIntrinsicsEstimator.h"
-
 #include <algorithm>
 
 namespace accurate_ri {
@@ -9,6 +8,7 @@ namespace accurate_ri {
     constexpr double OFFSET_STEP = 1e-3;
     constexpr double ANGLE_STEP = 1e-4;
 
+    // TODO probably make dedicated structs for all the tuples
     void VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
         initHough(points);
 
@@ -23,20 +23,16 @@ namespace accurate_ri {
                 break;
             }
 
-            const std::optional<std::pair<uint64_t, uint64_t> > maxIndices = hough->findMaximum(std::nullopt);
+            const std::optional<HoughCell> houghMaxOpt = hough->findMaximum(std::nullopt);
 
-            if (!maxIndices) {
+            if (!houghMaxOpt) {
                 break;
             }
 
-            const auto [maxOffsetIndex, maxAngleIndex] = *maxIndices;
-            const double maxOffset = hough->getXValue(maxOffsetIndex);
-            const double maxAngle = hough->getYValue(maxAngleIndex);
+            const auto houghMax = *houghMaxOpt;
+            const auto errorBounds = computeErrorBounds(points, houghMax.maxValues.offset);
+            const auto scanlineLimits = computeScanlineLimits(points, errorBounds.final, houghMax.maxValues, 0);
 
-            const auto [phisUpperBound, correctionUpperBound, finalUpperBound] = computeErrorBounds(points, maxOffset);
-            const auto [scanlineIndices, scanlineLowerLimit, scanlineUpperLimit] = computeScanlineLimits(
-                points, finalUpperBound, maxOffset, maxAngle, 0
-            );
         }
     }
 
@@ -52,7 +48,7 @@ namespace accurate_ri {
 
     // TODO precompute on PointArray
     // TODO review equation and make code cleaner
-    std::tuple<Eigen::VectorXd, Eigen::VectorXd, Eigen::VectorXd> VerticalIntrinsicsEstimator::computeErrorBounds(
+    VerticalBounds VerticalIntrinsicsEstimator::computeErrorBounds(
         const PointArray &points, const double offset
     ) {
         double coordsEps = points.getCoordsEps();
@@ -79,8 +75,8 @@ namespace accurate_ri {
     }
 
     // TODO split this function
-    std::tuple<Eigen::ArrayXi, Eigen::ArrayXd, Eigen::ArrayXd> VerticalIntrinsicsEstimator::computeScanlineLimits(
-        const PointArray &points, const Eigen::ArrayXd &errorBounds, const double offset, const double angle,
+    ScanlineLimits VerticalIntrinsicsEstimator::computeScanlineLimits(
+        const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
         const double invRangesShift
     ) const {
         const auto &invRanges = points.getInvRanges();
@@ -89,18 +85,16 @@ namespace accurate_ri {
         const auto upperAngleMargin = hough->getYStep();
         const auto lowerOffsetMargin = upperOffsetMargin;
         const auto lowerAngleMargin = upperAngleMargin;
+        const auto offset = scanlineAttributes.offset;
+        const auto angle = scanlineAttributes.angle;
 
         const Eigen::ArrayXd upperArcsinArg = (offset + upperOffsetMargin) * invRanges.array().min(1).max(-1);
         const Eigen::ArrayXd lowerArcsinArg = (offset - lowerOffsetMargin) * invRanges.array().min(1).max(-1);
 
         const Eigen::ArrayXd upperArcsinArgShifted =
-                (offset + upperOffsetMargin) * (invRanges.array() - invRangesShift).min(
-                    1
-                ).max(-1);
+                (offset + upperOffsetMargin) * (invRanges.array() - invRangesShift).min(1).max(-1);
         const Eigen::ArrayXd lowerArcsinArgShifted =
-                (offset - lowerOffsetMargin) * (invRanges.array() - invRangesShift).min(
-                    1
-                ).max(-1);
+                (offset - lowerOffsetMargin) * (invRanges.array() - invRangesShift).min(1).max(-1);
 
         const Eigen::ArrayXd upperArcsin = upperArcsinArg.array().asin();
         const Eigen::ArrayXd lowerArcsin = lowerArcsinArg.array().asin();
@@ -133,4 +127,6 @@ namespace accurate_ri {
 
         return {scanlineIndices, scanlineLowerLimit, scanlineUpperLimit};
     }
+
+
 } // namespace accurate_ri
