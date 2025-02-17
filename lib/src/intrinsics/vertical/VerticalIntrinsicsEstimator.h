@@ -26,8 +26,12 @@ namespace accurate_ri {
         ) const;
 
         void tryFitScanline(
-            const PointArray &points, const OffsetAngle &scanlineAttributes, const VerticalBounds &errorBounds,
-            const ScanlineLimits &scanlineLimits
+            const PointArray &points, const OffsetAngle &scanlineAttributes, VerticalBounds &errorBounds,
+            ScanlineLimits &scanlineLimits
         ) const;
+
+        static LinearFitResult performLinearFit(
+            const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &bounds
+        );
     };
 } // namespace accurate_ri

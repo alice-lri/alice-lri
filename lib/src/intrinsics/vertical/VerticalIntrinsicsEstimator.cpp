@@ -82,6 +82,7 @@ namespace accurate_ri {
     }
 
     // TODO split this function
+    // TODO margins need to be arguments
     ScanlineLimits VerticalIntrinsicsEstimator::computeScanlineLimits(
         const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
         const double invRangesShift
@@ -139,14 +140,16 @@ namespace accurate_ri {
     }
 
     void VerticalIntrinsicsEstimator::tryFitScanline(
-        const PointArray &points, const OffsetAngle &scanlineAttributes, const VerticalBounds &errorBounds,
-        const ScanlineLimits &scanlineLimits
+        const PointArray &points, const OffsetAngle &scanlineAttributes, VerticalBounds &errorBounds,
+        ScanlineLimits &scanlineLimits
     ) const {
-        const Eigen::ArrayXi &currentScanlineIndices = scanlineLimits.indices;
         const Eigen::ArrayXd &ranges = points.getRanges().array();
         FitConvergenceState state = INITIAL;
+        bool ciTooWide = false;
 
         for (uint64_t attempt = 0; attempt < MAX_FIT_ATTEMPTS; attempt++) {
+            const Eigen::ArrayXi &currentScanlineIndices = scanlineLimits.indices;
+
             if (currentScanlineIndices.size() <= 2) {
                 break;
             }
@@ -162,10 +165,63 @@ namespace accurate_ri {
                     pointsToFitMask = &scanlineLimits.mask;
                 }
             }
+
+            const Eigen::ArrayXd &invRanges = points.getInvRanges();
+            const Eigen::ArrayXd &phis = points.getPhis();
+
+            // TODO, careful, maybe this does not work. But: https://eigen.tuxfamily.org/dox/group__TutorialSlicingIndexing.html#title5
+            // TODO check if we can avoid these copies by lazy evaluating inside the performFit function
+            Eigen::ArrayXd invRangesFiltered = invRanges(*pointsToFitMask);
+            Eigen::ArrayXd phisFiltered = phis(*pointsToFitMask);
+            Eigen::ArrayXd boundsFiltered = errorBounds.final(*pointsToFitMask);
+
+            LinearFitResult fitResult = performLinearFit(invRanges, phis, boundsFiltered);
+            double offsetCiWidth = fitResult.ci.offset.upper - fitResult.ci.offset.lower;
+
+            // TODO review and justify these constants
+            if (offsetCiWidth > std::max(0.05 * fitResult.values.offset, 1e-2)) {
+                ciTooWide = true;
+                break;
+            }
+
+            // TODO we could save memory reallocation here (perhaps by passing buffer by ref to computeErrorBounds)
+            errorBounds = computeErrorBounds(points, fitResult.values.offset);
+
+            // TODO take into account that strict fit was removed here
+            double upperOffsetMargin = fitResult.ci.offset.upper - fitResult.values.offset;
+            double lowerOffsetMargin = fitResult.values.offset - fitResult.ci.offset.lower;
+            double upperAngleMargin = fitResult.ci.angle.upper - fitResult.values.angle;
+            double lowerAngleMargin = fitResult.values.angle - fitResult.ci.angle.lower;
+
+            // TODO 1e-6 can be justified for numerical stability, but well need to review 5e-4
+            upperOffsetMargin = std::max(upperOffsetMargin, 5e-4);
+            lowerOffsetMargin = std::max(lowerOffsetMargin, 5e-4);
+            upperAngleMargin = std::max(upperAngleMargin, 1e-6);
+            lowerAngleMargin = std::max(lowerAngleMargin, 1e-6);
+
+            // TODO NOW use the new margins for the computeScanlineLimits
+            double meanInvRanges = invRangesFiltered.mean();
+            ScanlineLimits newLimits = computeScanlineLimits(points, errorBounds.final, fitResult.values, meanInvRanges);
+
+            // TODO perhaps this does not work as the sizes might be different, if so, use boolean masks instead
+            if ((newLimits.indices == scanlineLimits.indices).all()) {
+                if (state == CONVERGED) {
+                    state = CONFIRMED;
+                    break;
+                }
+
+                state = CONVERGED;
+            }
+
+            scanlineLimits = newLimits;
         }
+
+        // TODO NOW return the result
     }
 
-    LinearFitResult performLinearFit(const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &bounds) {
+    LinearFitResult VerticalIntrinsicsEstimator::performLinearFit(
+        const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &bounds
+    ) {
         Eigen::ArrayXd weights = 1 / bounds.square();
 
         // Weighted least squares, variables use matrix notation from the standard formula, invRanges is X, phis is y
@@ -187,13 +243,13 @@ namespace accurate_ri {
                                         (residuals.transpose() * W * residuals).sum() / sigma2);
         double aic = -2 * log_likelihood + 2 * 2; // 2 parameters
 
-        int df = phis.size() - 2;  // Degrees of freedom = n - k (k=2 for intercept & slope)
+        int df = phis.size() - 2; // Degrees of freedom = n - k (k=2 for intercept & slope)
         boost::math::students_t dist(df);
-        double tCritical = quantile(complement(dist, 0.025));  // 95% CI
+        double tCritical = quantile(complement(dist, 0.025)); // 95% CI
 
         OffsetAngleCI ci = {};
         for (int i = 0; i < 2; ++i) {
-            const double standardError = std::sqrt(covariance(i, i));  // Standard error of beta[i]
+            const double standardError = std::sqrt(covariance(i, i)); // Standard error of beta[i]
             ConfidenceInterval &currentCi = (i == 0) ? ci.offset : ci.angle;
 
             currentCi.lower = beta[i] - tCritical * standardError;
@@ -201,8 +257,8 @@ namespace accurate_ri {
         }
 
         return {
-            { beta[0], beta[1]},
-            { covariance(0, 0), covariance(1, 1) },
+            {beta[0], beta[1]},
+            {covariance(0, 0), covariance(1, 1)},
             ci,
             aic
         };

@@ -42,7 +42,7 @@ namespace accurate_ri {
     struct LinearFitResult {
         OffsetAngle values;
         OffsetAngle variance;
-        OffsetAngleCI confidenceInterval;
+        OffsetAngleCI ci;
         double aic;
     };
 }
