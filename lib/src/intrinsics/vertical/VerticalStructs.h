@@ -32,6 +32,10 @@ namespace accurate_ri {
     struct RealMargin {
         double lower;
         double upper;
+
+        [[nodiscard]] double diff() const {
+            return upper - lower;
+        }
     };
 
     struct OffsetAngleMargin {

@@ -38,30 +38,37 @@ namespace accurate_ri {
             }
 
             const HoughCell houghMax = *houghMaxOpt;
+            OffsetAngle maxValues = houghMax.maxValues;
 
             const OffsetAngleMargin margin = {
                 {hough->getXStep(), hough->getXStep()},
                 {hough->getYStep(), hough->getYStep()}
             };
 
-            const VerticalBounds errorBounds = computeErrorBounds(points, houghMax.maxValues.offset);
+            VerticalBounds errorBounds = computeErrorBounds(points, maxValues.offset);
             ScanlineLimits scanlineLimits = computeScanlineLimits(
-                points, errorBounds.final, houghMax.maxValues, margin, 0
+                points, errorBounds.final, maxValues, margin, 0
             );
 
             bool requiresHeuristicFitting = true;
             bool fitSuccess = false;
+            double uncertainty;
+            OffsetAngleMargin confidenceIntervals = {};
 
             if (scanlineLimits.indices.size() > 2) {
                 const ScanlineFitResult scanlineFit = tryFitScanline(
-                    points, houghMax.maxValues, errorBounds, scanlineLimits
+                    points, maxValues, errorBounds, scanlineLimits
                 );
 
                 requiresHeuristicFitting = scanlineFit.ciTooWide;
                 fitSuccess = scanlineFit.success;
 
                 if (fitSuccess and !requiresHeuristicFitting) {
+                    // TODO these form a relevant group
+                    maxValues = scanlineFit.fit->values;
                     scanlineLimits = *scanlineFit.limits;
+                    confidenceIntervals = scanlineFit.fit->ci;
+                    uncertainty = scanlineFit.fit->aic;
                     // TODO At this point, we know that the fit was successful, make the code more readable
                 }
             }
@@ -73,6 +80,39 @@ namespace accurate_ri {
 
                 double invRangesMean = invRanges.mean();
                 double phisMean = phis.mean();
+
+                HeuristicScanline heuristic = computeHeuristicScanline(invRangesMean, phisMean);
+                maxValues.offset = heuristic.offset;
+                maxValues.angle = (phis - (maxValues.offset * invRanges).asin()).mean();
+
+                confidenceIntervals.offset = heuristic.offsetCi;
+
+                RealMargin angleMarginTmp = {
+                    (phis - (confidenceIntervals.offset.lower * invRanges).asin()).mean(),
+                    (phis - (confidenceIntervals.offset.upper * invRanges).asin()).mean()
+                };
+
+                confidenceIntervals.angle = {
+                    std::min(angleMarginTmp.lower, angleMarginTmp.upper),
+                    std::max(angleMarginTmp.lower, angleMarginTmp.upper)
+                };
+
+                fitSuccess = true;
+                uncertainty = std::numeric_limits<double>::infinity();
+
+                double offsetMargin = confidenceIntervals.offset.diff() / 2;
+                double angleMargin = confidenceIntervals.angle.diff() / 2;
+
+                // Numerical stability
+                offsetMargin = std::max(offsetMargin, 1e-6);
+                angleMargin = std::max(angleMargin, 1e-6);
+
+                errorBounds = computeErrorBounds(points, maxValues.offset);
+
+                OffsetAngleMargin heuristicMargin = {offsetMargin, offsetMargin, angleMargin, angleMargin};
+                scanlineLimits = computeScanlineLimits(
+                    points, errorBounds.final, maxValues, heuristicMargin, invRangesMean
+                );
             }
         }
     }
