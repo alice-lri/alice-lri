@@ -29,20 +29,27 @@ namespace accurate_ri {
         Eigen::ArrayXd upperLimit;
     };
 
-    struct ConfidenceInterval {
+    struct RealMargin {
         double lower;
         double upper;
     };
 
-    struct OffsetAngleCI {
-        ConfidenceInterval offset;
-        ConfidenceInterval angle;
+    struct OffsetAngleMargin {
+        RealMargin offset;
+        RealMargin angle;
     };
 
     struct LinearFitResult {
         OffsetAngle values;
         OffsetAngle variance;
-        OffsetAngleCI ci;
+        OffsetAngleMargin ci;
         double aic;
+    };
+
+    struct ScanlineFitResult {
+        bool success = false;
+        bool ciTooWide = false;
+        std::optional<LinearFitResult> fit;
+        std::optional<ScanlineLimits> limits;
     };
 }

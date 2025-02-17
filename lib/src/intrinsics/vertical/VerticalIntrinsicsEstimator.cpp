@@ -37,9 +37,28 @@ namespace accurate_ri {
                 break;
             }
 
-            const auto houghMax = *houghMaxOpt;
-            const auto errorBounds = computeErrorBounds(points, houghMax.maxValues.offset);
-            const auto scanlineLimits = computeScanlineLimits(points, errorBounds.final, houghMax.maxValues, 0);
+            const HoughCell houghMax = *houghMaxOpt;
+
+            const OffsetAngleMargin margin = {
+                {hough->getXStep(), hough->getXStep()},
+                {hough->getYStep(), hough->getYStep()}
+            };
+
+            const VerticalBounds errorBounds = computeErrorBounds(points, houghMax.maxValues.offset);
+            ScanlineLimits scanlineLimits = computeScanlineLimits(
+                points, errorBounds.final, houghMax.maxValues, margin, 0
+            );
+
+            const ScanlineFitResult scanlineFit = tryFitScanline(
+                points, houghMax.maxValues, errorBounds, scanlineLimits
+            );
+
+            if (!scanlineFit.success) {
+                // TODO
+                break;
+            }
+
+            scanlineLimits = *scanlineFit.limits;
         }
     }
 
@@ -85,24 +104,20 @@ namespace accurate_ri {
     // TODO margins need to be arguments
     ScanlineLimits VerticalIntrinsicsEstimator::computeScanlineLimits(
         const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
-        const double invRangesShift
+        const OffsetAngleMargin &margin, const double invRangesShift
     ) const {
         const auto &invRanges = points.getInvRanges();
         const auto &phis = points.getPhis();
-        const auto upperOffsetMargin = hough->getXStep();
-        const auto upperAngleMargin = hough->getYStep();
-        const auto lowerOffsetMargin = upperOffsetMargin;
-        const auto lowerAngleMargin = upperAngleMargin;
         const auto offset = scanlineAttributes.offset;
         const auto angle = scanlineAttributes.angle;
 
-        const Eigen::ArrayXd upperArcsinArg = (offset + upperOffsetMargin) * invRanges.array().min(1).max(-1);
-        const Eigen::ArrayXd lowerArcsinArg = (offset - lowerOffsetMargin) * invRanges.array().min(1).max(-1);
+        const Eigen::ArrayXd upperArcsinArg = (offset + margin.offset.upper) * invRanges.array().min(1).max(-1);
+        const Eigen::ArrayXd lowerArcsinArg = (offset - margin.offset.lower) * invRanges.array().min(1).max(-1);
 
         const Eigen::ArrayXd upperArcsinArgShifted =
-                (offset + upperOffsetMargin) * (invRanges.array() - invRangesShift).min(1).max(-1);
+                (offset + margin.offset.upper) * (invRanges.array() - invRangesShift).min(1).max(-1);
         const Eigen::ArrayXd lowerArcsinArgShifted =
-                (offset - lowerOffsetMargin) * (invRanges.array() - invRangesShift).min(1).max(-1);
+                (offset - margin.offset.lower) * (invRanges.array() - invRangesShift).min(1).max(-1);
 
         const Eigen::ArrayXd upperArcsin = upperArcsinArg.array().asin();
         const Eigen::ArrayXd lowerArcsin = lowerArcsinArg.array().asin();
@@ -119,8 +134,8 @@ namespace accurate_ri {
         Eigen::ArrayXd scanlineUpperLimit = scanlineUpperLimitTmp.array().max(scanlineLowerLimitTmp.array());
         Eigen::ArrayXd scanlineLowerLimit = scanlineLowerLimitTmp.array().min(scanlineUpperLimitTmp.array());
 
-        scanlineUpperLimit += deltaUpper + upperAngleMargin + errorBounds.array();
-        scanlineLowerLimit += deltaLower - lowerAngleMargin - errorBounds.array();
+        scanlineUpperLimit += deltaUpper + margin.angle.upper + errorBounds.array();
+        scanlineLowerLimit += deltaLower - margin.angle.lower - errorBounds.array();
 
         auto scanlineIndices = Eigen::ArrayXi(points.size());
         Eigen::ArrayX<bool> mask = scanlineLowerLimit.array() <= phis.array()
@@ -139,22 +154,27 @@ namespace accurate_ri {
         return {scanlineIndices, mask, scanlineLowerLimit, scanlineUpperLimit};
     }
 
-    void VerticalIntrinsicsEstimator::tryFitScanline(
-        const PointArray &points, const OffsetAngle &scanlineAttributes, VerticalBounds &errorBounds,
-        ScanlineLimits &scanlineLimits
+    ScanlineFitResult VerticalIntrinsicsEstimator::tryFitScanline(
+        const PointArray &points, const OffsetAngle &scanlineAttributes, const VerticalBounds &errorBounds,
+        const ScanlineLimits &scanlineLimits
     ) const {
         const Eigen::ArrayXd &ranges = points.getRanges().array();
+        VerticalBounds currentErrorBounds = errorBounds;
+        ScanlineLimits currentScanlineLimits = scanlineLimits;
+
+        std::optional<LinearFitResult> fitResult = std::nullopt;
+        std::optional<ScanlineLimits> limits = std::nullopt;
         FitConvergenceState state = INITIAL;
         bool ciTooWide = false;
 
         for (uint64_t attempt = 0; attempt < MAX_FIT_ATTEMPTS; attempt++) {
-            const Eigen::ArrayXi &currentScanlineIndices = scanlineLimits.indices;
+            const Eigen::ArrayXi &currentScanlineIndices = currentScanlineLimits.indices;
 
             if (currentScanlineIndices.size() <= 2) {
                 break;
             }
 
-            Eigen::ArrayX<bool> const *pointsToFitMask = &scanlineLimits.mask;
+            Eigen::ArrayX<bool> const *pointsToFitMask = &currentScanlineLimits.mask;
             Eigen::ArrayX<bool> newPointsToFitMask;
 
             if (state == INITIAL) {
@@ -162,7 +182,7 @@ namespace accurate_ri {
                 pointsToFitMask = &newPointsToFitMask;
 
                 if (pointsToFitMask->size() <= 2) {
-                    pointsToFitMask = &scanlineLimits.mask;
+                    pointsToFitMask = &currentScanlineLimits.mask;
                 }
             }
 
@@ -173,25 +193,25 @@ namespace accurate_ri {
             // TODO check if we can avoid these copies by lazy evaluating inside the performFit function
             Eigen::ArrayXd invRangesFiltered = invRanges(*pointsToFitMask);
             Eigen::ArrayXd phisFiltered = phis(*pointsToFitMask);
-            Eigen::ArrayXd boundsFiltered = errorBounds.final(*pointsToFitMask);
+            Eigen::ArrayXd boundsFiltered = currentErrorBounds.final(*pointsToFitMask);
 
-            LinearFitResult fitResult = performLinearFit(invRanges, phis, boundsFiltered);
-            double offsetCiWidth = fitResult.ci.offset.upper - fitResult.ci.offset.lower;
+            fitResult = performLinearFit(invRanges, phis, boundsFiltered);
+            double offsetCiWidth = fitResult->ci.offset.upper - fitResult->ci.offset.lower;
 
             // TODO review and justify these constants
-            if (offsetCiWidth > std::max(0.05 * fitResult.values.offset, 1e-2)) {
+            if (offsetCiWidth > std::max(0.05 * fitResult->values.offset, 1e-2)) {
                 ciTooWide = true;
                 break;
             }
 
             // TODO we could save memory reallocation here (perhaps by passing buffer by ref to computeErrorBounds)
-            errorBounds = computeErrorBounds(points, fitResult.values.offset);
+            currentErrorBounds = computeErrorBounds(points, fitResult->values.offset);
 
             // TODO take into account that strict fit was removed here
-            double upperOffsetMargin = fitResult.ci.offset.upper - fitResult.values.offset;
-            double lowerOffsetMargin = fitResult.values.offset - fitResult.ci.offset.lower;
-            double upperAngleMargin = fitResult.ci.angle.upper - fitResult.values.angle;
-            double lowerAngleMargin = fitResult.values.angle - fitResult.ci.angle.lower;
+            double upperOffsetMargin = fitResult->ci.offset.upper - fitResult->values.offset;
+            double lowerOffsetMargin = fitResult->values.offset - fitResult->ci.offset.lower;
+            double upperAngleMargin = fitResult->ci.angle.upper - fitResult->values.angle;
+            double lowerAngleMargin = fitResult->values.angle - fitResult->ci.angle.lower;
 
             // TODO 1e-6 can be justified for numerical stability, but well need to review 5e-4
             upperOffsetMargin = std::max(upperOffsetMargin, 5e-4);
@@ -199,12 +219,17 @@ namespace accurate_ri {
             upperAngleMargin = std::max(upperAngleMargin, 1e-6);
             lowerAngleMargin = std::max(lowerAngleMargin, 1e-6);
 
-            // TODO NOW use the new margins for the computeScanlineLimits
-            double meanInvRanges = invRangesFiltered.mean();
-            ScanlineLimits newLimits = computeScanlineLimits(points, errorBounds.final, fitResult.values, meanInvRanges);
+            OffsetAngleMargin margin = {
+                {lowerOffsetMargin, upperOffsetMargin},
+                {lowerAngleMargin, upperAngleMargin}
+            };
+            const double meanInvRanges = invRangesFiltered.mean();
+            ScanlineLimits newLimits = computeScanlineLimits(
+                points, currentErrorBounds.final, fitResult->values, margin, meanInvRanges
+            );
 
             // TODO perhaps this does not work as the sizes might be different, if so, use boolean masks instead
-            if ((newLimits.indices == scanlineLimits.indices).all()) {
+            if ((newLimits.indices == currentScanlineLimits.indices).all()) {
                 if (state == CONVERGED) {
                     state = CONFIRMED;
                     break;
@@ -213,10 +238,15 @@ namespace accurate_ri {
                 state = CONVERGED;
             }
 
-            scanlineLimits = newLimits;
+            currentScanlineLimits = newLimits;
         }
 
-        // TODO NOW return the result
+        return {
+            .success = state == CONFIRMED,
+            .ciTooWide = ciTooWide,
+            .fit = state == CONFIRMED ? fitResult : std::nullopt,
+            .limits = state == CONFIRMED ? std::make_optional(currentScanlineLimits) : std::nullopt
+        };
     }
 
     LinearFitResult VerticalIntrinsicsEstimator::performLinearFit(
@@ -247,20 +277,20 @@ namespace accurate_ri {
         boost::math::students_t dist(df);
         double tCritical = quantile(complement(dist, 0.025)); // 95% CI
 
-        OffsetAngleCI ci = {};
+        OffsetAngleMargin ci = {};
         for (int i = 0; i < 2; ++i) {
             const double standardError = std::sqrt(covariance(i, i)); // Standard error of beta[i]
-            ConfidenceInterval &currentCi = (i == 0) ? ci.offset : ci.angle;
+            RealMargin &currentCi = (i == 0) ? ci.offset : ci.angle;
 
             currentCi.lower = beta[i] - tCritical * standardError;
             currentCi.upper = beta[i] + tCritical * standardError;
         }
 
         return {
-            {beta[0], beta[1]},
-            {covariance(0, 0), covariance(1, 1)},
-            ci,
-            aic
+            .values = {beta[0], beta[1]},
+            .variance = {covariance(0, 0), covariance(1, 1)},
+            .ci = ci,
+            .aic = aic
         };
     }
 } // namespace accurate_ri

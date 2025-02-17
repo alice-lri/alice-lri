@@ -22,12 +22,12 @@ namespace accurate_ri {
 
         ScanlineLimits computeScanlineLimits(
             const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
-            double invRangesShift
+            const OffsetAngleMargin &margin, double invRangesShift
         ) const;
 
-        void tryFitScanline(
-            const PointArray &points, const OffsetAngle &scanlineAttributes, VerticalBounds &errorBounds,
-            ScanlineLimits &scanlineLimits
+        ScanlineFitResult tryFitScanline(
+            const PointArray &points, const OffsetAngle &scanlineAttributes, const VerticalBounds &errorBounds,
+            const ScanlineLimits &scanlineLimits
         ) const;
 
         static LinearFitResult performLinearFit(
