@@ -1,5 +1,7 @@
 #include "VerticalIntrinsicsEstimator.h"
 #include <algorithm>
+#include <ranges>
+#include <unordered_set>
 #include <boost/math/distributions/students_t.hpp>
 
 #include "utils/Utils.h"
@@ -121,12 +123,14 @@ namespace accurate_ri {
                 );
             }
 
-            if (!fitSuccess or scanlineLimits.indices.size() == 0) {
+            if (!fitSuccess || scanlineLimits.indices.size() == 0) {
                 hough->removeIdenticalCells(houghMax);
                 continue;
             }
 
-            bool intersectsOtherScanline = (pointsScanlinesIds(scanlineLimits.indices) != -1).any();
+
+            Eigen::ArrayXi conflictingScanlinesIdsVerbose = pointsScanlinesIds(scanlineLimits.indices);
+            bool intersectsOtherScanline = (conflictingScanlinesIdsVerbose != -1).any();
             ScanlineAngleBounds angleBounds = {
                 .bottom = {
                     .lower = confidenceIntervals.angle.lower + asin(confidenceIntervals.offset.lower / maxRange),
@@ -139,20 +143,17 @@ namespace accurate_ri {
             };
 
             Eigen::ArrayX<bool> intersectsTheoreticalMask = Eigen::ArrayX<bool>::Constant(currentScanlineId + 1, true);
+            std::vector boundsPointers = {&ScanlineAngleBounds::bottom, &ScanlineAngleBounds::top};
 
-            std::vector boundsPointers = { &ScanlineAngleBounds::bottom, &ScanlineAngleBounds::top };
-            std::vector boundCiPointers = { &RealMargin::lower, &RealMargin::upper };
-
-
-            for (const auto thisBound : boundsPointers) {
+            for (const auto thisBound: boundsPointers) {
                 double thisLower = (angleBounds.*thisBound).lower;
                 double thisUpper = (angleBounds.*thisBound).upper;
 
-                for (const auto otherBound : boundsPointers) {
+                for (const auto otherBound: boundsPointers) {
                     Eigen::ArrayXd maxTheoreticalSigns = Eigen::ArrayXd::Ones(currentScanlineId + 1);
                     Eigen::ArrayXd minTheoreticalSigns = Eigen::ArrayXd::Ones(currentScanlineId + 1);
 
-                    for (uint32_t id = 0; id < currentScanlineId + 1; id++) {
+                    for (uint32_t id = 0; id < currentScanlineId + 1; ++id) {
                         if (!scanlineInfoMap.contains(id)) {
                             minTheoreticalSigns[id] = maxTheoreticalSigns[id] = 1;
                             continue;
@@ -165,7 +166,55 @@ namespace accurate_ri {
                         maxTheoreticalSigns[id] = Utils::compare(thisUpper, otherUpper);
                     }
 
-                    intersectsTheoreticalMask = intersectsTheoreticalMask && ((maxTheoreticalSigns * minTheoreticalSigns).array() != 1).array();
+                    intersectsTheoreticalMask = intersectsTheoreticalMask && (
+                                                    (maxTheoreticalSigns * minTheoreticalSigns).array() != 1).array();
+                }
+            }
+
+            uint64_t intersectsTheoreticalCount = intersectsTheoreticalMask.count();
+
+            if (intersectsOtherScanline || intersectsTheoreticalCount > 0) {
+                bool rejectingCurrent = true;
+                std::vector<uint32_t> conflictingScanlinesTheoretical;
+                std::unordered_set<uint32_t> conflictingScanlines;
+                std::unordered_set<uint32_t> actuallyConflictingScanlines;
+
+                for (int i = 0; i < intersectsTheoreticalMask.size(); ++i) {
+                    if (intersectsTheoreticalMask[i]) {
+                        conflictingScanlinesTheoretical.emplace_back(i);
+                    }
+                }
+
+                conflictingScanlines.insert(
+                    conflictingScanlinesTheoretical.begin(), conflictingScanlinesTheoretical.end()
+                );
+                conflictingScanlines.insert(
+                    conflictingScanlinesIdsVerbose.begin(), conflictingScanlinesIdsVerbose.end()
+                );
+                conflictingScanlines.erase(-1);
+
+                Eigen::ArrayXd conflictingScanlinesUncertainties(conflictingScanlines.size());
+
+                uint32_t i = 0;
+                for (const auto conflictingScanlineId: conflictingScanlines) {
+                    const auto &conflictingScanline = scanlineInfoMap[conflictingScanlineId];
+                    conflictingScanlinesUncertainties(i++) = conflictingScanline.uncertainty;
+                }
+
+                if (uncertainty < conflictingScanlinesUncertainties.minCoeff() || (conflictingScanlinesUncertainties == std::numeric_limits<double>::infinity()).all) {
+                    if (uncertainty != std::numeric_limits<double>::infinity()) {
+                        rejectingCurrent = false; // TODO probably here we can return given the right scope
+                    } else {
+                        rejectingCurrent = intersectsOtherScanline;
+
+                        if (rejectingCurrent) {
+                            actuallyConflictingScanlines = conflictingScanlines;
+                        }
+                    }
+
+                    if (uncertainty != std::numeric_limits<double>::infinity()) {
+                        // TODO invalidate conflicting scanlines
+                    }
                 }
             }
         }
@@ -251,7 +300,7 @@ namespace accurate_ri {
                                    && phis.array() <= scanlineUpperLimit.array();
 
         int32_t count = 0;
-        for (int32_t i = 0; i < points.size(); i++) {
+        for (int32_t i = 0; i < points.size(); ++i) {
             if (mask[i]) {
                 scanlineIndices[count++] = i;
             }
@@ -276,7 +325,7 @@ namespace accurate_ri {
         FitConvergenceState state = INITIAL;
         bool ciTooWide = false;
 
-        for (uint64_t attempt = 0; attempt < MAX_FIT_ATTEMPTS; attempt++) {
+        for (uint64_t attempt = 0; attempt < MAX_FIT_ATTEMPTS; ++attempt) {
             const Eigen::ArrayXi &currentScanlineIndices = currentScanlineLimits.indices;
 
             if (currentScanlineIndices.size() <= 2) {
