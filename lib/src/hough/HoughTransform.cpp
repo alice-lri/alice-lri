@@ -122,8 +122,12 @@ namespace accurate_ri {
         return indicesToCell(closestPair);
     }
 
-    void HoughTransform::removeIdenticalCells(const HoughCell &houghCell) {
-        accumulator = (hashAccumulator.array() == houghCell.hash).select(0, accumulator.array());
+    void HoughTransform::eraseByHash(const uint64_t hash) {
+        accumulator = (hashAccumulator.array() == hash).select(0, accumulator.array());
+    }
+
+    void HoughTransform::restoreVotes(const uint64_t hash, const double votes) {
+        accumulator = (hashAccumulator.array() == hash).select(votes, accumulator.array());
     }
 
     HoughCell HoughTransform::indicesToCell(const std::pair<size_t, size_t> &indices) {

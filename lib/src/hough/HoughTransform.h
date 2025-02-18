@@ -82,7 +82,9 @@ namespace accurate_ri {
 
         [[nodiscard]] uint32_t getYCount() const { return yCount; }
 
-        void removeIdenticalCells(const HoughCell & houghCell);
+        void eraseByHash(uint64_t hash);
+
+        void restoreVotes(const uint64_t hash, const double votes);
 
     private:
         /**

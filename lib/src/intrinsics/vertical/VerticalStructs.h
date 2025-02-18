@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <unordered_set>
 #include <eigen3/Eigen/Dense>
 
 namespace accurate_ri {
@@ -69,9 +70,17 @@ namespace accurate_ri {
     };
 
     struct ScanlineInfo {
+        uint64_t pointsCount;
         OffsetAngle values;
         OffsetAngleMargin ci;
         ScanlineAngleBounds theoreticalAngleBounds;
         double uncertainty;
+        double houghVotes;
+        uint64_t houghHash;
+    };
+
+    struct HashToConflictValue {
+        std::unordered_set<uint32_t> conflictingScanlines;
+        double votes;
     };
 }
