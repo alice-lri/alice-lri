@@ -9,8 +9,8 @@ int main() {
     using namespace std::chrono;
 
     // Define matrix dimensions.
-    const int yCount = 2048;
-    const int xCount = 2048;
+    const int yCount = 30000;
+    const int xCount = 1000;
 
     // Create matrices:
     // hashAccumulator is filled with random (absolute) values.
@@ -23,10 +23,10 @@ int main() {
     // Define the hash value we're looking for.
     uint64_t hash = 12345;
 
-    // For demonstration, set roughly 10% of hashAccumulator's entries equal to hash.
+    // For demonstration, set roughly 1% of hashAccumulator's entries equal to hash.
     for (int i = 0; i < yCount; ++i) {
         for (int j = 0; j < xCount; ++j) {
-            if (rand() % 10 == 0) {
+            if (rand() % 100 == 0) {
                 hashAccumulator(i, j) = hash;
             }
         }
@@ -67,8 +67,8 @@ int main() {
     auto vectorizedDuration = duration_cast<milliseconds>(end - start).count();
 
     // Output the timing results.
-    cout << "Loop duration: " << loopDuration << " ms" << endl;
-    cout << "Vectorized duration: " << vectorizedDuration << " ms" << endl;
+    cout << "Loop duration: " << loopDuration << " ms, per iteration: " << loopDuration / iterations << " ms" << endl;
+    cout << "Vectorized duration: " << vectorizedDuration << " ms, per iteration: " << vectorizedDuration / iterations << " ms" << endl;
 
     return 0;
 }
