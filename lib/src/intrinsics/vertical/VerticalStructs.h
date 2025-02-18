@@ -57,15 +57,21 @@ namespace accurate_ri {
         std::optional<ScanlineLimits> limits;
     };
 
-    struct ScanlineInfo {
-        OffsetAngle values;
-        OffsetAngleMargin ci;
-        double uncertainty;
-    };
-
     struct HeuristicScanline {
         double offset;
         RealMargin offsetCi;
         std::vector<uint32_t> dependencies;
+    };
+
+    struct ScanlineAngleBounds {
+        RealMargin bottom;
+        RealMargin top;
+    };
+
+    struct ScanlineInfo {
+        OffsetAngle values;
+        OffsetAngleMargin ci;
+        ScanlineAngleBounds theoreticalAngleBounds;
+        double uncertainty;
     };
 }

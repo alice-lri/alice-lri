@@ -1,4 +1,5 @@
 add_executable(examples main.cpp)
+add_executable(eigen_loop_vs_select eigen_loop_vs_select.cpp)
 
 target_link_libraries(examples PRIVATE accurate_ri)
 

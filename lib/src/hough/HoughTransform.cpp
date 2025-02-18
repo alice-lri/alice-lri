@@ -122,12 +122,8 @@ namespace accurate_ri {
         return indicesToCell(closestPair);
     }
 
-    double HoughTransform::getXValue(const size_t index) const {
-        return xMin + xStep * static_cast<double>(index);
-    }
-
-    double HoughTransform::getYValue(const size_t index) const {
-        return yMin + yStep * static_cast<double>(index);
+    void HoughTransform::removeIdenticalCells(const HoughCell &houghCell) {
+        accumulator = (hashAccumulator.array() == houghCell.hash).select(0, accumulator.array());
     }
 
     HoughCell HoughTransform::indicesToCell(const std::pair<size_t, size_t> &indices) {
@@ -139,5 +135,13 @@ namespace accurate_ri {
             accumulator(indices.second, indices.first),
             hashAccumulator(indices.second, indices.first)
         };
+    }
+
+    double HoughTransform::getXValue(const size_t index) const {
+        return xMin + xStep * static_cast<double>(index);
+    }
+
+    double HoughTransform::getYValue(const size_t index) const {
+        return yMin + yStep * static_cast<double>(index);
     }
 } // namespace accurate_ri

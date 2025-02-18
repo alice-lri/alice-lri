@@ -82,6 +82,8 @@ namespace accurate_ri {
 
         [[nodiscard]] uint32_t getYCount() const { return yCount; }
 
+        void removeIdenticalCells(const HoughCell & houghCell);
+
     private:
         /**
          * @brief Updates the accumulator for a specific point.

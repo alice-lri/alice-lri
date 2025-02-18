@@ -19,11 +19,15 @@ namespace accurate_ri {
     // TODO probably make dedicated structs for all the tuples
     void VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
         initHough(points);
-
         hough->computeAccumulator(points);
 
+        Eigen::ArrayXi pointsScanlinesIds = Eigen::ArrayXi::Ones(points.size()) * -1;
         int64_t unassignedPoints = points.size();
         int64_t iteration = -1;
+        uint64_t currentScanlineId = 0;
+
+        double maxRange = points.getRanges().maxCoeff();
+        double minRange = points.getRanges().minCoeff();
 
         while (unassignedPoints > 0) {
             iteration++;
@@ -113,6 +117,54 @@ namespace accurate_ri {
                 scanlineLimits = computeScanlineLimits(
                     points, errorBounds.final, maxValues, heuristicMargin, invRangesMean
                 );
+            }
+
+            if (!fitSuccess or scanlineLimits.indices.size() == 0) {
+                hough->removeIdenticalCells(houghMax);
+                continue;
+            }
+
+            bool intersectsOtherScanline = (pointsScanlinesIds(scanlineLimits.indices) != -1).any();
+            ScanlineAngleBounds angleBounds = {
+                .bottom = {
+                    .lower = confidenceIntervals.angle.lower + asin(confidenceIntervals.offset.lower / maxRange),
+                    .upper = confidenceIntervals.angle.lower + asin(confidenceIntervals.offset.lower / minRange)
+                },
+                .top = {
+                    .lower = confidenceIntervals.angle.upper + asin(confidenceIntervals.offset.upper / maxRange),
+                    .upper = confidenceIntervals.angle.upper + asin(confidenceIntervals.offset.upper / minRange)
+                }
+            };
+
+            Eigen::ArrayX<bool> intersectsTheoreticalMask = Eigen::ArrayX<bool>::Constant(currentScanlineId + 1, true);
+
+            std::vector boundsPointers = { &ScanlineAngleBounds::bottom, &ScanlineAngleBounds::top };
+            std::vector boundCiPointers = { &RealMargin::lower, &RealMargin::upper };
+
+
+            for (const auto thisBound : boundsPointers) {
+                double thisLower = (angleBounds.*thisBound).lower;
+                double thisUpper = (angleBounds.*thisBound).upper;
+
+                for (const auto otherBound : boundsPointers) {
+                    Eigen::ArrayXd maxTheoreticalSigns = Eigen::ArrayXd::Ones(currentScanlineId + 1);
+                    Eigen::ArrayXd minTheoreticalSigns = Eigen::ArrayXd::Ones(currentScanlineId + 1);
+
+                    for (uint32_t id = 0; id < currentScanlineId + 1; id++) {
+                        if (!scanlineInfoMap.contains(id)) {
+                            minTheoreticalSigns[id] = maxTheoreticalSigns[id] = 1;
+                            continue;
+                        }
+
+                        double otherLower = (scanlineInfoMap[id].theoreticalAngleBounds.*otherBound).lower;
+                        double otherUpper = (scanlineInfoMap[id].theoreticalAngleBounds.*otherBound).upper;
+
+                        minTheoreticalSigns[id] = std::signbit(thisLower - otherLower) ? -1 : 1;
+                        maxTheoreticalSigns[id] = std::signbit(thisUpper - otherUpper) ? -1 : 1;
+                    }
+
+                    intersectsTheoreticalMask = intersectsTheoreticalMask && ((maxTheoreticalSigns * minTheoreticalSigns).array() != 1).array();
+                }
             }
         }
     }
