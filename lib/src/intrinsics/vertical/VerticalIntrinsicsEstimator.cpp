@@ -2,6 +2,8 @@
 #include <algorithm>
 #include <boost/math/distributions/students_t.hpp>
 
+#include "utils/Utils.h"
+
 namespace accurate_ri {
     // TODO extract these constants somewhere
     constexpr uint64_t MAX_ITERATIONS = 10000;
@@ -159,8 +161,8 @@ namespace accurate_ri {
                         double otherLower = (scanlineInfoMap[id].theoreticalAngleBounds.*otherBound).lower;
                         double otherUpper = (scanlineInfoMap[id].theoreticalAngleBounds.*otherBound).upper;
 
-                        minTheoreticalSigns[id] = std::signbit(thisLower - otherLower) ? -1 : 1;
-                        maxTheoreticalSigns[id] = std::signbit(thisUpper - otherUpper) ? -1 : 1;
+                        minTheoreticalSigns[id] = Utils::compare(thisLower, otherLower);
+                        maxTheoreticalSigns[id] = Utils::compare(thisUpper, otherUpper);
                     }
 
                     intersectsTheoreticalMask = intersectsTheoreticalMask && ((maxTheoreticalSigns * minTheoreticalSigns).array() != 1).array();

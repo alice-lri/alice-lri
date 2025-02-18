@@ -43,7 +43,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/hash/HashUtils.h
         src/point/PointArray.h
         src/point/PointArray.cpp
-        src/intrinsics/vertical/VerticalStructs.h)
+        src/intrinsics/vertical/VerticalStructs.h
+        src/utils/Utils.h)
 
 target_include_directories(accurate_ri
         PUBLIC include
