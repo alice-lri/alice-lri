@@ -32,28 +32,47 @@ enum LogLevel {
 #define LOG_LEVEL LOG_LEVEL_INFO
 #endif
 
+// Define logging modes
+#define LOG_MODE_DEFAULT 0
+#define LOG_MODE_TRACE 1
+
+// Default log mode (can be overridden at compile-time)
+#ifndef LOG_MODE
+#define LOG_MODE LOG_MODE_DEFAULT
+#endif
+
 class Logger {
 public:
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
     // Core logging function using variadic template for `<<` support
-    template <typename... Args>
-    static void log(LogLevel level, const char* file, int line, Args&&... args) {
+    template<typename... Args>
+    static void log(LogLevel level, const char *file, int line, Args &&... args) {
         std::ostringstream logStream;
+#if LOG_MODE == LOG_MODE_DEFAULT
         logStream << getTimestamp() << " [" << getLogLevelString(level) << "] ";
-        (logStream << ... << std::forward<Args>(args));  // Fold expression for variadic logging
+        (logStream << ... << std::forward<Args>(args)); // Fold expression for variadic logging
         logStream << " (" << file << ":" << line << ")\n";
-
+#endif
+#if LOG_MODE == LOG_MODE_TRACE
+        (logStream << ... << std::forward<Args>(args));  // Fold expression for variadic logging
+        logStream << "\n";
+        std::ofstream traceFile("trace.txt", getInstance().firstLog? std::ios_base::trunc : std::ios_base::app);
+        traceFile << logStream.str();
+        traceFile.close();
+#endif
         std::lock_guard<std::mutex> lock(getInstance().logMutex);
-            std::cerr << getColor(level) << logStream.str() << COLOR_RESET;
-        }
+        std::cerr << logStream.str();
+        getInstance().firstLog = false;
+    }
 #endif
 
 private:
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
     std::mutex logMutex;
 #endif
+    bool firstLog = true;
 
-    static Logger& getInstance() {
+    static Logger &getInstance() {
         static Logger instance;
         return instance;
     }
@@ -71,18 +90,18 @@ private:
     static std::string getLogLevelString(LogLevel level) {
         switch (level) {
             case Debug: return "DEBUG";
-            case Info:  return "INFO";
-            case Warn:  return "WARN";
+            case Info: return "INFO";
+            case Warn: return "WARN";
             case Error: return "ERROR";
             default: return "UNKNOWN";
         }
     }
 
-    static const char* getColor(LogLevel level) {
+    static const char *getColor(LogLevel level) {
         switch (level) {
             case Debug: return COLOR_DEBUG;
-            case Info:  return COLOR_INFO;
-            case Warn:  return COLOR_WARN;
+            case Info: return COLOR_INFO;
+            case Warn: return COLOR_WARN;
             case Error: return COLOR_ERROR;
             default: return COLOR_RESET;
         }
@@ -92,25 +111,25 @@ private:
 
 // **Compile-Time Optimized Logging Macros (Now with `<<` support!)**
 #if LOG_LEVEL <= LOG_LEVEL_DEBUG
-    #define LOG_DEBUG(...) Logger::log(Debug, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_DEBUG(...) Logger::log(Debug, __FILE__, __LINE__, __VA_ARGS__)
 #else
     #define LOG_DEBUG(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
-    #define LOG_INFO(...) Logger::log(Info, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_INFO(...) Logger::log(Info, __FILE__, __LINE__, __VA_ARGS__)
 #else
     #define LOG_INFO(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_WARN
-    #define LOG_WARN(...) Logger::log(Warn, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_WARN(...) Logger::log(Warn, __FILE__, __LINE__, __VA_ARGS__)
 #else
     #define LOG_WARN(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
-    #define LOG_ERROR(...) Logger::log(Error, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_ERROR(...) Logger::log(Error, __FILE__, __LINE__, __VA_ARGS__)
 #else
     #define LOG_ERROR(...) do {} while (0)
 #endif

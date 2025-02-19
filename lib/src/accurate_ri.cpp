@@ -7,6 +7,8 @@
 namespace accurate_ri {
     void hello() {
         IntrinsicsEstimator estimator = IntrinsicsEstimator();
+        LOG_INFO("Hello");
+        LOG_DEBUG("Hello2");
     }
 
     void execute(const std::vector<float> &x, const std::vector<float> &y, const std::vector<float> &z) {

@@ -1,25 +1,36 @@
 # TODO define release mode where we disable eigen debug and optimize the code for the native platform and so on
 
 option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
+option(LOG_MODE "Set log mode (DEFAULT, TRACE)" "CONSOLE")
 
 # Convert human-readable log level to numeric values
-if(LOG_LEVEL STREQUAL "DEBUG")
+if (LOG_LEVEL STREQUAL "DEBUG")
     add_definitions(-DLOG_LEVEL=1)
-elseif(LOG_LEVEL STREQUAL "INFO")
+elseif (LOG_LEVEL STREQUAL "INFO")
     add_definitions(-DLOG_LEVEL=2)
-elseif(LOG_LEVEL STREQUAL "WARN")
+elseif (LOG_LEVEL STREQUAL "WARN")
     add_definitions(-DLOG_LEVEL=3)
-elseif(LOG_LEVEL STREQUAL "ERROR")
+elseif (LOG_LEVEL STREQUAL "ERROR")
     add_definitions(-DLOG_LEVEL=4)
-elseif(LOG_LEVEL STREQUAL "NONE") # Completely remove all logs
+elseif (LOG_LEVEL STREQUAL "NONE") # Completely remove all logs
     add_definitions(-DLOG_LEVEL=5)
-else()
+else ()
     message(FATAL_ERROR "Invalid LOG_LEVEL: Choose DEBUG, INFO, WARN, ERROR, or NONE")
-endif()
+endif ()
 
-if(ENABLE_PROFILING)
+if (NOT LOG_LEVEL STREQUAL "NONE")
+    if (LOG_MODE STREQUAL "DEFAULT")
+        add_definitions(-DLOG_MODE=0)
+    elseif (LOG_MODE STREQUAL "TRACE")
+        add_definitions(-DLOG_MODE=1)
+    else ()
+        message(FATAL_ERROR "Invalid LOG_MODE: Choose DEFAULT or TRACE")
+    endif ()
+endif ()
+
+if (ENABLE_PROFILING)
     add_definitions(-DENABLE_PROFILING)
-endif()
+endif ()
 
 find_package(Eigen3 REQUIRED)
 include_directories(EIGEN3_INCLUDE_DIR)
