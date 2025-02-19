@@ -23,7 +23,7 @@ namespace accurate_ri {
     };
 
     // TODO probably make dedicated structs for all the tuples
-    void VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
+    VerticalIntrinsicsResult VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
         initHough(points);
         hough->computeAccumulator(points);
 
@@ -67,6 +67,8 @@ namespace accurate_ri {
             bool fitSuccess = false;
             double uncertainty;
             OffsetAngleMargin confidenceIntervals = {};
+            std::vector<uint32_t> dependencies;
+            // TODO this is only used in heuristics an added to the end, we should probably construct the scanline info through the process
 
             if (scanlineLimits.indices.size() > 2) {
                 const ScanlineFitResult scanlineFit = tryFitScanline(
@@ -99,6 +101,7 @@ namespace accurate_ri {
                 maxValues.angle = (phis - (maxValues.offset * invRanges).asin()).mean();
 
                 confidenceIntervals.offset = heuristic.offsetCi;
+                dependencies = heuristic.dependencies;
 
                 RealMargin angleMarginTmp = {
                     (phis - (confidenceIntervals.offset.lower * invRanges).asin()).mean(),
@@ -209,7 +212,7 @@ namespace accurate_ri {
                 Eigen::ArrayXi actuallyConflictingScanlines;
 
                 if (uncertainty < conflictingScanlinesUncertainties.minCoeff() || (
-                        conflictingScanlinesUncertainties == std::numeric_limits<double>::infinity()).all) {
+                        conflictingScanlinesUncertainties == std::numeric_limits<double>::infinity()).all()) {
                     if (uncertainty != std::numeric_limits<double>::infinity()) {
                         rejectingCurrent = false; // TODO probably here we can return given the right scope
                     } else {
@@ -234,11 +237,10 @@ namespace accurate_ri {
                             const uint32_t scanlineId = scanlinesToRemoveQueue.front();
                             scanlinesToRemoveQueue.pop();
 
-                            const auto dependentScanlines = reverseScanlinesDependencyMap.equal_range(scanlineId);
-
-                            for (uint32_t dependent: dependentScanlines) {
-                                if (scanlinesToRemoveSet.insert(dependent).second) {
-                                    scanlinesToRemoveQueue.push(dependent);
+                            auto dependencyRange = reverseScanlinesDependencyMap.equal_range(scanlineId);
+                            for (auto it = dependencyRange.first; it != dependencyRange.second; ++it) {
+                                if (scanlinesToRemoveSet.insert(it->second).second) {
+                                    scanlinesToRemoveQueue.push(it->second);
                                 }
                             }
                         }
@@ -293,7 +295,9 @@ namespace accurate_ri {
                     rejectingCurrent = intersectsOtherScanline;
                     lastScanlineAssignment = true;
                 } else {
-                    actuallyConflictingScanlines = conflictingScanlines(uncertainty < conflictingScanlinesUncertainties); // TODO suspicious
+                    actuallyConflictingScanlines = conflictingScanlines(
+                        uncertainty < conflictingScanlinesUncertainties
+                    ); // TODO suspicious
                 }
 
                 if (rejectingCurrent) {
@@ -313,8 +317,85 @@ namespace accurate_ri {
             }
 
             // We are now outside conflict resolution (seriously, I need to refactor this)
+            // TODO here there was the if uncertainty < -500, check if it is still needed
 
+            hough->eraseByHash(houghMax.hash);
+            pointsScanlinesIds(scanlineLimits.mask) = currentScanlineId;
+            unassignedPoints -= scanlineLimits.indices.size();
+
+            for (const auto &dependency: dependencies) {
+                reverseScanlinesDependencyMap.emplace(dependency, currentScanlineId);
+            }
+
+            scanlineInfoMap.emplace(
+                currentScanlineId, ScanlineInfo{
+                    .scanlineId = currentScanlineId,
+                    .pointsCount = static_cast<uint64_t>(scanlineLimits.indices.size()),
+                    .values = maxValues,
+                    .ci = confidenceIntervals,
+                    .theoreticalAngleBounds = angleBounds,
+                    .dependencies = std::move(dependencies),
+                    .uncertainty = uncertainty,
+                    .houghVotes = houghMax.votes,
+                    .houghHash = houghMax.hash
+                }
+            );
+
+            if (unassignedPoints != (pointsScanlinesIds == -1).count()) {
+                // TODO debug error
+            }
+
+            currentScanlineId++;
         }
+
+        // TODO last resort assignment is disabled, maybe implement?
+        if (unassignedPoints > 0) {
+            // TODO print debug warning
+        }
+
+        std::vector<ScanlineInfo> sortedScanlines;
+        for (ScanlineInfo &scanlineInfo: scanlineInfoMap | std::views::values) {
+            sortedScanlines.emplace_back(std::move(scanlineInfo));
+        }
+        scanlineInfoMap.clear();
+
+        std::ranges::sort(
+            sortedScanlines, [](const ScanlineInfo &a, const ScanlineInfo &b) {
+                return a.values.angle < b.values.angle;
+            }
+        );
+
+
+        std::unordered_map<uint32_t, uint32_t> oldIdsToNewIdsMap;
+        for (uint32_t i = 0; i < sortedScanlines.size(); ++i) {
+            oldIdsToNewIdsMap.emplace(sortedScanlines[i].scanlineId, i);
+        }
+
+        for (auto &scanlineInfo: sortedScanlines) {
+            std::ranges::transform(
+                scanlineInfo.dependencies, scanlineInfo.dependencies.begin(), [&oldIdsToNewIdsMap](const uint32_t id) {
+                    return oldIdsToNewIdsMap[id];
+                }
+            );
+        }
+
+        std::ranges::transform(
+            pointsScanlinesIds, pointsScanlinesIds.begin(), [&oldIdsToNewIdsMap](const int32_t id) {
+                return (id >= 0)? oldIdsToNewIdsMap[id] : -1;
+            }
+        );
+
+        VerticalIntrinsicsResult result = {
+            .iterations = static_cast<uint32_t>(iteration),
+            .scanlinesCount = static_cast<uint32_t>(sortedScanlines.size()),
+            .unassignedPoints = static_cast<uint32_t>(unassignedPoints),
+            .pointsCount = static_cast<uint32_t>(points.size()),
+            .endReason = EndReason::ALL_ASSIGNED,
+            .scanlines = std::move(sortedScanlines),
+            .pointsScanlinesIds = std::move(pointsScanlinesIds)
+        };
+
+        return result;
     }
 
     void VerticalIntrinsicsEstimator::initHough(const PointArray &points) {

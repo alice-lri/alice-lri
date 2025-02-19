@@ -14,7 +14,7 @@ namespace accurate_ri {
         std::unordered_map<uint32_t, ScanlineInfo> scanlineInfoMap;
 
     public:
-        void estimate(const PointArray &points);
+        VerticalIntrinsicsResult estimate(const PointArray &points);
 
     private:
         void initHough(const PointArray &points);

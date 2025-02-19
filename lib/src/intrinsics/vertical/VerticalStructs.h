@@ -70,10 +70,12 @@ namespace accurate_ri {
     };
 
     struct ScanlineInfo {
+        uint32_t scanlineId;
         uint64_t pointsCount;
         OffsetAngle values;
         OffsetAngleMargin ci;
         ScanlineAngleBounds theoreticalAngleBounds;
+        std::vector<uint32_t> dependencies;
         double uncertainty;
         double houghVotes;
         uint64_t houghHash;
@@ -82,5 +84,19 @@ namespace accurate_ri {
     struct HashToConflictValue {
         std::unordered_set<uint32_t> conflictingScanlines;
         double votes;
+    };
+
+    enum class EndReason {
+        ALL_ASSIGNED
+    };
+
+    struct VerticalIntrinsicsResult {
+        uint32_t iterations;
+        uint32_t scanlinesCount;
+        uint32_t unassignedPoints;
+        uint32_t pointsCount;
+        EndReason endReason;
+        std::vector<ScanlineInfo> scanlines;
+        Eigen::ArrayXi pointsScanlinesIds;
     };
 }
