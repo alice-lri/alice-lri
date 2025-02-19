@@ -8,9 +8,9 @@
 namespace accurate_ri {
 
     double PointUtils::computeCoordsEps(const PointArray &points) {
-        Eigen::VectorXd sortedX = points.getX();
-        Eigen::VectorXd sortedY = points.getY();
-        Eigen::VectorXd sortedZ = points.getZ();
+        Eigen::ArrayXd sortedX = points.getX();
+        Eigen::ArrayXd sortedY = points.getY();
+        Eigen::ArrayXd sortedZ = points.getZ();
 
         std::ranges::sort(sortedX);
         std::ranges::sort(sortedY);

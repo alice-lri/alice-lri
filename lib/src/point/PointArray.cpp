@@ -5,7 +5,7 @@ namespace accurate_ri {
     void PointArray::computeExtraInfo() {
         extraInfo.coordsEps = PointUtils::computeCoordsEps(*this);
 
-        auto rangeXySquared = x.array().square() + y.array().square();
+        const Eigen::ArrayXd& rangeXySquared = x.array().square() + y.array().square();
 
         extraInfo.rangeXy = rangeXySquared.sqrt();
         extraInfo.range = (rangeXySquared + z.array().square()).sqrt();

@@ -1,8 +1,7 @@
-#ifndef ACCURATERI_LIBRARY_H
-#define ACCURATERI_LIBRARY_H
+#pragma once
+#include <vector>
 
 namespace accurate_ri {
     void hello();
+    void execute(const std::vector<float> &x, const std::vector<float> &y, const std::vector<float> &z);
 }
-
-#endif //ACCURATERI_LIBRARY_H
