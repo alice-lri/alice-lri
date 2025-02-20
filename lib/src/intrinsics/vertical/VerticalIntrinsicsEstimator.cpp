@@ -61,8 +61,8 @@ namespace accurate_ri {
             const HoughCell houghMax = *houghMaxOpt;
             OffsetAngle maxValues = houghMax.maxValues;
 
-            LOG_INFO("ITERATION ", iteration);
-            LOG_INFO(
+            LOG_DEBUG("ITERATION ", iteration);
+            LOG_DEBUG(
                 "Offset: ", maxValues.offset, ", Angle: ", maxValues.angle, ", Votes: ", houghMax.votes,
                 ", Hash: ", houghMax.hash, ", Hough indices: [", houghMax.maxOffsetIndex, ", ", houghMax.maxAngleIndex,
                 "]"
@@ -78,7 +78,7 @@ namespace accurate_ri {
                 points, errorBounds.final, maxValues, margin, 0
             );
 
-            LOG_INFO(
+            LOG_DEBUG(
                 "Minimum limit width (Hough): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff()
             );
 
@@ -134,7 +134,7 @@ namespace accurate_ri {
                     std::max(angleMarginTmp.lower, angleMarginTmp.upper)
                 };
 
-                LOG_INFO(
+                LOG_DEBUG(
                     "Offset confidence interval: ", confidenceIntervals.offset, ", Angle confidence interval: ",
                     confidenceIntervals.angle, ", Offset: ", maxValues.offset, ", Angle: ", maxValues.angle
                 );
@@ -156,12 +156,12 @@ namespace accurate_ri {
                     points, errorBounds.final, maxValues, heuristicMargin, invRangesMean
                 );
 
-                LOG_INFO("Offset: ", maxValues.offset, ", Angle: ", maxValues.angle);
+                LOG_DEBUG("Offset: ", maxValues.offset, ", Angle: ", maxValues.angle);
             }
 
             if (!fitSuccess || scanlineLimits.indices.size() == 0) {
-                LOG_INFO("Fit failed: ", !fitSuccess, ", Points in scanline: ", scanlineLimits.indices.size());
-                LOG_INFO("");
+                LOG_DEBUG("Fit failed: ", !fitSuccess, ", Points in scanline: ", scanlineLimits.indices.size());
+                LOG_DEBUG("");
 
                 hough->eraseByHash(houghMax.hash);
                 continue;
@@ -217,7 +217,7 @@ namespace accurate_ri {
                 std::unordered_set<uint32_t> conflictingScanlinesSet;
 
                 LOG_WARN("Possible problem detected");
-                LOG_INFO(
+                LOG_DEBUG(
                     "Intersects other scanline: ", intersectsOtherScanline,
                     ", Intersects theoretically: ", intersectsTheoreticalCount,
                     ", Fit success: ", fitSuccess,
@@ -250,7 +250,7 @@ namespace accurate_ri {
 
                 Eigen::ArrayXi actuallyConflictingScanlines;
 
-                LOG_INFO(
+                LOG_DEBUG(
                     "Intersects with scanlines: ", conflictingScanlines,
                     ", Current scanline uncertainty: ", uncertainty,
                     ", Conflicting scanlines uncertainties: ", conflictingScanlinesUncertainties
@@ -259,12 +259,12 @@ namespace accurate_ri {
                 if (uncertainty < conflictingScanlinesUncertainties.minCoeff() || (
                         conflictingScanlinesUncertainties == std::numeric_limits<double>::infinity()).all()) {
                     if (uncertainty != std::numeric_limits<double>::infinity()) {
-                        LOG_INFO(
+                        LOG_DEBUG(
                             "New uncertainty is lower than conflicting scanlines uncertainties. Rejecting conflicting scanlines"
                         );
                         rejectingCurrent = false; // TODO probably here we can return given the right scope
                     } else {
-                        LOG_INFO(
+                        LOG_DEBUG(
                             "New uncertainty is infinite, but so are the conflicting scanlines uncertainties. Intersects other empirical: ",
                             intersectsOtherScanline
                         );
@@ -297,7 +297,7 @@ namespace accurate_ri {
                             }
                         }
 
-                        LOG_INFO("Removing scanlines: ", scanlinesToRemoveSet);
+                        LOG_DEBUG("Removing scanlines: ", scanlinesToRemoveSet);
 
                         for (const uint32_t scanlineId: scanlinesToRemoveSet) {
                             const ScanlineInfo &scanline = scanlineInfoMap[scanlineId];
@@ -328,7 +328,7 @@ namespace accurate_ri {
                                 conflicts.conflictingScanlines.erase(scanlineId);
 
                                 if (conflicts.conflictingScanlines.empty()) {
-                                    LOG_INFO("Restored hash: ", hash);
+                                    LOG_DEBUG("Restored hash: ", hash);
 
                                     hough->restoreVotes(hash, conflicts.votes);
                                     it = hashesToConflictsMap.erase(it);
@@ -345,7 +345,7 @@ namespace accurate_ri {
                                 }
                             );
 
-                            LOG_INFO("Added hash ", conflictingHash, " to the map");
+                            LOG_DEBUG("Added hash ", conflictingHash, " to the map");
                         }
                     }
                 } else if (scanlineLimits.indices.size() == unassignedPoints) {
@@ -358,7 +358,7 @@ namespace accurate_ri {
                     lastScanlineAssignment = true;
                 } else {
                     // TODO make this code cleaner, I think this is just rejectingCurrent
-                    LOG_INFO(
+                    LOG_DEBUG(
                         "New uncertainty is higher than conflicting scanlines uncertainties. Rejecting current scanline"
                     );
                     actuallyConflictingScanlines = conflictingScanlines(
@@ -367,8 +367,8 @@ namespace accurate_ri {
                 }
 
                 if (rejectingCurrent) {
-                    LOG_INFO("Scanline rejected");
-                    LOG_INFO("");
+                    LOG_DEBUG("Scanline rejected");
+                    LOG_DEBUG("");
 
                     hough->eraseByHash(houghMax.hash);
 
@@ -418,7 +418,7 @@ namespace accurate_ri {
             }
 
             LOG_INFO("Scanline ", currentScanlineId, " assigned with ", scanlineLimits.indices.size(), " points");
-            LOG_INFO(
+            LOG_DEBUG(
                 "Scanline parameters: Offset: ", maxValues.offset, ", Angle: ", maxValues.angle, ", Votes: ",
                 houghMax.votes,
                 ", Count: ", scanlineLimits.indices.size(),
@@ -428,8 +428,8 @@ namespace accurate_ri {
                 angleBounds.top.upper,
                 ", Uncertainty: ", uncertainty
             );
-            LOG_INFO("Number of unassigned points: ", unassignedPoints);
-            LOG_INFO("");
+            LOG_DEBUG("Number of unassigned points: ", unassignedPoints);
+            LOG_DEBUG("");
 
             currentScanlineId++;
         }
@@ -471,8 +471,8 @@ namespace accurate_ri {
             }
         );
 
-        LOG_INFO("Number of scanlines: ", sortedScanlines.size());
-        LOG_INFO("Number of unassigned points: ", unassignedPoints);
+        LOG_DEBUG("Number of scanlines: ", sortedScanlines.size());
+        LOG_DEBUG("Number of unassigned points: ", unassignedPoints);
 
         VerticalIntrinsicsResult result = {
             .iterations = static_cast<uint32_t>(iteration),
@@ -575,7 +575,6 @@ namespace accurate_ri {
 
         scanlineIndices.conservativeResize(count);
 
-
         return {scanlineIndices, mask, scanlineLowerLimit, scanlineUpperLimit};
     }
 
@@ -607,23 +606,33 @@ namespace accurate_ri {
                 newPointsToFitMask = *pointsToFitMask && (ranges >= 2);
                 pointsToFitMask = &newPointsToFitMask;
 
-                if (pointsToFitMask->size() <= 2) {
+                if (pointsToFitMask->count() <= 2) {
                     pointsToFitMask = &currentScanlineLimits.mask;
                 }
             }
 
+            std::vector<int32_t> pointsToFitIndicesVector;
+            for (int32_t i = 0; i < pointsToFitMask->size(); ++i) {
+                if ((*pointsToFitMask)[i]) {
+                    pointsToFitIndicesVector.emplace_back(i);
+                }
+            }
+
+            const Eigen::ArrayXi &pointsToFitIndices = Eigen::ArrayXi::Map(
+                pointsToFitIndicesVector.data(), pointsToFitIndicesVector.size()
+            );
             const Eigen::ArrayXd &invRanges = points.getInvRanges();
             const Eigen::ArrayXd &phis = points.getPhis();
 
             // TODO, careful, maybe this does not work. But: https://eigen.tuxfamily.org/dox/group__TutorialSlicingIndexing.html#title5
             // TODO check if we can avoid these copies by lazy evaluating inside the performFit function
-            Eigen::ArrayXd invRangesFiltered = invRanges(*pointsToFitMask);
-            Eigen::ArrayXd phisFiltered = phis(*pointsToFitMask);
-            Eigen::ArrayXd boundsFiltered = currentErrorBounds.final(*pointsToFitMask);
+            const Eigen::ArrayXd &invRangesFiltered = invRanges(pointsToFitIndices);
+            const Eigen::ArrayXd &phisFiltered = phis(pointsToFitIndices);
+            const Eigen::ArrayXd &boundsFiltered = currentErrorBounds.final(pointsToFitIndices);
 
-            fitResult = performLinearFit(invRanges, phis, boundsFiltered);
+            fitResult = performLinearFit(invRangesFiltered, phisFiltered, boundsFiltered);
             double offsetCiWidth = fitResult->ci.offset.upper - fitResult->ci.offset.lower;
-            int32_t pointFitCount = pointsToFitMask->count();
+            int32_t pointFitCount = pointsToFitIndices.size();
 
             LOG_DEBUG(
                 "Model fit iteration; Offset: ", fitResult->values.offset, ", Angle: ", fitResult->values.angle,
@@ -652,7 +661,7 @@ namespace accurate_ri {
             upperAngleMargin = std::max(upperAngleMargin, 1e-6);
             lowerAngleMargin = std::max(lowerAngleMargin, 1e-6);
 
-            OffsetAngleMargin margin = {
+            const OffsetAngleMargin &margin = {
                 {lowerOffsetMargin, upperOffsetMargin},
                 {lowerAngleMargin, upperAngleMargin}
             };
@@ -660,11 +669,11 @@ namespace accurate_ri {
 
             LOG_DEBUG(
                 "Offset increased: ", upperOffsetMargin, ", Offset decreased: ", lowerOffsetMargin,
-                "Angle increased: ", upperAngleMargin, ", Angle decreased: ", lowerAngleMargin,
-                "Mean inv ranges: ", meanInvRanges
+                " Angle increased: ", upperAngleMargin, ", Angle decreased: ", lowerAngleMargin,
+                " Mean inv ranges: ", meanInvRanges
             );
 
-            ScanlineLimits newLimits = computeScanlineLimits(
+            const ScanlineLimits &newLimits = computeScanlineLimits(
                 points, currentErrorBounds.final, fitResult->values, margin, meanInvRanges
             );
 
@@ -672,8 +681,7 @@ namespace accurate_ri {
                 "Minimum limit width (fit): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff()
             );
 
-            // TODO perhaps this does not work as the sizes might be different, if so, use boolean masks instead
-            if ((newLimits.indices == currentScanlineLimits.indices).all()) {
+            if ((newLimits.mask == currentScanlineLimits.mask).all()) {
                 if (state == FitConvergenceState::CONVERGED) {
                     state = FitConvergenceState::CONFIRMED;
                     break;
@@ -701,8 +709,8 @@ namespace accurate_ri {
 
         // Weighted least squares, variables use matrix notation from the standard formula, invRanges is X, phis is y
         Eigen::MatrixXd X = Eigen::MatrixXd(phis.size(), 2);
-        X.col(0) = Eigen::VectorXd::Ones(phis.size());
-        X.col(1) = invRanges;
+        X.col(1) = Eigen::VectorXd::Ones(phis.size());
+        X.col(0) = invRanges;
 
         Eigen::MatrixXd W = weights.matrix().asDiagonal();
         Eigen::MatrixXd XtW = X.transpose() * W;

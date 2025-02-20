@@ -6,7 +6,6 @@
 #define MIN_COORDS_EPS (1e-6 / 2)
 
 namespace accurate_ri {
-
     double PointUtils::computeCoordsEps(const PointArray &points) {
         Eigen::ArrayXd sortedX = points.getX();
         Eigen::ArrayXd sortedY = points.getY();
@@ -19,11 +18,16 @@ namespace accurate_ri {
         double minDiff = std::numeric_limits<double>::max();
 
         for (size_t i = 1; i < sortedX.size(); i++) {
-            minDiff = std::min(minDiff, sortedX[i] - sortedX[i - 1]);
-            minDiff = std::min(minDiff, sortedY[i] - sortedY[i - 1]);
-            minDiff = std::min(minDiff, sortedZ[i] - sortedZ[i - 1]);
+            const double diffX = sortedX[i] - sortedX[i - 1];
+            minDiff = diffX > 0 ? std::min(minDiff, diffX) : minDiff;
+
+            const double diffY = sortedY[i] - sortedY[i - 1];
+            minDiff = diffY > 0 ? std::min(minDiff, diffY) : minDiff;
+
+            const double diffZ = sortedZ[i] - sortedZ[i - 1];
+            minDiff = diffZ > 0 ? std::min(minDiff, diffZ) : minDiff;
         }
 
-        return std::max(minDiff, MIN_COORDS_EPS);
+        return std::max(minDiff / 2, MIN_COORDS_EPS);
     }
 } // accurate_ri

@@ -24,9 +24,188 @@ Noise radius use square: False
 Fit type: linear
 Offset min: -0.499, Offset max: 0.499, Offset res: 0.001
 Angle min: -1.5707, Angle max: 1.5707, Angle res: 0.0001
-Coords eps: 5e-07
+Coords eps: 0.000499725
 
 ==| Execution |==
 ITERATION 0
 Offset: 0.206, Angle: -0.00789633, Votes: 78671.4, Hash: 6317574525297179341, Hough indices: [705, 15628]
-Minimum limit width (Hough): 0.000225018
+Minimum limit width (Hough): 0.000237579
+Model fit iteration; Offset: 0.205987, Angle: -0.00788541 using 1867 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0276827
+Minimum limit width (fit): 0.000237579
+Model fit iteration; Offset: 0.205987, Angle: -0.00788541 using 1867 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0276827
+Minimum limit width (fit): 0.000237579
+ERROR: Unassigned points count mismatch, expected 120962, found 122827
+Scanline 0 assigned with 1867 points
+Scanline parameters: Offset: 0.205987, Angle: -0.00788541, Votes: 78671.4, Count: 1867, Lower min theoretical angle: -0.00531136, Lower max theoretical angle: 0.131861, Upper min theoretical angle: -0.00530878, Upper max theoretical angle: 0.131914, Uncertainty: 3149.66
+Number of unassigned points: 120962
+
+ITERATION 1
+Offset: 0.208, Angle: 0.0152037, Votes: 78508.9, Hash: 1115660143367112427, Hough indices: [707, 15859]
+Minimum limit width (Hough): 0.00023758
+Model fit iteration; Offset: 0.207698, Angle: 0.0152111 using 1714 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0270045
+Minimum limit width (fit): 0.00023758
+Model fit iteration; Offset: 0.207698, Angle: 0.0152111 using 1714 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0270045
+Minimum limit width (fit): 0.00023758
+ERROR: Unassigned points count mismatch, expected 119248, found 122827
+Scanline 1 assigned with 1714 points
+Scanline parameters: Offset: 0.207698, Angle: 0.0152111, Votes: 78508.9, Count: 1714, Lower min theoretical angle: 0.0178066, Lower max theoretical angle: 0.156126, Upper min theoretical angle: 0.017809, Upper max theoretical angle: 0.156178, Uncertainty: 2795.26
+Number of unassigned points: 119248
+
+ITERATION 2
+Offset: 0.207, Angle: -0.00789633, Votes: 77015, Hash: 1882525989041464486, Hough indices: [706, 15628]
+Minimum limit width (Hough): 0.000237579
+Model fit iteration; Offset: 0.205987, Angle: -0.00788541 using 1867 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0276827
+Minimum limit width (fit): 0.000237579
+Model fit iteration; Offset: 0.205987, Angle: -0.00788541 using 1867 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0276827
+Minimum limit width (fit): 0.000237579
+ERROR: Unassigned points count mismatch, expected 117381, found 122827
+Scanline 2 assigned with 1867 points
+Scanline parameters: Offset: 0.205987, Angle: -0.00788541, Votes: 77015, Count: 1867, Lower min theoretical angle: -0.00531136, Lower max theoretical angle: 0.131861, Upper min theoretical angle: -0.00530878, Upper max theoretical angle: 0.131914, Uncertainty: 3149.66
+Number of unassigned points: 117381
+
+ITERATION 3
+Offset: 0.205, Angle: -0.0139963, Votes: 76239.8, Hash: 3556379890547940739, Hough indices: [704, 15567]
+Minimum limit width (Hough): 0.000237579
+Model fit iteration; Offset: 0.205573, Angle: -0.0140178 using 1862 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0278871
+Minimum limit width (fit): 0.000237579
+Model fit iteration; Offset: 0.205573, Angle: -0.0140178 using 1862 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0278871
+Minimum limit width (fit): 0.000237579
+ERROR: Unassigned points count mismatch, expected 115519, found 122827
+Scanline 3 assigned with 1862 points
+Scanline parameters: Offset: 0.205573, Angle: -0.0140178, Votes: 76239.8, Count: 1862, Lower min theoretical angle: -0.011449, Lower max theoretical angle: 0.125444, Upper min theoretical angle: -0.0114462, Upper max theoretical angle: 0.125499, Uncertainty: 3095.09
+Number of unassigned points: 115519
+
+ITERATION 4
+Offset: 0.207, Angle: 0.0152037, Votes: 76095.1, Hash: 18368770959287291356, Hough indices: [706, 15859]
+Minimum limit width (Hough): 0.000237579
+Model fit iteration; Offset: 0.207698, Angle: 0.0152111 using 1714 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0270045
+Minimum limit width (fit): 0.000237579
+Model fit iteration; Offset: 0.207698, Angle: 0.0152111 using 1714 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0270045
+Minimum limit width (fit): 0.000237579
+ERROR: Unassigned points count mismatch, expected 113805, found 122827
+Scanline 4 assigned with 1714 points
+Scanline parameters: Offset: 0.207698, Angle: 0.0152111, Votes: 76095.1, Count: 1714, Lower min theoretical angle: 0.0178066, Lower max theoretical angle: 0.156126, Upper min theoretical angle: 0.017809, Upper max theoretical angle: 0.156178, Uncertainty: 2795.26
+Number of unassigned points: 113805
+
+ITERATION 5
+Offset: 0.204, Angle: -0.0319963, Votes: 75692.1, Hash: 9048361783625030340, Hough indices: [703, 15387]
+Minimum limit width (Hough): 0.000237579
+Model fit iteration; Offset: 0.204261, Angle: -0.031996 using 1985 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0294214
+Minimum limit width (fit): 0.000237579
+Model fit iteration; Offset: 0.204261, Angle: -0.031996 using 1985 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0294214
+Minimum limit width (fit): 0.000237579
+ERROR: Unassigned points count mismatch, expected 111820, found 122827
+Scanline 5 assigned with 1985 points
+Scanline parameters: Offset: 0.204261, Angle: -0.031996, Votes: 75692.1, Count: 1985, Lower min theoretical angle: -0.0294437, Lower max theoretical angle: 0.106571, Upper min theoretical angle: -0.0294409, Upper max theoretical angle: 0.106624, Uncertainty: 3261.07
+Number of unassigned points: 111820
+
+ITERATION 6
+Offset: 0.206, Angle: -0.0209963, Votes: 75621.7, Hash: 18428621335500295100, Hough indices: [705, 15497]
+Minimum limit width (Hough): 0.000237579
+Model fit iteration; Offset: 0.205068, Angle: -0.0209658 using 1897 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0282215
+Minimum limit width (fit): 0.000237579
+Model fit iteration; Offset: 0.205068, Angle: -0.0209658 using 1897 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0282215
+Minimum limit width (fit): 0.000237579
+ERROR: Unassigned points count mismatch, expected 109923, found 122827
+Scanline 6 assigned with 1897 points
+Scanline parameters: Offset: 0.205068, Angle: -0.0209658, Votes: 75621.7, Count: 1897, Lower min theoretical angle: -0.0184034, Lower max theoretical angle: 0.118151, Upper min theoretical angle: -0.0184004, Upper max theoretical angle: 0.118208, Uncertainty: 3260.17
+Number of unassigned points: 109923
+
+ITERATION 7
+Offset: 0.206, Angle: 0.00320367, Votes: 75316.4, Hash: 18108754047021881953, Hough indices: [705, 15739]
+Minimum limit width (Hough): 0.000237579
+Model fit iteration; Offset: 0.206794, Angle: 0.00315261 using 1787 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0282883
+Minimum limit width (fit): 0.000237579
+Model fit iteration; Offset: 0.206794, Angle: 0.00315261 using 1787 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0282883
+Minimum limit width (fit): 0.000237579
+ERROR: Unassigned points count mismatch, expected 108136, found 122827
+Scanline 7 assigned with 1787 points
+Scanline parameters: Offset: 0.206794, Angle: 0.00315261, Votes: 75316.4, Count: 1787, Lower min theoretical angle: 0.0057368, Lower max theoretical angle: 0.143451, Upper min theoretical angle: 0.00573929, Upper max theoretical angle: 0.143502, Uncertainty: 2997.44
+Number of unassigned points: 108136
+
+ITERATION 8
+Offset: 0.205, Angle: -0.0209963, Votes: 75179.5, Hash: 14148774802482048454, Hough indices: [704, 15497]
+Minimum limit width (Hough): 0.000237579
+Model fit iteration; Offset: 0.205068, Angle: -0.0209658 using 1897 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0282215
+Minimum limit width (fit): 0.000237579
+Model fit iteration; Offset: 0.205068, Angle: -0.0209658 using 1897 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0282215
+Minimum limit width (fit): 0.000237579
+ERROR: Unassigned points count mismatch, expected 106239, found 122827
+Scanline 8 assigned with 1897 points
+Scanline parameters: Offset: 0.205068, Angle: -0.0209658, Votes: 75179.5, Count: 1897, Lower min theoretical angle: -0.0184034, Lower max theoretical angle: 0.118151, Upper min theoretical angle: -0.0184004, Upper max theoretical angle: 0.118208, Uncertainty: 3260.17
+Number of unassigned points: 106239
+
+ITERATION 9
+Offset: 0.205, Angle: -0.0319963, Votes: 75142.2, Hash: 168442650258126919, Hough indices: [704, 15387]
+Minimum limit width (Hough): 0.000237579
+Model fit iteration; Offset: 0.204261, Angle: -0.031996 using 1985 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0294214
+Minimum limit width (fit): 0.000237579
+Model fit iteration; Offset: 0.204261, Angle: -0.031996 using 1985 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0294214
+Minimum limit width (fit): 0.000237579
+ERROR: Unassigned points count mismatch, expected 104254, found 122827
+Scanline 9 assigned with 1985 points
+Scanline parameters: Offset: 0.204261, Angle: -0.031996, Votes: 75142.2, Count: 1985, Lower min theoretical angle: -0.0294437, Lower max theoretical angle: 0.106571, Upper min theoretical angle: -0.0294409, Upper max theoretical angle: 0.106624, Uncertainty: 3261.07
+Number of unassigned points: 104254
+
+ITERATION 10
+Offset: 0.208, Angle: 0.00310367, Votes: 75101.4, Hash: 16378603845219873115, Hough indices: [707, 15738]
+Minimum limit width (Hough): 0.00023758
+Model fit iteration; Offset: 0.206794, Angle: 0.00315261 using 1787 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0282883
+Minimum limit width (fit): 0.00023758
+Model fit iteration; Offset: 0.206794, Angle: 0.00315261 using 1787 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0282883
+Minimum limit width (fit): 0.00023758
+ERROR: Unassigned points count mismatch, expected 102467, found 122827
+Scanline 10 assigned with 1787 points
+Scanline parameters: Offset: 0.206794, Angle: 0.00315261, Votes: 75101.4, Count: 1787, Lower min theoretical angle: 0.0057368, Lower max theoretical angle: 0.143451, Upper min theoretical angle: 0.00573929, Upper max theoretical angle: 0.143502, Uncertainty: 2997.44
+Number of unassigned points: 102467
+
+ITERATION 11
+Offset: 0.203, Angle: -0.0208963, Votes: 74949.7, Hash: 17170417244209915829, Hough indices: [702, 15498]
+Minimum limit width (Hough): 0.000237578
+Model fit iteration; Offset: 0.205068, Angle: -0.0209658 using 1897 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0282215
+Minimum limit width (fit): 0.000237578
+Model fit iteration; Offset: 0.205068, Angle: -0.0209658 using 1897 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0282215
+Minimum limit width (fit): 0.000237578
+ERROR: Unassigned points count mismatch, expected 100570, found 122827
+Scanline 11 assigned with 1897 points
+Scanline parameters: Offset: 0.205068, Angle: -0.0209658, Votes: 74949.7, Count: 1897, Lower min theoretical angle: -0.0184034, Lower max theoretical angle: 0.118151, Upper min theoretical angle: -0.0184004, Upper max theoretical angle: 0.118208, Uncertainty: 3260.17
+Number of unassigned points: 100570
+
+ITERATION 12
+Offset: 0.203, Angle: -0.0384963, Votes: 74903.6, Hash: 6772292046179171130, Hough indices: [702, 15322]
+Minimum limit width (Hough): 0.000237578
+Model fit iteration; Offset: 0.203814, Angle: -0.0385298 using 2031 points, Convergence state: 0
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0311245
+Minimum limit width (fit): 0.000237578
+Model fit iteration; Offset: 0.203814, Angle: -0.0385298 using 2031 points, Convergence state: 1
+Offset increased: 0.0005, Offset decreased: 0.0005 Angle increased: 1e-06, Angle decreased: 1e-06 Mean inv ranges: 0.0311245
+Minimum limit width (fit): 0.000237578
+ERROR: Unassigned points count mismatch, expected 98539, found 122827
+Scanline 12 assigned with 2031 points
+Scanline parameters: Offset: 0.203814, Angle: -0.0385298, Votes: 74903.6, Count: 2031, Lower min theoretical angle: -0.035983, Lower max theoretical angle: 0.0997334, Upper min theoretical angle: -0.0359803, Upper max theoretical angle: 0.0997837, Uncertainty: 3301.81
+Number of unassigned points: 98539
+
