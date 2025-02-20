@@ -87,7 +87,9 @@ namespace accurate_ri {
     };
 
     enum class EndReason {
-        ALL_ASSIGNED
+        ALL_ASSIGNED,
+        MAX_ITERATIONS,
+        NO_MORE_PEAKS
     };
 
     struct VerticalIntrinsicsResult {

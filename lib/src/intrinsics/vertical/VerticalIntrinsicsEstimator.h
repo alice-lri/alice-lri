@@ -27,7 +27,7 @@ namespace accurate_ri {
         ) const;
 
         [[nodiscard]] ScanlineFitResult tryFitScanline(
-            const PointArray &points, const OffsetAngle &scanlineAttributes, const VerticalBounds &errorBounds,
+            const PointArray &points, const VerticalBounds &errorBounds,
             const ScanlineLimits &scanlineLimits
         ) const;
 

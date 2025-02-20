@@ -4,6 +4,8 @@
 #include <ranges>
 #include <unordered_set>
 #include <boost/math/distributions/students_t.hpp>
+
+#include "helper/VerticalLogging.h"
 #include "utils/Utils.h"
 
 // TODO make benchmark testing the array bool mask things
@@ -16,10 +18,10 @@ namespace accurate_ri {
     constexpr double ANGLE_STEP = 1e-4;
     constexpr uint64_t MAX_FIT_ATTEMPTS = 10;
 
-    enum FitConvergenceState {
-        INITIAL,
-        CONVERGED,
-        CONFIRMED,
+    enum class FitConvergenceState {
+        INITIAL = 0,
+        CONVERGED = 1,
+        CONFIRMED = 2,
     };
 
     // TODO probably make dedicated structs for all the tuples
@@ -27,12 +29,15 @@ namespace accurate_ri {
         initHough(points);
         hough->computeAccumulator(points);
 
+        VerticalLogging::printHeaderDebugInfo(points, *hough);
+
         Eigen::ArrayXi pointsScanlinesIds = Eigen::ArrayXi::Ones(points.size()) * -1;
         int64_t unassignedPoints = points.size();
         int64_t iteration = -1;
         uint32_t currentScanlineId = 0;
         std::unordered_multimap<uint32_t, uint32_t> reverseScanlinesDependencyMap;
         std::unordered_map<uint64_t, HashToConflictValue> hashesToConflictsMap;
+        EndReason endReason = EndReason::ALL_ASSIGNED;
 
         const double maxRange = points.getRanges().maxCoeff();
         const double minRange = points.getRanges().minCoeff();
@@ -40,17 +45,28 @@ namespace accurate_ri {
         while (unassignedPoints > 0) {
             iteration++;
             if (iteration > MAX_ITERATIONS) {
+                endReason = EndReason::MAX_ITERATIONS;
+                LOG_WARN("Warning: Maximum iterations reached");
                 break;
             }
 
             const std::optional<HoughCell> houghMaxOpt = hough->findMaximum(std::nullopt);
 
             if (!houghMaxOpt) {
+                endReason = EndReason::NO_MORE_PEAKS;
+                LOG_WARN("Warning: No more peaks found");
                 break;
             }
 
             const HoughCell houghMax = *houghMaxOpt;
             OffsetAngle maxValues = houghMax.maxValues;
+
+            LOG_INFO("ITERATION ", iteration);
+            LOG_INFO(
+                "Offset: ", maxValues.offset, ", Angle: ", maxValues.angle, ", Votes: ", houghMax.votes,
+                ", Hash: ", houghMax.hash, ", Hough indices: [", houghMax.maxOffsetIndex, ", ", houghMax.maxAngleIndex,
+                "]"
+            );
 
             const OffsetAngleMargin margin = {
                 {hough->getXStep(), hough->getXStep()},
@@ -62,7 +78,11 @@ namespace accurate_ri {
                 points, errorBounds.final, maxValues, margin, 0
             );
 
-            bool lastScanlineAssignment = false;
+            LOG_INFO(
+                "Minimum limit width (Hough): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff()
+            );
+
+            bool lastScanlineAssignment = false; // TODO why is this not used
             bool requiresHeuristicFitting = true;
             bool fitSuccess = false;
             double uncertainty;
@@ -72,7 +92,7 @@ namespace accurate_ri {
 
             if (scanlineLimits.indices.size() > 2) {
                 const ScanlineFitResult scanlineFit = tryFitScanline(
-                    points, maxValues, errorBounds, scanlineLimits
+                    points, errorBounds, scanlineLimits
                 );
 
                 requiresHeuristicFitting = scanlineFit.ciTooWide;
@@ -381,7 +401,7 @@ namespace accurate_ri {
 
         std::ranges::transform(
             pointsScanlinesIds, pointsScanlinesIds.begin(), [&oldIdsToNewIdsMap](const int32_t id) {
-                return (id >= 0)? oldIdsToNewIdsMap[id] : -1;
+                return (id >= 0) ? oldIdsToNewIdsMap[id] : -1;
             }
         );
 
@@ -390,7 +410,7 @@ namespace accurate_ri {
             .scanlinesCount = static_cast<uint32_t>(sortedScanlines.size()),
             .unassignedPoints = static_cast<uint32_t>(unassignedPoints),
             .pointsCount = static_cast<uint32_t>(points.size()),
-            .endReason = EndReason::ALL_ASSIGNED,
+            .endReason = endReason,
             .scanlines = std::move(sortedScanlines),
             .pointsScanlinesIds = std::move(pointsScanlinesIds)
         };
@@ -491,7 +511,7 @@ namespace accurate_ri {
     }
 
     ScanlineFitResult VerticalIntrinsicsEstimator::tryFitScanline(
-        const PointArray &points, const OffsetAngle &scanlineAttributes, const VerticalBounds &errorBounds,
+        const PointArray &points, const VerticalBounds &errorBounds,
         const ScanlineLimits &scanlineLimits
     ) const {
         const Eigen::ArrayXd &ranges = points.getRanges().array();
@@ -500,7 +520,7 @@ namespace accurate_ri {
 
         std::optional<LinearFitResult> fitResult = std::nullopt;
         std::optional<ScanlineLimits> limits = std::nullopt;
-        FitConvergenceState state = INITIAL;
+        FitConvergenceState state = FitConvergenceState::INITIAL;
         bool ciTooWide = false;
 
         for (uint64_t attempt = 0; attempt < MAX_FIT_ATTEMPTS; ++attempt) {
@@ -510,10 +530,11 @@ namespace accurate_ri {
                 break;
             }
 
+            // TODO maybe avoid using pointers here through move semantics
             Eigen::ArrayX<bool> const *pointsToFitMask = &currentScanlineLimits.mask;
             Eigen::ArrayX<bool> newPointsToFitMask;
 
-            if (state == INITIAL) {
+            if (state == FitConvergenceState::INITIAL) {
                 newPointsToFitMask = *pointsToFitMask && (ranges >= 2);
                 pointsToFitMask = &newPointsToFitMask;
 
@@ -533,9 +554,16 @@ namespace accurate_ri {
 
             fitResult = performLinearFit(invRanges, phis, boundsFiltered);
             double offsetCiWidth = fitResult->ci.offset.upper - fitResult->ci.offset.lower;
+            int32_t pointFitCount = pointsToFitMask->count();
+
+            LOG_DEBUG(
+                "Model fit iteration; Offset: ", fitResult->values.offset, ", Angle: ", fitResult->values.angle,
+                " using ", pointFitCount, " points, Convergence state: ", static_cast<int>(state)
+            );
 
             // TODO review and justify these constants
             if (offsetCiWidth > std::max(0.05 * fitResult->values.offset, 1e-2)) {
+                LOG_WARN("CI too wide: ", offsetCiWidth);
                 ciTooWide = true;
                 break;
             }
@@ -560,28 +588,39 @@ namespace accurate_ri {
                 {lowerAngleMargin, upperAngleMargin}
             };
             const double meanInvRanges = invRangesFiltered.mean();
+
+            LOG_DEBUG(
+                "Offset increased: ", upperOffsetMargin, ", Offset decreased: ", lowerOffsetMargin,
+                "Angle increased: ", upperAngleMargin, ", Angle decreased: ", lowerAngleMargin,
+                "Mean inv ranges: ", meanInvRanges
+            );
+
             ScanlineLimits newLimits = computeScanlineLimits(
                 points, currentErrorBounds.final, fitResult->values, margin, meanInvRanges
             );
 
+            LOG_DEBUG(
+                "Minimum limit width (fit): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff()
+            );
+
             // TODO perhaps this does not work as the sizes might be different, if so, use boolean masks instead
             if ((newLimits.indices == currentScanlineLimits.indices).all()) {
-                if (state == CONVERGED) {
-                    state = CONFIRMED;
+                if (state == FitConvergenceState::CONVERGED) {
+                    state = FitConvergenceState::CONFIRMED;
                     break;
                 }
 
-                state = CONVERGED;
+                state = FitConvergenceState::CONVERGED;
             }
 
             currentScanlineLimits = newLimits;
         }
 
         return {
-            .success = state == CONFIRMED,
+            .success = state == FitConvergenceState::CONFIRMED,
             .ciTooWide = ciTooWide,
-            .fit = state == CONFIRMED ? fitResult : std::nullopt,
-            .limits = state == CONFIRMED ? std::make_optional(currentScanlineLimits) : std::nullopt
+            .fit = state == FitConvergenceState::CONFIRMED ? fitResult : std::nullopt,
+            .limits = state == FitConvergenceState::CONFIRMED ? std::make_optional(currentScanlineLimits) : std::nullopt
         };
     }
 

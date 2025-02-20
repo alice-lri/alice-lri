@@ -5,8 +5,10 @@
 #include "utils/Timer.h"
 
 namespace accurate_ri {
+    // TODO remove this, the library should be path agnostic, just here for the trace file
+    std::string cloudPath;
+
     void hello() {
-        IntrinsicsEstimator estimator = IntrinsicsEstimator();
         LOG_INFO("Hello");
         LOG_DEBUG("Hello2");
     }
@@ -16,9 +18,17 @@ namespace accurate_ri {
         const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXf>(y.data(), y.size()).cast<double>();
         const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(z.data(), z.size()).cast<double>();
 
-        const PointArray points(std::move(xArray), std::move(yArray), std::move(zArray));
+        const PointArray points(xArray, yArray, zArray);
         IntrinsicsEstimator estimator = IntrinsicsEstimator();
 
         estimator.estimate(points);
+    }
+
+    void setCloudPath(const std::string& path) {
+        cloudPath = path;
+    }
+
+    std::string getCloudPath() {
+        return cloudPath;
     }
 }
