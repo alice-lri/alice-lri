@@ -1,7 +1,6 @@
 # TODO define release mode where we disable eigen debug and optimize the code for the native platform and so on
 
 option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
-option(LOG_MODE "Set log mode (DEFAULT, TRACE)" "CONSOLE")
 
 # Convert human-readable log level to numeric values
 if (LOG_LEVEL STREQUAL "DEBUG")
@@ -18,19 +17,16 @@ else ()
     message(FATAL_ERROR "Invalid LOG_LEVEL: Choose DEBUG, INFO, WARN, ERROR, or NONE")
 endif ()
 
-if (NOT LOG_LEVEL STREQUAL "NONE")
-    if (LOG_MODE STREQUAL "DEFAULT")
-        add_definitions(-DLOG_MODE=0)
-    elseif (LOG_MODE STREQUAL "TRACE")
-        add_definitions(-DLOG_MODE=1)
-    else ()
-        message(FATAL_ERROR "Invalid LOG_MODE: Choose DEFAULT or TRACE")
-    endif ()
-endif ()
-
 if (ENABLE_PROFILING)
     add_definitions(-DENABLE_PROFILING)
 endif ()
+
+if(ENABLE_TRACE_FILE)
+    add_definitions(-DENABLE_TRACE_FILE)
+    if (NOT LOG_LEVEL STREQUAL "DEBUG")
+        message(FATAL_ERROR "LOG_LEVEL must be set to DEBUG when ENABLE_TRACE_FILE is enabled")
+    endif()
+endif()
 
 find_package(Eigen3 REQUIRED)
 include_directories(EIGEN3_INCLUDE_DIR)

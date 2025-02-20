@@ -32,15 +32,6 @@ enum LogLevel {
 #define LOG_LEVEL LOG_LEVEL_INFO
 #endif
 
-// Define logging modes
-#define LOG_MODE_DEFAULT 0
-#define LOG_MODE_TRACE 1
-
-// Default log mode (can be overridden at compile-time)
-#ifndef LOG_MODE
-#define LOG_MODE LOG_MODE_DEFAULT
-#endif
-
 class Logger {
 public:
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
@@ -48,20 +39,18 @@ public:
     template<typename... Args>
     static void log(LogLevel level, const char *file, int line, Args &&... args) {
         std::ostringstream logStream;
-#if LOG_MODE == LOG_MODE_DEFAULT
         logStream << getTimestamp() << " [" << getLogLevelString(level) << "] ";
         (logStream << ... << std::forward<Args>(args)); // Fold expression for variadic logging
-        logStream << " (" << file << ":" << line << ")\n";
-#endif
-#if LOG_MODE == LOG_MODE_TRACE
-        (logStream << ... << std::forward<Args>(args));  // Fold expression for variadic logging
-        logStream << "\n";
+        logStream << " (" << file << ":" << line << ")" << std::endl;
+
+        std::lock_guard lock(getInstance().logMutex);
+        std::cout << getColor(level) << logStream.str() << COLOR_RESET;
+#ifdef ENABLE_TRACE_FILE
         std::ofstream traceFile("trace.txt", getInstance().firstLog? std::ios_base::trunc : std::ios_base::app);
-        traceFile << logStream.str();
+        (traceFile << ... << std::forward<Args>(args));
+        traceFile << std::endl;
         traceFile.close();
 #endif
-        std::lock_guard<std::mutex> lock(getInstance().logMutex);
-        std::cerr << logStream.str();
         getInstance().firstLog = false;
     }
 #endif
