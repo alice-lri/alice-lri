@@ -4,9 +4,9 @@
 #include <ranges>
 #include <unordered_set>
 #include <boost/math/distributions/students_t.hpp>
-
 #include "helper/VerticalLogging.h"
 #include "utils/Utils.h"
+#include "VerticalStructs.h"
 
 // TODO make benchmark testing the array bool mask things
 
@@ -109,6 +109,7 @@ namespace accurate_ri {
             }
 
             if (requiresHeuristicFitting and scanlineLimits.indices.size() > 0) {
+                LOG_WARN("Heuristic fitting");
                 // TODO: in theory it can only ever be zero if it was before, perhaps break or something earlier
                 const Eigen::ArrayXd invRanges = points.getInvRanges()(scanlineLimits.mask);
                 const Eigen::ArrayXd phis = points.getPhis()(scanlineLimits.mask);
@@ -133,6 +134,11 @@ namespace accurate_ri {
                     std::max(angleMarginTmp.lower, angleMarginTmp.upper)
                 };
 
+                LOG_INFO(
+                    "Offset confidence interval: ", confidenceIntervals.offset, ", Angle confidence interval: ",
+                    confidenceIntervals.angle, ", Offset: ", maxValues.offset, ", Angle: ", maxValues.angle
+                );
+
                 fitSuccess = true;
                 uncertainty = std::numeric_limits<double>::infinity();
 
@@ -149,9 +155,14 @@ namespace accurate_ri {
                 scanlineLimits = computeScanlineLimits(
                     points, errorBounds.final, maxValues, heuristicMargin, invRangesMean
                 );
+
+                LOG_INFO("Offset: ", maxValues.offset, ", Angle: ", maxValues.angle);
             }
 
             if (!fitSuccess || scanlineLimits.indices.size() == 0) {
+                LOG_INFO("Fit failed: ", !fitSuccess, ", Points in scanline: ", scanlineLimits.indices.size());
+                LOG_INFO("");
+
                 hough->eraseByHash(houghMax.hash);
                 continue;
             }
@@ -205,6 +216,14 @@ namespace accurate_ri {
                 std::vector<uint32_t> conflictingScanlinesTheoretical;
                 std::unordered_set<uint32_t> conflictingScanlinesSet;
 
+                LOG_WARN("Possible problem detected");
+                LOG_INFO(
+                    "Intersects other scanline: ", intersectsOtherScanline,
+                    ", Intersects theoretically: ", intersectsTheoreticalCount,
+                    ", Fit success: ", fitSuccess,
+                    ", Points in scanline: ", scanlineLimits.indices.size(), " vs ", houghMax.votes
+                );
+
                 for (int i = 0; i < intersectsTheoreticalMask.size(); ++i) {
                     if (intersectsTheoreticalMask[i]) {
                         conflictingScanlinesTheoretical.emplace_back(i);
@@ -231,11 +250,24 @@ namespace accurate_ri {
 
                 Eigen::ArrayXi actuallyConflictingScanlines;
 
+                LOG_INFO(
+                    "Intersects with scanlines: ", conflictingScanlines,
+                    ", Current scanline uncertainty: ", uncertainty,
+                    ", Conflicting scanlines uncertainties: ", conflictingScanlinesUncertainties
+                );
+
                 if (uncertainty < conflictingScanlinesUncertainties.minCoeff() || (
                         conflictingScanlinesUncertainties == std::numeric_limits<double>::infinity()).all()) {
                     if (uncertainty != std::numeric_limits<double>::infinity()) {
+                        LOG_INFO(
+                            "New uncertainty is lower than conflicting scanlines uncertainties. Rejecting conflicting scanlines"
+                        );
                         rejectingCurrent = false; // TODO probably here we can return given the right scope
                     } else {
+                        LOG_INFO(
+                            "New uncertainty is infinite, but so are the conflicting scanlines uncertainties. Intersects other empirical: ",
+                            intersectsOtherScanline
+                        );
                         rejectingCurrent = intersectsOtherScanline;
 
                         if (rejectingCurrent) {
@@ -264,6 +296,8 @@ namespace accurate_ri {
                                 }
                             }
                         }
+
+                        LOG_INFO("Removing scanlines: ", scanlinesToRemoveSet);
 
                         for (const uint32_t scanlineId: scanlinesToRemoveSet) {
                             const ScanlineInfo &scanline = scanlineInfoMap[scanlineId];
@@ -294,6 +328,8 @@ namespace accurate_ri {
                                 conflicts.conflictingScanlines.erase(scanlineId);
 
                                 if (conflicts.conflictingScanlines.empty()) {
+                                    LOG_INFO("Restored hash: ", hash);
+
                                     hough->restoreVotes(hash, conflicts.votes);
                                     it = hashesToConflictsMap.erase(it);
                                 } else {
@@ -308,19 +344,32 @@ namespace accurate_ri {
                                     .votes = conflictingVotes
                                 }
                             );
+
+                            LOG_INFO("Added hash ", conflictingHash, " to the map");
                         }
                     }
                 } else if (scanlineLimits.indices.size() == unassignedPoints) {
+                    LOG_WARN(
+                        "Warning: This is the last scanline, so we will accept it if it is not "
+                        "empirically intersecting with other scanlines"
+                    );
                     // TODO This is causing problems, for example in durlar_4d_single_upper_bound_.._.._datasets_durlar_dataset_DurLAR_DurLAR_20210716_ouster_points_data_0000035800.bin/output.txt
                     rejectingCurrent = intersectsOtherScanline;
                     lastScanlineAssignment = true;
                 } else {
+                    // TODO make this code cleaner, I think this is just rejectingCurrent
+                    LOG_INFO(
+                        "New uncertainty is higher than conflicting scanlines uncertainties. Rejecting current scanline"
+                    );
                     actuallyConflictingScanlines = conflictingScanlines(
                         uncertainty < conflictingScanlinesUncertainties
                     ); // TODO suspicious
                 }
 
                 if (rejectingCurrent) {
+                    LOG_INFO("Scanline rejected");
+                    LOG_INFO("");
+
                     hough->eraseByHash(houghMax.hash);
 
                     if (actuallyConflictingScanlines.size() > 0) {
@@ -362,15 +411,32 @@ namespace accurate_ri {
             );
 
             if (unassignedPoints != (pointsScanlinesIds == -1).count()) {
-                // TODO debug error
+                LOG_ERROR(
+                    "ERROR: Unassigned points count mismatch, expected ", unassignedPoints,
+                    ", found ", (pointsScanlinesIds == -1).count()
+                );
             }
+
+            LOG_INFO("Scanline ", currentScanlineId, " assigned with ", scanlineLimits.indices.size(), " points");
+            LOG_INFO(
+                "Scanline parameters: Offset: ", maxValues.offset, ", Angle: ", maxValues.angle, ", Votes: ",
+                houghMax.votes,
+                ", Count: ", scanlineLimits.indices.size(),
+                ", Lower min theoretical angle: ", angleBounds.bottom.lower, ", Lower max theoretical angle: ",
+                angleBounds.bottom.upper,
+                ", Upper min theoretical angle: ", angleBounds.top.lower, ", Upper max theoretical angle: ",
+                angleBounds.top.upper,
+                ", Uncertainty: ", uncertainty
+            );
+            LOG_INFO("Number of unassigned points: ", unassignedPoints);
+            LOG_INFO("");
 
             currentScanlineId++;
         }
 
         // TODO last resort assignment is disabled, maybe implement?
         if (unassignedPoints > 0) {
-            // TODO print debug warning
+            LOG_WARN("Warning: Found ", unassignedPoints, " spurious points");
         }
 
         std::vector<ScanlineInfo> sortedScanlines;
@@ -404,6 +470,9 @@ namespace accurate_ri {
                 return (id >= 0) ? oldIdsToNewIdsMap[id] : -1;
             }
         );
+
+        LOG_INFO("Number of scanlines: ", sortedScanlines.size());
+        LOG_INFO("Number of unassigned points: ", unassignedPoints);
 
         VerticalIntrinsicsResult result = {
             .iterations = static_cast<uint32_t>(iteration),

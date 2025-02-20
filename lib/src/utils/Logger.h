@@ -19,106 +19,108 @@
 #define LOG_LEVEL_ERROR 4
 #define LOG_LEVEL_NONE  5
 
-enum LogLevel {
-    Debug = LOG_LEVEL_DEBUG,
-    Info = LOG_LEVEL_INFO,
-    Warn = LOG_LEVEL_WARN,
-    Error = LOG_LEVEL_ERROR,
-    None = LOG_LEVEL_NONE
-};
+namespace accurate_ri {
+    enum LogLevel {
+        Debug = LOG_LEVEL_DEBUG,
+        Info = LOG_LEVEL_INFO,
+        Warn = LOG_LEVEL_WARN,
+        Error = LOG_LEVEL_ERROR,
+        None = LOG_LEVEL_NONE
+    };
 
-// Default log level (can be overridden at compile-time)
+    // Default log level (can be overridden at compile-time)
 #ifndef LOG_LEVEL
 #define LOG_LEVEL LOG_LEVEL_INFO
 #endif
 
-class Logger {
-public:
+    class Logger {
+    public:
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
-    // Core logging function using variadic template for `<<` support
-    template<typename... Args>
-    static void log(LogLevel level, const char *file, int line, Args &&... args) {
-        std::ostringstream logStream;
-        logStream << getTimestamp() << " [" << getLogLevelString(level) << "] ";
-        (logStream << ... << std::forward<Args>(args)); // Fold expression for variadic logging
-        logStream << " (" << file << ":" << line << ")" << std::endl;
+        // Core logging function using variadic template for `<<` support
+        template<typename... Args>
+        static void log(LogLevel level, const char *file, int line, Args &&... args) {
+            std::ostringstream logStream;
+            logStream << getTimestamp() << " [" << getLogLevelString(level) << "] ";
+            (logStream << ... << std::forward<Args>(args)); // Fold expression for variadic logging
+            logStream << " (" << file << ":" << line << ")" << std::endl;
 
-        std::lock_guard lock(getInstance().logMutex);
-        std::cout << getColor(level) << logStream.str() << COLOR_RESET;
+            std::lock_guard lock(getInstance().logMutex);
+            std::cout << getColor(level) << logStream.str() << COLOR_RESET;
 #ifdef ENABLE_TRACE_FILE
-        std::ofstream traceFile("trace.txt", getInstance().firstLog? std::ios_base::trunc : std::ios_base::app);
-        (traceFile << ... << std::forward<Args>(args));
-        traceFile << std::endl;
-        traceFile.close();
+            std::ofstream traceFile("trace.txt", getInstance().firstLog ? std::ios_base::trunc : std::ios_base::app);
+            (traceFile << ... << std::forward<Args>(args));
+            traceFile << std::endl;
+            traceFile.close();
 #endif
-        getInstance().firstLog = false;
-    }
-#endif
-
-private:
-#if LOG_LEVEL <= LOG_LEVEL_ERROR
-    std::mutex logMutex;
-#endif
-    bool firstLog = true;
-
-    static Logger &getInstance() {
-        static Logger instance;
-        return instance;
-    }
-
-#if LOG_LEVEL <= LOG_LEVEL_ERROR
-    static std::string getTimestamp() {
-        std::time_t now = std::time(nullptr);
-        std::tm tmNow;
-        localtime_r(&now, &tmNow);
-        char buf[20];
-        strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tmNow);
-        return std::string(buf);
-    }
-
-    static std::string getLogLevelString(LogLevel level) {
-        switch (level) {
-            case Debug: return "DEBUG";
-            case Info: return "INFO";
-            case Warn: return "WARN";
-            case Error: return "ERROR";
-            default: return "UNKNOWN";
+            getInstance().firstLog = false;
         }
-    }
-
-    static const char *getColor(LogLevel level) {
-        switch (level) {
-            case Debug: return COLOR_DEBUG;
-            case Info: return COLOR_INFO;
-            case Warn: return COLOR_WARN;
-            case Error: return COLOR_ERROR;
-            default: return COLOR_RESET;
-        }
-    }
 #endif
-};
 
-// **Compile-Time Optimized Logging Macros (Now with `<<` support!)**
+    private:
+#if LOG_LEVEL <= LOG_LEVEL_ERROR
+        std::mutex logMutex;
+#endif
+        bool firstLog = true;
+
+        static Logger &getInstance() {
+            static Logger instance;
+            return instance;
+        }
+
+#if LOG_LEVEL <= LOG_LEVEL_ERROR
+        static std::string getTimestamp() {
+            std::time_t now = std::time(nullptr);
+            std::tm tmNow;
+            localtime_r(&now, &tmNow);
+            char buf[20];
+            strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tmNow);
+            return std::string(buf);
+        }
+
+        static std::string getLogLevelString(LogLevel level) {
+            switch (level) {
+                case Debug: return "DEBUG";
+                case Info: return "INFO";
+                case Warn: return "WARN";
+                case Error: return "ERROR";
+                default: return "UNKNOWN";
+            }
+        }
+
+        static const char *getColor(LogLevel level) {
+            switch (level) {
+                case Debug: return COLOR_DEBUG;
+                case Info: return COLOR_INFO;
+                case Warn: return COLOR_WARN;
+                case Error: return COLOR_ERROR;
+                default: return COLOR_RESET;
+            }
+        }
+#endif
+    };
+}
+
+    // **Compile-Time Optimized Logging Macros (Now with `<<` support!)**
 #if LOG_LEVEL <= LOG_LEVEL_DEBUG
-#define LOG_DEBUG(...) Logger::log(Debug, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_DEBUG(...) accurate_ri::Logger::log(accurate_ri::Debug, __FILE__, __LINE__, __VA_ARGS__)
 #else
-    #define LOG_DEBUG(...) do {} while (0)
+#define LOG_DEBUG(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
-#define LOG_INFO(...) Logger::log(Info, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_INFO(...) accurate_ri::Logger::log(accurate_ri::Info, __FILE__, __LINE__, __VA_ARGS__)
 #else
-    #define LOG_INFO(...) do {} while (0)
+#define LOG_INFO(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_WARN
-#define LOG_WARN(...) Logger::log(Warn, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_WARN(...) accurate_ri::Logger::log(accurate_ri::Warn, __FILE__, __LINE__, __VA_ARGS__)
 #else
-    #define LOG_WARN(...) do {} while (0)
+#define LOG_WARN(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
-#define LOG_ERROR(...) Logger::log(Error, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_ERROR(...) accurate_ri::Logger::log(accurate_ri::Error, __FILE__, __LINE__, __VA_ARGS__)
 #else
-    #define LOG_ERROR(...) do {} while (0)
+#define LOG_ERROR(...) do {} while (0)
 #endif

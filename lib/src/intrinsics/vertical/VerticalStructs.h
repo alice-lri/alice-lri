@@ -101,4 +101,27 @@ namespace accurate_ri {
         std::vector<ScanlineInfo> scanlines;
         Eigen::ArrayXi pointsScanlinesIds;
     };
+
+    // TODO move elsewhere
+    template<typename T>
+    std::ostream &operator<<(std::ostream &os, const std::unordered_set<T> &set) {
+        os << "{"; // Start with opening curly brace
+
+        bool firstElement = true; // Flag to handle commas correctly
+        for (const auto &element: set) {
+            if (!firstElement) {
+                os << ", "; // Add comma and space before subsequent elements
+            }
+            os << element; // Stream each element - assumes element type T is also streamable
+            firstElement = false;
+        }
+
+        os << "}"; // End with closing curly brace
+        return os;
+    }
+
+    inline std::ostream& operator<<(std::ostream& os, const RealMargin& margin) {
+        os << "[" << margin.lower << ", " << margin.upper << "]";
+        return os;
+    }
 }
