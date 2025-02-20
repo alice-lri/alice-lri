@@ -30,9 +30,9 @@ FileUtils::Points FileUtils::loadBinaryFile(const std::string &filename) {
     result.z.reserve(pointsCount);
 
     for (uint32_t i = 0; i < pointsCount; ++i) {
-        result.x[i] = buffer[i * 4];
-        result.y[i] = buffer[i * 4 + 1];
-        result.z[i] = buffer[i * 4 + 2];
+        result.x.emplace_back(buffer[i * 4]);
+        result.y.emplace_back(buffer[i * 4 + 1]);
+        result.z.emplace_back(buffer[i * 4 + 2]);
     }
 
     return result;

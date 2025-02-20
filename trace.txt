@@ -1,2 +1,32 @@
-Hello
-Hello2
+HoughTransform initialized with xCount: 998 yCount: 31413
+Starting accumulator computation for 122829 points
+Processing point 0 of 122829
+Processing point 10000 of 122829
+Processing point 20000 of 122829
+Processing point 30000 of 122829
+Processing point 40000 of 122829
+Processing point 50000 of 122829
+Processing point 60000 of 122829
+Processing point 70000 of 122829
+Processing point 80000 of 122829
+Processing point 90000 of 122829
+Processing point 100000 of 122829
+Processing point 110000 of 122829
+Processing point 120000 of 122829
+Accumulator computation completed.
+==| Parameters |==
+Number of points: 122829
+Cloud path: 
+Coord distortion compensation strategy: upper_bound
+Hough model: arcsin
+Voting strategy: single
+Noise radius use square: False
+Fit type: linear
+Offset min: -0.499, Offset max: 0.499, Offset res: 0.001
+Angle min: -1.5707, Angle max: 1.5707, Angle res: 0.0001
+Coords eps: 5e-07
+
+==| Execution |==
+ITERATION 0
+Offset: 0.206, Angle: -0.00789633, Votes: 78671.4, Hash: 6317574525297179341, Hough indices: [705, 15628]
+Minimum limit width (Hough): 0.000225018

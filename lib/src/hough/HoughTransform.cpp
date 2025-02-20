@@ -25,13 +25,16 @@ namespace accurate_ri {
         xCount = std::floor((xMax - xMin) / xStep);
         yCount = std::floor((yMax - yMin) / yStep);
 
-        LOG_INFO("HoughTransform initialized with xCount:", xCount, "yCount:", yCount);
+        LOG_INFO("HoughTransform initialized with xCount: ", xCount, " yCount: ", yCount);
     }
 
     void HoughTransform::computeAccumulator(const PointArray &points) {
-        LOG_INFO("Starting accumulator computation for", points.size(), "points");
+        LOG_INFO("Starting accumulator computation for ", points.size(), " points");
 
         for (uint64_t i = 0; i < points.size(); i++) {
+            if (i % 10000 == 0) {
+                LOG_DEBUG("Processing point ", i, " of ", points.size());
+            }
             updateAccumulatorForPoint(i, points);
         }
 
@@ -70,6 +73,10 @@ namespace accurate_ri {
 
         const int32_t yMin = std::min(previousY, y);
         const int32_t yMax = std::max(previousY, y);
+
+        if (yMin == yMax) {
+            return;
+        }
 
         accumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() += voteVal;
 

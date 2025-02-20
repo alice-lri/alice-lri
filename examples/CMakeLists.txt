@@ -12,6 +12,7 @@ add_executable(eigen_loop_vs_select eigen_loop_vs_select.cpp)
 target_link_libraries(examples PRIVATE accurate_ri)
 
 if(ENABLE_STRICT_WARNINGS) #TODO make this trigger in release mode
+    message(STATUS "Strict warnings enabled")
     target_compile_options(examples PRIVATE
             -Wall -Wextra -Wpedantic  # General best practices
             -Wshadow -Wnon-virtual-dtor -Wold-style-cast -Wcast-align

@@ -7,5 +7,10 @@
     <option name="pythonIntegrationState" value="YES" />
   </component>
   <component name="CMakeWorkspace" PROJECT_DIR="$PROJECT_DIR$" />
+  <component name="CidrRootsConfiguration">
+    <excludeRoots>
+      <file path="$PROJECT_DIR$/datasets" />
+    </excludeRoots>
+  </component>
   <component name="WestSettings">{}</component>
 </project>

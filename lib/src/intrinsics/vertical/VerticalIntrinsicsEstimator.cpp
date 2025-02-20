@@ -693,6 +693,7 @@ namespace accurate_ri {
         };
     }
 
+    // TODO the memory requirements explode with the number of points, check if this also happens in python
     LinearFitResult VerticalIntrinsicsEstimator::performLinearFit(
         const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &bounds
     ) {
