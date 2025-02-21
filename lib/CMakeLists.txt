@@ -23,8 +23,8 @@ endif ()
 
 if(ENABLE_TRACE_FILE)
     add_definitions(-DENABLE_TRACE_FILE)
-    if (NOT LOG_LEVEL STREQUAL "DEBUG")
-        message(FATAL_ERROR "LOG_LEVEL must be set to DEBUG when ENABLE_TRACE_FILE is enabled")
+    if (NOT LOG_LEVEL STREQUAL "INFO")
+        message(FATAL_ERROR "LOG_LEVEL must be set to INFO when ENABLE_TRACE_FILE is enabled")
     endif()
 endif()
 

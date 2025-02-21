@@ -18,11 +18,11 @@ namespace accurate_ri {
         accumulator = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(yCount, xCount);
         hashAccumulator = Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(yCount, xCount);
 
-        LOG_INFO("HoughTransform initialized with xCount: ", xCount, " yCount: ", yCount);
+        LOG_DEBUG("HoughTransform initialized with xCount: ", xCount, " yCount: ", yCount);
     }
 
     void HoughTransform::computeAccumulator(const PointArray &points) {
-        LOG_INFO("Starting accumulator computation for ", points.size(), " points");
+        LOG_DEBUG("Starting accumulator computation for ", points.size(), " points");
 
         for (uint64_t i = 0; i < points.size(); i++) {
             if (i % 10000 == 0) {
@@ -31,7 +31,7 @@ namespace accurate_ri {
             updateAccumulatorForPoint(i, points);
         }
 
-        LOG_INFO("Accumulator computation completed.");
+        LOG_DEBUG("Accumulator computation completed.");
     }
 
     inline void HoughTransform::updateAccumulatorForPoint(const uint64_t pointIndex, const PointArray &points) {
@@ -141,16 +141,16 @@ namespace accurate_ri {
             for (int j = 0; j < matrix.cols(); j++) {
                 if (matrix(i, j) != hashAccumulator(i, j)) {
                     diffFlag = true;
-                    LOG_ERROR("Hashes do not match at ", i, ", ", j);
-                    LOG_ERROR("Expected: ", matrix(i, j), ", got: ", hashAccumulator(i, j));
+                    LOG_DEBUG("Hashes do not match at ", i, ", ", j);
+                    LOG_DEBUG("Expected: ", matrix(i, j), ", got: ", hashAccumulator(i, j));
                 }
             }
         }
 
         if (diffFlag) {
-            LOG_ERROR("Hashes do not match");
+            LOG_DEBUG("Hashes do not match");
         } else {
-            LOG_INFO("Hashes match");
+            LOG_DEBUG("Hashes match");
         }
     }
 
@@ -164,16 +164,16 @@ namespace accurate_ri {
             for (int j = 0; j < matrix.cols(); j++) {
                 if (matrix(i, j) != accumulator(i, j)) {
                     diffFlag = true;
-                    LOG_ERROR("Accumulators do not match at ", i, ", ", j);
-                    LOG_ERROR("Expected: ", matrix(i, j), ", got: ", accumulator(i, j));
+                    LOG_DEBUG("Accumulators do not match at ", i, ", ", j);
+                    LOG_DEBUG("Expected: ", matrix(i, j), ", got: ", accumulator(i, j));
                 }
             }
         }
 
         if (diffFlag) {
-            LOG_ERROR("Accumulators do not match");
+            LOG_DEBUG("Accumulators do not match");
         } else {
-            LOG_INFO("Accumulators match");
+            LOG_DEBUG("Accumulators match");
         }
     }
 
