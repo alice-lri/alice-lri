@@ -9,8 +9,6 @@
 #include "VerticalStructs.h"
 #include "utils/TestUtils.h"
 
-// TODO make benchmark testing the array bool mask things
-
 namespace accurate_ri {
     // TODO extract these constants somewhere
     constexpr uint64_t MAX_ITERATIONS = 10000;
@@ -125,8 +123,8 @@ namespace accurate_ri {
             if (requiresHeuristicFitting and scanlineLimits.indices.size() > 0) {
                 LOG_WARN("Heuristic fitting");
                 // TODO: in theory it can only ever be zero if it was before, perhaps break or something earlier
-                const Eigen::ArrayXd invRanges = points.getInvRanges()(scanlineLimits.mask);
-                const Eigen::ArrayXd phis = points.getPhis()(scanlineLimits.mask);
+                const Eigen::ArrayXd invRanges = points.getInvRanges()(scanlineLimits.indices);
+                const Eigen::ArrayXd phis = points.getPhis()(scanlineLimits.indices);
 
                 const double invRangesMean = invRanges.mean();
                 const double phisMean = phis.mean();
@@ -223,11 +221,20 @@ namespace accurate_ri {
                 }
             }
 
-            uint64_t intersectsTheoreticalCount = intersectsTheoreticalMask.count();
+            std::vector<int32_t> intersectsTheoreticalIdsVector;
+            for (int i = 0; i < intersectsTheoreticalMask.size(); ++i) {
+                if (intersectsTheoreticalMask[i]) {
+                    intersectsTheoreticalIdsVector.emplace_back(i);
+                }
+            }
+
+            Eigen::ArrayXi intersectsTheoreticalIds = Eigen::Map<Eigen::ArrayXi>(
+                intersectsTheoreticalIdsVector.data(), intersectsTheoreticalIdsVector.size()
+            );
+            const uint64_t intersectsTheoreticalCount = intersectsTheoreticalIds.size();
 
             if (intersectsOtherScanline || intersectsTheoreticalCount > 0) {
                 bool rejectingCurrent = true;
-                std::vector<uint32_t> conflictingScanlinesTheoretical;
                 std::unordered_set<uint32_t> conflictingScanlinesSet;
 
                 LOG_WARN("Possible problem detected");
@@ -238,14 +245,8 @@ namespace accurate_ri {
                     ", Points in scanline: ", scanlineLimits.indices.size(), " vs ", houghMax.votes
                 );
 
-                for (int i = 0; i < intersectsTheoreticalMask.size(); ++i) {
-                    if (intersectsTheoreticalMask[i]) {
-                        conflictingScanlinesTheoretical.emplace_back(i);
-                    }
-                }
-
                 conflictingScanlinesSet.insert(
-                    conflictingScanlinesTheoretical.begin(), conflictingScanlinesTheoretical.end()
+                    intersectsTheoreticalIds.begin(), intersectsTheoreticalIds.end()
                 );
                 conflictingScanlinesSet.insert(
                     conflictingScanlinesIdsVerbose.begin(), conflictingScanlinesIdsVerbose.end()
@@ -403,7 +404,7 @@ namespace accurate_ri {
             // TODO here there was the if uncertainty < -500, check if it is still needed
 
             hough->eraseByHash(houghMax.hash);
-            pointsScanlinesIds(scanlineLimits.mask) = currentScanlineId;
+            pointsScanlinesIds(scanlineLimits.indices) = currentScanlineId;
             unassignedPoints -= scanlineLimits.indices.size();
 
             for (const auto &dependency: dependencies) {
