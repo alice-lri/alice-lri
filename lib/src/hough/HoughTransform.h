@@ -7,6 +7,8 @@
 #include "point/PointArray.h"
 
 namespace accurate_ri {
+    enum class VoteType { RANGE, ZERO };
+
     /**
      * @class HoughTransform
      * @brief A class to perform the Hough Transform for detecting lines in a 2D space.
@@ -90,13 +92,16 @@ namespace accurate_ri {
 
         void ensureAccEquals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &matrix);
 
+        void eraseWhere(const PointArray & points, const Eigen::ArrayXi& indices);
+
     private:
         /**
          * @brief Updates the accumulator for a specific point.
          * @param pointIndex Index of the point.
          * @param points Vector of phi values.
+         * @param voteType
          */
-        inline void updateAccumulatorForPoint(uint64_t pointIndex, const PointArray &points);
+        inline void updateAccumulatorForPoint(uint64_t pointIndex, const PointArray &points, const VoteType& voteType);
 
         /**
          * @brief Votes for discontinuities in the accumulator to avoid gaps.

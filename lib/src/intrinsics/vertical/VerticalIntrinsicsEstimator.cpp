@@ -403,6 +403,9 @@ namespace accurate_ri {
 
             // We are now outside conflict resolution (seriously, I need to refactor this)
             // TODO here there was the if uncertainty < -500, check if it is still needed
+            if (uncertainty < -500) {
+                hough->eraseWhere(points, scanlineLimits.indices);
+            }
 
             hough->eraseByHash(houghMax.hash);
             pointsScanlinesIds(scanlineLimits.indices) = currentScanlineId;

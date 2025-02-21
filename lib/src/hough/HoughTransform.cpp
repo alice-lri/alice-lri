@@ -8,6 +8,7 @@
 #include "utils/Logger.h"
 
 namespace accurate_ri {
+
     HoughTransform::HoughTransform(
         const double xMin, const double xMax, const double xStep, const double yMin, const double yMax,
         const double yStep
@@ -28,13 +29,15 @@ namespace accurate_ri {
             if (i % 10000 == 0) {
                 LOG_DEBUG("Processing point ", i, " of ", points.size());
             }
-            updateAccumulatorForPoint(i, points);
+            updateAccumulatorForPoint(i, points, VoteType::RANGE);
         }
 
         LOG_DEBUG("Accumulator computation completed.");
     }
 
-    inline void HoughTransform::updateAccumulatorForPoint(const uint64_t pointIndex, const PointArray &points) {
+    inline void HoughTransform::updateAccumulatorForPoint(
+        const uint64_t pointIndex, const PointArray &points, const VoteType &voteType
+    ) {
         int32_t previousY = -1;
 
         for (size_t x = 0; x < xCount; x++) {
@@ -46,11 +49,11 @@ namespace accurate_ri {
                 continue;
             }
 
-            const double voteVal = rangeVal;
+            const double voteVal = voteType == VoteType::RANGE ? rangeVal : 0;
 
             if (previousY != -1) {
                 // TODO this is inside the if for consistency with Python, but maybe is not the right thing to do
-                accumulator(y, x) += voteVal;
+                accumulator(y, x) = (voteType != VoteType::ZERO) ? (accumulator(y, x) + voteVal) : 0;
                 hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
 
                 voteForDiscontinuities(pointIndex, x, y, voteVal, previousY);
@@ -129,6 +132,12 @@ namespace accurate_ri {
 
     void HoughTransform::restoreVotes(const uint64_t hash, const double votes) {
         accumulator = (hashAccumulator.array() == hash).select(votes, accumulator.array());
+    }
+
+    void HoughTransform::eraseWhere(const PointArray &points, const Eigen::ArrayXi &indices) {
+        for (const int32_t index : indices) {
+            updateAccumulatorForPoint(index, points, VoteType::ZERO);
+        }
     }
 
     // TODO this is a debug function, should be removed
