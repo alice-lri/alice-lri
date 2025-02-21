@@ -7,6 +7,7 @@
 #include "helper/VerticalLogging.h"
 #include "utils/Utils.h"
 #include "VerticalStructs.h"
+#include "utils/TestUtils.h"
 
 // TODO make benchmark testing the array bool mask things
 
@@ -28,6 +29,19 @@ namespace accurate_ri {
     VerticalIntrinsicsResult VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
         initHough(points);
         hough->computeAccumulator(points);
+
+        LOG_INFO("Dimensions of testHash: ", hough->getYCount(), " x ", hough->getXCount());
+
+        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> testAcc = TestUtils::loadBinToEigenMatrix<double>(
+            "acc.bin", hough->getYCount(), hough->getXCount()
+        );
+
+        Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic> testHash = TestUtils::loadBinToEigenMatrix<uint64_t>(
+            "hashes.bin", hough->getYCount(), hough->getXCount()
+        );
+
+        hough->ensureAccEquals(testAcc);
+        hough->ensureHashEquals(testHash);
 
         VerticalLogging::printHeaderDebugInfo(points, *hough);
 

@@ -86,6 +86,10 @@ namespace accurate_ri {
 
         void restoreVotes(const uint64_t hash, const double votes);
 
+        void ensureHashEquals(Eigen::Matrix<unsigned long, -1, -1> &matrix);
+
+        void ensureAccEquals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &matrix);
+
     private:
         /**
          * @brief Updates the accumulator for a specific point.

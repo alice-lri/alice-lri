@@ -12,18 +12,11 @@ namespace accurate_ri {
         const double xMin, const double xMax, const double xStep, const double yMin, const double yMax,
         const double yStep
     ) : xMin(xMin), xMax(xMax), xStep(xStep), yMin(yMin), yMax(yMax), yStep(yStep) {
-        accumulator = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(
-            static_cast<int>(std::floor((yMax - yMin) / yStep)),
-            static_cast<int>(std::floor((xMax - xMin) / xStep))
-        );
+        xCount = std::floor((xMax - xMin + xStep) / xStep);
+        yCount = std::floor((yMax - yMin + yStep) / yStep);
 
-        hashAccumulator = Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(
-            static_cast<int>(std::floor((yMax - yMin) / yStep)),
-            static_cast<int>(std::floor((xMax - xMin) / xStep))
-        );
-
-        xCount = std::floor((xMax - xMin) / xStep);
-        yCount = std::floor((yMax - yMin) / yStep);
+        accumulator = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(yCount, xCount);
+        hashAccumulator = Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(yCount, xCount);
 
         LOG_INFO("HoughTransform initialized with xCount: ", xCount, " yCount: ", yCount);
     }
@@ -55,10 +48,11 @@ namespace accurate_ri {
 
             const double voteVal = rangeVal;
 
-            accumulator(y, x) += voteVal;
-            hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
-
             if (previousY != -1) {
+                // TODO this is inside the if for consistency with Python, but maybe is not the right thing to do
+                accumulator(y, x) += voteVal;
+                hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
+
                 voteForDiscontinuities(pointIndex, x, y, voteVal, previousY);
             }
 
@@ -135,6 +129,52 @@ namespace accurate_ri {
 
     void HoughTransform::restoreVotes(const uint64_t hash, const double votes) {
         accumulator = (hashAccumulator.array() == hash).select(votes, accumulator.array());
+    }
+
+    // TODO this is a debug function, should be removed
+    void HoughTransform::ensureHashEquals(Eigen::Matrix<uint64_t, -1, -1> &matrix) {
+        assert(matrix.rows() == hashAccumulator.rows());
+        assert(matrix.cols() == hashAccumulator.cols());
+
+        bool diffFlag = false;
+        for (int i = 0; i < matrix.rows(); i++) {
+            for (int j = 0; j < matrix.cols(); j++) {
+                if (matrix(i, j) != hashAccumulator(i, j)) {
+                    diffFlag = true;
+                    LOG_ERROR("Hashes do not match at ", i, ", ", j);
+                    LOG_ERROR("Expected: ", matrix(i, j), ", got: ", hashAccumulator(i, j));
+                }
+            }
+        }
+
+        if (diffFlag) {
+            LOG_ERROR("Hashes do not match");
+        } else {
+            LOG_INFO("Hashes match");
+        }
+    }
+
+    // TODO this is also a debug function, should be removed
+    void HoughTransform::ensureAccEquals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &matrix) {
+        assert(matrix.rows() == accumulator.rows());
+        assert(matrix.cols() == accumulator.cols());
+
+        bool diffFlag = false;
+        for (int i = 0; i < matrix.rows(); i++) {
+            for (int j = 0; j < matrix.cols(); j++) {
+                if (matrix(i, j) != accumulator(i, j)) {
+                    diffFlag = true;
+                    LOG_ERROR("Accumulators do not match at ", i, ", ", j);
+                    LOG_ERROR("Expected: ", matrix(i, j), ", got: ", accumulator(i, j));
+                }
+            }
+        }
+
+        if (diffFlag) {
+            LOG_ERROR("Accumulators do not match");
+        } else {
+            LOG_INFO("Accumulators match");
+        }
     }
 
     HoughCell HoughTransform::indicesToCell(const std::pair<size_t, size_t> &indices) {
