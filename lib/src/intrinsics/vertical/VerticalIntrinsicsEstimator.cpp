@@ -76,7 +76,7 @@ namespace accurate_ri {
             LOG_INFO("ITERATION ", iteration);
             LOG_INFO(
                 "Offset: ", maxValues.offset, ", Angle: ", maxValues.angle, ", Votes: ", houghMax.votes,
-                ", Hash: ", houghMax.hash, ", Hough indices: [", houghMax.maxOffsetIndex, ", ", houghMax.maxAngleIndex,
+                ", Hash: ", houghMax.hash, ", Hough indices: [", houghMax.maxAngleIndex, "  ", houghMax.maxOffsetIndex,
                 "]"
             );
 
@@ -257,7 +257,7 @@ namespace accurate_ri {
                 Eigen::ArrayXd conflictingScanlinesUncertainties(conflictingScanlinesSet.size());
 
                 uint32_t i = 0;
-                for (const auto conflictingScanlineId: conflictingScanlines) {
+                for (const auto conflictingScanlineId: conflictingScanlinesSet) {
                     const auto &conflictingScanline = scanlineInfoMap[conflictingScanlineId];
                     conflictingScanlines(i) = conflictingScanlineId;
                     conflictingScanlinesUncertainties(i++) = conflictingScanline.uncertainty;
@@ -321,7 +321,8 @@ namespace accurate_ri {
 
                             hough->restoreVotes(conflictingHash, conflictingVotes);
                             unassignedPoints += scanline.pointsCount;
-                            pointsScanlinesIds(pointsScanlinesIds == scanlineId) = -1;
+                            pointsScanlinesIds = (pointsScanlinesIds == scanlineId).select(-1, pointsScanlinesIds);
+
                             // TODO careful with this, perhaps select
                             scanlineInfoMap.erase(scanlineId);
                             reverseScanlinesDependencyMap.erase(scanlineId);
