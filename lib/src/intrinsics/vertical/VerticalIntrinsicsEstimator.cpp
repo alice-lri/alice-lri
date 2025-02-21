@@ -720,30 +720,34 @@ namespace accurate_ri {
     LinearFitResult VerticalIntrinsicsEstimator::performLinearFit(
         const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &bounds
     ) {
-        Eigen::ArrayXd weights = 1 / bounds.square();
+        const Eigen::ArrayXd &weights = 1 / bounds.square();
 
         // Weighted least squares, variables use matrix notation from the standard formula, invRanges is X, phis is y
         Eigen::MatrixXd X = Eigen::MatrixXd(phis.size(), 2);
         X.col(1) = Eigen::VectorXd::Ones(phis.size());
         X.col(0) = invRanges;
 
-        Eigen::MatrixXd W = weights.matrix().asDiagonal();
-        Eigen::MatrixXd XtW = X.transpose() * W;
-        Eigen::MatrixXd XtWX = XtW * X;
-        Eigen::MatrixXd XtWy = XtW * phis.matrix();
+        const Eigen::MatrixXd &W = weights.matrix().asDiagonal();
+        const Eigen::MatrixXd &XtW = X.transpose() * W;
+        const Eigen::MatrixXd &XtWX = XtW * X;
+        const Eigen::MatrixXd &XtWy = XtW * phis.matrix();
 
-        Eigen::VectorXd beta = XtWX.ldlt().solve(XtWy);
-        Eigen::VectorXd residuals = phis.matrix() - X * beta;
-        double sigma2 = (residuals.transpose() * W * residuals).value() / (phis.size() - 2);
+        const Eigen::VectorXd &beta = XtWX.ldlt().solve(XtWy);
+        const Eigen::VectorXd &residuals = phis.matrix() - X * beta;
+        const double sigma2 = (residuals.transpose() * W * residuals).value() / (phis.size() - 2);
 
-        Eigen::MatrixXd covariance = XtWX.inverse() * sigma2;
-        double log_likelihood = -0.5 * (phis.size() * std::log(2 * M_PI * sigma2) +
-                                        (residuals.transpose() * W * residuals).sum() / sigma2);
-        double aic = -2 * log_likelihood + 2 * 2; // 2 parameters
+        const Eigen::MatrixXd &covariance = XtWX.inverse() * sigma2;
 
-        int df = phis.size() - 2; // Degrees of freedom = n - k (k=2 for intercept & slope)
+        const double ssr = (residuals.transpose() * W * residuals).value();
+        const double sizeOverTwo = static_cast<double>(phis.size()) / 2;
+        double logLikelihood = -std::log(ssr) * sizeOverTwo;
+        logLikelihood -= (1 + std::log(M_PI / sizeOverTwo)) * sizeOverTwo;
+        logLikelihood += 0.5 * weights.log().sum();
+        const double aic = -2 * logLikelihood + 2 * 2; // 2 parameters
+        
+        const int df = phis.size() - 2; // Degrees of freedom = n - k (k=2 for intercept & slope)
         boost::math::students_t dist(df);
-        double tCritical = quantile(complement(dist, 0.025)); // 95% CI
+        const double tCritical = quantile(complement(dist, 0.025)); // 95% CI
 
         OffsetAngleMargin ci = {};
         for (int i = 0; i < 2; ++i) {
