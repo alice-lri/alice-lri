@@ -8,6 +8,7 @@
 #include "utils/Utils.h"
 #include "VerticalStructs.h"
 #include "utils/TestUtils.h"
+#include "utils/Timer.h"
 
 namespace accurate_ri {
     // TODO extract these constants somewhere
@@ -601,6 +602,7 @@ namespace accurate_ri {
         const PointArray &points, const VerticalBounds &errorBounds,
         const ScanlineLimits &scanlineLimits
     ) const {
+        PROFILE_SCOPE("VerticalIntrinsicsEstimator::tryFitScanline");
         const Eigen::ArrayXd &ranges = points.getRanges().array();
         VerticalBounds currentErrorBounds = errorBounds;
         ScanlineLimits currentScanlineLimits = scanlineLimits;
@@ -724,6 +726,7 @@ namespace accurate_ri {
     LinearFitResult VerticalIntrinsicsEstimator::performLinearFit(
         const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &bounds
     ) {
+        PROFILE_SCOPE("VerticalIntrinsicsEstimator::performLinearFit");
         const Eigen::ArrayXd &weights = 1 / bounds.square();
 
         // Weighted least squares, variables use matrix notation from the standard formula, invRanges is X, phis is y

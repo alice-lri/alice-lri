@@ -6,6 +6,7 @@
 #include "hash/HashUtils.h"
 #include "intrinsics/vertical/VerticalStructs.h"
 #include "utils/Logger.h"
+#include "utils/Timer.h"
 
 namespace accurate_ri {
 
@@ -23,6 +24,7 @@ namespace accurate_ri {
     }
 
     void HoughTransform::computeAccumulator(const PointArray &points) {
+        PROFILE_SCOPE("HoughTransform::computeAccumulator");
         LOG_DEBUG("Starting accumulator computation for ", points.size(), " points");
 
         for (uint64_t i = 0; i < points.size(); i++) {
@@ -86,13 +88,13 @@ namespace accurate_ri {
     }
 
     std::optional<HoughCell> HoughTransform::findMaximum(std::optional<double> averageX) {
-        std::vector<std::pair<size_t, size_t> > maxIndices;
+        std::vector<std::pair<size_t, size_t>> maxIndices;
         double maxVal = -std::numeric_limits<double>::infinity();
 
         for (size_t y = 0; y < yCount; y++) {
             for (size_t x = 0; x < xCount; x++) {
-                const double val = accumulator(y * xCount + x);
-                if (val > maxVal) {
+                const double val = accumulator(y, x);
+                if (val > maxVal && val > 1e-6) {
                     maxVal = val;
                     maxIndices = {{x, y}};
                 } else if (val == maxVal) {
