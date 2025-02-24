@@ -565,13 +565,13 @@ namespace accurate_ri {
         const auto offset = scanlineAttributes.offset;
         const auto angle = scanlineAttributes.angle;
 
-        const Eigen::ArrayXd upperArcsinArg = (offset + margin.offset.upper) * invRanges.array().min(1).max(-1);
-        const Eigen::ArrayXd lowerArcsinArg = (offset - margin.offset.lower) * invRanges.array().min(1).max(-1);
+        const Eigen::ArrayXd upperArcsinArg = ((offset + margin.offset.upper) * invRanges.array()).min(1).max(-1);
+        const Eigen::ArrayXd lowerArcsinArg = ((offset - margin.offset.lower) * invRanges.array()).min(1).max(-1);
 
         const Eigen::ArrayXd upperArcsinArgShifted =
-                (offset + margin.offset.upper) * (invRanges.array() - invRangesShift).min(1).max(-1);
+                ((offset + margin.offset.upper) * (invRanges.array() - invRangesShift)).min(1).max(-1);
         const Eigen::ArrayXd lowerArcsinArgShifted =
-                (offset - margin.offset.lower) * (invRanges.array() - invRangesShift).min(1).max(-1);
+                ((offset - margin.offset.lower) * (invRanges.array() - invRangesShift)).min(1).max(-1);
 
         const Eigen::ArrayXd upperArcsin = upperArcsinArg.array().asin();
         const Eigen::ArrayXd lowerArcsin = lowerArcsinArg.array().asin();
