@@ -4,6 +4,7 @@
 #include <mutex>
 #include <ctime>
 #include <sstream>
+#include <iomanip>
 
 // ANSI Escape Codes for Colors
 #define COLOR_RESET  "\033[0m"
@@ -40,15 +41,16 @@ namespace accurate_ri {
         template<typename... Args>
         static void log(LogLevel level, const char *file, int line, Args &&... args) {
             std::ostringstream logStream;
+
             logStream << getTimestamp() << " [" << getLogLevelString(level) << "] ";
-            (logStream << ... << std::forward<Args>(args)); // Fold expression for variadic logging
+            (logStream << ... << formatValue(std::forward<Args>(args))); // Fold expression for variadic logging
             logStream << " (" << file << ":" << line << ")" << std::endl;
 
             std::lock_guard lock(getInstance().logMutex);
             std::cout << getColor(level) << logStream.str() << COLOR_RESET;
 #ifdef ENABLE_TRACE_FILE
             std::ofstream traceFile("ref_tracing/trace.txt", getInstance().firstLog ? std::ios_base::trunc : std::ios_base::app);
-            (traceFile << ... << std::forward<Args>(args));
+            (traceFile << ... << formatValue(std::forward<Args>(args)));
             traceFile << std::endl;
             traceFile.close();
 #endif
@@ -94,6 +96,17 @@ namespace accurate_ri {
                 case Warn: return COLOR_WARN;
                 case Error: return COLOR_ERROR;
                 default: return COLOR_RESET;
+            }
+        }
+
+        template<typename T>
+        static auto formatValue(const T& value) {
+            if constexpr (std::is_floating_point_v<T>) {
+                std::stringstream ss;
+                ss << std::fixed << std::setprecision(6) << value;
+                return ss.str();
+            } else {
+                return value;
             }
         }
 #endif

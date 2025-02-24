@@ -12,8 +12,8 @@
 
 class Timer {
 private:
-    std::chrono::high_resolution_clock::time_point start;
     const char* name;
+    std::chrono::high_resolution_clock::time_point start;
 
 public:
     explicit Timer(const char* name) : name(name), start(std::chrono::high_resolution_clock::now()) {}
@@ -21,6 +21,6 @@ public:
     ~Timer() {
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration = end - start;
-        LOG_INFO("[TIMER] " + std::string(name) + " took " + std::to_string(duration.count()) + " seconds");
+        std::cout << "[TIMER] " << std::string(name) << " took " << std::to_string(duration.count()) << " seconds";
     }
 };
