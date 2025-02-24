@@ -13,8 +13,8 @@ void setCloudPath(const std::string& path) {
 }
 
 int main() {
-    const std::string path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210716/ouster_points/data/0000035800.bin";
-    const std::optional<int> accurateDigits = std::nullopt;
+    const std::string path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000009025.bin";
+    const std::optional<int> accurateDigits = 4;
     FileUtils::Points points = FileUtils::loadBinaryFile(path, accurateDigits);
 
     setCloudPath(path);

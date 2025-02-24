@@ -5,7 +5,7 @@
 
 namespace FileUtils {
     struct Points {
-        std::vector<float> x, y, z;
+        std::vector<double> x, y, z;
     };
 
     Points loadBinaryFile(const std::string &filename, const std::optional<int>& accurateDigits);
