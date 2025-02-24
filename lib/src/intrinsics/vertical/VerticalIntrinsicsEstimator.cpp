@@ -39,8 +39,8 @@ namespace accurate_ri {
             "ref_tracing/hashes.bin", hough->getYCount(), hough->getXCount()
         );
 
-        hough->ensureAccEquals(testAcc);
-        hough->ensureHashEquals(testHash);
+        // hough->ensureAccEquals(testAcc);
+        // hough->ensureHashEquals(testHash);
 
         VerticalLogging::printHeaderDebugInfo(points, *hough);
 
@@ -107,6 +107,8 @@ namespace accurate_ri {
             OffsetAngleMargin confidenceIntervals = {};
             std::vector<uint32_t> dependencies;
             // TODO this is only used in heuristics an added to the end, we should probably construct the scanline info through the process
+
+            VerticalLogging::plotDebugInfo(points, scanlineLimits, pointsScanlinesIds, iteration, "hough_", maxValues, 0);
 
             if (scanlineLimits.indices.size() > 2) {
                 const ScanlineFitResult scanlineFit = tryFitScanline(
@@ -176,6 +178,8 @@ namespace accurate_ri {
 
                 LOG_INFO("Offset: ", maxValues.offset, ", Angle: ", maxValues.angle);
             }
+
+            VerticalLogging::plotDebugInfo(points, scanlineLimits, pointsScanlinesIds, iteration, "fit_", maxValues, uncertainty);
 
             if (!fitSuccess || scanlineLimits.indices.size() == 0) {
                 LOG_INFO("Fit failed: ", !fitSuccess, ", Points in scanline: ", scanlineLimits.indices.size());

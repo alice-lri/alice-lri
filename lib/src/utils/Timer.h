@@ -12,15 +12,17 @@
 
 class Timer {
 private:
-    const char* name;
+    const char *name;
     std::chrono::high_resolution_clock::time_point start;
 
 public:
-    explicit Timer(const char* name) : name(name), start(std::chrono::high_resolution_clock::now()) {}
+    explicit Timer(const char *name) : name(name), start(std::chrono::high_resolution_clock::now()) {
+    }
 
     ~Timer() {
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration = end - start;
-        std::cout << "[TIMER] " << std::string(name) << " took " << std::to_string(duration.count()) << " seconds";
+        std::cout << "[TIMER] " << std::string(name) << " took " << std::to_string(duration.count()) << " seconds" <<
+                std::endl;
     }
 };
