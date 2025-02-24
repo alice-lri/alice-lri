@@ -54,6 +54,7 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/utils/Utils.h
         src/intrinsics/vertical/helper/VerticalLogging.h
         src/utils/TestUtils.h
+        src/intrinsics/vertical/helper/VerticalLogging.cpp
 )
 
 target_include_directories(accurate_ri
