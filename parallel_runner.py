@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import os
 import glob
 import multiprocessing
@@ -27,6 +29,7 @@ def run_experiment(experiment):
         )
         print(f"Process finished successfully for command: {experiment_command}")
     except subprocess.CalledProcessError as e:
+        Path(output_root_folder).joinpath('error').touch()
         print(f"Error running command: {experiment_command}")
         print(f"Return Code: {e.returncode}")
 
