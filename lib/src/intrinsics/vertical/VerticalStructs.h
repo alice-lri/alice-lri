@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <iomanip>
 #include <unordered_set>
 #include <eigen3/Eigen/Dense>
 
@@ -105,23 +106,40 @@ namespace accurate_ri {
     // TODO move elsewhere
     template<typename T>
     std::ostream &operator<<(std::ostream &os, const std::unordered_set<T> &set) {
-        os << "{"; // Start with opening curly brace
+        os << std::fixed << std::setprecision(5) << "{";
 
-        bool firstElement = true; // Flag to handle commas correctly
+        bool firstElement = true;
         for (const auto &element: set) {
             if (!firstElement) {
-                os << ", "; // Add comma and space before subsequent elements
+                os << ", ";
             }
-            os << element; // Stream each element - assumes element type T is also streamable
+            os << element;
             firstElement = false;
         }
 
-        os << "}"; // End with closing curly brace
+        os << "}";
         return os;
     }
 
     inline std::ostream& operator<<(std::ostream& os, const RealMargin& margin) {
-        os << "[" << margin.lower << ", " << margin.upper << "]";
+        os << std::fixed << std::setprecision(5) << "[" << margin.lower << ", " << margin.upper << "]";
+        return os;
+    }
+
+    template<typename T>
+    std::ostream &operator<<(std::ostream &os, const Eigen::ArrayX<T> &array) {
+        os << std::fixed << std::setprecision(5) << "[";
+
+        bool firstElement = true;
+        for (const auto &element: array) {
+            if (!firstElement) {
+                os << ", ";
+            }
+            os << element;
+            firstElement = false;
+        }
+
+        os << "]";
         return os;
     }
 }

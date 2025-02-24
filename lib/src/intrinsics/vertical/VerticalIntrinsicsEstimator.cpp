@@ -182,7 +182,7 @@ namespace accurate_ri {
             VerticalLogging::plotDebugInfo(points, scanlineLimits, pointsScanlinesIds, iteration, "fit_", maxValues, uncertainty);
 
             if (!fitSuccess || scanlineLimits.indices.size() == 0) {
-                LOG_INFO("Fit failed: ", !fitSuccess, ", Points in scanline: ", scanlineLimits.indices.size());
+                LOG_INFO("Fit failed: ", !fitSuccess? "True" : "False", ", Points in scanline: ", scanlineLimits.indices.size());
                 LOG_INFO("");
 
                 hough->eraseByHash(houghMax.hash);
@@ -249,9 +249,9 @@ namespace accurate_ri {
 
                 LOG_WARN("Possible problem detected");
                 LOG_INFO(
-                    "Intersects other scanline: ", intersectsOtherScanline,
+                    "Intersects other scanline: ", intersectsOtherScanline? "True": "False",
                     ", Intersects theoretically: ", intersectsTheoreticalCount,
-                    ", Fit success: ", fitSuccess,
+                    ", Fit success: ", fitSuccess? "True": "False",
                     ", Points in scanline: ", scanlineLimits.indices.size(), " vs ", houghMax.votes
                 );
 
@@ -291,7 +291,7 @@ namespace accurate_ri {
                     } else {
                         LOG_INFO(
                             "New uncertainty is infinite, but so are the conflicting scanlines uncertainties. Intersects other empirical: ",
-                            intersectsOtherScanline
+                            intersectsOtherScanline? "True": "False", "."
                         );
                         rejectingCurrent = intersectsOtherScanline;
 
