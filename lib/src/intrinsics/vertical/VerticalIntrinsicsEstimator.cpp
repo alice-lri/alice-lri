@@ -63,7 +63,12 @@ namespace accurate_ri {
                 break;
             }
 
-            const std::optional<HoughCell> houghMaxOpt = hough->findMaximum(std::nullopt);
+            double averageOffset = 0;
+            for (const ScanlineInfo &info: scanlineInfoMap | std::views::values) {
+                averageOffset += info.values.offset / static_cast<double>(scanlineInfoMap.size());
+            }
+
+            const std::optional<HoughCell> houghMaxOpt = hough->findMaximum(averageOffset);
 
             if (!houghMaxOpt) {
                 endReason = EndReason::NO_MORE_PEAKS;
@@ -77,7 +82,7 @@ namespace accurate_ri {
             LOG_INFO("ITERATION ", iteration);
             LOG_INFO(
                 "Offset: ", maxValues.offset, ", Angle: ", maxValues.angle, ", Votes: ", houghMax.votes,
-                ", Hash: ", houghMax.hash, ", Hough indices: [", houghMax.maxAngleIndex, "  ", houghMax.maxOffsetIndex,
+                ", Hash: ", houghMax.hash, ", Hough indices: [", houghMax.maxAngleIndex, "   ", houghMax.maxOffsetIndex,
                 "]"
             );
 
@@ -657,7 +662,7 @@ namespace accurate_ri {
 
             LOG_INFO(
                 "Model fit iteration; Offset: ", fitResult->values.offset, ", Angle: ", fitResult->values.angle,
-                " using ", pointFitCount, " points, Convergence state: ", static_cast<int>(state)
+                " using ", pointFitCount, " points, Convergence state: ", static_cast<int>(state), ","
             );
 
             // TODO review and justify these constants
@@ -690,8 +695,8 @@ namespace accurate_ri {
 
             LOG_INFO(
                 "Offset increased: ", upperOffsetMargin, ", Offset decreased: ", lowerOffsetMargin,
-                " Angle increased: ", upperAngleMargin, ", Angle decreased: ", lowerAngleMargin,
-                " Mean inv ranges: ", meanInvRanges
+                ", Angle increased: ", upperAngleMargin, ", Angle decreased: ", lowerAngleMargin,
+                ", Mean inv ranges: ", meanInvRanges
             );
 
             const ScanlineLimits &newLimits = computeScanlineLimits(
@@ -699,7 +704,7 @@ namespace accurate_ri {
             );
 
             LOG_INFO(
-                "Minimum limit width (fit): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff()
+                "Minimum limit width (fit): ", (newLimits.upperLimit - newLimits.lowerLimit).minCoeff()
             );
 
             if ((newLimits.mask == currentScanlineLimits.mask).all()) {
