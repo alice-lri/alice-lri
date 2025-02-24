@@ -119,8 +119,9 @@ namespace accurate_ri {
          * @param y The current y value in the accumulator.
          * @param voteVal The value to be added to the accumulator for the current point.
          * @param previousY The y value of the previous point.
+         * @param voteType
          */
-        inline void voteForDiscontinuities(uint64_t pointIndex, size_t x, int32_t y, double voteVal, int32_t previousY);
+        inline void voteForDiscontinuities(uint64_t pointIndex, size_t x, int32_t y, double voteVal, int32_t previousY, const VoteType &voteType);
 
         HoughCell indicesToCell(const std::pair<size_t, size_t> &indices);
     };

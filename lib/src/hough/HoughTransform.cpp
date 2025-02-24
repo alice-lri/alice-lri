@@ -9,7 +9,6 @@
 #include "utils/Timer.h"
 
 namespace accurate_ri {
-
     HoughTransform::HoughTransform(
         const double xMin, const double xMax, const double xStep, const double yMin, const double yMax,
         const double yStep
@@ -55,10 +54,14 @@ namespace accurate_ri {
 
             if (previousY != -1) {
                 // TODO this is inside the if for consistency with Python, but maybe is not the right thing to do
-                accumulator(y, x) = (voteType != VoteType::ZERO) ? (accumulator(y, x) + voteVal) : 0;
-                hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
+                if (voteType != VoteType::ZERO) {
+                    accumulator(y, x) += voteVal;
+                    hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
+                } else {
+                    accumulator(y, x) = 0;
+                }
 
-                voteForDiscontinuities(pointIndex, x, y, voteVal, previousY);
+                voteForDiscontinuities(pointIndex, x, y, voteVal, previousY, voteType);
             }
 
             previousY = y;
@@ -66,7 +69,8 @@ namespace accurate_ri {
     }
 
     inline void HoughTransform::voteForDiscontinuities(
-        const uint64_t pointIndex, const size_t x, const int32_t y, const double voteVal, const int32_t previousY
+        const uint64_t pointIndex, const size_t x, const int32_t y, const double voteVal, const int32_t previousY,
+        const VoteType &voteType
     ) {
         assert(x > 0);
 
@@ -77,18 +81,22 @@ namespace accurate_ri {
             return;
         }
 
-        accumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() += voteVal;
-
-        hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() =
-                hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).unaryExpr(
-                    [&](uint64_t val) {
-                        return val ^ HashUtils::knuth_uint(pointIndex); // Equivalent to ^= but for Eigen
-                    }
-                );
+        auto &&accumulatorBlock = accumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array();
+        if (voteType != VoteType::ZERO) {
+            accumulatorBlock += voteVal;
+            hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() =
+                    hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).unaryExpr(
+                        [&](uint64_t val) {
+                            return val ^ HashUtils::knuth_uint(pointIndex); // Equivalent to ^= but for Eigen
+                        }
+                    );
+        } else {
+            accumulatorBlock = 0;
+        }
     }
 
     std::optional<HoughCell> HoughTransform::findMaximum(std::optional<double> averageX) {
-        std::vector<std::pair<size_t, size_t>> maxIndices;
+        std::vector<std::pair<size_t, size_t> > maxIndices;
         double maxVal = -std::numeric_limits<double>::infinity();
 
         for (size_t y = 0; y < yCount; y++) {
@@ -137,7 +145,7 @@ namespace accurate_ri {
     }
 
     void HoughTransform::eraseWhere(const PointArray &points, const Eigen::ArrayXi &indices) {
-        for (const int32_t index : indices) {
+        for (const int32_t index: indices) {
             updateAccumulatorForPoint(index, points, VoteType::ZERO);
         }
     }
@@ -152,16 +160,16 @@ namespace accurate_ri {
             for (int j = 0; j < matrix.cols(); j++) {
                 if (matrix(i, j) != hashAccumulator(i, j)) {
                     diffFlag = true;
-                    LOG_DEBUG("Hashes do not match at ", i, ", ", j);
-                    LOG_DEBUG("Expected: ", matrix(i, j), ", got: ", hashAccumulator(i, j));
+                    LOG_INFO("Hashes do not match at ", i, ", ", j);
+                    LOG_INFO("Expected: ", matrix(i, j), ", got: ", hashAccumulator(i, j));
                 }
             }
         }
 
         if (diffFlag) {
-            LOG_DEBUG("Hashes do not match");
+            LOG_INFO("Hashes do not match");
         } else {
-            LOG_DEBUG("Hashes match");
+            LOG_INFO("Hashes match");
         }
     }
 
@@ -175,16 +183,16 @@ namespace accurate_ri {
             for (int j = 0; j < matrix.cols(); j++) {
                 if (matrix(i, j) != accumulator(i, j)) {
                     diffFlag = true;
-                    LOG_DEBUG("Accumulators do not match at ", i, ", ", j);
-                    LOG_DEBUG("Expected: ", matrix(i, j), ", got: ", accumulator(i, j));
+                    LOG_INFO("Accumulators do not match at ", i, ", ", j);
+                    LOG_INFO("Expected: ", matrix(i, j), ", got: ", accumulator(i, j));
                 }
             }
         }
 
         if (diffFlag) {
-            LOG_DEBUG("Accumulators do not match");
+            LOG_INFO("Accumulators do not match");
         } else {
-            LOG_DEBUG("Accumulators match");
+            LOG_INFO("Accumulators match");
         }
     }
 
