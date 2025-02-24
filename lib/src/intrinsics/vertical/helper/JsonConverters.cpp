@@ -74,15 +74,24 @@ namespace accurate_ri {
 
     nlohmann::json scanlineInfoToJson(const ScanlineInfo &si) {
         nlohmann::json j;
-        j["scanlineId"] = si.scanlineId;
-        j["pointsCount"] = si.pointsCount;
-        j["values"] = offsetAngleToJson(si.values);
-        j["ci"] = offsetAngleMarginToJson(si.ci);
-        j["theoreticalAngleBounds"] = scanlineAngleBoundsToJson(si.theoreticalAngleBounds);
-        j["dependencies"] = si.dependencies;
+        j["offset"] = si.values.offset;
+        j["angle"] = si.values.angle;
+        j["hough_votes"] = si.houghVotes;
+        j["hash"] = si.houghHash;
+        j["count"] = si.pointsCount;
+        j["lower_min_theoretical_angle"] = si.theoreticalAngleBounds.bottom.lower;
+        j["lower_max_theoretical_angle"] = si.theoreticalAngleBounds.bottom.upper;
+        j["upper_min_theoretical_angle"] = si.theoreticalAngleBounds.top.lower;
+        j["upper_max_theoretical_angle"] = si.theoreticalAngleBounds.top.upper;
         j["uncertainty"] = si.uncertainty;
-        j["houghVotes"] = si.houghVotes;
-        j["houghHash"] = si.houghHash;
+        j["angle_ci"] = nlohmann::json::array();
+        j["angle_ci"].push_back(si.ci.angle.lower);
+        j["angle_ci"].push_back(si.ci.angle.upper);
+        j["offset_ci"] = nlohmann::json::array();
+        j["offset_ci"].push_back(si.ci.offset.lower);
+        j["offset_ci"].push_back(si.ci.offset.upper);
+        j["dependencies"] = si.dependencies;
+        j["last_scanline_assignment"] = false;
         return j;
     }
 
@@ -113,13 +122,13 @@ namespace accurate_ri {
     nlohmann::json verticalIntrinsicsResultToJson(const VerticalIntrinsicsResult &vir) {
         nlohmann::json j;
         j["iterations"] = vir.iterations;
-        j["scanlinesCount"] = vir.scanlinesCount;
-        j["unassignedPoints"] = vir.unassignedPoints;
-        j["pointsCount"] = vir.pointsCount;
-        j["endReason"] = endReasonToJson(vir.endReason);
-        j["scanlines"] = nlohmann::json::array();
+        j["scanlines_count"] = vir.scanlinesCount;
+        j["end_reason"] = endReasonToJson(vir.endReason);
+        j["unassigned_points"] = vir.unassignedPoints;
+        j["points_count"] = vir.pointsCount;
+        j["scanlines_attributes"] = nlohmann::json::array();
         for (const auto &scanline: vir.scanlines) {
-            j["scanlines"].push_back(scanlineInfoToJson(scanline));
+            j["scanlines_attributes"].push_back(scanlineInfoToJson(scanline));
         }
         return j;
     }
