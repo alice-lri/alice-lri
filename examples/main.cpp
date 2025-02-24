@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
             outputPath = argv[3];
             break;
         default:
-            std::cout << "Usage: " << argv[0] << " [path] [accurateDigits]" << std::endl;
+            std::cout << "Usage: " << argv[0] << " [path] [accurateDigits] [outputPath]" << std::endl;
             return 1;
     }
 

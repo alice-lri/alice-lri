@@ -4,44 +4,57 @@ import multiprocessing
 import random
 import json
 import sys
+import subprocess
+
+base_folder = "../../Datasets/LiDAR"
+executable = "cmake-build-release/examples/examples"
 
 def run_experiment(experiment):
     path = experiment['path']
     output_root_folder = experiment['output_root_folder']
     accurate_digit = experiment['accurate_digit']
-    experiment_name = experiment['experiment_name']
 
     # Create the output directory
     os.makedirs(output_root_folder, exist_ok=True)
 
-    print(f"Executing experiment {experiment_name}")
-    # TODO invoke process
+    experiment_command = [executable, path, str(accurate_digit), output_root_folder]
+    print(f"Executing command: {experiment_command}")
+
+    try:
+        subprocess.run(
+            experiment_command,
+            check=True
+        )
+        print(f"Process finished successfully for command: {experiment_command}")
+    except subprocess.CalledProcessError as e:
+        print(f"Error running command: {experiment_command}")
+        print(f"Return Code: {e.returncode}")
 
 def get_kitti_files():
-    kitti_pattern = '../../kitti/Organized/*/*/data/*.bin'
+    kitti_pattern = f'{base_folder}/kitti_organized/Organized/*/*/data/*.bin'
     kitti_files = glob.glob(kitti_pattern)
 
     return kitti_files
 
 def get_durlar_files():
-    durlar_pattern = '../../datasets/durlar/dataset/DurLAR/*/ouster_points/data/*.bin'
+    durlar_pattern = f'{base_folder}/durlar/dataset/DurLAR/*/ouster_points/data/*.bin'
     durlar_files = glob.glob(durlar_pattern)
 
     return durlar_files
 
 def get_conflicting_durlar_files():
     return [
-        '../../datasets/durlar/dataset/DurLAR/DurLAR_20210716/ouster_points/data/0000035000.bin',
-        '../../datasets/durlar/dataset/DurLAR/DurLAR_20210716/ouster_points/data/0000035800.bin',
-        '../../datasets/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000019700.bin',
-        '../../datasets/durlar/dataset/DurLAR/DurLAR_20211012/ouster_points/data/0000018200.bin',
-        '../../datasets/durlar/dataset/DurLAR/DurLAR_20211012/ouster_points/data/0000019800.bin',
-        '../../datasets/durlar/dataset/DurLAR/DurLAR_20211012/ouster_points/data/0000022800.bin',
-        '../../datasets/durlar/dataset/DurLAR/DurLAR_20211012/ouster_points/data/0000023900.bin',
-        '../../datasets/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000018100.bin',
-        '../../datasets/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000021200.bin',
-        '../../datasets/durlar/dataset/DurLAR/DurLAR_20211208/ouster_points/data/0000016700.bin',
-        '../../datasets/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000015800.bin'
+        f'{base_folder}/durlar/dataset/DurLAR/DurLAR_20210716/ouster_points/data/0000035000.bin',
+        f'{base_folder}/durlar/dataset/DurLAR/DurLAR_20210716/ouster_points/data/0000035800.bin',
+        f'{base_folder}/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000019700.bin',
+        f'{base_folder}/durlar/dataset/DurLAR/DurLAR_20211012/ouster_points/data/0000018200.bin',
+        f'{base_folder}/durlar/dataset/DurLAR/DurLAR_20211012/ouster_points/data/0000019800.bin',
+        f'{base_folder}/durlar/dataset/DurLAR/DurLAR_20211012/ouster_points/data/0000022800.bin',
+        f'{base_folder}/durlar/dataset/DurLAR/DurLAR_20211012/ouster_points/data/0000023900.bin',
+        f'{base_folder}/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000018100.bin',
+        f'{base_folder}/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000021200.bin',
+        f'{base_folder}/durlar/dataset/DurLAR/DurLAR_20211208/ouster_points/data/0000016700.bin',
+        f'{base_folder}/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000015800.bin'
     ]
 
 def update_progress(current, total):
@@ -97,7 +110,7 @@ def filter_out_successful_experiments(all_experiments, print_info=False, only_pa
     return experiments_to_run
 
 
-def execute_hough_experiments_parallel():
+def execute_experiments_parallel():
     paths_kitti = get_kitti_files()
     #paths_kitti = []
     paths_durlar = get_durlar_files()
@@ -145,7 +158,7 @@ def execute_hough_experiments_parallel():
 
     experiments = filter_out_successful_experiments(experiments, print_info=True)
 
-    N = multiprocessing.cpu_count()
+    N = 16# multiprocessing.cpu_count()
     print(f"Will use {N} processes for parallel execution.")
     print("Continue with the execution? (y/n): ")
 
@@ -157,4 +170,4 @@ def execute_hough_experiments_parallel():
 
 
 if __name__ == '__main__':
-    execute_hough_experiments_parallel()
+    execute_experiments_parallel()

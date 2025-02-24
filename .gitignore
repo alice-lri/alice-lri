@@ -6,3 +6,5 @@ cmake-build-release/
 ref_tracing/
 
 scripts/buffers/
+
+output/
