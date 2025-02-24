@@ -31,17 +31,6 @@ namespace accurate_ri {
 
         LOG_DEBUG("Dimensions of testHash: ", hough->getYCount(), " x ", hough->getXCount());
 
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> testAcc = TestUtils::loadBinToEigenMatrix<double>(
-            "ref_tracing/acc.bin", hough->getYCount(), hough->getXCount()
-        );
-
-        Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic> testHash = TestUtils::loadBinToEigenMatrix<uint64_t>(
-            "ref_tracing/hashes.bin", hough->getYCount(), hough->getXCount()
-        );
-
-        // hough->ensureAccEquals(testAcc);
-        // hough->ensureHashEquals(testHash);
-
         VerticalLogging::printHeaderDebugInfo(points, *hough);
 
         Eigen::ArrayXi pointsScanlinesIds = Eigen::ArrayXi::Ones(points.size()) * -1;
