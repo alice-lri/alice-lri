@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <unordered_set>
 #include <eigen3/Eigen/Dense>
+#include <optional>
 
 namespace accurate_ri {
     struct OffsetAngle {
@@ -121,7 +122,7 @@ namespace accurate_ri {
         return os;
     }
 
-    inline std::ostream& operator<<(std::ostream& os, const RealMargin& margin) {
+    inline std::ostream &operator<<(std::ostream &os, const RealMargin &margin) {
         os << std::fixed << std::setprecision(5) << "[" << margin.lower << ", " << margin.upper << "]";
         return os;
     }

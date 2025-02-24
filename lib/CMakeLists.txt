@@ -34,6 +34,9 @@ include_directories(EIGEN3_INCLUDE_DIR)
 #print out the EIGEN3_INCLUDE_DIR
 message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
 
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+add_subdirectory(external/json)
+
 add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/utils/Timer.h
         src/point/PointUtils.cpp
@@ -55,12 +58,16 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/vertical/helper/VerticalLogging.h
         src/utils/TestUtils.h
         src/intrinsics/vertical/helper/VerticalLogging.cpp
+        src/intrinsics/vertical/helper/JsonConverters.cpp
+        src/intrinsics/vertical/helper/JsonConverters.h
 )
 
 target_include_directories(accurate_ri
         PUBLIC include
         PRIVATE src
 )
+
+target_link_libraries(accurate_ri PRIVATE nlohmann_json::nlohmann_json)
 
 install(TARGETS accurate_ri DESTINATION lib)
 install(DIRECTORY include/ DESTINATION include)

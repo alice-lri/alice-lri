@@ -9,6 +9,7 @@
 #include "VerticalStructs.h"
 #include "utils/TestUtils.h"
 #include "utils/Timer.h"
+#include <nlohmann/json.hpp>
 
 namespace accurate_ri {
     // TODO extract these constants somewhere
@@ -476,6 +477,7 @@ namespace accurate_ri {
         }
 
         for (auto &scanlineInfo: sortedScanlines) {
+            scanlineInfo.scanlineId = oldIdsToNewIdsMap[scanlineInfo.scanlineId];
             std::ranges::transform(
                 scanlineInfo.dependencies, scanlineInfo.dependencies.begin(), [&oldIdsToNewIdsMap](const uint32_t id) {
                     return oldIdsToNewIdsMap[id];
@@ -501,6 +503,8 @@ namespace accurate_ri {
             .scanlines = std::move(sortedScanlines),
             .pointsScanlinesIds = std::move(pointsScanlinesIds)
         };
+
+        writeToJson(result);
 
         return result;
     }
