@@ -2,8 +2,11 @@
 
 #include <cstdint>
 #include <fstream>
+#include <optional>
+#include <cmath>
 
-FileUtils::Points FileUtils::loadBinaryFile(const std::string &filename) {
+
+FileUtils::Points FileUtils::loadBinaryFile(const std::string &filename, const std::optional<int>& accurateDigits) {
     std::ifstream file(filename, std::ios::binary);
     if (!file) {
         throw std::runtime_error("Cannot open file: " + filename);
@@ -22,6 +25,12 @@ FileUtils::Points FileUtils::loadBinaryFile(const std::string &filename) {
         throw std::runtime_error("Error reading file");
     }
 
+    if (accurateDigits.has_value()) {
+        for (float& value : buffer) {
+            value = std::round(value * std::pow(10, accurateDigits.value())) / std::pow(10, accurateDigits.value());
+        }
+    }
+
     size_t pointsCount = buffer.size() / 4;
 
     Points result;
@@ -30,10 +39,22 @@ FileUtils::Points FileUtils::loadBinaryFile(const std::string &filename) {
     result.z.reserve(pointsCount);
 
     for (uint32_t i = 0; i < pointsCount; ++i) {
-        result.x.emplace_back(buffer[i * 4]);
-        result.y.emplace_back(buffer[i * 4 + 1]);
-        result.z.emplace_back(buffer[i * 4 + 2]);
+        const float x = buffer[i * 4];
+        const float y = buffer[i * 4 + 1];
+        const float z = buffer[i * 4 + 2];
+
+        if (x == 0 && y == 0 && z == 0) {
+            continue;
+        }
+
+        result.x.emplace_back(x);
+        result.y.emplace_back(y);
+        result.z.emplace_back(z);
     }
+
+    result.x.shrink_to_fit();
+    result.y.shrink_to_fit();
+    result.z.shrink_to_fit();
 
     return result;
 }

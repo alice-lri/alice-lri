@@ -103,7 +103,7 @@ namespace accurate_ri {
         static auto formatValue(const T& value) {
             if constexpr (std::is_floating_point_v<T>) {
                 std::stringstream ss;
-                ss << std::fixed << std::setprecision(6) << value;
+                ss << std::fixed << std::setprecision(5) << value;
                 return ss.str();
             } else {
                 return value;

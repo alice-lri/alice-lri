@@ -1,3 +1,4 @@
+#include <optional>
 #include "accurate_ri.h"
 #include "FileUtils.h"
 
@@ -12,8 +13,9 @@ void setCloudPath(const std::string& path) {
 }
 
 int main() {
-    const std::string path = "../../Datasets/LiDAR/kitti_organized/Organized/road/2011_10_03_drive_0042/data/0000000000.bin";
-    FileUtils::Points points = FileUtils::loadBinaryFile(path);
+    const std::string path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000009025.bin";
+    const std::optional<int> accurateDigits = std::nullopt;
+    FileUtils::Points points = FileUtils::loadBinaryFile(path, accurateDigits);
 
     setCloudPath(path);
     accurate_ri::execute(points.x, points.y, points.z);
