@@ -60,6 +60,20 @@ namespace accurate_ri {
         std::optional<ScanlineLimits> limits;
     };
 
+    struct ScanlineEstimationResult {
+        bool heuristic;
+        double uncertainty;
+        OffsetAngle values;
+        OffsetAngleMargin ci;
+        ScanlineLimits limits;
+        std::vector<uint32_t> dependencies;
+    };
+
+    struct ScanlineIntersectionInfo {
+        uint32_t scanlineId;
+        double intersection;
+    };
+
     struct HeuristicScanline {
         double offset;
         RealMargin offsetCi;

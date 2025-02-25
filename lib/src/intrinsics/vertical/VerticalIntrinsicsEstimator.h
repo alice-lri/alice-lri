@@ -26,6 +26,10 @@ namespace accurate_ri {
             const OffsetAngleMargin &margin, double invRangesShift
         ) const;
 
+        std::optional<ScanlineEstimationResult> estimateScanline(
+            const PointArray &points, const VerticalBounds &errorBounds, const ScanlineLimits &scanlineLimits
+        );
+
         [[nodiscard]] ScanlineFitResult tryFitScanline(
             const PointArray &points, const VerticalBounds &errorBounds,
             const ScanlineLimits &scanlineLimits

@@ -20,9 +20,7 @@ namespace accurate_ri {
     constexpr uint64_t MAX_FIT_ATTEMPTS = 10;
 
     enum class FitConvergenceState {
-        INITIAL = 0,
-        CONVERGED = 1,
-        CONFIRMED = 2,
+        INITIAL = 0, CONVERGED = 1, CONFIRMED = 2,
     };
 
     // TODO probably make dedicated structs for all the tuples
@@ -81,8 +79,8 @@ namespace accurate_ri {
                 {hough->getYStep(), hough->getYStep()}
             };
 
-            VerticalBounds errorBounds = computeErrorBounds(points, maxValues.offset);
-            ScanlineLimits scanlineLimits = computeScanlineLimits(
+            VerticalBounds errorBoundz = computeErrorBounds(points, maxValues.offset);
+            ScanlineLimits scanlineLimitz = computeScanlineLimits(
                 points, errorBounds.final, maxValues, margin, 0
             );
 
@@ -91,97 +89,32 @@ namespace accurate_ri {
             );
 
             bool lastScanlineAssignment = false; // TODO why is this not used
-            bool requiresHeuristicFitting = true;
-            bool fitSuccess = false;
-            double uncertainty;
-            OffsetAngleMargin confidenceIntervals = {};
-            std::vector<uint32_t> dependencies;
-            // TODO this is only used in heuristics an added to the end, we should probably construct the scanline info through the process
 
-            VerticalLogging::plotDebugInfo(points, scanlineLimits, pointsScanlinesIds, iteration, "hough_", maxValues, 0);
+            VerticalLogging::plotDebugInfo(
+                points, scanlineLimits, pointsScanlinesIds, iteration, "hough_", maxValues, 0
+            );
 
-            if (scanlineLimits.indices.size() > 2) {
-                const ScanlineFitResult scanlineFit = tryFitScanline(
-                    points, errorBounds, scanlineLimits
-                );
+            const auto &estimationResultOpt = estimateScanline(points, errorBounds, scanlineLimits);
 
-                requiresHeuristicFitting = scanlineFit.ciTooWide;
-                fitSuccess = scanlineFit.success;
-
-                if (fitSuccess and !requiresHeuristicFitting) {
-                    // TODO these form a relevant group
-                    maxValues = scanlineFit.fit->values;
-                    scanlineLimits = *scanlineFit.limits;
-                    confidenceIntervals = scanlineFit.fit->ci;
-                    uncertainty = scanlineFit.fit->aic;
-                    // TODO At this point, we know that the fit was successful, make the code more readable
-                }
-            }
-
-            if (requiresHeuristicFitting and scanlineLimits.indices.size() > 0) {
-                LOG_WARN("Heuristic fitting");
-                // TODO: in theory it can only ever be zero if it was before, perhaps break or something earlier
-                const Eigen::ArrayXd invRanges = points.getInvRanges()(scanlineLimits.indices);
-                const Eigen::ArrayXd phis = points.getPhis()(scanlineLimits.indices);
-
-                const double invRangesMean = invRanges.mean();
-                const double phisMean = phis.mean();
-
-                HeuristicScanline heuristic = computeHeuristicScanline(invRangesMean, phisMean);
-                maxValues.offset = heuristic.offset;
-                maxValues.angle = (phis - (maxValues.offset * invRanges).asin()).mean();
-
-                confidenceIntervals.offset = heuristic.offsetCi;
-                dependencies = heuristic.dependencies;
-
-                RealMargin angleMarginTmp = {
-                    (phis - (confidenceIntervals.offset.lower * invRanges).asin()).mean(),
-                    (phis - (confidenceIntervals.offset.upper * invRanges).asin()).mean()
-                };
-
-                confidenceIntervals.angle = {
-                    std::min(angleMarginTmp.lower, angleMarginTmp.upper),
-                    std::max(angleMarginTmp.lower, angleMarginTmp.upper)
-                };
-
+            if (!estimationResultOpt) {
                 LOG_INFO(
-                    "Offset confidence interval: ", confidenceIntervals.offset, ", Angle confidence interval: ",
-                    confidenceIntervals.angle, ", Offset: ", maxValues.offset, ", Angle: ", maxValues.angle
+                    "Fit failed: True, Points in scanline: ", scanlineLimits.indices.size()
                 );
-
-                fitSuccess = true;
-                uncertainty = std::numeric_limits<double>::infinity();
-
-                double offsetMargin = confidenceIntervals.offset.diff() / 2;
-                double angleMargin = confidenceIntervals.angle.diff() / 2;
-
-                // Numerical stability
-                offsetMargin = std::max(offsetMargin, 1e-6);
-                angleMargin = std::max(angleMargin, 1e-6);
-
-                errorBounds = computeErrorBounds(points, maxValues.offset);
-
-                const OffsetAngleMargin heuristicMargin = {offsetMargin, offsetMargin, angleMargin, angleMargin};
-                scanlineLimits = computeScanlineLimits(
-                    points, errorBounds.final, maxValues, heuristicMargin, invRangesMean
-                );
-
-                LOG_INFO("Offset: ", maxValues.offset, ", Angle: ", maxValues.angle);
-            }
-
-            VerticalLogging::plotDebugInfo(points, scanlineLimits, pointsScanlinesIds, iteration, "fit_", maxValues, uncertainty);
-
-            if (!fitSuccess || scanlineLimits.indices.size() == 0) {
-                LOG_INFO("Fit failed: ", !fitSuccess? "True" : "False", ", Points in scanline: ", scanlineLimits.indices.size());
                 LOG_INFO("");
 
                 hough->eraseByHash(houghMax.hash);
                 continue;
             }
 
-            const Eigen::ArrayXi conflictingScanlinesIdsVerbose = pointsScanlinesIds(scanlineLimits.indices);
+            const ScanlineEstimationResult& scanlineEstimation = *estimationResultOpt;
+
+            VerticalLogging::plotDebugInfo(
+                points, scanlineEstimation.limits, pointsScanlinesIds, iteration, "fit_", maxValues, scanlineEstimation.uncertainty
+            );
+
+            const Eigen::ArrayXi& conflictingScanlinesIdsVerbose = pointsScanlinesIds(scanlineLimits.indices);
             const bool intersectsOtherScanline = (conflictingScanlinesIdsVerbose != -1).any();
-            const ScanlineAngleBounds angleBounds = {
+            const ScanlineAngleBounds& angleBounds = {
                 .bottom = {
                     .lower = confidenceIntervals.angle.lower + asin(confidenceIntervals.offset.lower / maxRange),
                     .upper = confidenceIntervals.angle.lower + asin(confidenceIntervals.offset.lower / minRange)
@@ -271,14 +204,16 @@ namespace accurate_ri {
                     ", Conflicting scanlines uncertainties: ", conflictingScanlinesUncertainties
                 );
 
-                if (uncertainty < conflictingScanlinesUncertainties.minCoeff() || (
-                        conflictingScanlinesUncertainties == std::numeric_limits<double>::infinity()).all()) {
+                if (uncertainty<conflictingScanlinesUncertainties.minCoeff() || (
+                                    conflictingScanlinesUncertainties == std::numeric_limits<double>::infinity()).all()
+) {
                     if (uncertainty != std::numeric_limits<double>::infinity()) {
                         LOG_INFO(
                             "New uncertainty is lower than conflicting scanlines uncertainties. Rejecting conflicting scanlines"
                         );
                         rejectingCurrent = false; // TODO probably here we can return given the right scope
-                    } else {
+
+                    }else {
                         LOG_INFO(
                             "New uncertainty is infinite, but so are the conflicting scanlines uncertainties. Intersects other empirical: ",
                             intersectsOtherScanline? "True": "False", "."
@@ -287,6 +222,7 @@ namespace accurate_ri {
 
                         if (rejectingCurrent) {
                             actuallyConflictingScanlines = conflictingScanlines; // making copy on purpose
+
                         }
                     }
 
@@ -297,6 +233,7 @@ namespace accurate_ri {
                         for (const auto conflictingScanlineId: conflictingScanlines) {
                             if (scanlinesToRemoveSet.insert(conflictingScanlineId).second) {
                                 scanlinesToRemoveQueue.push(conflictingScanlineId);
+
                             }
                         }
 
@@ -308,6 +245,7 @@ namespace accurate_ri {
                             for (auto it = dependencyRange.first; it != dependencyRange.second; ++it) {
                                 if (scanlinesToRemoveSet.insert(it->second).second) {
                                     scanlinesToRemoveQueue.push(it->second);
+
                                 }
                             }
                         }
@@ -315,7 +253,7 @@ namespace accurate_ri {
                         LOG_INFO("Removing scanlines: ", scanlinesToRemoveSet);
 
                         for (const uint32_t scanlineId: scanlinesToRemoveSet) {
-                            const ScanlineInfo &scanline = scanlineInfoMap[scanlineId];
+                            const ScanlineInfo & scanline = scanlineInfoMap[scanlineId];
                             const uint64_t conflictingHash = scanline.houghHash;
                             const double conflictingVotes = scanline.houghVotes;
 
@@ -329,17 +267,19 @@ namespace accurate_ri {
 
                             // Remove entries where scanlineId is in the value
                             for (auto it = reverseScanlinesDependencyMap.begin();
-                                 it != reverseScanlinesDependencyMap.end();) {
+                            it != reverseScanlinesDependencyMap.end();) {
                                 if (it->second == scanlineId) {
                                     it = reverseScanlinesDependencyMap.erase(it);
-                                } else {
+
+                                }else {
                                     ++it;
+
                                 }
                             }
 
                             for (auto it = hashesToConflictsMap.begin(); it != hashesToConflictsMap.end();) {
                                 const uint64_t hash = it->first;
-                                HashToConflictValue &conflicts = it->second;
+                                HashToConflictValue & conflicts = it->second;
 
                                 conflicts.conflictingScanlines.erase(scanlineId);
 
@@ -348,8 +288,10 @@ namespace accurate_ri {
 
                                     hough->restoreVotes(hash, conflicts.votes);
                                     it = hashesToConflictsMap.erase(it);
-                                } else {
+
+                                }else {
                                     ++it;
+
                                 }
                             }
 
@@ -362,9 +304,10 @@ namespace accurate_ri {
                             );
 
                             LOG_INFO("Added hash ", conflictingHash, " to the map");
+
                         }
                     }
-                } else if (scanlineLimits.indices.size() == unassignedPoints) {
+                } else if (scanlineLimits.indices.size() == unassignedPoints){
                     LOG_WARN(
                         "Warning: This is the last scanline, so we will accept it if it is not "
                         "empirically intersecting with other scanlines"
@@ -372,7 +315,8 @@ namespace accurate_ri {
                     // TODO This is causing problems, for example in durlar_4d_single_upper_bound_.._.._datasets_durlar_dataset_DurLAR_DurLAR_20210716_ouster_points_data_0000035800.bin/output.txt
                     rejectingCurrent = intersectsOtherScanline;
                     lastScanlineAssignment = true;
-                } else {
+
+                }else {
                     // TODO make this code cleaner, I think this is just rejectingCurrent
                     LOG_INFO(
                         "New uncertainty is higher than conflicting scanlines uncertainties. Rejecting current scanline"
@@ -403,12 +347,13 @@ namespace accurate_ri {
 
             // We are now outside conflict resolution (seriously, I need to refactor this)
             // TODO here there was the if uncertainty < -500, check if it is still needed
-            if (uncertainty < -500) {
-                hough->eraseWhere(points, scanlineLimits.indices);
-            }
+            if (uncertainty<-500) {
+                        hough->eraseWhere(points, scanlineLimits.indices);
 
-            hough->eraseByHash(houghMax.hash);
-            pointsScanlinesIds(scanlineLimits.indices) = currentScanlineId;
+                    }
+
+                    hough->eraseByHash(houghMax.hash);
+                pointsScanlinesIds(scanlineLimits.indices) = currentScanlineId;
             unassignedPoints -= scanlineLimits.indices.size();
 
             for (const auto &dependency: dependencies) {
@@ -600,6 +545,86 @@ namespace accurate_ri {
         return {scanlineIndices, mask, scanlineLowerLimit, scanlineUpperLimit};
     }
 
+    std::optional<ScanlineEstimationResult> VerticalIntrinsicsEstimator::estimateScanline(
+        const PointArray &points, const VerticalBounds &errorBounds, const ScanlineLimits &scanlineLimits
+    ) {
+        bool requiresHeuristicFitting = false;
+
+        if (scanlineLimits.indices.size() == 0) {
+            return std::nullopt;
+        }
+
+        if (scanlineLimits.indices.size() > 2) {
+            const ScanlineFitResult &scanlineFit = tryFitScanline(points, errorBounds, scanlineLimits);
+            requiresHeuristicFitting = scanlineFit.ciTooWide;
+
+            if (scanlineFit.success and !requiresHeuristicFitting) {
+                return ScanlineEstimationResult{
+                    .heuristic = false,
+                    .uncertainty = scanlineFit.fit->aic,
+                    .values = std::move(scanlineFit.fit->values),
+                    .ci = std::move(scanlineFit.fit->ci),
+                    .limits = std::move(*scanlineFit.limits),
+                    .dependencies = std::vector<uint32_t>()
+                };
+            }
+        }
+
+        if (requiresHeuristicFitting) {
+            LOG_WARN("Heuristic fitting");
+            const Eigen::ArrayXd &invRanges = points.getInvRanges()(scanlineLimits.indices);
+            const Eigen::ArrayXd &phis = points.getPhis()(scanlineLimits.indices);
+
+            const double invRangesMean = invRanges.mean();
+            const double phisMean = phis.mean();
+
+            const HeuristicScanline &heuristic = computeHeuristicScanline(invRangesMean, phisMean);
+            const double heuristicAngle = (phis - (heuristic.offset * invRanges).asin()).mean();
+
+            const RealMargin &angleMarginTmp = {
+                .lower = (phis - (heuristic.offsetCi.lower * invRanges).asin()).mean(),
+                .upper = (phis - (heuristic.offsetCi.upper * invRanges).asin()).mean()
+            };
+
+            const RealMargin &heuristicAngleCi = {
+                .lower = std::min(angleMarginTmp.lower, angleMarginTmp.upper),
+                .upper = std::max(angleMarginTmp.lower, angleMarginTmp.upper)
+            };
+
+            LOG_INFO(
+                "Offset confidence interval: ", heuristic.offsetCi, ", Angle confidence interval: ",
+                heuristicAngleCi, ", Offset: ", heuristic.offset, ", Angle: ", heuristicAngle
+            );
+
+            double offsetMargin = heuristic.offsetCi.diff() / 2;
+            double angleMargin = heuristicAngleCi.diff() / 2;
+
+            // Numerical stability
+            offsetMargin = std::max(offsetMargin, 1e-6);
+            angleMargin = std::max(angleMargin, 1e-6);
+
+            const VerticalBounds &heuristicBounds = computeErrorBounds(points, heuristic.offset);
+            const OffsetAngle &heuristicOffsetAngle = {heuristic.offset, heuristicAngle};
+
+            const OffsetAngleMargin &heuristicMargin = {offsetMargin, offsetMargin, angleMargin, angleMargin};
+            const ScanlineLimits &heuristicLimits = computeScanlineLimits(
+                points, heuristicBounds.final, heuristicOffsetAngle, heuristicMargin, invRangesMean
+            );
+            LOG_INFO("Offset: ", heuristicOffsetAngle.offset, ", Angle: ", heuristicOffsetAngle.angle);
+
+            return ScanlineEstimationResult{
+                .heuristic = true,
+                .uncertainty = std::numeric_limits<double>::infinity(),
+                .values = std::move(heuristicOffsetAngle),
+                .ci = std::move(heuristicMargin),
+                .limits = std::move(heuristicLimits),
+                .dependencies = std::vector<uint32_t>()
+            };
+        }
+
+        return std::nullopt;
+    }
+
     ScanlineFitResult VerticalIntrinsicsEstimator::tryFitScanline(
         const PointArray &points, const VerticalBounds &errorBounds,
         const ScanlineLimits &scanlineLimits
@@ -753,7 +778,7 @@ namespace accurate_ri {
         logLikelihood -= (1 + std::log(M_PI / sizeOverTwo)) * sizeOverTwo;
         logLikelihood += 0.5 * weights.log().sum();
         const double aic = -2 * logLikelihood + 2 * 2; // 2 parameters
-        
+
         const int df = phis.size() - 2; // Degrees of freedom = n - k (k=2 for intercept & slope)
         boost::math::students_t dist(df);
         const double tCritical = quantile(complement(dist, 0.025)); // 95% CI
