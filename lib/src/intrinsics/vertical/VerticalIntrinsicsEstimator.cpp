@@ -33,11 +33,9 @@ namespace accurate_ri {
         VerticalLogging::printHeaderDebugInfo(points, *hough);
 
         pointsScanlinesIds = Eigen::ArrayXi::Ones(points.size()) * -1;
-        int64_t unassignedPoints = points.size();
+        unassignedPoints = points.size();
         int64_t iteration = -1;
         uint32_t currentScanlineId = 0;
-        std::unordered_multimap<uint32_t, uint32_t> reverseScanlinesDependencyMap;
-        std::unordered_map<uint64_t, HashToConflictValue> hashesToConflictsMap;
         EndReason endReason = EndReason::ALL_ASSIGNED;
 
         while (unassignedPoints > 0) {
@@ -85,8 +83,6 @@ namespace accurate_ri {
                 "Minimum limit width (Hough): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff()
             );
 
-            bool lastScanlineAssignment = false; // TODO why is this not used
-
             VerticalLogging::plotDebugInfo(
                 points, scanlineLimits, pointsScanlinesIds, iteration, "hough_", maxValues, 0
             );
@@ -104,194 +100,40 @@ namespace accurate_ri {
             }
 
             const ScanlineEstimationResult &scanlineEstimation = *estimationResultOpt;
-            const ScanlineAngleBounds &angleBounds = {
-                .bottom = {
-                    .lower = scanlineEstimation.ci.angle.lower + asin(scanlineEstimation.ci.offset.lower / points.getMaxRange()),
-                    .upper = scanlineEstimation.ci.angle.lower + asin(scanlineEstimation.ci.offset.lower / points.getMinRange())
-                },
-                .top = {
-                    .lower = scanlineEstimation.ci.angle.upper + asin(scanlineEstimation.ci.offset.upper / points.getMaxRange()),
-                    .upper = scanlineEstimation.ci.angle.upper + asin(scanlineEstimation.ci.offset.upper / points.getMinRange())
-                }
-            };
 
             VerticalLogging::plotDebugInfo(
                 points, scanlineEstimation.limits, pointsScanlinesIds, iteration, "fit_", maxValues,
                 scanlineEstimation.uncertainty
             );
 
-            const ScanlineIntersectionInfo &intersectionInfo = computeScanlineIntersectionInfo(
-                angleBounds, scanlineEstimation, currentScanlineId
+            const ScanlineAngleBounds &angleBounds = {
+                .bottom = {
+                    .lower = scanlineEstimation.ci.angle.lower + asin(
+                                 scanlineEstimation.ci.offset.lower / points.getMaxRange()
+                             ),
+                    .upper = scanlineEstimation.ci.angle.lower + asin(
+                                 scanlineEstimation.ci.offset.lower / points.getMinRange()
+                             )
+                },
+                .top = {
+                    .lower = scanlineEstimation.ci.angle.upper + asin(
+                                 scanlineEstimation.ci.offset.upper / points.getMaxRange()
+                             ),
+                    .upper = scanlineEstimation.ci.angle.upper + asin(
+                                 scanlineEstimation.ci.offset.upper / points.getMinRange()
+                             )
+                }
+            };
+
+
+            bool keepScanline = performScanlineConflictResolution(
+                angleBounds, scanlineEstimation, currentScanlineId, houghMax
             );
 
-            if (intersectionInfo.anyIntersection()) {
-                bool rejectingCurrent = true;
-
-                LOG_WARN("Possible problem detected");
-                LOG_INFO(
-                    "Intersects other scanline: ", intersectionInfo.empiricalIntersection? "True": "False",
-                    ", Intersects theoretically: ", intersectionInfo.theoreticalIntersection,
-                    ", Fit success: ", "True",
-                    ", Points in scanline: ", scanlineEstimation.limits.indices.size(), " vs ", houghMax.votes
-                );
-
-
-                Eigen::ArrayXi conflictingScanlines = Eigen::ArrayXi::Zero(
-                    intersectionInfo.empiricalIntersectionMask.size()
-                );
-                int j = 0;
-                for (int i = 0; i < intersectionInfo.empiricalIntersectionMask.size(); ++i) {
-                    if (intersectionInfo.anyIntersection(i)) {
-                        conflictingScanlines(j++) = pointsScanlinesIds(i);
-                    }
-                }
-                conflictingScanlines.conservativeResize(j);
-
-                Eigen::ArrayXd conflictingScanlinesUncertainties(conflictingScanlines.size());
-                for (int i = 0; i < conflictingScanlines.size(); ++i) {
-                    conflictingScanlinesUncertainties(i) = scanlineInfoMap[conflictingScanlines(i)].uncertainty;
-                }
-
-                Eigen::ArrayXi actuallyConflictingScanlines;
-
-                LOG_INFO(
-                    "Intersects with scanlines: ", conflictingScanlines,
-                    ", Current scanline uncertainty: ", scanlineEstimation.uncertainty,
-                    ", Conflicting scanlines uncertainties: ", conflictingScanlinesUncertainties
-                );
-
-                if (scanlineEstimation.uncertainty < conflictingScanlinesUncertainties.minCoeff() || (
-                        conflictingScanlinesUncertainties == std::numeric_limits<double>::infinity()).all()
-                ) {
-                    if (scanlineEstimation.uncertainty != std::numeric_limits<double>::infinity()) {
-                        LOG_INFO(
-                            "New uncertainty is lower than conflicting scanlines uncertainties. Rejecting conflicting scanlines"
-                        );
-                        rejectingCurrent = false; // TODO probably here we can return given the right scope
-                    } else {
-                        LOG_INFO(
-                            "New uncertainty is infinite, but so are the conflicting scanlines uncertainties. Intersects other empirical: ",
-                            intersectionInfo.empiricalIntersection? "True": "False", "."
-                        );
-                        rejectingCurrent = intersectionInfo.empiricalIntersection;
-
-                        if (rejectingCurrent) {
-                            actuallyConflictingScanlines = conflictingScanlines; // making copy on purpose
-                        }
-                    }
-
-                    if (scanlineEstimation.uncertainty != std::numeric_limits<double>::infinity()) {
-                        std::queue<uint32_t> scanlinesToRemoveQueue;
-                        std::unordered_set<uint32_t> scanlinesToRemoveSet;
-
-                        for (const auto conflictingScanlineId: conflictingScanlines) {
-                            if (scanlinesToRemoveSet.insert(conflictingScanlineId).second) {
-                                scanlinesToRemoveQueue.push(conflictingScanlineId);
-                            }
-                        }
-
-                        while (!scanlinesToRemoveQueue.empty()) {
-                            const uint32_t scanlineId = scanlinesToRemoveQueue.front();
-                            scanlinesToRemoveQueue.pop();
-
-                            auto dependencyRange = reverseScanlinesDependencyMap.equal_range(scanlineId);
-                            for (auto it = dependencyRange.first; it != dependencyRange.second; ++it) {
-                                if (scanlinesToRemoveSet.insert(it->second).second) {
-                                    scanlinesToRemoveQueue.push(it->second);
-                                }
-                            }
-                        }
-
-                        LOG_INFO("Removing scanlines: ", scanlinesToRemoveSet);
-
-                        for (const uint32_t scanlineId: scanlinesToRemoveSet) {
-                            const ScanlineInfo &scanline = scanlineInfoMap[scanlineId];
-                            const uint64_t conflictingHash = scanline.houghHash;
-                            const double conflictingVotes = scanline.houghVotes;
-
-                            hough->restoreVotes(conflictingHash, conflictingVotes);
-                            unassignedPoints += scanline.pointsCount;
-                            pointsScanlinesIds = (pointsScanlinesIds == scanlineId).select(-1, pointsScanlinesIds);
-
-                            // TODO careful with this, perhaps select
-                            scanlineInfoMap.erase(scanlineId);
-                            reverseScanlinesDependencyMap.erase(scanlineId);
-
-                            // Remove entries where scanlineId is in the value
-                            for (auto it = reverseScanlinesDependencyMap.begin();
-                                 it != reverseScanlinesDependencyMap.end();) {
-                                if (it->second == scanlineId) {
-                                    it = reverseScanlinesDependencyMap.erase(it);
-                                } else {
-                                    ++it;
-                                }
-                            }
-
-                            for (auto it = hashesToConflictsMap.begin(); it != hashesToConflictsMap.end();) {
-                                const uint64_t hash = it->first;
-                                HashToConflictValue &conflicts = it->second;
-
-                                conflicts.conflictingScanlines.erase(scanlineId);
-
-                                if (conflicts.conflictingScanlines.empty()) {
-                                    LOG_INFO("Restored hash: ", hash);
-
-                                    hough->restoreVotes(hash, conflicts.votes);
-                                    it = hashesToConflictsMap.erase(it);
-                                } else {
-                                    ++it;
-                                }
-                            }
-
-                            // Store the removed line, as conflicting with current one
-                            hashesToConflictsMap.emplace(
-                                conflictingHash, HashToConflictValue{
-                                    .conflictingScanlines = {currentScanlineId},
-                                    .votes = conflictingVotes
-                                }
-                            );
-
-                            LOG_INFO("Added hash ", conflictingHash, " to the map");
-                        }
-                    }
-                } else if (scanlineEstimation.limits.indices.size() == unassignedPoints) {
-                    LOG_WARN(
-                        "Warning: This is the last scanline, so we will accept it if it is not "
-                        "empirically intersecting with other scanlines"
-                    );
-                    // TODO This is causing problems, for example in durlar_4d_single_upper_bound_.._.._datasets_durlar_dataset_DurLAR_DurLAR_20210716_ouster_points_data_0000035800.bin/output.txt
-                    rejectingCurrent = intersectionInfo.empiricalIntersection;
-                    lastScanlineAssignment = true;
-                } else {
-                    // TODO make this code cleaner, I think this is just rejectingCurrent
-                    LOG_INFO(
-                        "New uncertainty is higher than conflicting scanlines uncertainties. Rejecting current scanline"
-                    );
-                    actuallyConflictingScanlines = conflictingScanlines(
-                        scanlineEstimation.uncertainty < conflictingScanlinesUncertainties
-                    ); // TODO suspicious
-                }
-
-                if (rejectingCurrent) {
-                    LOG_INFO("Scanline rejected");
-                    LOG_INFO("");
-
-                    hough->eraseByHash(houghMax.hash);
-
-                    if (actuallyConflictingScanlines.size() > 0) {
-                        HashToConflictValue &conflicts = hashesToConflictsMap[houghMax.hash];
-
-                        conflicts.conflictingScanlines.insert(
-                            actuallyConflictingScanlines.begin(), actuallyConflictingScanlines.end()
-                        );
-                        conflicts.votes = houghMax.votes;
-                    }
-
-                    continue;
-                }
+            if (!keepScanline) {
+                continue;
             }
 
-            // We are now outside conflict resolution (seriously, I need to refactor this)
             // TODO here there was the if uncertainty < -500, check if it is still needed
             if (scanlineEstimation.uncertainty < -500) {
                 hough->eraseWhere(points, scanlineEstimation.limits.indices);
@@ -326,7 +168,9 @@ namespace accurate_ri {
                 );
             }
 
-            LOG_INFO("Scanline ", currentScanlineId, " assigned with ", scanlineEstimation.limits.indices.size(), " points");
+            LOG_INFO(
+                "Scanline ", currentScanlineId, " assigned with ", scanlineEstimation.limits.indices.size(), " points"
+            );
             LOG_INFO(
                 "Scanline parameters: Offset: ", maxValues.offset, ", Angle: ", maxValues.angle, ", Votes: ",
                 houghMax.votes,
@@ -815,7 +659,7 @@ namespace accurate_ri {
             }
         }
 
-        Eigen::ArrayX<bool> theoreticalInteresectionMask = Eigen::ArrayX<bool>::Constant(scanlineId + 1, true);
+        Eigen::ArrayX<bool> theoreticalIntersectionMask = Eigen::ArrayX<bool>::Constant(scanlineId + 1, true);
         const std::vector boundsPointers = {&ScanlineAngleBounds::bottom, &ScanlineAngleBounds::top};
 
         for (const auto thisBound: boundsPointers) {
@@ -838,16 +682,219 @@ namespace accurate_ri {
                     maxTheoreticalSigns[otherId] = Utils::compare(thisUpper, otherUpper);
                 }
 
-                theoreticalInteresectionMask = theoreticalInteresectionMask && (
+                theoreticalIntersectionMask = theoreticalIntersectionMask && (
                                                    (maxTheoreticalSigns * minTheoreticalSigns).array() != 1).array();
             }
         }
 
-        return ScanlineIntersectionInfo{
+        return {
             .empiricalIntersectionMask = std::move(empiricalIntersectionMask),
-            .theoreticalIntersectionMask = std::move(theoreticalInteresectionMask),
+            .theoreticalIntersectionMask = std::move(theoreticalIntersectionMask),
             .empiricalIntersection = empiricalIntersection,
-            .theoreticalIntersection = theoreticalInteresectionMask.any()
+            .theoreticalIntersection = theoreticalIntersectionMask.any()
+        };
+    }
+
+    bool VerticalIntrinsicsEstimator::performScanlineConflictResolution(
+        const ScanlineAngleBounds &angleBounds, const ScanlineEstimationResult &scanline, const uint32_t scanlineId,
+        const HoughCell &houghMax
+    ) {
+        const ScanlineConflictsResult &conflicts = evaluateScanlineConflicts(
+            angleBounds, scanline, scanlineId, houghMax
+        );
+
+        if (conflicts.shouldReject) {
+            LOG_INFO("Scanline rejected");
+            LOG_INFO("");
+
+            hough->eraseByHash(houghMax.hash);
+
+            if (conflicts.conflictingScanlines.size() > 0) {
+                HashToConflictValue &hashToConflictValue = hashesToConflictsMap[houghMax.hash];
+
+                hashToConflictValue.conflictingScanlines.insert(
+                    conflicts.conflictingScanlines.begin(), conflicts.conflictingScanlines.end()
+                );
+                hashToConflictValue.votes = houghMax.votes;
+            }
+
+            return false;
+        }
+
+        std::queue<uint32_t> scanlinesToRemoveQueue;
+        std::unordered_set<uint32_t> scanlinesToRemoveSet;
+
+        for (const auto otherId: conflicts.conflictingScanlines) {
+            if (scanlinesToRemoveSet.insert(otherId).second) {
+                scanlinesToRemoveQueue.push(otherId);
+            }
+        }
+
+        while (!scanlinesToRemoveQueue.empty()) {
+            const uint32_t otherId = scanlinesToRemoveQueue.front();
+            scanlinesToRemoveQueue.pop();
+
+            auto dependencyRange = reverseScanlinesDependencyMap.equal_range(otherId);
+            for (auto it = dependencyRange.first; it != dependencyRange.second; ++it) {
+                if (scanlinesToRemoveSet.insert(it->second).second) {
+                    scanlinesToRemoveQueue.push(it->second);
+                }
+            }
+        }
+
+        LOG_INFO("Removing scanlines: ", scanlinesToRemoveSet);
+
+        for (const uint32_t otherId: scanlinesToRemoveSet) {
+            const ScanlineInfo &otherScanline = scanlineInfoMap[otherId];
+            const uint64_t conflictingHash = otherScanline.houghHash;
+            const double conflictingVotes = otherScanline.houghVotes;
+
+            hough->restoreVotes(conflictingHash, conflictingVotes);
+            unassignedPoints += otherScanline.pointsCount;
+            pointsScanlinesIds = (pointsScanlinesIds == otherId).select(-1, pointsScanlinesIds);
+
+            // TODO careful with this, perhaps select
+            scanlineInfoMap.erase(otherId);
+            reverseScanlinesDependencyMap.erase(otherId);
+
+            // Remove entries where scanlineId is in the value
+            for (auto it = reverseScanlinesDependencyMap.begin(); it != reverseScanlinesDependencyMap.end();) {
+                if (it->second == otherId) {
+                    it = reverseScanlinesDependencyMap.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+
+            for (auto it = hashesToConflictsMap.begin(); it != hashesToConflictsMap.end();) {
+                const uint64_t hash = it->first;
+                HashToConflictValue &hashToConflictValue = it->second;
+
+                hashToConflictValue.conflictingScanlines.erase(otherId);
+
+                if (hashToConflictValue.conflictingScanlines.empty()) {
+                    LOG_INFO("Restored hash: ", hash);
+
+                    hough->restoreVotes(hash, hashToConflictValue.votes);
+                    it = hashesToConflictsMap.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+
+            // Store the removed line, as conflicting with current one
+            hashesToConflictsMap.emplace(
+                conflictingHash, HashToConflictValue{
+                    .conflictingScanlines = {scanlineId},
+                    .votes = conflictingVotes
+                }
+            );
+
+            LOG_INFO("Added hash ", conflictingHash, " to the map");
+        }
+
+        return true;
+    }
+
+    // TODO review this method, maybe precompute actually conflicting scanlines and do ifs based on that
+    ScanlineConflictsResult VerticalIntrinsicsEstimator::evaluateScanlineConflicts(
+        const ScanlineAngleBounds &angleBounds, const ScanlineEstimationResult &scanline, const uint32_t scanlineId,
+        const HoughCell &houghMax
+    ) {
+        const ScanlineIntersectionInfo &intersectionInfo = computeScanlineIntersectionInfo(
+            angleBounds, scanline, scanlineId
+        );
+
+        if (!intersectionInfo.anyIntersection()) {
+            return {
+                .shouldReject = false,
+                .conflictingScanlines = Eigen::ArrayXi()
+            };
+        }
+
+        LOG_WARN("Possible problem detected");
+        LOG_INFO(
+            "Intersects other scanline: ", intersectionInfo.empiricalIntersection? "True": "False",
+            ", Intersects theoretically: ", intersectionInfo.theoreticalIntersection,
+            ", Fit success: ", "True",
+            ", Points in scanline: ", scanline.limits.indices.size(), " vs ", houghMax.votes
+        );
+
+
+        Eigen::ArrayXi conflictingScanlines = Eigen::ArrayXi::Zero(intersectionInfo.empiricalIntersectionMask.size());
+        int j = 0;
+        for (int i = 0; i < intersectionInfo.empiricalIntersectionMask.size(); ++i) {
+            if (intersectionInfo.anyIntersection(i)) {
+                conflictingScanlines(j++) = i;
+            }
+        }
+        conflictingScanlines.conservativeResize(j);
+
+        Eigen::ArrayXd conflictingScanlinesUncertainties(conflictingScanlines.size());
+        for (int i = 0; i < conflictingScanlines.size(); ++i) {
+            conflictingScanlinesUncertainties(i) = scanlineInfoMap[conflictingScanlines(i)].uncertainty;
+        }
+
+        LOG_INFO(
+            "Intersects with scanlines: ", conflictingScanlines,
+            ", Current scanline uncertainty: ", scanline.uncertainty,
+            ", Conflicting scanlines uncertainties: ", conflictingScanlinesUncertainties
+        );
+
+        if (scanline.limits.indices.size() == unassignedPoints) {
+            LOG_WARN(
+                "Warning: This is the last scanline, so we will accept it if it is "
+                "not empirically intersecting with other scanlines"
+            );
+            // TODO This is causing problems, for example in durlar_4d_single_upper_bound_.._.._datasets_durlar_dataset_DurLAR_DurLAR_20210716_ouster_points_data_0000035800.bin/output.txt
+            // TODO maybe recover last scanline flag (evaluate whether this case occurs)
+            return {
+                .shouldReject = intersectionInfo.empiricalIntersection,
+                .conflictingScanlines = std::move(conflictingScanlines)
+            };
+        }
+
+        if (scanline.uncertainty >= conflictingScanlinesUncertainties.minCoeff()) {
+            if (scanline.uncertainty == std::numeric_limits<double>::infinity()) {
+                LOG_INFO(
+                    "New uncertainty is infinite, but so are the conflicting scanlines uncertainties. Intersects other empirical: ",
+                    intersectionInfo.empiricalIntersection? "True": "False", "."
+                );
+
+                return {
+                    .shouldReject = intersectionInfo.empiricalIntersection,
+                    .conflictingScanlines = std::move(conflictingScanlines)
+                };
+            }
+
+            // TODO thoroughly test this case both in python and C++
+            LOG_INFO(
+                "New uncertainty is higher than conflicting scanlines uncertainties. Rejecting current scanline"
+            );
+
+            Eigen::ArrayXi actuallyConflictingScanlines = Eigen::ArrayXi::Zero(conflictingScanlines.size());
+
+            j = 0;
+            for (int i = 0; i < conflictingScanlines.size(); ++i) {
+                if (scanline.uncertainty >= conflictingScanlinesUncertainties(i)) {
+                    actuallyConflictingScanlines(j++) = conflictingScanlines(i);
+                }
+            }
+            actuallyConflictingScanlines.conservativeResize(j);
+
+            return {
+                .shouldReject = true,
+                .conflictingScanlines = std::move(actuallyConflictingScanlines)
+            };
+        }
+
+        LOG_INFO(
+            "New uncertainty is lower than conflicting scanlines uncertainties. Rejecting conflicting scanlines"
+        );
+
+        return {
+            .shouldReject = false,
+            .conflictingScanlines = std::move(conflictingScanlines)
         };
     }
 } // namespace accurate_ri

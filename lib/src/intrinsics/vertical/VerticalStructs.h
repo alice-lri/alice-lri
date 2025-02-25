@@ -130,6 +130,11 @@ namespace accurate_ri {
         Eigen::ArrayXi pointsScanlinesIds;
     };
 
+    struct ScanlineConflictsResult {
+        bool shouldReject;
+        Eigen::ArrayXi conflictingScanlines;
+    };
+
     // TODO move elsewhere
     template<typename T>
     std::ostream &operator<<(std::ostream &os, const std::unordered_set<T> &set) {
