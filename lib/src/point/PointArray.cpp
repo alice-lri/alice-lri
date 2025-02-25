@@ -13,5 +13,7 @@ namespace accurate_ri {
         extraInfo.theta = y.binaryExpr(x, [](double yi, double xi) { return std::atan2(yi, xi); });
 
         extraInfo.invRange = extraInfo.range.array().inverse();
+        extraInfo.maxRange = extraInfo.range.maxCoeff();
+        extraInfo.minRange = extraInfo.range.minCoeff();
     }
 }

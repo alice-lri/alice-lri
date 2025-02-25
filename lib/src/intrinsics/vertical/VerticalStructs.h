@@ -25,6 +25,7 @@ namespace accurate_ri {
         Eigen::ArrayXd final;
     };
 
+    // TODO this containing indices and mask is probably not intuitive
     struct ScanlineLimits {
         Eigen::ArrayXi indices;
         Eigen::ArrayX<bool> mask;
@@ -60,6 +61,7 @@ namespace accurate_ri {
         std::optional<ScanlineLimits> limits;
     };
 
+    // TODO objetive: remove this and construct ScanlineInfo through the process
     struct ScanlineEstimationResult {
         bool heuristic;
         double uncertainty;
@@ -70,8 +72,18 @@ namespace accurate_ri {
     };
 
     struct ScanlineIntersectionInfo {
-        uint32_t scanlineId;
-        double intersection;
+        const Eigen::ArrayX<bool> empiricalIntersectionMask;
+        const Eigen::ArrayX<bool> theoreticalIntersectionMask;
+        const bool empiricalIntersection;
+        const bool theoreticalIntersection;
+
+        inline bool anyIntersection() const {
+            return empiricalIntersection || theoreticalIntersection;
+        }
+
+        inline bool anyIntersection(const uint32_t i) const {
+            return empiricalIntersectionMask[i] || theoreticalIntersectionMask[i];
+        }
     };
 
     struct HeuristicScanline {

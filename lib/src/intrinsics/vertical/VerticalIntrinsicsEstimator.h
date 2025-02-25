@@ -12,6 +12,7 @@ namespace accurate_ri {
     private:
         std::unique_ptr<HoughTransform> hough = nullptr;
         std::unordered_map<uint32_t, ScanlineInfo> scanlineInfoMap;
+        Eigen::ArrayXi pointsScanlinesIds;
 
     public:
         VerticalIntrinsicsResult estimate(const PointArray &points);
@@ -40,5 +41,9 @@ namespace accurate_ri {
         );
 
         HeuristicScanline computeHeuristicScanline(double invRangesMean, double phisMean) const;
+
+        ScanlineIntersectionInfo computeScanlineIntersectionInfo(
+            const ScanlineAngleBounds &angleBounds, const ScanlineEstimationResult &scanline, const uint32_t scanlineId
+        );
     };
 } // namespace accurate_ri
