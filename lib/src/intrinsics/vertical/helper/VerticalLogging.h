@@ -6,12 +6,13 @@
 #include <variant>
 #include <eigen3/Eigen/Dense>
 #include "hough/HoughTransform.h"
+#include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 
-using EigenDataVariant = std::variant<Eigen::ArrayXd, Eigen::ArrayX<bool>>; // List all possible Eigen types
+using EigenDataVariant = std::variant<Eigen::ArrayXd, Eigen::ArrayX<bool> >; // List all possible Eigen types
 
 // TODO remove this whole file after debugging
 namespace accurate_ri::VerticalLogging {
-    void printHeaderDebugInfo(const PointArray &points, const HoughTransform &hough);
+    void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough);
 
     template<typename T>
     bool writeBinaryFile(const std::filesystem::path &filePath, const T &data, const std::string &dataName) {
@@ -41,7 +42,7 @@ namespace accurate_ri::VerticalLogging {
             return; // Or handle directory creation failure as needed
         }
 
-        std::vector<std::pair<std::string, EigenDataVariant>> dataToWrite = {
+        std::vector<std::pair<std::string, EigenDataVariant> > dataToWrite = {
             {"ranges", points.getRanges()},
             {"phis", points.getPhis()},
             {"scanline_lower_limit", limits.lowerLimit},
@@ -49,10 +50,12 @@ namespace accurate_ri::VerticalLogging {
             {"points_in_scanline_mask", limits.mask}
         };
 
-        for (const auto& item : dataToWrite) {
-            std::visit([&](const auto& data) { // Use std::visit to work with variant
-                writeBinaryFile(folderPath / (item.first + ".bin"), data, item.first);
-            }, item.second); // Apply lambda to each variant alternative
+        for (const auto &item: dataToWrite) {
+            std::visit(
+                [&](const auto &data) { // Use std::visit to work with variant
+                    writeBinaryFile(folderPath / (item.first + ".bin"), data, item.first);
+                }, item.second
+            ); // Apply lambda to each variant alternative
         }
 
         Eigen::ArrayX<bool> unassignedMask = (pointsScanlinesIds == -1).cast<bool>(); // Explicitly cast to bool Array

@@ -62,6 +62,10 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/vertical/helper/JsonConverters.h
         src/math/Stats.cpp
         src/math/Stats.h
+        src/intrinsics/vertical/conflict/ScanlineConflictSolver.cpp
+        src/intrinsics/vertical/conflict/ScanlineConflictSolver.h
+        src/intrinsics/vertical/VerticalScanlinePool.cpp
+        src/intrinsics/vertical/VerticalScanlinePool.h
 )
 
 target_include_directories(accurate_ri

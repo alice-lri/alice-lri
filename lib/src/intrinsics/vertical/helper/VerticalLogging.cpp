@@ -1,7 +1,7 @@
 #include "VerticalLogging.h"
 
 namespace accurate_ri::VerticalLogging {
-    void printHeaderDebugInfo(const PointArray &points, const HoughTransform &hough) {
+    void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough) {
         LOG_INFO("==| Parameters |==");
         LOG_INFO("Number of points: ", points.size());
         LOG_INFO("Cloud path: ", getCloudPath()); // TODO remove this

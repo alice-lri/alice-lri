@@ -1,29 +1,19 @@
 #pragma once
 #include <memory>
-#include <tuple>
-#include <tuple>
-#include <tuple>
-
 #include "hough/HoughTransform.h"
+#include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "point/PointArray.h"
 
 namespace accurate_ri {
     class VerticalIntrinsicsEstimator {
     private:
-        std::unique_ptr<HoughTransform> hough = nullptr;
-        std::unordered_map<uint32_t, ScanlineInfo> scanlineInfoMap;
-        Eigen::ArrayXi pointsScanlinesIds;
-
-        std::unordered_multimap<uint32_t, uint32_t> reverseScanlinesDependencyMap;
-        std::unordered_map<uint64_t, HashToConflictValue> hashesToConflictsMap;
-
-        int64_t unassignedPoints = 0;
+        std::unique_ptr<VerticalScanlinePool> scanlinePool = nullptr;
 
     public:
         VerticalIntrinsicsResult estimate(const PointArray &points);
 
     private:
-        void initHough(const PointArray &points);
+        void initScanlinePool(const PointArray &points);
 
         static VerticalBounds computeErrorBounds(const PointArray &points, double offset);
 
@@ -42,20 +32,6 @@ namespace accurate_ri {
         ) const;
 
         HeuristicScanline computeHeuristicScanline(double invRangesMean, double phisMean) const;
-
-        ScanlineIntersectionInfo computeScanlineIntersectionInfo(
-            const ScanlineAngleBounds &angleBounds, const ScanlineEstimationResult &scanline, const uint32_t scanlineId
-        );
-
-        bool performScanlineConflictResolution(
-            const ScanlineAngleBounds &angleBounds, const ScanlineEstimationResult &scanline, const uint32_t scanlineId,
-            const HoughCell &houghMax
-        );
-
-        ScanlineConflictsResult evaluateScanlineConflicts(
-            const ScanlineAngleBounds &angleBounds, const ScanlineEstimationResult &scanline, uint32_t scanlineId,
-            const HoughCell &houghMax
-        );
 
         void writeToJson(const VerticalIntrinsicsResult &result);
     };

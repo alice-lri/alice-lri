@@ -47,6 +47,11 @@ namespace accurate_ri {
         RealMargin angle;
     };
 
+    struct HoughScanlineEstimation {
+        HoughCell cell;
+        OffsetAngleMargin margin;
+    };
+
     struct ScanlineFitResult {
         std::optional<Stats::WLSResult> fit;
         std::optional<ScanlineLimits> limits;
