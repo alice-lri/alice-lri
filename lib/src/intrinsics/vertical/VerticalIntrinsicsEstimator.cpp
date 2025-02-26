@@ -134,12 +134,13 @@ namespace accurate_ri {
                 continue;
             }
 
-            // TODO here there was the if uncertainty < -500, check if it is still needed
+            // TODO this is a bit hacky wacky
             if (scanlineEstimation.uncertainty < -500) {
                 hough->eraseWhere(points, scanlineEstimation.limits.indices);
+            } else {
+                hough->eraseByHash(houghMax.hash);
             }
 
-            hough->eraseByHash(houghMax.hash);
             pointsScanlinesIds(scanlineEstimation.limits.indices) = currentScanlineId;
             unassignedPoints -= scanlineEstimation.limits.indices.size();
 
@@ -160,13 +161,6 @@ namespace accurate_ri {
                     .houghHash = houghMax.hash
                 }
             );
-
-            if (unassignedPoints != (pointsScanlinesIds == -1).count()) {
-                LOG_ERROR(
-                    "ERROR: Unassigned points count mismatch, expected ", unassignedPoints,
-                    ", found ", (pointsScanlinesIds == -1).count()
-                );
-            }
 
             LOG_INFO(
                 "Scanline ", currentScanlineId, " assigned with ", scanlineEstimation.limits.indices.size(), " points"
