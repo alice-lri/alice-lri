@@ -38,11 +38,29 @@ namespace accurate_ri {
         };
     }
 
-    inline void VerticalScanlinePool::invalidateHash(const uint64_t hash) {
-        hough.eraseByHash(hash);
+    void VerticalScanlinePool::assignScanline(ScanlineInfo&& scanline, const Eigen::ArrayXi& pointsIndices) {
+        pointsScanlinesIds(pointsIndices) = scanline.id;
+        unassignedPoints -= pointsIndices.size();
+
+        scanlineInfoMap.emplace(scanline.id, std::move(scanline));
     }
 
-    inline bool VerticalScanlinePool::anyUnassigned() const {
-        return unassignedPoints > 0;
+    std::optional<ScanlineInfo> VerticalScanlinePool::removeScanline(const uint32_t scanlineId) {
+        const auto node = scanlineInfoMap.extract(scanlineId);
+        if (!node) {
+            return std::nullopt;
+        }
+
+        const ScanlineInfo &scanline = node.mapped();
+        const uint64_t conflictingHash = scanline.houghHash;
+        const double conflictingVotes = scanline.houghVotes;
+
+        hough.restoreVotes(conflictingHash, conflictingVotes);
+        unassignedPoints += scanline.pointsCount;
+        pointsScanlinesIds = (pointsScanlinesIds == scanlineId).select(-1, pointsScanlinesIds);
+
+        scanlineInfoMap.erase(scanlineId);
+
+        return scanline;
     }
 } // accurate_ri

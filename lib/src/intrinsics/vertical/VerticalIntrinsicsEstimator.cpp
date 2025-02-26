@@ -14,6 +14,7 @@
 #include "intrinsics/vertical/helper/JsonConverters.h"
 #include "math/Stats.h"
 
+// TODO review that I am using .at() instead of [] for the maps
 namespace accurate_ri {
     // TODO extract these constants somewhere
     constexpr uint64_t MAX_ITERATIONS = 10000;
@@ -85,7 +86,7 @@ namespace accurate_ri {
                 );
                 LOG_INFO("");
 
-                scanlinePool->invalidateHash(houghMax.hash);
+                scanlinePool->invalidateByHash(houghMax.hash);
                 continue;
             }
 
@@ -115,7 +116,6 @@ namespace accurate_ri {
                 }
             };
 
-
             bool keepScanline = performScanlineConflictResolution(
                 angleBounds, scanlineEstimation, currentScanlineId, houghMax
             );
@@ -124,33 +124,30 @@ namespace accurate_ri {
                 continue;
             }
 
-            // TODO this is a bit hacky wacky
-            if (scanlineEstimation.uncertainty < -500) {
-                hough->eraseWhere(points, scanlineEstimation.limits.indices);
-            } else {
-                hough->eraseByHash(houghMax.hash);
-            }
-
-            pointsScanlinesIds(scanlineEstimation.limits.indices) = currentScanlineId;
-            unassignedPoints -= scanlineEstimation.limits.indices.size();
-
             for (const auto &dependency: scanlineEstimation.dependencies) {
                 reverseScanlinesDependencyMap.emplace(dependency, currentScanlineId);
             }
 
-            scanlineInfoMap.emplace(
-                currentScanlineId, ScanlineInfo{
-                    .scanlineId = currentScanlineId,
-                    .pointsCount = static_cast<uint64_t>(scanlineEstimation.limits.indices.size()),
-                    .values = maxValues,
-                    .ci = scanlineEstimation.ci,
-                    .theoreticalAngleBounds = std::move(angleBounds),
-                    .dependencies = std::move(scanlineEstimation.dependencies),
-                    .uncertainty = scanlineEstimation.uncertainty,
-                    .houghVotes = houghMax.votes,
-                    .houghHash = houghMax.hash
-                }
-            );
+            // TODO this is a bit hacky wacky
+            if (scanlineEstimation.uncertainty < -500) {
+                scanlinePool->invalidateByPoints(points, scanlineEstimation.limits.indices);
+            } else {
+                scanlinePool->invalidateByHash(houghMax.hash);
+            }
+
+            const ScanlineInfo& scanlineInfo = ScanlineInfo{
+                .id = currentScanlineId,
+                .pointsCount = static_cast<uint64_t>(scanlineEstimation.limits.indices.size()),
+                .values = maxValues,
+                .ci = scanlineEstimation.ci,
+                .theoreticalAngleBounds = std::move(angleBounds),
+                .dependencies = std::move(scanlineEstimation.dependencies),
+                .uncertainty = scanlineEstimation.uncertainty,
+                .houghVotes = houghMax.votes,
+                .houghHash = houghMax.hash
+            };
+
+            scanlinePool->assignScanline(std::move(scanlineInfo), scanlineEstimation.limits.indices);
 
             LOG_INFO(
                 "Scanline ", currentScanlineId, " assigned with ", scanlineEstimation.limits.indices.size(), " points"
@@ -165,15 +162,15 @@ namespace accurate_ri {
                 angleBounds.top.upper,
                 ", Uncertainty: ", scanlineEstimation.uncertainty
             );
-            LOG_INFO("Number of unassigned points: ", unassignedPoints);
+            LOG_INFO("Number of unassigned points: ", scanlinePool->getUnassignedPoints());
             LOG_INFO("");
 
             currentScanlineId++;
         }
 
         // TODO last resort assignment is disabled, maybe implement?
-        if (unassignedPoints > 0) {
-            LOG_WARN("Warning: Found ", unassignedPoints, " spurious points");
+        if (scanlinePool->anyUnassigned()) {
+            LOG_WARN("Warning: Found ", scanlinePool->getUnassignedPoints(), " spurious points");
         }
 
         std::vector<ScanlineInfo> sortedScanlines;
@@ -191,11 +188,11 @@ namespace accurate_ri {
 
         std::unordered_map<uint32_t, uint32_t> oldIdsToNewIdsMap;
         for (uint32_t i = 0; i < sortedScanlines.size(); ++i) {
-            oldIdsToNewIdsMap.emplace(sortedScanlines[i].scanlineId, i);
+            oldIdsToNewIdsMap.emplace(sortedScanlines[i].id, i);
         }
 
         for (auto &scanlineInfo: sortedScanlines) {
-            scanlineInfo.scanlineId = oldIdsToNewIdsMap[scanlineInfo.scanlineId];
+            scanlineInfo.id = oldIdsToNewIdsMap[scanlineInfo.id];
             std::ranges::transform(
                 scanlineInfo.dependencies, scanlineInfo.dependencies.begin(), [&oldIdsToNewIdsMap](const uint32_t id) {
                     return oldIdsToNewIdsMap[id];

@@ -92,7 +92,7 @@ namespace accurate_ri {
 
         void ensureAccEquals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &matrix);
 
-        void eraseWhere(const PointArray & points, const Eigen::ArrayXi& indices);
+        void eraseByPoints(const PointArray & points, const Eigen::ArrayXi& indices);
 
     private:
         /**

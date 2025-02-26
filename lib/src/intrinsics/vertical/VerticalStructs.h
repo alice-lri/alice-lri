@@ -96,7 +96,7 @@ namespace accurate_ri {
     };
 
     struct ScanlineInfo {
-        uint32_t scanlineId;
+        uint32_t id;
         uint64_t pointsCount;
         OffsetAngle values;
         OffsetAngleMargin ci;

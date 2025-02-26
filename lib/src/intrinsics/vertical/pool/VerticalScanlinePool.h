@@ -4,11 +4,11 @@
 namespace accurate_ri {
     class VerticalScanlinePool {
     private:
-        HoughTransform hough;
         std::unordered_map<uint32_t, ScanlineInfo> scanlineInfoMap;
         Eigen::ArrayXi pointsScanlinesIds;
-
         int64_t unassignedPoints = 0;
+
+        HoughTransform hough;
 
     public:
         VerticalScanlinePool::VerticalScanlinePool(
@@ -20,9 +20,40 @@ namespace accurate_ri {
 
         std::optional<HoughScanlineEstimation> performHoughEstimation();
 
-        inline void invalidateHash(uint64_t hash);
+        void assignScanline(ScanlineInfo&& scanline, const Eigen::ArrayXi& pointsIndices);
 
-        inline bool anyUnassigned() const;
+        std::optional<ScanlineInfo> removeScanline(uint32_t scanlineId);
+
+        inline Eigen::ArrayXi getScanlinesIds(const Eigen::ArrayXi &pointsIndices) const {
+            return pointsScanlinesIds(pointsIndices);
+        }
+
+        inline void restoreByHash(const uint64_t hash, const double votes) {
+            hough.restoreVotes(hash, votes);
+        }
+
+        inline void invalidateByHash(const uint64_t hash) {
+            hough.eraseByHash(hash);
+        }
+
+        inline void invalidateByPoints(const PointArray &points, const Eigen::ArrayXi &indices) {
+            hough.eraseByPoints(points, indices);
+        }
+
+        inline const ScanlineInfo& getScanlineById(const uint32_t id) const {
+            return scanlineInfoMap.at(id);
+        }
+
+        inline bool anyUnassigned() const { return unassignedPoints > 0; }
+
+        inline int64_t getUnassignedPoints() const { return unassignedPoints; }
+
+        template<typename Func>
+        void forEachScanline(Func&& func) const {
+            for (const auto &scanline: scanlineInfoMap) {
+                func(scanline.second);
+            }
+        }
 
         [[nodiscard]] double getXMin() const { return hough.getXMin(); }
 

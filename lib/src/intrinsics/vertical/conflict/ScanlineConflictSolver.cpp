@@ -3,83 +3,39 @@
 #include <queue>
 
 #include "intrinsics/vertical/VerticalStructs.h"
+#include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "utils/Logger.h"
 #include "utils/Utils.h"
 
 namespace accurate_ri {
-
-    ScanlineIntersectionInfo ScanlineConflictSolver::computeScanlineIntersectionInfo(
-        const ScanlineAngleBounds &angleBounds, const ScanlineEstimationResult &scanline, const uint32_t scanlineId
-    ) {
-        const Eigen::ArrayXi &conflictingScanlinesIdsVerbose = pointsScanlinesIds(scanline.limits.indices);
-        Eigen::ArrayX<bool> empiricalIntersectionMask = Eigen::ArrayX<bool>::Constant(scanlineId + 1, false);
-        bool empiricalIntersection = false;
-
-        for (const int32_t conflictingId: conflictingScanlinesIdsVerbose) {
-            if (conflictingId >= 0) {
-                empiricalIntersection = true;
-                empiricalIntersectionMask[conflictingId] = true;
-            }
-        }
-
-        Eigen::ArrayX<bool> theoreticalIntersectionMask = Eigen::ArrayX<bool>::Constant(scanlineId + 1, true);
-        const std::vector boundsPointers = {&ScanlineAngleBounds::bottom, &ScanlineAngleBounds::top};
-
-        for (const auto thisBound: boundsPointers) {
-            const double thisLower = (angleBounds.*thisBound).lower;
-            const double thisUpper = (angleBounds.*thisBound).upper;
-
-            for (const auto otherBound: boundsPointers) {
-                Eigen::ArrayXd maxTheoreticalSigns = Eigen::ArrayXd::Ones(scanlineId + 1);
-                Eigen::ArrayXd minTheoreticalSigns = Eigen::ArrayXd::Ones(scanlineId + 1);
-
-                for (uint32_t otherId = 0; otherId < scanlineId + 1; ++otherId) {
-                    if (!scanlineInfoMap.contains(otherId)) {
-                        continue;
-                    }
-
-                    const double otherLower = (scanlineInfoMap[otherId].theoreticalAngleBounds.*otherBound).lower;
-                    const double otherUpper = (scanlineInfoMap[otherId].theoreticalAngleBounds.*otherBound).upper;
-
-                    minTheoreticalSigns[otherId] = Utils::compare(thisLower, otherLower);
-                    maxTheoreticalSigns[otherId] = Utils::compare(thisUpper, otherUpper);
-                }
-
-                theoreticalIntersectionMask = theoreticalIntersectionMask && (
-                                                  (maxTheoreticalSigns * minTheoreticalSigns).array() != 1).array();
-            }
-        }
-
-        return {
-            .empiricalIntersectionMask = std::move(empiricalIntersectionMask),
-            .theoreticalIntersectionMask = std::move(theoreticalIntersectionMask),
-            .empiricalIntersection = empiricalIntersection,
-            .theoreticalIntersection = theoreticalIntersectionMask.any()
-        };
-    }
-
     bool ScanlineConflictSolver::performScanlineConflictResolution(
-        const ScanlineAngleBounds &angleBounds, const ScanlineEstimationResult &scanline, const uint32_t scanlineId,
-        const HoughCell &houghMax
+        VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
+        const ScanlineEstimationResult &scanline, const uint32_t scanlineId, const HoughCell &houghMax
     ) {
         const ScanlineConflictsResult &conflicts = evaluateScanlineConflicts(
-            angleBounds, scanline, scanlineId, houghMax
+            scanlinePool, angleBounds, scanline, scanlineId, houghMax
         );
 
         if (conflicts.shouldReject) {
             LOG_INFO("Scanline rejected");
             LOG_INFO("");
 
-            hough->eraseByHash(houghMax.hash);
+            scanlinePool.invalidateByHash(houghMax.hash);
 
-            if (conflicts.conflictingScanlines.size() > 0) {
-                HashToConflictValue &hashToConflictValue = hashesToConflictsMap[houghMax.hash];
-
-                hashToConflictValue.conflictingScanlines.insert(
-                    conflicts.conflictingScanlines.begin(), conflicts.conflictingScanlines.end()
-                );
-                hashToConflictValue.votes = houghMax.votes;
+            if (conflicts.conflictingScanlines.size() == 0) {
+                return false;
             }
+
+            if (!hashesToConflictsMap.contains(houghMax.hash)) {
+                return false;
+            }
+
+            HashToConflictValue &hashToConflictValue = hashesToConflictsMap[houghMax.hash];
+
+            hashToConflictValue.conflictingScanlines.insert(
+                conflicts.conflictingScanlines.begin(), conflicts.conflictingScanlines.end()
+            );
+            hashToConflictValue.votes = houghMax.votes;
 
             return false;
         }
@@ -108,16 +64,7 @@ namespace accurate_ri {
         LOG_INFO("Removing scanlines: ", scanlinesToRemoveSet);
 
         for (const uint32_t otherId: scanlinesToRemoveSet) {
-            const ScanlineInfo &otherScanline = scanlineInfoMap[otherId];
-            const uint64_t conflictingHash = otherScanline.houghHash;
-            const double conflictingVotes = otherScanline.houghVotes;
-
-            hough->restoreVotes(conflictingHash, conflictingVotes);
-            unassignedPoints += otherScanline.pointsCount;
-            pointsScanlinesIds = (pointsScanlinesIds == otherId).select(-1, pointsScanlinesIds);
-
-            // TODO careful with this, perhaps select
-            scanlineInfoMap.erase(otherId);
+            std::optional<ScanlineInfo> removedScanline = scanlinePool.removeScanline(otherId);
             reverseScanlinesDependencyMap.erase(otherId);
 
             // Remove entries where scanlineId is in the value
@@ -129,6 +76,7 @@ namespace accurate_ri {
                 }
             }
 
+            // Restore previously rejected scanlines due to this one
             for (auto it = hashesToConflictsMap.begin(); it != hashesToConflictsMap.end();) {
                 const uint64_t hash = it->first;
                 HashToConflictValue &hashToConflictValue = it->second;
@@ -138,22 +86,26 @@ namespace accurate_ri {
                 if (hashToConflictValue.conflictingScanlines.empty()) {
                     LOG_INFO("Restored hash: ", hash);
 
-                    hough->restoreVotes(hash, hashToConflictValue.votes);
+                    scanlinePool.restoreByHash(hash, hashToConflictValue.votes);
                     it = hashesToConflictsMap.erase(it);
                 } else {
                     ++it;
                 }
             }
 
+            if (!removedScanline) {
+                continue;
+            }
+
             // Store the removed line, as conflicting with current one
             hashesToConflictsMap.emplace(
-                conflictingHash, HashToConflictValue{
+                removedScanline->houghHash, HashToConflictValue{
                     .conflictingScanlines = {scanlineId},
-                    .votes = conflictingVotes
+                    .votes = removedScanline->houghVotes
                 }
             );
 
-            LOG_INFO("Added hash ", conflictingHash, " to the map");
+            LOG_INFO("Added hash ", removedScanline->houghHash, " to the map");
         }
 
         return true;
@@ -161,11 +113,11 @@ namespace accurate_ri {
 
     // TODO review this method, maybe precompute actually conflicting scanlines and do ifs based on that
     ScanlineConflictsResult ScanlineConflictSolver::evaluateScanlineConflicts(
-        const ScanlineAngleBounds &angleBounds, const ScanlineEstimationResult &scanline, const uint32_t scanlineId,
-        const HoughCell &houghMax
+        const VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
+        const ScanlineEstimationResult &scanline, const uint32_t scanlineId, const HoughCell &houghMax
     ) {
         const ScanlineIntersectionInfo &intersectionInfo = computeScanlineIntersectionInfo(
-            angleBounds, scanline, scanlineId
+            scanlinePool, angleBounds, scanline, scanlineId
         );
 
         if (!intersectionInfo.anyIntersection()) {
@@ -195,7 +147,7 @@ namespace accurate_ri {
 
         Eigen::ArrayXd conflictingScanlinesUncertainties(conflictingScanlines.size());
         for (int i = 0; i < conflictingScanlines.size(); ++i) {
-            conflictingScanlinesUncertainties(i) = scanlineInfoMap[conflictingScanlines(i)].uncertainty;
+            conflictingScanlinesUncertainties(i) = scanlinePool.getScanlineById(conflictingScanlines(i)).uncertainty;
         }
 
         LOG_INFO(
@@ -204,7 +156,7 @@ namespace accurate_ri {
             ", Conflicting scanlines uncertainties: ", conflictingScanlinesUncertainties
         );
 
-        if (scanline.limits.indices.size() == unassignedPoints) {
+        if (scanline.limits.indices.size() == scanlinePool.getUnassignedPoints()) {
             LOG_WARN(
                 "Warning: This is the last scanline, so we will accept it if it is "
                 "not empirically intersecting with other scanlines"
@@ -258,6 +210,55 @@ namespace accurate_ri {
         return {
             .shouldReject = false,
             .conflictingScanlines = std::move(conflictingScanlines)
+        };
+    }
+
+    ScanlineIntersectionInfo ScanlineConflictSolver::computeScanlineIntersectionInfo(
+        const VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
+        const ScanlineEstimationResult &scanline, const uint32_t scanlineId
+    ) {
+        const Eigen::ArrayXi &conflictingScanlinesIdsVerbose = scanlinePool.getScanlinesIds(scanline.limits.indices);
+        Eigen::ArrayX<bool> empiricalIntersectionMask = Eigen::ArrayX<bool>::Constant(scanlineId + 1, false);
+        bool empiricalIntersection = false;
+
+        for (const int32_t conflictingId: conflictingScanlinesIdsVerbose) {
+            if (conflictingId >= 0) {
+                empiricalIntersection = true;
+                empiricalIntersectionMask[conflictingId] = true;
+            }
+        }
+
+        Eigen::ArrayX<bool> theoreticalIntersectionMask = Eigen::ArrayX<bool>::Constant(scanlineId + 1, true);
+        const std::vector boundsPointers = {&ScanlineAngleBounds::bottom, &ScanlineAngleBounds::top};
+
+        for (const auto thisBound: boundsPointers) {
+            const double thisLower = (angleBounds.*thisBound).lower;
+            const double thisUpper = (angleBounds.*thisBound).upper;
+
+            for (const auto otherBound: boundsPointers) {
+                Eigen::ArrayXd maxTheoreticalSigns = Eigen::ArrayXd::Ones(scanlineId + 1);
+                Eigen::ArrayXd minTheoreticalSigns = Eigen::ArrayXd::Ones(scanlineId + 1);
+
+                scanlinePool.forEachScanline(
+                    [&](const ScanlineInfo &otherScanline) {
+                        const double otherLower = (otherScanline.theoreticalAngleBounds.*otherBound).lower;
+                        const double otherUpper = (otherScanline.theoreticalAngleBounds.*otherBound).upper;
+
+                        minTheoreticalSigns[otherScanline.id] = Utils::compare(thisLower, otherLower);
+                        maxTheoreticalSigns[otherScanline.id] = Utils::compare(thisUpper, otherUpper);
+                    }
+                );
+
+                theoreticalIntersectionMask = theoreticalIntersectionMask && (
+                                                  (maxTheoreticalSigns * minTheoreticalSigns).array() != 1).array();
+            }
+        }
+
+        return {
+            .empiricalIntersectionMask = std::move(empiricalIntersectionMask),
+            .theoreticalIntersectionMask = std::move(theoreticalIntersectionMask),
+            .empiricalIntersection = empiricalIntersection,
+            .theoreticalIntersection = theoreticalIntersectionMask.any()
         };
     }
 } // accurate_ri

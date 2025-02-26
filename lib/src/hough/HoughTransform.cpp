@@ -144,7 +144,7 @@ namespace accurate_ri {
         accumulator = (hashAccumulator.array() == hash).select(votes, accumulator.array());
     }
 
-    void HoughTransform::eraseWhere(const PointArray &points, const Eigen::ArrayXi &indices) {
+    void HoughTransform::eraseByPoints(const PointArray &points, const Eigen::ArrayXi &indices) {
         for (const int32_t index: indices) {
             updateAccumulatorForPoint(index, points, VoteType::ZERO);
         }
