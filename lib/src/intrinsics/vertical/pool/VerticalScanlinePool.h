@@ -11,7 +11,7 @@ namespace accurate_ri {
         HoughTransform hough;
 
     public:
-        VerticalScanlinePool::VerticalScanlinePool(
+        VerticalScanlinePool(
             const double offsetMin, double offsetMax, double offsetStep, double angleMin, double angleMax,
             double angleStep
         );
@@ -23,6 +23,8 @@ namespace accurate_ri {
         void assignScanline(ScanlineInfo&& scanline, const Eigen::ArrayXi& pointsIndices);
 
         std::optional<ScanlineInfo> removeScanline(uint32_t scanlineId);
+
+        FullScanlines extractFullSortedScanlines();
 
         inline Eigen::ArrayXi getScanlinesIds(const Eigen::ArrayXi &pointsIndices) const {
             return pointsScanlinesIds(pointsIndices);
@@ -47,6 +49,8 @@ namespace accurate_ri {
         inline bool anyUnassigned() const { return unassignedPoints > 0; }
 
         inline int64_t getUnassignedPoints() const { return unassignedPoints; }
+
+        inline const Eigen::ArrayXi& getPointsScanlinesIds() const { return pointsScanlinesIds; }
 
         template<typename Func>
         void forEachScanline(Func&& func) const {

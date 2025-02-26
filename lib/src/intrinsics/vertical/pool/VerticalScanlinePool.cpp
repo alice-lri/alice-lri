@@ -63,4 +63,46 @@ namespace accurate_ri {
 
         return scanline;
     }
+
+    FullScanlines VerticalScanlinePool::extractFullSortedScanlines() {
+        std::vector<ScanlineInfo> sortedScanlines;
+        for (ScanlineInfo &scanlineInfo: scanlineInfoMap | std::views::values) {
+            sortedScanlines.emplace_back(std::move(scanlineInfo));
+        }
+        scanlineInfoMap.clear();
+
+        std::ranges::sort(
+            sortedScanlines, [](const ScanlineInfo &a, const ScanlineInfo &b) {
+                return a.values.angle < b.values.angle;
+            }
+        );
+
+        std::unordered_map<uint32_t, uint32_t> oldIdsToNewIdsMap;
+        for (uint32_t i = 0; i < sortedScanlines.size(); ++i) {
+            oldIdsToNewIdsMap.emplace(sortedScanlines[i].id, i);
+        }
+
+        for (auto &scanlineInfo: sortedScanlines) {
+            scanlineInfo.id = oldIdsToNewIdsMap[scanlineInfo.id];
+            std::ranges::transform(
+                scanlineInfo.dependencies, scanlineInfo.dependencies.begin(), [&oldIdsToNewIdsMap](const uint32_t id) {
+                    return oldIdsToNewIdsMap[id];
+                }
+            );
+        }
+
+        std::ranges::transform(
+            pointsScanlinesIds, pointsScanlinesIds.begin(), [&oldIdsToNewIdsMap](const int32_t id) {
+                return (id >= 0) ? oldIdsToNewIdsMap[id] : -1;
+            }
+        );
+
+        Eigen::ArrayXi movedScanlinesIds = std::move(pointsScanlinesIds);
+        pointsScanlinesIds.resize(0);
+
+        return FullScanlines {
+            .scanlines = std::move(sortedScanlines),
+            .pointsScanlinesIds = std::move(movedScanlinesIds)
+        };
+    }
 } // accurate_ri

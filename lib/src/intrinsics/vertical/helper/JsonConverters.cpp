@@ -101,7 +101,7 @@ namespace accurate_ri {
         j["unassigned_points"] = vir.unassignedPoints;
         j["points_count"] = vir.pointsCount;
         j["scanlines_attributes"] = nlohmann::json::array();
-        for (const auto &scanline: vir.scanlines) {
+        for (const auto &scanline: vir.fullScanlines.scanlines) {
             j["scanlines_attributes"].push_back(scanlineInfoToJson(scanline));
         }
         return j;

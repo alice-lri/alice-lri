@@ -108,6 +108,10 @@ namespace accurate_ri {
             LOG_INFO("Added hash ", removedScanline->houghHash, " to the map");
         }
 
+        for (const auto &dependency: scanline.dependencies) {
+            reverseScanlinesDependencyMap.emplace(dependency, scanlineId);
+        }
+
         return true;
     }
 

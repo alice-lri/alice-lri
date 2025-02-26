@@ -118,14 +118,18 @@ namespace accurate_ri {
         NO_MORE_PEAKS
     };
 
+    struct FullScanlines {
+        std::vector<ScanlineInfo> scanlines;
+        Eigen::ArrayXi pointsScanlinesIds;
+    };
+
     struct VerticalIntrinsicsResult {
         uint32_t iterations;
         uint32_t scanlinesCount;
         uint32_t unassignedPoints;
         uint32_t pointsCount;
         EndReason endReason;
-        std::vector<ScanlineInfo> scanlines;
-        Eigen::ArrayXi pointsScanlinesIds;
+        FullScanlines fullScanlines;
     };
 
     struct ScanlineConflictsResult {

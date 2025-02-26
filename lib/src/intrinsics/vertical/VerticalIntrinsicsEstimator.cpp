@@ -75,7 +75,7 @@ namespace accurate_ri {
             );
 
             VerticalLogging::plotDebugInfo(
-                points, scanlineLimits, pointsScanlinesIds, iteration, "hough_", maxValues, 0
+                points, scanlineLimits, scanlinePool->getPointsScanlinesIds(), iteration, "hough_", maxValues, 0
             );
 
             const auto &estimationResultOpt = estimateScanline(points, errorBounds, scanlineLimits);
@@ -93,7 +93,7 @@ namespace accurate_ri {
             const ScanlineEstimationResult &scanlineEstimation = *estimationResultOpt;
 
             VerticalLogging::plotDebugInfo(
-                points, scanlineEstimation.limits, pointsScanlinesIds, iteration, "fit_", maxValues,
+                points, scanlineEstimation.limits, scanlinePool->getPointsScanlinesIds(), iteration, "fit_", maxValues,
                 scanlineEstimation.uncertainty
             );
 
@@ -116,16 +116,12 @@ namespace accurate_ri {
                 }
             };
 
-            bool keepScanline = performScanlineConflictResolution(
-                angleBounds, scanlineEstimation, currentScanlineId, houghMax
+            bool keepScanline = conflictSolver.performScanlineConflictResolution(
+                *scanlinePool, angleBounds, scanlineEstimation, currentScanlineId, houghMax
             );
 
             if (!keepScanline) {
                 continue;
-            }
-
-            for (const auto &dependency: scanlineEstimation.dependencies) {
-                reverseScanlinesDependencyMap.emplace(dependency, currentScanlineId);
             }
 
             // TODO this is a bit hacky wacky
@@ -135,7 +131,7 @@ namespace accurate_ri {
                 scanlinePool->invalidateByHash(houghMax.hash);
             }
 
-            const ScanlineInfo& scanlineInfo = ScanlineInfo{
+            ScanlineInfo scanlineInfo = ScanlineInfo{
                 .id = currentScanlineId,
                 .pointsCount = static_cast<uint64_t>(scanlineEstimation.limits.indices.size()),
                 .values = maxValues,
@@ -168,55 +164,25 @@ namespace accurate_ri {
             currentScanlineId++;
         }
 
+        int64_t unassignedPoints = scanlinePool->getUnassignedPoints();
+
         // TODO last resort assignment is disabled, maybe implement?
         if (scanlinePool->anyUnassigned()) {
-            LOG_WARN("Warning: Found ", scanlinePool->getUnassignedPoints(), " spurious points");
+            LOG_WARN("Warning: Found ", unassignedPoints, " spurious points");
         }
 
-        std::vector<ScanlineInfo> sortedScanlines;
-        for (ScanlineInfo &scanlineInfo: scanlineInfoMap | std::views::values) {
-            sortedScanlines.emplace_back(std::move(scanlineInfo));
-        }
-        scanlineInfoMap.clear();
+        const FullScanlines fullScanlines = scanlinePool->extractFullSortedScanlines();
 
-        std::ranges::sort(
-            sortedScanlines, [](const ScanlineInfo &a, const ScanlineInfo &b) {
-                return a.values.angle < b.values.angle;
-            }
-        );
-
-
-        std::unordered_map<uint32_t, uint32_t> oldIdsToNewIdsMap;
-        for (uint32_t i = 0; i < sortedScanlines.size(); ++i) {
-            oldIdsToNewIdsMap.emplace(sortedScanlines[i].id, i);
-        }
-
-        for (auto &scanlineInfo: sortedScanlines) {
-            scanlineInfo.id = oldIdsToNewIdsMap[scanlineInfo.id];
-            std::ranges::transform(
-                scanlineInfo.dependencies, scanlineInfo.dependencies.begin(), [&oldIdsToNewIdsMap](const uint32_t id) {
-                    return oldIdsToNewIdsMap[id];
-                }
-            );
-        }
-
-        std::ranges::transform(
-            pointsScanlinesIds, pointsScanlinesIds.begin(), [&oldIdsToNewIdsMap](const int32_t id) {
-                return (id >= 0) ? oldIdsToNewIdsMap[id] : -1;
-            }
-        );
-
-        LOG_INFO("Number of scanlines: ", sortedScanlines.size());
+        LOG_INFO("Number of scanlines: ", fullScanlines.scanlines.size());
         LOG_INFO("Number of unassigned points: ", unassignedPoints);
 
         VerticalIntrinsicsResult result = {
             .iterations = static_cast<uint32_t>(iteration),
-            .scanlinesCount = static_cast<uint32_t>(sortedScanlines.size()),
+            .scanlinesCount = static_cast<uint32_t>(fullScanlines.scanlines.size()),
             .unassignedPoints = static_cast<uint32_t>(unassignedPoints),
             .pointsCount = static_cast<uint32_t>(points.size()),
             .endReason = endReason,
-            .scanlines = std::move(sortedScanlines),
-            .pointsScanlinesIds = std::move(pointsScanlinesIds)
+            .fullScanlines = std::move(fullScanlines)
         };
 
         writeToJson(result);
@@ -542,7 +508,9 @@ namespace accurate_ri {
         double closestScanlineTopDistance = std::numeric_limits<double>::infinity();
         double closestScanlineBottomDistance = std::numeric_limits<double>::infinity();
 
-        for (const auto &[scanlineId, scanline]: scanlineInfoMap) {
+        scanlinePool->forEachScanline([&](const ScanlineInfo &scanline) {
+            uint32_t scanlineId = scanline.id;
+
             const double scanlinePhi = std::asin(scanline.values.offset * invRangesMean) + scanline.values.angle;
             if (scanlinePhi > phisMean) {
                 const double distance = scanlinePhi - phisMean;
@@ -558,7 +526,7 @@ namespace accurate_ri {
                     closestScanlineBottomDistance = distance;
                 }
             }
-        }
+        });
 
         std::vector<uint32_t> validScanlineIds;
         if (closestScanlineIdTop) {
@@ -572,7 +540,7 @@ namespace accurate_ri {
 
         std::vector<double> offsetDiffs;
         for (const auto &scanlineId: validScanlineIds) {
-            const auto &scanline = scanlineInfoMap.at(scanlineId);
+            const auto &scanline = scanlinePool->getScanlineById(scanlineId);
             double offsetDiff = scanline.ci.offset.upper - scanline.ci.offset.lower;
             offsetDiffs.emplace_back(offsetDiff);
         }
@@ -580,7 +548,8 @@ namespace accurate_ri {
         const double maxOffsetDiff = std::ranges::max(offsetDiffs);
         double meanOffset = 0;
         for (const auto &scanlineId: validScanlineIds) {
-            meanOffset += scanlineInfoMap.at(scanlineId).values.offset / static_cast<double>(validScanlineIds.size());
+            const auto &scanline = scanlinePool->getScanlineById(scanlineId);
+            meanOffset += scanline.values.offset / static_cast<double>(validScanlineIds.size());
         }
 
         return HeuristicScanline{
