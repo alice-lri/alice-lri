@@ -2,8 +2,8 @@
 #include <cstdint>
 #include <iomanip>
 #include <unordered_set>
-#include <eigen3/Eigen/Dense>
 #include <optional>
+#include "math/Stats.h"
 
 namespace accurate_ri {
     struct OffsetAngle {
@@ -47,18 +47,11 @@ namespace accurate_ri {
         RealMargin angle;
     };
 
-    struct LinearFitResult {
-        OffsetAngle values;
-        OffsetAngle variance;
-        OffsetAngleMargin ci;
-        double aic;
-    };
-
     struct ScanlineFitResult {
+        std::optional<Stats::WLSResult> fit;
+        std::optional<ScanlineLimits> limits;
         bool success = false;
         bool ciTooWide = false;
-        std::optional<LinearFitResult> fit;
-        std::optional<ScanlineLimits> limits;
     };
 
     // TODO objetive: remove this and construct ScanlineInfo through the process

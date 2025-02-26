@@ -9,11 +9,7 @@ namespace accurate_ri {
 
     nlohmann::json offsetAngleMarginToJson(const OffsetAngleMargin &oam);
 
-    nlohmann::json linearFitResultToJson(const LinearFitResult &lfr);
-
     nlohmann::json scanlineLimitsToJson(const ScanlineLimits &sl);
-
-    nlohmann::json scanlineFitResultToJson(const ScanlineFitResult &sfr);
 
     nlohmann::json heuristicScanlineToJson(const HeuristicScanline &hsl);
 

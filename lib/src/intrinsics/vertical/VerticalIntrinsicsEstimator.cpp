@@ -11,6 +11,9 @@
 #include "utils/Timer.h"
 #include <nlohmann/json.hpp>
 
+#include "intrinsics/vertical/helper/JsonConverters.h"
+#include "math/Stats.h"
+
 namespace accurate_ri {
     // TODO extract these constants somewhere
     constexpr uint64_t MAX_ITERATIONS = 10000;
@@ -342,11 +345,21 @@ namespace accurate_ri {
             requiresHeuristicFitting = scanlineFit.ciTooWide;
 
             if (scanlineFit.success and !requiresHeuristicFitting) {
+                const OffsetAngle values = {
+                    .offset = scanlineFit.fit->slope,
+                    .angle = scanlineFit.fit->intercept
+                };
+
+                const OffsetAngleMargin ci = {
+                    .offset = {.lower = scanlineFit.fit->slopeCi[0], .upper = scanlineFit.fit->slopeCi[1]},
+                    .angle = {.lower = scanlineFit.fit->interceptCi[0], .upper = scanlineFit.fit->interceptCi[1]}
+                };
+
                 return ScanlineEstimationResult{
                     .heuristic = false,
                     .uncertainty = scanlineFit.fit->aic,
-                    .values = std::move(scanlineFit.fit->values),
-                    .ci = std::move(scanlineFit.fit->ci),
+                    .values = values,
+                    .ci = ci,
                     .limits = std::move(*scanlineFit.limits),
                     .dependencies = std::vector<uint32_t>()
                 };
@@ -417,7 +430,7 @@ namespace accurate_ri {
         VerticalBounds currentErrorBounds = errorBounds;
         ScanlineLimits currentScanlineLimits = scanlineLimits;
 
-        std::optional<LinearFitResult> fitResult = std::nullopt;
+        std::optional<Stats::WLSResult> fitResult = std::nullopt;
         std::optional<ScanlineLimits> limits = std::nullopt;
         FitConvergenceState state = FitConvergenceState::INITIAL;
         bool ciTooWide = false;
@@ -461,30 +474,30 @@ namespace accurate_ri {
             const Eigen::ArrayXd &phisFiltered = phis(pointsToFitIndices);
             const Eigen::ArrayXd &boundsFiltered = currentErrorBounds.final(pointsToFitIndices);
 
-            fitResult = performLinearFit(invRangesFiltered, phisFiltered, boundsFiltered);
-            double offsetCiWidth = fitResult->ci.offset.upper - fitResult->ci.offset.lower;
+            fitResult = Stats::wlsBoundsFit(invRangesFiltered, phisFiltered, boundsFiltered);
+            double offsetCiWidth = fitResult->slopeCi(1) - fitResult->slopeCi(0);
             int32_t pointFitCount = pointsToFitIndices.size();
 
             LOG_INFO(
-                "Model fit iteration; Offset: ", fitResult->values.offset, ", Angle: ", fitResult->values.angle,
+                "Model fit iteration; Offset: ", fitResult->slope, ", Angle: ", fitResult->intercept,
                 " using ", pointFitCount, " points, Convergence state: ", static_cast<int>(state), ","
             );
 
             // TODO review and justify these constants
-            if (offsetCiWidth > std::max(0.05 * fitResult->values.offset, 1e-2)) {
+            if (offsetCiWidth > std::max(0.05 * fitResult->slope, 1e-2)) {
                 LOG_WARN("CI too wide: ", offsetCiWidth);
                 ciTooWide = true;
                 break;
             }
 
             // TODO we could save memory reallocation here (perhaps by passing buffer by ref to computeErrorBounds)
-            currentErrorBounds = computeErrorBounds(points, fitResult->values.offset);
+            currentErrorBounds = computeErrorBounds(points, fitResult->slope);
 
             // TODO take into account that strict fit was removed here
-            double upperOffsetMargin = fitResult->ci.offset.upper - fitResult->values.offset;
-            double lowerOffsetMargin = fitResult->values.offset - fitResult->ci.offset.lower;
-            double upperAngleMargin = fitResult->ci.angle.upper - fitResult->values.angle;
-            double lowerAngleMargin = fitResult->values.angle - fitResult->ci.angle.lower;
+            double upperOffsetMargin = fitResult->slopeCi(1) - fitResult->slope;
+            double lowerOffsetMargin = fitResult->slope - fitResult->slopeCi(0);
+            double upperAngleMargin = fitResult->interceptCi(1) - fitResult->intercept;
+            double lowerAngleMargin = fitResult->intercept - fitResult->interceptCi(0);
 
             // TODO 1e-6 can be justified for numerical stability, but well need to review 5e-4
             upperOffsetMargin = std::max(upperOffsetMargin, 5e-4);
@@ -504,8 +517,9 @@ namespace accurate_ri {
                 ", Mean inv ranges: ", meanInvRanges
             );
 
+            const OffsetAngle scanlineAttributes = {.offset = fitResult->slope, .angle = fitResult->intercept};
             const ScanlineLimits &newLimits = computeScanlineLimits(
-                points, currentErrorBounds.final, fitResult->values, margin, meanInvRanges
+                points, currentErrorBounds.final, scanlineAttributes, margin, meanInvRanges
             );
 
             LOG_INFO(
@@ -525,61 +539,10 @@ namespace accurate_ri {
         }
 
         return {
+            .fit = state == FitConvergenceState::CONFIRMED ? fitResult : std::nullopt,
+            .limits = state == FitConvergenceState::CONFIRMED ? std::make_optional(currentScanlineLimits) : std::nullopt,
             .success = state == FitConvergenceState::CONFIRMED,
             .ciTooWide = ciTooWide,
-            .fit = state == FitConvergenceState::CONFIRMED ? fitResult : std::nullopt,
-            .limits = state == FitConvergenceState::CONFIRMED ? std::make_optional(currentScanlineLimits) : std::nullopt
-        };
-    }
-
-    // TODO the memory requirements explode with the number of points, check if this also happens in python
-    LinearFitResult VerticalIntrinsicsEstimator::performLinearFit(
-        const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &bounds
-    ) {
-        PROFILE_SCOPE("VerticalIntrinsicsEstimator::performLinearFit");
-        const Eigen::ArrayXd &weights = 1 / bounds.square();
-
-        // Weighted least squares, variables use matrix notation from the standard formula, invRanges is X, phis is y
-        Eigen::MatrixXd X = Eigen::MatrixXd(phis.size(), 2);
-        X.col(1) = Eigen::VectorXd::Ones(phis.size());
-        X.col(0) = invRanges;
-
-        const Eigen::MatrixXd &W = weights.matrix().asDiagonal();
-        const Eigen::MatrixXd &XtW = X.transpose() * W;
-        const Eigen::MatrixXd &XtWX = XtW * X;
-        const Eigen::MatrixXd &XtWy = XtW * phis.matrix();
-
-        const Eigen::VectorXd &beta = XtWX.ldlt().solve(XtWy);
-        const Eigen::VectorXd &residuals = phis.matrix() - X * beta;
-        const double sigma2 = (residuals.transpose() * W * residuals).value() / (phis.size() - 2);
-
-        const Eigen::MatrixXd &covariance = XtWX.inverse() * sigma2;
-
-        const double ssr = (residuals.transpose() * W * residuals).value();
-        const double sizeOverTwo = static_cast<double>(phis.size()) / 2;
-        double logLikelihood = -std::log(ssr) * sizeOverTwo;
-        logLikelihood -= (1 + std::log(M_PI / sizeOverTwo)) * sizeOverTwo;
-        logLikelihood += 0.5 * weights.log().sum();
-        const double aic = -2 * logLikelihood + 2 * 2; // 2 parameters
-
-        const int df = phis.size() - 2; // Degrees of freedom = n - k (k=2 for intercept & slope)
-        boost::math::students_t dist(df);
-        const double tCritical = quantile(complement(dist, 0.025)); // 95% CI
-
-        OffsetAngleMargin ci = {};
-        for (int i = 0; i < 2; ++i) {
-            const double standardError = std::sqrt(covariance(i, i)); // Standard error of beta[i]
-            RealMargin &currentCi = (i == 0) ? ci.offset : ci.angle;
-
-            currentCi.lower = beta[i] - tCritical * standardError;
-            currentCi.upper = beta[i] + tCritical * standardError;
-        }
-
-        return {
-            .values = {beta[0], beta[1]},
-            .variance = {covariance(0, 0), covariance(1, 1)},
-            .ci = ci,
-            .aic = aic
         };
     }
 
@@ -677,7 +640,7 @@ namespace accurate_ri {
                 }
 
                 theoreticalIntersectionMask = theoreticalIntersectionMask && (
-                                                   (maxTheoreticalSigns * minTheoreticalSigns).array() != 1).array();
+                                                  (maxTheoreticalSigns * minTheoreticalSigns).array() != 1).array();
             }
         }
 
@@ -890,5 +853,15 @@ namespace accurate_ri {
             .shouldReject = false,
             .conflictingScanlines = std::move(conflictingScanlines)
         };
+    }
+
+    // TODO remove this
+    void VerticalIntrinsicsEstimator::writeToJson(const VerticalIntrinsicsResult &result) {
+        const std::optional<std::string> outputPath = getOutputPath();
+        if (outputPath) {
+            nlohmann::json json = verticalIntrinsicsResultToJson(result);
+            std::ofstream outFile(std::filesystem::path(*outputPath) / "summary.json");
+            outFile << json.dump(4);
+        }
     }
 } // namespace accurate_ri

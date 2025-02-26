@@ -54,12 +54,4 @@ namespace accurate_ri {
     std::optional<std::string> getOutputPath() {
         return outputPath;
     }
-
-    void writeToJson(VerticalIntrinsicsResult &result) {
-        if (outputPath) {
-            nlohmann::json json = verticalIntrinsicsResultToJson(result);
-            std::ofstream outFile(std::filesystem::path(*outputPath) / "summary.json");
-            outFile << json.dump(4);
-        }
-    }
 }

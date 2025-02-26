@@ -1,10 +1,8 @@
 #pragma once
+#include <optional>
 #include <string>
 #include <vector>
 #include <eigen3/Eigen/Core>
-
-// TODO fix this include
-#include "../src/intrinsics/vertical/VerticalStructs.h"
 
 namespace accurate_ri {
     void hello();
@@ -18,6 +16,4 @@ namespace accurate_ri {
 
     void setOutputPath(const std::optional<std::string>& path);
     std::optional<std::string> getOutputPath();
-
-    void writeToJson(VerticalIntrinsicsResult &result);
 }

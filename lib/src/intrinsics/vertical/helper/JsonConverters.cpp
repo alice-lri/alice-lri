@@ -22,38 +22,12 @@ namespace accurate_ri {
         return j;
     }
 
-    nlohmann::json linearFitResultToJson(const LinearFitResult &lfr) {
-        nlohmann::json j;
-        j["values"] = offsetAngleToJson(lfr.values);
-        j["variance"] = offsetAngleToJson(lfr.variance);
-        j["ci"] = offsetAngleMarginToJson(lfr.ci);
-        j["aic"] = lfr.aic;
-        return j;
-    }
-
     nlohmann::json scanlineLimitsToJson(const ScanlineLimits &sl) {
         nlohmann::json j;
         j["indices"] = std::vector<int>(sl.indices.data(), sl.indices.data() + sl.indices.size());
         j["mask"] = std::vector<bool>(sl.mask.data(), sl.mask.data() + sl.mask.size());
         j["lowerLimit"] = std::vector<double>(sl.lowerLimit.data(), sl.lowerLimit.data() + sl.lowerLimit.size());
         j["upperLimit"] = std::vector<double>(sl.upperLimit.data(), sl.upperLimit.data() + sl.upperLimit.size());
-        return j;
-    }
-
-    nlohmann::json scanlineFitResultToJson(const ScanlineFitResult &sfr) {
-        nlohmann::json j;
-        j["success"] = sfr.success;
-        j["ciTooWide"] = sfr.ciTooWide;
-        if (sfr.fit.has_value()) {
-            j["fit"] = linearFitResultToJson(sfr.fit.value());
-        } else {
-            j["fit"] = nullptr; // Or nlohmann::json::null() if you prefer explicit null
-        }
-        if (sfr.limits.has_value()) {
-            j["limits"] = scanlineLimitsToJson(sfr.limits.value());
-        } else {
-            j["limits"] = nullptr; // Or nlohmann::json::null()
-        }
         return j;
     }
 

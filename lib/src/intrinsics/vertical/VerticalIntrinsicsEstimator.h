@@ -41,10 +41,6 @@ namespace accurate_ri {
             const ScanlineLimits &scanlineLimits
         ) const;
 
-        static LinearFitResult performLinearFit(
-            const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &bounds
-        );
-
         HeuristicScanline computeHeuristicScanline(double invRangesMean, double phisMean) const;
 
         ScanlineIntersectionInfo computeScanlineIntersectionInfo(
@@ -60,5 +56,7 @@ namespace accurate_ri {
             const ScanlineAngleBounds &angleBounds, const ScanlineEstimationResult &scanline, uint32_t scanlineId,
             const HoughCell &houghMax
         );
+
+        void writeToJson(const VerticalIntrinsicsResult &result);
     };
 } // namespace accurate_ri
