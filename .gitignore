@@ -8,3 +8,5 @@ ref_tracing/
 scripts/buffers/
 
 output/
+
+.idea/
