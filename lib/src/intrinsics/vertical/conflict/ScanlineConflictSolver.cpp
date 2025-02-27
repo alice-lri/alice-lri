@@ -39,6 +39,14 @@ namespace accurate_ri {
 
             return false;
         }
+        
+        for (const auto &dependency: scanline.dependencies) {
+            reverseScanlinesDependencyMap.emplace(dependency, scanlineId);
+        }
+
+        if (conflicts.conflictingScanlines.size() == 0) {
+            return true;
+        }
 
         std::queue<uint32_t> scanlinesToRemoveQueue;
         std::unordered_set<uint32_t> scanlinesToRemoveSet;
@@ -106,10 +114,6 @@ namespace accurate_ri {
             );
 
             LOG_INFO("Added hash ", removedScanline->houghHash, " to the map");
-        }
-
-        for (const auto &dependency: scanline.dependencies) {
-            reverseScanlinesDependencyMap.emplace(dependency, scanlineId);
         }
 
         return true;
