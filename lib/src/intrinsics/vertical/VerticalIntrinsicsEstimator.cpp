@@ -55,19 +55,19 @@ namespace accurate_ri {
             }
 
             const HoughCell &houghMax = houghEstimationOpt->cell;
-            const OffsetAngle &maxValues = houghMax.maxValues;
+            const OffsetAngle &houghValues = houghMax.maxValues;
             const OffsetAngleMargin &margin = houghEstimationOpt->margin;
 
             LOG_INFO("ITERATION ", iteration);
             LOG_INFO(
-                "Offset: ", maxValues.offset, ", Angle: ", maxValues.angle, ", Votes: ", houghMax.votes,
+                "Offset: ", houghValues.offset, ", Angle: ", houghValues.angle, ", Votes: ", houghMax.votes,
                 ", Hash: ", houghMax.hash, ", Hough indices: [", houghMax.maxAngleIndex, "   ", houghMax.maxOffsetIndex,
                 "]"
             );
 
-            VerticalBounds errorBounds = computeErrorBounds(points, maxValues.offset);
+            VerticalBounds errorBounds = computeErrorBounds(points, houghValues.offset);
             ScanlineLimits scanlineLimits = computeScanlineLimits(
-                points, errorBounds.final, maxValues, margin, 0
+                points, errorBounds.final, houghValues, margin, 0
             );
 
             LOG_INFO(
@@ -75,8 +75,11 @@ namespace accurate_ri {
             );
 
             VerticalLogging::plotDebugInfo(
-                points, scanlineLimits, scanlinePool->getPointsScanlinesIds(), iteration, "hough_", maxValues, 0
+                points, scanlineLimits, scanlinePool->getPointsScanlinesIds(), iteration, "hough_", houghValues, 0
             );
+
+            // TODO houghvalues and scanline limits should not be used beyond this point, refactor to avoid
+
 
             const auto &estimationResultOpt = estimateScanline(points, errorBounds, scanlineLimits);
 
@@ -91,6 +94,7 @@ namespace accurate_ri {
             }
 
             const ScanlineEstimationResult &scanlineEstimation = *estimationResultOpt;
+            const OffsetAngle& maxValues = scanlineEstimation.values;
 
             VerticalLogging::plotDebugInfo(
                 points, scanlineEstimation.limits, scanlinePool->getPointsScanlinesIds(), iteration, "fit_", maxValues,
