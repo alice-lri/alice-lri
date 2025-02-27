@@ -22,6 +22,7 @@ namespace accurate_ri {
         const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(z.data(), z.size()).cast<double>();
 
         execute(xArray, yArray, zArray);
+        PRINT_PROFILE_REPORT();
     }
 
     void execute(const std::vector<double> &x, const std::vector<double> &y, const std::vector<double> &z) {
@@ -30,9 +31,11 @@ namespace accurate_ri {
         const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(z.data(), z.size());
 
         execute(xArray, yArray, zArray);
+        PRINT_PROFILE_REPORT();
     }
 
     void execute(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) {
+        PROFILE_SCOPE("TOTAL");
         const PointArray points(xArray, yArray, zArray);
         IntrinsicsEstimator estimator = IntrinsicsEstimator();
 
