@@ -9,23 +9,25 @@ namespace accurate_ri::Stats {
         PROFILE_SCOPE("Stats::wlsBoundsFit");
         const Eigen::ArrayXd &weights = 1 / bounds.square();
 
-        // Weighted least squares, variables use matrix notation from the standard formula, invRanges is X, phis is y
-        Eigen::MatrixXd X = Eigen::MatrixXd(y.size(), 2);
-        X.col(1) = Eigen::VectorXd::Ones(y.size());
-        X.col(0) = x;
+        const double S = weights.sum();
+        const double Sx = (weights.array() * x.array()).sum();
+        const double Sy = (weights.array() * y.array()).sum();
+        const double Sxx = (weights.array() * x.array().square()).sum();
+        const double Sxy = (weights.array() * x.array() * y.array()).sum();
 
-        const Eigen::MatrixXd &W = weights.matrix().asDiagonal();
-        const Eigen::MatrixXd &XtW = X.transpose() * W;
-        const Eigen::MatrixXd &XtWX = XtW * X;
-        const Eigen::MatrixXd &XtWy = XtW * y.matrix();
+        const double Delta = S * Sxx - Sx * Sx;
+        const double slope = (S * Sxy - Sx * Sy) / Delta;
+        const double intercept = (Sxx * Sy - Sx * Sxy) / Delta;
 
-        const Eigen::VectorXd &beta = XtWX.ldlt().solve(XtWy);
-        const Eigen::VectorXd &residuals = y.matrix() - X * beta;
-        const double sigma2 = (residuals.transpose() * W * residuals).value() / (y.size() - 2);
+        // Compute residuals and weighted variance
+        const Eigen::VectorXd residuals = y.array() - (slope * x.array() + intercept);
+        const double sigma2 = (weights.array() * residuals.array().square()).sum() / (y.size() - 2);
 
-        const Eigen::MatrixXd &covariance = XtWX.inverse() * sigma2;
+        // Optionally, compute the covariance matrix explicitly
+        const double slopeVariance = sigma2 * S / Delta;
+        const double interceptVariance = sigma2 * Sxx / Delta;
+        const double ssr = (weights.array() * residuals.array().square()).sum();
 
-        const double ssr = (residuals.transpose() * W * residuals).value();
         const double sizeOverTwo = static_cast<double>(y.size()) / 2;
         double logLikelihood = -std::log(ssr) * sizeOverTwo;
         logLikelihood -= (1 + std::log(M_PI / sizeOverTwo)) * sizeOverTwo;
@@ -40,18 +42,21 @@ namespace accurate_ri::Stats {
         Eigen::Array2d interceptCi;
 
         for (int i = 0; i < 2; ++i) {
-            const double standardError = std::sqrt(covariance(i, i)); // Standard error of beta[i]
             Eigen::Array2d &currentCi = (i == 0) ? slopeCi : interceptCi;
+            const double currentParameter = (i == 0)? slope : intercept;
+            const double currentVariance = (i == 0)? slopeVariance : interceptVariance;
 
-            currentCi(0) = beta[i] - tCritical * standardError;
-            currentCi(1) = beta[i] + tCritical * standardError;
+            const double standardError = std::sqrt(currentVariance); // Standard error of beta[i]
+
+            currentCi(0) = currentParameter - tCritical * standardError;
+            currentCi(1) = currentParameter + tCritical * standardError;
         }
 
         return {
-            .slope = beta[0],
-            .intercept = beta[1],
-            .slopeVariance = covariance(0, 0),
-            .interceptVariance = covariance(1, 1),
+            .slope = slope,
+            .intercept = intercept,
+            .slopeVariance = slopeVariance,
+            .interceptVariance = interceptVariance,
             .aic = aic,
             .slopeCi = std::move(slopeCi),
             .interceptCi = std::move(interceptCi)

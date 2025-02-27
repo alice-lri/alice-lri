@@ -93,15 +93,15 @@ namespace accurate_ri {
                 continue;
             }
 
-            const ScanlineEstimationResult &scanlineEstimation = *estimationResultOpt;
-            const OffsetAngle& maxValues = scanlineEstimation.values;
+            ScanlineEstimationResult scanlineEstimation = *estimationResultOpt;
+            const OffsetAngle &maxValues = scanlineEstimation.values;
 
             VerticalLogging::plotDebugInfo(
                 points, scanlineEstimation.limits, scanlinePool->getPointsScanlinesIds(), iteration, "fit_", maxValues,
                 scanlineEstimation.uncertainty
             );
 
-            const ScanlineAngleBounds &angleBounds = {
+            ScanlineAngleBounds angleBounds = {
                 .bottom = {
                     .lower = scanlineEstimation.ci.angle.lower + asin(
                                  scanlineEstimation.ci.offset.lower / points.getMaxRange()
@@ -175,7 +175,7 @@ namespace accurate_ri {
             LOG_WARN("Warning: Found ", unassignedPoints, " spurious points");
         }
 
-        const FullScanlines fullScanlines = scanlinePool->extractFullSortedScanlines();
+        FullScanlines fullScanlines = scanlinePool->extractFullSortedScanlines();
 
         LOG_INFO("Number of scanlines: ", fullScanlines.scanlines.size());
         LOG_INFO("Number of unassigned points: ", unassignedPoints);
@@ -211,27 +211,31 @@ namespace accurate_ri {
     VerticalBounds VerticalIntrinsicsEstimator::computeErrorBounds(
         const PointArray &points, const double offset
     ) {
+        PROFILE_SCOPE("VerticalIntrinsicsEstimator::computeErrorBounds");
         double coordsEps = points.getCoordsEps();
         const auto &zs = points.getZ();
         const auto &rangesXy = points.getRangesXy();
         const auto &ranges = points.getRanges();
 
-        const Eigen::ArrayXd rangeXySquared = rangesXy.array().square();
-        const Eigen::ArrayXd rangeSquared = ranges.array().square();
-        const Eigen::ArrayXd zsOverRangesXy = zs.array() / rangesXy.array();
-        const Eigen::ArrayXd sqrtFactor = 1 + zsOverRangesXy.square();
+        const auto &rangeXySquared = rangesXy.square();
+        const auto &rangeSquared = ranges.square();
+        const auto &zsOverRangesXy = zs / rangesXy;
+        const auto &sqrtFactor = 1 + zsOverRangesXy.square();
 
-        const Eigen::ArrayXd phisUpperBound = (coordsEps * std::sqrt(2) * zs.cwiseAbs() + coordsEps * rangesXy).array()
-                                              / (rangeXySquared.array() * sqrtFactor.array());
-
-        const Eigen::ArrayXd correctionUpperBound = offset * coordsEps * std::sqrt(3)
-                                                    / (rangeSquared.array() * (1 - (offset / ranges.array()).square()).
-                                                       sqrt());
-
-        const Eigen::ArrayXd finalUpperBound = phisUpperBound + correctionUpperBound;
+        VerticalBounds result;
 
 
-        return {phisUpperBound, correctionUpperBound, finalUpperBound};
+        result.phis = (coordsEps * std::sqrt(2) * zs.cwiseAbs() + coordsEps * rangesXy).array()
+                                     / (rangeXySquared.array() * sqrtFactor.array());
+
+        result.correction = offset * coordsEps * std::sqrt(3)
+                                           / (rangeSquared.array() * (1 - (offset / ranges.array()).square()).
+                                              sqrt());
+
+        result.final = result.phis + result.correction;
+
+
+        return result;
     }
 
     // TODO split this function
@@ -246,25 +250,25 @@ namespace accurate_ri {
         const auto offset = scanlineAttributes.offset;
         const auto angle = scanlineAttributes.angle;
 
-        const Eigen::ArrayXd upperArcsinArg = ((offset + margin.offset.upper) * invRanges.array()).min(1).max(-1);
-        const Eigen::ArrayXd lowerArcsinArg = ((offset - margin.offset.lower) * invRanges.array()).min(1).max(-1);
+        const auto upperArcsinArg = ((offset + margin.offset.upper) * invRanges.array()).min(1).max(-1);
+        const auto lowerArcsinArg = ((offset - margin.offset.lower) * invRanges.array()).min(1).max(-1);
 
-        const Eigen::ArrayXd upperArcsinArgShifted =
+        const auto upperArcsinArgShifted =
                 ((offset + margin.offset.upper) * (invRanges.array() - invRangesShift)).min(1).max(-1);
-        const Eigen::ArrayXd lowerArcsinArgShifted =
+        const auto lowerArcsinArgShifted =
                 ((offset - margin.offset.lower) * (invRanges.array() - invRangesShift)).min(1).max(-1);
 
-        const Eigen::ArrayXd upperArcsin = upperArcsinArg.array();
-        const Eigen::ArrayXd lowerArcsin = lowerArcsinArg.array();
+        const auto upperArcsin = upperArcsinArg;
+        const auto lowerArcsin = lowerArcsinArg;
 
-        const Eigen::ArrayXd upperArcsinShifted = upperArcsinArgShifted.array();
-        const Eigen::ArrayXd lowerArcsinShifted = lowerArcsinArgShifted.array();
+        const auto upperArcsinShifted = upperArcsinArgShifted;
+        const auto lowerArcsinShifted = lowerArcsinArgShifted;
 
-        const Eigen::ArrayXd deltaUpper = upperArcsin - upperArcsinShifted;
-        const Eigen::ArrayXd deltaLower = lowerArcsin - lowerArcsinShifted;
+        const auto deltaUpper = upperArcsin - upperArcsinShifted;
+        const auto deltaLower = lowerArcsin - lowerArcsinShifted;
 
-        const Eigen::ArrayXd scanlineUpperLimitTmp = upperArcsinShifted + angle;
-        const Eigen::ArrayXd scanlineLowerLimitTmp = lowerArcsinShifted + angle;
+        const auto scanlineUpperLimitTmp = upperArcsinShifted + angle;
+        const auto scanlineLowerLimitTmp = lowerArcsinShifted + angle;
 
         Eigen::ArrayXd scanlineUpperLimit = scanlineUpperLimitTmp.array().max(scanlineLowerLimitTmp.array());
         Eigen::ArrayXd scanlineLowerLimit = scanlineLowerLimitTmp.array().min(scanlineUpperLimitTmp.array());
@@ -272,7 +276,7 @@ namespace accurate_ri {
         scanlineUpperLimit += deltaUpper + margin.angle.upper + errorBounds.array();
         scanlineLowerLimit += deltaLower - margin.angle.lower - errorBounds.array();
 
-        auto scanlineIndices = Eigen::ArrayXi(points.size());
+        Eigen::ArrayXi scanlineIndices = Eigen::ArrayXi(points.size());
         Eigen::ArrayX<bool> mask = scanlineLowerLimit.array() <= phis.array()
                                    && phis.array() <= scanlineUpperLimit.array();
 
@@ -285,7 +289,12 @@ namespace accurate_ri {
 
         scanlineIndices.conservativeResize(count);
 
-        return {scanlineIndices, mask, scanlineLowerLimit, scanlineUpperLimit};
+        return {
+            std::move(scanlineIndices),
+            std::move(mask),
+            std::move(scanlineLowerLimit),
+            std::move(scanlineUpperLimit)
+        };
     }
 
     std::optional<ScanlineEstimationResult> VerticalIntrinsicsEstimator::estimateScanline(
@@ -298,7 +307,7 @@ namespace accurate_ri {
         }
 
         if (scanlineLimits.indices.size() > 2) {
-            const ScanlineFitResult &scanlineFit = tryFitScanline(points, errorBounds, scanlineLimits);
+            ScanlineFitResult scanlineFit = tryFitScanline(points, errorBounds, scanlineLimits);
             requiresHeuristicFitting = scanlineFit.ciTooWide;
 
             if (scanlineFit.success and !requiresHeuristicFitting) {
@@ -356,11 +365,11 @@ namespace accurate_ri {
             offsetMargin = std::max(offsetMargin, 1e-6);
             angleMargin = std::max(angleMargin, 1e-6);
 
-            const VerticalBounds &heuristicBounds = computeErrorBounds(points, heuristic.offset);
-            const OffsetAngle &heuristicOffsetAngle = {heuristic.offset, heuristicAngle};
+            const VerticalBounds heuristicBounds = computeErrorBounds(points, heuristic.offset);
+            OffsetAngle heuristicOffsetAngle = {heuristic.offset, heuristicAngle};
 
-            const OffsetAngleMargin &heuristicMargin = {offsetMargin, offsetMargin, angleMargin, angleMargin};
-            const ScanlineLimits &heuristicLimits = computeScanlineLimits(
+            const OffsetAngleMargin heuristicMargin = {offsetMargin, offsetMargin, angleMargin, angleMargin};
+            ScanlineLimits heuristicLimits = computeScanlineLimits(
                 points, heuristicBounds.final, heuristicOffsetAngle, heuristicMargin, invRangesMean
             );
             LOG_INFO("Offset: ", heuristicOffsetAngle.offset, ", Angle: ", heuristicOffsetAngle.angle);
@@ -368,8 +377,8 @@ namespace accurate_ri {
             return ScanlineEstimationResult{
                 .heuristic = true,
                 .uncertainty = std::numeric_limits<double>::infinity(),
-                .values = std::move(heuristicOffsetAngle),
-                .ci = std::move(heuristicMargin),
+                .values = heuristicOffsetAngle,
+                .ci = heuristicMargin,
                 .limits = std::move(heuristicLimits),
                 .dependencies = std::vector<uint32_t>()
             };
@@ -475,7 +484,7 @@ namespace accurate_ri {
             );
 
             const OffsetAngle scanlineAttributes = {.offset = fitResult->slope, .angle = fitResult->intercept};
-            const ScanlineLimits &newLimits = computeScanlineLimits(
+            const ScanlineLimits newLimits = computeScanlineLimits(
                 points, currentErrorBounds.final, scanlineAttributes, margin, meanInvRanges
             );
 
@@ -513,25 +522,27 @@ namespace accurate_ri {
         double closestScanlineTopDistance = std::numeric_limits<double>::infinity();
         double closestScanlineBottomDistance = std::numeric_limits<double>::infinity();
 
-        scanlinePool->forEachScanline([&](const ScanlineInfo &scanline) {
-            uint32_t scanlineId = scanline.id;
+        scanlinePool->forEachScanline(
+            [&](const ScanlineInfo &scanline) {
+                uint32_t scanlineId = scanline.id;
 
-            const double scanlinePhi = std::asin(scanline.values.offset * invRangesMean) + scanline.values.angle;
-            if (scanlinePhi > phisMean) {
-                const double distance = scanlinePhi - phisMean;
-                if (distance < closestScanlineTopDistance) {
-                    closestScanlineIdTop = scanlineId;
-                    closestScanlineTopDistance = distance;
+                const double scanlinePhi = std::asin(scanline.values.offset * invRangesMean) + scanline.values.angle;
+                if (scanlinePhi > phisMean) {
+                    const double distance = scanlinePhi - phisMean;
+                    if (distance < closestScanlineTopDistance) {
+                        closestScanlineIdTop = scanlineId;
+                        closestScanlineTopDistance = distance;
+                    }
+                }
+                if (scanlinePhi < phisMean) {
+                    const double distance = phisMean - scanlinePhi;
+                    if (distance < closestScanlineBottomDistance) {
+                        closestScanlineIdBottom = scanlineId;
+                        closestScanlineBottomDistance = distance;
+                    }
                 }
             }
-            if (scanlinePhi < phisMean) {
-                const double distance = phisMean - scanlinePhi;
-                if (distance < closestScanlineBottomDistance) {
-                    closestScanlineIdBottom = scanlineId;
-                    closestScanlineBottomDistance = distance;
-                }
-            }
-        });
+        );
 
         std::vector<uint32_t> validScanlineIds;
         if (closestScanlineIdTop) {

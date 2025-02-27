@@ -1,3 +1,4 @@
+#include <chrono>
 #include <iostream>
 #include <optional>
 #include "accurate_ri.h"
@@ -56,6 +57,12 @@ int main(int argc, char **argv) {
     setCloudPath(path);
     accurate_ri::setOutputPath(outputPath);
 
+
+    auto start = std::chrono::high_resolution_clock::now();
     accurate_ri::execute(points.x, points.y, points.z);
+    auto end = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = end - start;
+    std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
+
     return 0;
 }

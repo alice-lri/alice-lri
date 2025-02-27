@@ -96,6 +96,7 @@ namespace accurate_ri {
     }
 
     std::optional<HoughCell> HoughTransform::findMaximum(std::optional<double> averageX) {
+        PROFILE_SCOPE("HoughTransform::findMaximum");
         std::vector<std::pair<size_t, size_t> > maxIndices;
         double maxVal = -std::numeric_limits<double>::infinity();
 
@@ -137,6 +138,7 @@ namespace accurate_ri {
     }
 
     void HoughTransform::eraseByHash(const uint64_t hash) {
+        PROFILE_SCOPE("HoughTransform::eraseByHash");
         accumulator = (hashAccumulator.array() == hash).select(0, accumulator.array());
     }
 
@@ -145,6 +147,7 @@ namespace accurate_ri {
     }
 
     void HoughTransform::eraseByPoints(const PointArray &points, const Eigen::ArrayXi &indices) {
+        PROFILE_SCOPE("HoughTransform::eraseByPoints");
         for (const int32_t index: indices) {
             updateAccumulatorForPoint(index, points, VoteType::ZERO);
         }
