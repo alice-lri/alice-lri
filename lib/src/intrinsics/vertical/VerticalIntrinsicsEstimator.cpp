@@ -240,6 +240,7 @@ namespace accurate_ri {
         const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
         const OffsetAngleMargin &margin, const double invRangesShift
     ) const {
+        PROFILE_SCOPE("VerticalIntrinsicsEstimator::computeScanlineLimits");
         const auto &invRanges = points.getInvRanges();
         const auto &phis = points.getPhis();
         const auto offset = scanlineAttributes.offset;
@@ -253,11 +254,11 @@ namespace accurate_ri {
         const Eigen::ArrayXd lowerArcsinArgShifted =
                 ((offset - margin.offset.lower) * (invRanges.array() - invRangesShift)).min(1).max(-1);
 
-        const Eigen::ArrayXd upperArcsin = upperArcsinArg.array().asin();
-        const Eigen::ArrayXd lowerArcsin = lowerArcsinArg.array().asin();
+        const Eigen::ArrayXd upperArcsin = upperArcsinArg.array();
+        const Eigen::ArrayXd lowerArcsin = lowerArcsinArg.array();
 
-        const Eigen::ArrayXd upperArcsinShifted = upperArcsinArgShifted.array().asin();
-        const Eigen::ArrayXd lowerArcsinShifted = lowerArcsinArgShifted.array().asin();
+        const Eigen::ArrayXd upperArcsinShifted = upperArcsinArgShifted.array();
+        const Eigen::ArrayXd lowerArcsinShifted = lowerArcsinArgShifted.array();
 
         const Eigen::ArrayXd deltaUpper = upperArcsin - upperArcsinShifted;
         const Eigen::ArrayXd deltaLower = lowerArcsin - lowerArcsinShifted;
