@@ -8,6 +8,7 @@ set(HEADER_FILES
 
 add_executable(examples main.cpp ${SRC_FILES} ${HEADER_FILES})
 add_executable(eigen_loop_vs_select eigen_loop_vs_select.cpp)
+add_executable(eigen_lazy_vs_immediate eigen_lazy_vs_immediate.cpp)
 
 target_link_libraries(examples PRIVATE accurate_ri)
 

@@ -1,31 +1,25 @@
 #include "HorizontalMath.h"
 #include <cstdint>
-#include <cmath>
-#include <numbers>
-#include <eigen3/Eigen/src/Core/Array.h>
-#include <eigen3/Eigen/src/Core/Array.h>
-
+#include <numeric>
 #include "utils/Utils.h"
 
-
 namespace accurate_ri::HorizontalMath {
-    Eigen::ArrayXd computeDiffToIdeal(const Eigen::ArrayXd& thetas, uint32_t resolution, bool reconstruct) {
+    Eigen::ArrayXd computeDiffToIdeal(const Eigen::ArrayXd &thetas, const uint32_t resolution, const bool reconstruct) {
         const double thetaStep = 2 * std::numbers::pi / static_cast<double>(resolution);
-        const auto closestIdeal = (thetas / thetaStep).round() * resolution;
+        const auto closestIdeal = (thetas / thetaStep) * thetaStep;
         Eigen::ArrayXd diffToIdeal = thetas - closestIdeal;
 
-        // TODO i think this can be done in a single pass
         if (reconstruct) {
             const auto diffDiffToIdeal = Utils::diff(diffToIdeal);
-            const auto jumpMask = diffDiffToIdeal.cabs() >= thetaStep / 1.5;
+            const auto jumpMask = (diffDiffToIdeal.abs() >= thetaStep / 1.5).cast<double>();
+            const auto signs = diffDiffToIdeal.sign().cast<double>();
+            const auto diffDiffToIdealNoJumps = diffDiffToIdeal - thetaStep * jumpMask * signs;
 
+            // Diff to ideal is the cumulative sum of diffDiffToIdealNoJumps, with first element being 0
             diffToIdeal[0] = 0;
-            for (int i = 0; i < diffDiffToIdeal.size(); ++i) {
-                if (jumpMask[i]) {
-                    diffDiffToIdeal[i] -= thetaStep * Utils::sign(diffDiffToIdeal[i]);
-                }
-                diffToIdeal[i + 1] = diffToIdeal[i] + diffDiffToIdeal[i];
-            }
+            std::partial_sum(diffDiffToIdealNoJumps.begin(), diffDiffToIdealNoJumps.end(), diffToIdeal.begin() + 1);
         }
+
+        return diffToIdeal;
     }
 } // accurate_ri
