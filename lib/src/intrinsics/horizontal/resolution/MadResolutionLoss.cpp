@@ -7,23 +7,43 @@
 #include "utils/Utils.h"
 
 namespace accurate_ri {
+    template<typename T>
+    Eigen::ArrayXd computeDiffThetaIdealWrtDiffRxy(
+        const Eigen::ArrayBase<T> &invRangesXy, const Eigen::ArrayBase<T> &thetas, uint32_t resolution
+    );
+
     double MadResolutionLoss::computeResolutionLoss(
-        const Eigen::ArrayXd &invRangesXy, const Eigen::ArrayXd &thetas, uint32_t resolution
+        const Eigen::ArrayXd &invRangesXy, const Eigen::ArrayXd &thetas, const uint32_t resolution
+    ) {
+        auto df = computeDiffThetaIdealWrtDiffRxy(invRangesXy, thetas, resolution);
+        const double median = Utils::medianInPlace(df);
+        const double mad = (df - median).abs().mean() * resolution;
+
+        return mad;
+    }
+
+    template<typename T>
+    Eigen::ArrayXd computeDiffThetaIdealWrtDiffRxy(
+        const Eigen::ArrayBase<T> &invRangesXy, const Eigen::ArrayBase<T> &thetas, const uint32_t resolution
     ) {
         const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(thetas, resolution, true);
         const auto diffInvRangesXy = Utils::diff(invRangesXy);
         const auto diffInvRangesXyEpsMask = diffInvRangesXy.abs() >= 1e-7;
-        const bool ignoreMask = diffInvRangesXyEpsMask.count() < 2;
 
-        if (ignoreMask) {
-            Utils::diff(diffToIdeal) / diffInvRangesXy;
-        } else {
-            std::vector<uint32_t> indices;
-            for (int i = 0; i < diffInvRangesXyEpsMask.size(); ++i) {
+        if (diffInvRangesXyEpsMask.count() < 2) {
+            return Utils::diff(diffToIdeal) / diffInvRangesXy;
+        }
 
+        std::vector<int32_t> indicesVector;
+        indicesVector.reserve(diffInvRangesXyEpsMask.size());
+        for (int i = 0; i < diffInvRangesXyEpsMask.size(); ++i) {
+            if (indicesVector[i]) {
+                indicesVector.emplace_back(i);
             }
         }
 
-        return 0;
+        const auto indices = Eigen::Map<const Eigen::ArrayXi>(indices.data(), indices.size());
+
+        return Utils::diff(diffToIdeal)(indices) / diffInvRangesXy(indices);
     }
 }
