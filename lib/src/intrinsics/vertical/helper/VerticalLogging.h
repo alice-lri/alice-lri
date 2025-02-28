@@ -1,5 +1,4 @@
 #pragma once
-#include <accurate_ri.h>
 #include <string>
 #include "utils/Logger.h"
 #include <filesystem>
@@ -8,11 +7,17 @@
 #include "hough/HoughTransform.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 
-using EigenDataVariant = std::variant<Eigen::ArrayXd, Eigen::ArrayX<bool> >; // List all possible Eigen types
+using EigenDataVariant = std::variant<Eigen::ArrayXd, Eigen::ArrayX<bool>>; // List all possible Eigen types
 
 // TODO remove this whole file after debugging
 namespace accurate_ri::VerticalLogging {
+#if LOG_LEVEL <= LOG_LEVEL_INFO
     void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough);
+#else
+    void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough);
+#endif
+
+    void writeToJson(const VerticalIntrinsicsResult &result);
 
     template<typename T>
     bool writeBinaryFile(const std::filesystem::path &filePath, const T &data, const std::string &dataName) {

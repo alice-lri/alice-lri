@@ -2,7 +2,6 @@
 
 #include "intrinsics/IntrinsicsEstimator.h"
 #include "intrinsics/vertical/helper/JsonConverters.h"
-#include "intrinsics/vertical/helper/VerticalLogging.h"
 #include "utils/Logger.h"
 #include "utils/Timer.h"
 

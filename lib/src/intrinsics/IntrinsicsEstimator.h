@@ -1,5 +1,5 @@
 #pragma once
-#include "HorizontalIntrinsicsEstimator.h"
+#include "intrinsics/horizontal/HorizontalIntrinsicsEstimator.h"
 #include "point/PointArray.h"
 #include "vertical/VerticalIntrinsicsEstimator.h"
 

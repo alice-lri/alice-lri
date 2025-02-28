@@ -1,8 +1,4 @@
 #pragma once
-
-#include <cassert>
-#include <vector>
-#include <cmath>
 #include <eigen3/Eigen/Dense>
 
 namespace accurate_ri {

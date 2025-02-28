@@ -34,7 +34,5 @@ namespace accurate_ri {
         ) const;
 
         HeuristicScanline computeHeuristicScanline(double invRangesMean, double phisMean) const;
-
-        void writeToJson(const VerticalIntrinsicsResult &result);
     };
 } // namespace accurate_ri

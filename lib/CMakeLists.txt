@@ -45,8 +45,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/vertical/VerticalIntrinsicsEstimator.h
         src/intrinsics/IntrinsicsEstimator.cpp
         src/intrinsics/IntrinsicsEstimator.h
-        src/intrinsics/HorizontalIntrinsicsEstimator.cpp
-        src/intrinsics/HorizontalIntrinsicsEstimator.h
+        src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.cpp
+        src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.h
         src/hough/HoughTransform.cpp
         src/hough/HoughTransform.h
         src/hash/HashUtils.cpp
@@ -66,6 +66,12 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/vertical/conflict/ScanlineConflictSolver.h
         src/intrinsics/vertical/pool/VerticalScanlinePool.cpp
         src/intrinsics/vertical/pool/VerticalScanlinePool.h
+        src/intrinsics/horizontal/helper/HorizontalLogging.cpp
+        src/intrinsics/horizontal/helper/HorizontalLogging.h
+        src/intrinsics/horizontal/resolution/MadResolutionLoss.cpp
+        src/intrinsics/horizontal/resolution/MadResolutionLoss.h
+        src/intrinsics/horizontal/helper/HorizontalMath.cpp
+        src/intrinsics/horizontal/helper/HorizontalMath.h
 )
 
 target_include_directories(accurate_ri

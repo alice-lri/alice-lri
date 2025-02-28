@@ -1,4 +1,6 @@
 #include "VerticalIntrinsicsEstimator.h"
+
+#include <accurate_ri.h>
 #include <algorithm>
 #include <queue>
 #include <ranges>
@@ -189,7 +191,7 @@ namespace accurate_ri {
             .fullScanlines = std::move(fullScanlines)
         };
 
-        writeToJson(result);
+        VerticalLogging::writeToJson(result);
 
         return result;
     }
@@ -573,16 +575,5 @@ namespace accurate_ri {
             .offsetCi = {meanOffset - maxOffsetDiff / 2, meanOffset + maxOffsetDiff / 2},
             .dependencies = validScanlineIds
         };
-    }
-
-
-    // TODO remove this
-    void VerticalIntrinsicsEstimator::writeToJson(const VerticalIntrinsicsResult &result) {
-        const std::optional<std::string> outputPath = getOutputPath();
-        if (outputPath) {
-            nlohmann::json json = verticalIntrinsicsResultToJson(result);
-            std::ofstream outFile(std::filesystem::path(*outputPath) / "summary.json");
-            outFile << json.dump(4);
-        }
     }
 } // namespace accurate_ri
