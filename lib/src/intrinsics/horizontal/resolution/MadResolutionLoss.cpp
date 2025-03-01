@@ -28,7 +28,7 @@ namespace accurate_ri {
     ) {
         const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(thetas, resolution, true);
         const auto diffInvRangesXy = Utils::diff(invRangesXy);
-        const auto diffInvRangesXyEpsMask = diffInvRangesXy.abs() >= 1e-7;
+        const auto diffInvRangesXyEpsMask = diffInvRangesXy.abs() >= 1e-7; // TODO optimize this is the same every time
 
         if (diffInvRangesXyEpsMask.count() < 2) {
             return Utils::diff(diffToIdeal) / diffInvRangesXy;
@@ -37,12 +37,12 @@ namespace accurate_ri {
         std::vector<int32_t> indicesVector;
         indicesVector.reserve(diffInvRangesXyEpsMask.size());
         for (int i = 0; i < diffInvRangesXyEpsMask.size(); ++i) {
-            if (indicesVector[i]) {
+            if (diffInvRangesXyEpsMask[i]) {
                 indicesVector.emplace_back(i);
             }
         }
 
-        const auto indices = Eigen::Map<const Eigen::ArrayXi>(indices.data(), indices.size());
+        const auto indices = Eigen::Map<const Eigen::ArrayXi>(indicesVector.data(), indicesVector.size());
 
         return Utils::diff(diffToIdeal)(indices) / diffInvRangesXy(indices);
     }

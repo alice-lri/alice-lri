@@ -51,7 +51,10 @@ namespace accurate_ri {
 
         for (int scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
             invRangesXyByScanline.emplace_back(points.getInvRangesXy()(pointsByScanline[scanlineIdx]));
-            thetasByScanline.emplace_back(points.getThetas()(pointsByScanline[scanlineIdx]));
+
+            Eigen::ArrayXd scanlineThetas = points.getThetas()(pointsByScanline[scanlineIdx]);
+            scanlineThetas -= scanlineThetas(0);
+            thetasByScanline.emplace_back(scanlineThetas);
         }
 
         for (int scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
