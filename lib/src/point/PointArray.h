@@ -3,9 +3,9 @@
 
 namespace accurate_ri {
     struct PointArrayExtraInfo {
-        Eigen::ArrayXd range, rangeXy, phi, theta = Eigen::ArrayXd::Zero(0);
-        Eigen::ArrayXd invRange = Eigen::ArrayXd::Zero(0);
-        double maxRange, minRange = 0;
+        Eigen::ArrayXd range, rangeXy, phi, theta;
+        Eigen::ArrayXd invRange, invRangeXy;
+        double maxRange = 0, minRange = 0;
         double coordsEps = 0;
     };
 
@@ -40,6 +40,7 @@ namespace accurate_ri {
         [[nodiscard]] inline double getCoordsEps() const { return extraInfo.coordsEps; }
 
         [[nodiscard]] inline double getInvRange(const size_t index) const { return extraInfo.invRange[index]; }
+        [[nodiscard]] inline double getInvRangeXy(const size_t index) const { return extraInfo.invRangeXy[index]; }
 
         [[nodiscard]] inline const Eigen::ArrayXd& getRanges() const { return extraInfo.range; }
         [[nodiscard]] inline const Eigen::ArrayXd& getRangesXy() const { return extraInfo.rangeXy; }
@@ -47,6 +48,7 @@ namespace accurate_ri {
         [[nodiscard]] inline const Eigen::ArrayXd& getThetas() const { return extraInfo.theta; }
 
         [[nodiscard]] inline const Eigen::ArrayXd& getInvRanges() const { return extraInfo.invRange; }
+        [[nodiscard]] inline const Eigen::ArrayXd& getInvRangesXy() const { return extraInfo.invRangeXy; }
         [[nodiscard]] inline double getMaxRange() const { return extraInfo.maxRange; }
         [[nodiscard]] inline double getMinRange() const { return extraInfo.minRange; }
 

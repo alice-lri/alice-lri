@@ -3,7 +3,7 @@
 
 namespace accurate_ri {
     void IntrinsicsEstimator::estimate(const PointArray &points) {
-        verticalIntrinsicsEstimator.estimate(points);
-        horizontalIntrinsicsEstimator.estimate(points);
+        const VerticalIntrinsicsResult vertical = verticalIntrinsicsEstimator.estimate(points);
+        horizontalIntrinsicsEstimator.estimate(points, vertical);
     }
 } // accurate_ri
