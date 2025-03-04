@@ -72,6 +72,12 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/horizontal/resolution/MadResolutionLoss.h
         src/intrinsics/horizontal/helper/HorizontalMath.cpp
         src/intrinsics/horizontal/helper/HorizontalMath.h
+        src/intrinsics/horizontal/offset/RansacHOffset.cpp
+        src/intrinsics/horizontal/offset/RansacHOffset.h
+        src/ransac/CustomRansac.cpp
+        src/ransac/CustomRansac.h
+        src/ransac/CustomEstimator.cpp
+        src/ransac/CustomEstimator.h
 )
 
 target_include_directories(accurate_ri

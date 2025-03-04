@@ -12,5 +12,10 @@ namespace accurate_ri::Stats {
         Eigen::Array2d interceptCi;
     };
 
+    struct LRResult {
+        double slope;
+        double intercept;
+    };
+
     WLSResult wlsBoundsFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &bounds);
 }

@@ -22,6 +22,7 @@ void setCloudPath(const std::string &path) {
     accurate_ri::setCloudPath(newPath);
 }
 
+// TODO perf, identify memory  bottlenecks. Reuse Eigen buffers as much as possible, especially in loops
 int main(int argc, char **argv) {
     std::string path;
     std::optional<int> accurateDigits = std::nullopt;
@@ -34,7 +35,7 @@ int main(int argc, char **argv) {
             //path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000009025.bin";
             //path = "../../Datasets/LiDAR/kitti_organized/Organized/road/2011_10_03_drive_0042/data/0000000000.bin";
             accurateDigits = std::nullopt;
-            outputPath = "output/";
+            outputPath = "../../Datasets/output/accurate_ri_cpp/";
             break;
         case 2:
             path = argv[1];

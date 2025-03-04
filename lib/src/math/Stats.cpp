@@ -43,8 +43,8 @@ namespace accurate_ri::Stats {
 
         for (int i = 0; i < 2; ++i) {
             Eigen::Array2d &currentCi = (i == 0) ? slopeCi : interceptCi;
-            const double currentParameter = (i == 0)? slope : intercept;
-            const double currentVariance = (i == 0)? slopeVariance : interceptVariance;
+            const double currentParameter = (i == 0) ? slope : intercept;
+            const double currentVariance = (i == 0) ? slopeVariance : interceptVariance;
 
             const double standardError = std::sqrt(currentVariance); // Standard error of beta[i]
 
@@ -60,6 +60,25 @@ namespace accurate_ri::Stats {
             .aic = aic,
             .slopeCi = std::move(slopeCi),
             .interceptCi = std::move(interceptCi)
+        };
+    }
+
+    LRResult simpleLinearRegression(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
+        PROFILE_SCOPE("Stats::simpleLinearRegression");
+
+        const double n = static_cast<double>(x.size());
+        const double Sx = x.sum();
+        const double Sy = y.sum();
+        const double Sxx = x.square().sum();
+        const double Sxy = (x * y).sum();
+
+        const double Delta = n * Sxx - Sx * Sx;
+        const double slope = (n * Sxy - Sx * Sy) / Delta;
+        const double intercept = (Sxx * Sy - Sx * Sxy) / Delta;
+
+        return {
+            .slope = slope,
+            .intercept = intercept
         };
     }
 }
