@@ -4,7 +4,6 @@
 #include "utils/Timer.h"
 
 namespace accurate_ri::Stats {
-    // TODO the memory requirements explode with the number of points, check if this also happens in python
     WLSResult wlsBoundsFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &bounds) {
         PROFILE_SCOPE("Stats::wlsBoundsFit");
         const Eigen::ArrayXd &weights = 1 / bounds.square();

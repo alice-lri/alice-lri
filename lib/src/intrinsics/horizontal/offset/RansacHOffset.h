@@ -1,6 +1,5 @@
 #pragma once
 #include <optional>
-
 #include "point/PointArray.h"
 
 namespace accurate_ri {

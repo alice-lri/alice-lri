@@ -1,9 +1,12 @@
 #include "RansacHOffset.h"
+
+#include <accurate_ri.h>
 #include <cstdint>
 
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "point/PointArray.h"
 #include "ransac/CustomRansac.h"
+#include "utils/Logger.h"
 
 namespace accurate_ri {
     std::optional<double> RansacHOffset::computeOffset(
@@ -13,6 +16,10 @@ namespace accurate_ri {
         auto diffToIdeal = HorizontalMath::computeDiffToIdeal(thetas, resolution, false);
         double residualThreshold = coordsEps * 1.5;
         double thetaStep = 2 * M_PI / resolution;
+
+        if (getResidualThreshold()) {
+            residualThreshold = *getResidualThreshold();
+        }
 
         CustomRansac ransac = CustomRansac(2, residualThreshold, 1000, thetaStep);
         const std::optional<Stats::LRResult> ransacResult = ransac.fit(invRangesXy, diffToIdeal);

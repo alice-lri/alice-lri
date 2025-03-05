@@ -5,6 +5,7 @@
 #include <eigen3/Eigen/Core>
 
 namespace accurate_ri {
+
     void hello();
     void execute(const std::vector<float> &x, const std::vector<float> &y, const std::vector<float> &z);
     void execute(const std::vector<double> &x, const std::vector<double> &y, const std::vector<double> &z);
@@ -16,4 +17,7 @@ namespace accurate_ri {
 
     void setOutputPath(const std::optional<std::string>& path);
     std::optional<std::string> getOutputPath();
+
+    std::optional<double> getResidualThreshold();
+    void setResidualThreshold(const std::optional<double>& res);
 }
