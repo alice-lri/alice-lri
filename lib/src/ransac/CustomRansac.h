@@ -24,9 +24,10 @@ public:
     ) : minSamples(minSamples),
         residualThreshold(residualThreshold),
         maxTrials(maxTrials),
-        resolution(resolution) {}
+        resolution(resolution),
+        estimator(resolution){}
 
-    void fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
+    std::optional<Stats::LRResult> fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
 
 private:
     void refineSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);

@@ -1,5 +1,6 @@
 #include "HorizontalIntrinsicsEstimator.h"
 
+#include "intrinsics/horizontal/offset/RansacHOffset.h"
 #include "intrinsics/horizontal/resolution/MadResolutionLoss.h"
 #include "intrinsics/vertical/VerticalStructs.h"
 #include "utils/Logger.h"
@@ -37,10 +38,12 @@ namespace accurate_ri {
             }
         }
 
-        for (auto &scanline : pointsByScanline) {
-            std::ranges::sort(scanline, [&](const int32_t a, const int32_t b) {
-                return points.getRangeXy(a) < points.getRangeXy(b);
-            });
+        for (auto &scanline: pointsByScanline) {
+            std::ranges::sort(
+                scanline, [&](const int32_t a, const int32_t b) {
+                    return points.getRangeXy(a) < points.getRangeXy(b);
+                }
+            );
         }
 
         std::vector<Eigen::ArrayXd> invRangesXyByScanline;
@@ -57,12 +60,30 @@ namespace accurate_ri {
             thetasByScanline.emplace_back(scanlineThetas);
         }
 
-        for (int scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
+        std::vector<uint32_t> heuristicScanlines;
+
+        for (uint32_t scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
             const auto &invRangesXy = invRangesXyByScanline[scanlineIdx];
             const auto &thetas = thetasByScanline[scanlineIdx];
+            const double coordsEps = points.getCoordsEps();
 
             int32_t resolution = computeOptimalResolution(invRangesXy, thetas);
-            LOG_INFO("Scanline ", scanlineIdx, " optimal resolution: ", resolution);
+            const std::optional<double> offset = RansacHOffset::computeOffset(
+                invRangesXy, thetas, resolution, coordsEps
+            );
+
+            if (!offset.has_value()) {
+                LOG_WARN("Warning: Scanline ", scanlineIdx, " has no valid consensus set, queueing for heuristics");
+                heuristicScanlines.emplace_back(scanlineIdx);
+                continue;
+            }
+
+            // TODO add to whatever collection
+
+            LOG_INFO(
+                "Scanline ", scanlineIdx, ", optimal resolution: ", resolution, ", h: ", offset.value(), ", length: ",
+                thetas.size()
+            );
         }
     }
 } // accurate_ri

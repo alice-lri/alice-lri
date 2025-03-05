@@ -24,5 +24,9 @@ namespace accurate_ri {
         const Eigen::ArrayXd &computeResiduals(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
 
         const MultiLineResult &computeMultiLine(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
+
+        [[nodiscard]] MultiLineResult getLastMultiLine() const {
+            return multiLineResult;
+        }
     };
 } // accurate_ri

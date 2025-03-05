@@ -3,12 +3,19 @@
 
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "point/PointArray.h"
+#include "ransac/CustomRansac.h"
 
 namespace accurate_ri {
+    std::optional<double> RansacHOffset::computeOffset(
+        const Eigen::ArrayXd &invRangesXy, const Eigen::ArrayXd &thetas, const uint32_t resolution,
+        const double coordsEps
+    ) {
+        auto diffToIdeal = HorizontalMath::computeDiffToIdeal(thetas, resolution, false);
+        double residualThreshold = coordsEps * 1.5;
 
-    void RansacHOffset::computeOffset(PointArray& points, const uint32_t scanlineId, const uint32_t resolution) {
-        auto diffToIdeal = HorizontalMath::computeDiffToIdeal(points.getThetas(), resolution, false);
-        double residualThreshold = points.getCoordsEps() * 1.5;
+        CustomRansac ransac = CustomRansac(2, residualThreshold, 1000, resolution);
+        const std::optional<Stats::LRResult> ransacResult = ransac.fit(invRangesXy, diffToIdeal);
 
+        return ransacResult.has_value() ? std::optional(ransacResult->slope) : std::nullopt;
     }
 } // accurate_ri

@@ -1,7 +1,5 @@
 #include "MadResolutionLoss.h"
-
 #include <cstdint>
-#include <eigen3/Eigen/src/Core/Array.h>
 
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "utils/Utils.h"

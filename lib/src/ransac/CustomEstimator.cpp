@@ -1,7 +1,5 @@
 #include "CustomEstimator.h"
-
-#include <eigen3/Eigen/src/Core/Array.h>
-
+#include <eigen3/Eigen/Core>
 #include "math/Stats.h"
 
 namespace accurate_ri {
@@ -12,14 +10,14 @@ namespace accurate_ri {
 
     const Eigen::ArrayXd &CustomEstimator::computeResiduals(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
         const auto &multi = computeMultiLine(x, y);
-        residuals = (multi.distances - multi.linesIdx * resolution).abs();
+        residuals = (multi.distances - multi.linesIdx.cast<double>() * static_cast<double>(resolution)).abs();
 
         return residuals;
     }
 
     const MultiLineResult &CustomEstimator::computeMultiLine(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
         multiLineResult.distances = y - (lrResult.slope * x + lrResult.intercept);
-        multiLineResult.linesIdx = (multiLineResult.distances / resolution).round().cast<uint32_t>();
+        multiLineResult.linesIdx = (multiLineResult.distances / resolution).round().cast<int>();
 
         return multiLineResult;
     }
