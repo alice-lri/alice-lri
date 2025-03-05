@@ -18,4 +18,5 @@ namespace accurate_ri::Stats {
     };
 
     WLSResult wlsBoundsFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &bounds);
+    LRResult simpleLinearRegression(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
 }
