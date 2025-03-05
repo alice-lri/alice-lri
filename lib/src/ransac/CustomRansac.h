@@ -13,19 +13,19 @@ private:
     const uint32_t minSamples;
     const double residualThreshold;
     const uint32_t maxTrials;
-    const uint32_t resolution;
+    const double thetaStep;
 
     CustomEstimator estimator;
     std::optional<Stats::LRResult> model = std::nullopt;
 
 public:
     CustomRansac(
-        const uint32_t minSamples, const double residualThreshold, const uint32_t maxTrials, const uint32_t resolution
+        const uint32_t minSamples, const double residualThreshold, const uint32_t maxTrials, const double thetaStep
     ) : minSamples(minSamples),
         residualThreshold(residualThreshold),
         maxTrials(maxTrials),
-        resolution(resolution),
-        estimator(resolution){}
+        thetaStep(thetaStep),
+        estimator(thetaStep){}
 
     std::optional<Stats::LRResult> fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
 

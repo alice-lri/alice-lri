@@ -12,8 +12,9 @@ namespace accurate_ri {
     ) {
         auto diffToIdeal = HorizontalMath::computeDiffToIdeal(thetas, resolution, false);
         double residualThreshold = coordsEps * 1.5;
+        double thetaStep = 2 * M_PI / resolution;
 
-        CustomRansac ransac = CustomRansac(2, residualThreshold, 1000, resolution);
+        CustomRansac ransac = CustomRansac(2, residualThreshold, 1000, thetaStep);
         const std::optional<Stats::LRResult> ransacResult = ransac.fit(invRangesXy, diffToIdeal);
 
         return ransacResult.has_value() ? std::optional(ransacResult->slope) : std::nullopt;

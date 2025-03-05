@@ -11,13 +11,13 @@ namespace accurate_ri {
 
     class CustomEstimator {
     private:
-        const uint32_t resolution;
+        const double thetaStep;
         Stats::LRResult lrResult = Stats::LRResult();
         MultiLineResult multiLineResult = MultiLineResult();
         Eigen::ArrayXd residuals = Eigen::ArrayXd();
 
     public:
-        explicit CustomEstimator(const uint32_t resolution) : resolution(resolution) {}
+        explicit CustomEstimator(const double thetaStep) : thetaStep(thetaStep) {}
 
         const Stats::LRResult &fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
 

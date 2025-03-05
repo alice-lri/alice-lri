@@ -52,17 +52,8 @@ namespace accurate_ri {
 
         for (uint32_t pointIdx = 0; pointIdx < multi.linesIdx.size(); ++pointIdx) {
             int64_t lineIdx = multi.linesIdx[pointIdx];
-            MultiLineItem multiLineItem;
 
-            auto it = multiLineMap.find(lineIdx);
-
-            if (it == multiLineMap.end()) {
-                multiLineItem = MultiLineItem();
-                multiLineMap[lineIdx] = multiLineItem;
-            } else {
-                multiLineItem = it->second;
-            }
-
+            MultiLineItem& multiLineItem = multiLineMap[lineIdx];
             multiLineItem.push(x(pointIdx), y(pointIdx));
         }
 
@@ -71,8 +62,8 @@ namespace accurate_ri {
 
         for (uint32_t pointIdx = 0; pointIdx < multi.linesIdx.size(); ++pointIdx) {
             const MultiLineItem& multiLineItem = multiLineMap.at(multi.linesIdx[pointIdx]);
-            shiftedX(pointIdx) -= multiLineItem.xMean;
-            shiftedY(pointIdx) -= multiLineItem.yMean;
+            shiftedX(pointIdx) = x(pointIdx) - multiLineItem.xMean;
+            shiftedY(pointIdx) = y(pointIdx) - multiLineItem.yMean;
         }
 
         model->slope = (shiftedX * shiftedY).sum() / shiftedX.square().sum();

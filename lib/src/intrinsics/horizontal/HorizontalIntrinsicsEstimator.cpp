@@ -56,7 +56,7 @@ namespace accurate_ri {
             invRangesXyByScanline.emplace_back(points.getInvRangesXy()(pointsByScanline[scanlineIdx]));
 
             Eigen::ArrayXd scanlineThetas = points.getThetas()(pointsByScanline[scanlineIdx]);
-            scanlineThetas -= scanlineThetas(0);
+            scanlineThetas -= scanlineThetas.minCoeff();
             thetasByScanline.emplace_back(scanlineThetas);
         }
 

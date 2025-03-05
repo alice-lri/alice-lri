@@ -64,8 +64,6 @@ namespace accurate_ri::Stats {
     }
 
     LRResult simpleLinearRegression(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
-        PROFILE_SCOPE("Stats::simpleLinearRegression");
-
         const double n = static_cast<double>(x.size());
         const double Sx = x.sum();
         const double Sy = y.sum();

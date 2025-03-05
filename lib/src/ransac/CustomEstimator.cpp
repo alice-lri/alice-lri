@@ -10,14 +10,14 @@ namespace accurate_ri {
 
     const Eigen::ArrayXd &CustomEstimator::computeResiduals(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
         const auto &multi = computeMultiLine(x, y);
-        residuals = (multi.distances - multi.linesIdx.cast<double>() * static_cast<double>(resolution)).abs();
+        residuals = (multi.distances - multi.linesIdx.cast<double>() * thetaStep).abs();
 
         return residuals;
     }
 
     const MultiLineResult &CustomEstimator::computeMultiLine(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
         multiLineResult.distances = y - (lrResult.slope * x + lrResult.intercept);
-        multiLineResult.linesIdx = (multiLineResult.distances / resolution).round().cast<int>();
+        multiLineResult.linesIdx = (multiLineResult.distances / thetaStep).round().cast<int>();
 
         return multiLineResult;
     }
