@@ -1,10 +1,9 @@
 #include "VerticalIntrinsicsEstimator.h"
 
-#include <accurate_ri.h>
+#include <accurate_ri/accurate_ri.hpp>
 #include <algorithm>
 #include <queue>
 #include <ranges>
-#include <unordered_set>
 #include <boost/math/distributions/students_t.hpp>
 #include "helper/VerticalLogging.h"
 #include "utils/Utils.h"
@@ -12,8 +11,6 @@
 #include "utils/TestUtils.h"
 #include "utils/Timer.h"
 #include <nlohmann/json.hpp>
-
-#include "intrinsics/vertical/helper/JsonConverters.h"
 #include "math/Stats.h"
 
 // TODO review that I am using .at() instead of [] for the maps

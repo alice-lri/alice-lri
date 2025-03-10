@@ -1,5 +1,4 @@
-#include "accurate_ri.h"
-
+#include "accurate_ri/accurate_ri.hpp"
 #include "intrinsics/IntrinsicsEstimator.h"
 #include "intrinsics/vertical/helper/JsonConverters.h"
 #include "utils/Logger.h"
@@ -16,31 +15,35 @@ namespace accurate_ri {
         LOG_DEBUG("Hello2");
     }
 
-    void execute(const std::vector<float> &x, const std::vector<float> &y, const std::vector<float> &z) {
+    IntrinsicsResult execute(const std::vector<float> &x, const std::vector<float> &y, const std::vector<float> &z) {
         const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(x.data(), x.size()).cast<double>();
         const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXf>(y.data(), y.size()).cast<double>();
         const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(z.data(), z.size()).cast<double>();
 
-        execute(xArray, yArray, zArray);
+        const IntrinsicsResult result = execute(xArray, yArray, zArray);
         PRINT_PROFILE_REPORT();
+
+        return result;
     }
 
-    void execute(const std::vector<double> &x, const std::vector<double> &y, const std::vector<double> &z) {
+    IntrinsicsResult execute(const std::vector<double> &x, const std::vector<double> &y, const std::vector<double> &z) {
         LOG_DEBUG(*residualThresholdOverride);
         const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(x.data(), x.size());
         const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXd>(y.data(), y.size());
         const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(z.data(), z.size());
 
-        execute(xArray, yArray, zArray);
+        const IntrinsicsResult result = execute(xArray, yArray, zArray);
         PRINT_PROFILE_REPORT();
+
+        return result;
     }
 
-    void execute(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) {
+    IntrinsicsResult execute(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) {
         PROFILE_SCOPE("TOTAL");
         const PointArray points(xArray, yArray, zArray);
         IntrinsicsEstimator estimator = IntrinsicsEstimator();
 
-        estimator.estimate(points);
+        return estimator.estimate(points);
     }
 
     void setCloudPath(const std::string &path) {

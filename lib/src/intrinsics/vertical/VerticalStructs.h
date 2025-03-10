@@ -4,12 +4,9 @@
 #include <unordered_set>
 #include <optional>
 #include "math/Stats.h"
+#include "accurate_ri/public_structs.hpp"
 
 namespace accurate_ri {
-    struct OffsetAngle {
-        double offset;
-        double angle;
-    };
 
     struct HoughCell {
         uint64_t maxOffsetIndex;
@@ -31,20 +28,6 @@ namespace accurate_ri {
         Eigen::ArrayX<bool> mask;
         Eigen::ArrayXd lowerLimit;
         Eigen::ArrayXd upperLimit;
-    };
-
-    struct RealMargin {
-        double lower;
-        double upper;
-
-        [[nodiscard]] double diff() const {
-            return upper - lower;
-        }
-    };
-
-    struct OffsetAngleMargin {
-        RealMargin offset;
-        RealMargin angle;
     };
 
     struct HoughScanlineEstimation {
@@ -90,46 +73,9 @@ namespace accurate_ri {
         std::vector<uint32_t> dependencies;
     };
 
-    struct ScanlineAngleBounds {
-        RealMargin bottom;
-        RealMargin top;
-    };
-
-    struct ScanlineInfo {
-        uint32_t id;
-        uint64_t pointsCount;
-        OffsetAngle values;
-        OffsetAngleMargin ci;
-        ScanlineAngleBounds theoreticalAngleBounds;
-        std::vector<uint32_t> dependencies;
-        double uncertainty;
-        double houghVotes;
-        uint64_t houghHash;
-    };
-
     struct HashToConflictValue {
         std::unordered_set<uint32_t> conflictingScanlines;
         double votes;
-    };
-
-    enum class EndReason {
-        ALL_ASSIGNED,
-        MAX_ITERATIONS,
-        NO_MORE_PEAKS
-    };
-
-    struct FullScanlines {
-        std::vector<ScanlineInfo> scanlines;
-        Eigen::ArrayXi pointsScanlinesIds;
-    };
-
-    struct VerticalIntrinsicsResult {
-        uint32_t iterations;
-        uint32_t scanlinesCount;
-        uint32_t unassignedPoints;
-        uint32_t pointsCount;
-        EndReason endReason;
-        FullScanlines fullScanlines;
     };
 
     struct ScanlineConflictsResult {

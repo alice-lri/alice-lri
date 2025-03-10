@@ -97,12 +97,9 @@ namespace accurate_ri {
             }
         );
 
-        Eigen::ArrayXi movedScanlinesIds = std::move(pointsScanlinesIds);
-        pointsScanlinesIds.resize(0);
-
         return FullScanlines {
             .scanlines = std::move(sortedScanlines),
-            .pointsScanlinesIds = std::move(movedScanlinesIds)
+            .pointsScanlinesIds = std::vector(pointsScanlinesIds.data(), pointsScanlinesIds.data() + pointsScanlinesIds.size()),
         };
     }
 } // accurate_ri

@@ -3,7 +3,6 @@
 #include <map>
 #include <numeric>
 
-#include "intrinsics/horizontal/helper/HorizontalStructs.h"
 #include "intrinsics/horizontal/offset/RansacHOffset.h"
 #include "intrinsics/horizontal/resolution/MadResolutionLoss.h"
 #include "intrinsics/vertical/VerticalStructs.h"
@@ -37,7 +36,7 @@ namespace accurate_ri {
         std::vector<std::vector<int32_t>> pointsByScanline(vertical.scanlinesCount);
 
         for (int32_t pointIdx = 0; pointIdx < vertical.pointsCount; ++pointIdx) {
-            const int32_t scanlineIdx = vertical.fullScanlines.pointsScanlinesIds(pointIdx);
+            const int32_t scanlineIdx = vertical.fullScanlines.pointsScanlinesIds[pointIdx];
 
             if (scanlineIdx >= 0) {
                 pointsByScanline[scanlineIdx].emplace_back(pointIdx);

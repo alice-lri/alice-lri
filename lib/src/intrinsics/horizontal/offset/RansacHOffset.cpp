@@ -1,6 +1,6 @@
 #include "RansacHOffset.h"
 
-#include <accurate_ri.h>
+#include <accurate_ri/accurate_ri.hpp>
 #include <cstdint>
 
 #include "intrinsics/horizontal/helper/HorizontalMath.h"

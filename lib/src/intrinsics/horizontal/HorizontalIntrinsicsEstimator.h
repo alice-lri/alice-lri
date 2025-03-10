@@ -1,8 +1,6 @@
 #pragma once
-#include <iosfwd>
 #include <unordered_map>
 
-#include "intrinsics/horizontal/helper/HorizontalStructs.h"
 #include "intrinsics/vertical/VerticalStructs.h"
 #include "point/PointArray.h"
 namespace accurate_ri {

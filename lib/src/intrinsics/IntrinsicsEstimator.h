@@ -1,4 +1,5 @@
 #pragma once
+#include "accurate_ri/public_structs.hpp"
 #include "intrinsics/horizontal/HorizontalIntrinsicsEstimator.h"
 #include "point/PointArray.h"
 #include "vertical/VerticalIntrinsicsEstimator.h"
@@ -12,6 +13,6 @@ private:
     VerticalIntrinsicsEstimator verticalIntrinsicsEstimator;
 
 public:
-    void estimate(const PointArray& points);
+    IntrinsicsResult estimate(const PointArray &points);
 };
 } // accurate_ri

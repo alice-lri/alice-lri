@@ -1,5 +1,5 @@
 #include "VerticalLogging.h"
-#include <accurate_ri.h>
+#include <accurate_ri/accurate_ri.hpp>
 #include <nlohmann/json_fwd.hpp>
 
 #include "intrinsics/vertical/helper/JsonConverters.h"
