@@ -102,8 +102,8 @@ namespace accurate_ri {
 
         std::vector<ScanlineHorizontalInfo> scanlinesInfo(vertical.scanlinesCount);
 
-        for (auto it = scanlinesInfoMap.begin(); it != scanlinesInfoMap.end(); ++it) {
-            auto node = scanlinesInfoMap.extract(it);
+        for (auto it = scanlinesInfoMap.begin(); it != scanlinesInfoMap.end(); ) {
+            auto node = scanlinesInfoMap.extract(it++);
             scanlinesInfo[node.key()] = node.mapped();
         }
 
