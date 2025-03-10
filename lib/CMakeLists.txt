@@ -36,10 +36,10 @@ include_directories(EIGEN3_INCLUDE_DIR)
 #print out the EIGEN3_INCLUDE_DIR
 message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
 
-set(JSON_BuildTests OFF CACHE INTERNAL "")
-add_subdirectory(external/json)
 
 find_package(SQLiteCpp REQUIRED)
+find_package(nlohmann_json REQUIRED)
+set(JSON_BuildTests OFF CACHE INTERNAL "")
 
 add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/utils/Timer.h
@@ -86,7 +86,7 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
 
 target_include_directories(accurate_ri
         PUBLIC include
-        PRIVATE src
+        PRIVATE src ${nlohmann_json_INCLUDE_DIRS}
 )
 
 target_link_libraries(accurate_ri PRIVATE
