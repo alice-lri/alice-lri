@@ -37,7 +37,6 @@ include_directories(EIGEN3_INCLUDE_DIR)
 message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
 
 
-find_package(SQLiteCpp REQUIRED)
 find_package(nlohmann_json REQUIRED)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
@@ -92,7 +91,6 @@ target_include_directories(accurate_ri
 
 target_link_libraries(accurate_ri PRIVATE
         nlohmann_json::nlohmann_json
-        SQLiteCpp
 )
 
 if(ENABLE_STRICT_WARNINGS) #TODO make this trigger in release mode

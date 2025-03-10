@@ -1,5 +1,5 @@
 [requires]
-nlohmann_json/3.11.3
+sqlitecpp/3.3.2
 
 [generators]
 CMakeDeps
