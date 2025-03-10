@@ -1,5 +1,9 @@
 #include "HorizontalIntrinsicsEstimator.h"
 
+#include <map>
+#include <numeric>
+
+#include "intrinsics/horizontal/helper/HorizontalStructs.h"
 #include "intrinsics/horizontal/offset/RansacHOffset.h"
 #include "intrinsics/horizontal/resolution/MadResolutionLoss.h"
 #include "intrinsics/vertical/VerticalStructs.h"
@@ -27,7 +31,9 @@ namespace accurate_ri {
         return optimalResolution;
     }
 
-    void HorizontalIntrinsicsEstimator::estimate(const PointArray &points, const VerticalIntrinsicsResult &vertical) {
+    HorizontalIntrinsicsResult HorizontalIntrinsicsEstimator::estimate(
+        const PointArray &points, const VerticalIntrinsicsResult &vertical
+    ) {
         std::vector<std::vector<int32_t>> pointsByScanline(vertical.scanlinesCount);
 
         for (int32_t pointIdx = 0; pointIdx < vertical.pointsCount; ++pointIdx) {
@@ -57,10 +63,11 @@ namespace accurate_ri {
 
             Eigen::ArrayXd scanlineThetas = points.getThetas()(pointsByScanline[scanlineIdx]);
             scanlineThetas -= scanlineThetas.minCoeff();
-            thetasByScanline.emplace_back(scanlineThetas);
+            thetasByScanline.emplace_back(std::move(scanlineThetas));
         }
 
         std::vector<uint32_t> heuristicScanlines;
+        std::unordered_map<uint32_t, ScanlineHorizontalInfo> scanlinesInfoMap;
 
         for (uint32_t scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
             const auto &invRangesXy = invRangesXyByScanline[scanlineIdx];
@@ -78,12 +85,67 @@ namespace accurate_ri {
                 continue;
             }
 
-            // TODO add to whatever collection
+            scanlinesInfoMap.emplace(
+                scanlineIdx, ScanlineHorizontalInfo{
+                    .resolution = resolution,
+                    .offset = *offset,
+                    .heuristic = false
+                }
+            );
 
             LOG_INFO(
                 "Scanline ", scanlineIdx, ", optimal resolution: ", resolution, ", h: ", offset.value(), ", length: ",
                 thetas.size()
             );
         }
+
+        updateScanlinesUseHeuristics(scanlinesInfoMap, heuristicScanlines);
+
+        std::vector<ScanlineHorizontalInfo> scanlinesInfo(vertical.scanlinesCount);
+
+        for (auto it = scanlinesInfoMap.begin(); it != scanlinesInfoMap.end(); ++it) {
+            auto node = scanlinesInfoMap.extract(it);
+            scanlinesInfo[node.key()] = node.mapped();
+        }
+
+        return HorizontalIntrinsicsResult{
+            .scanlines = std::move(scanlinesInfo)
+        };
+    }
+
+    void HorizontalIntrinsicsEstimator::updateScanlinesUseHeuristics(
+        std::unordered_map<uint32_t, ScanlineHorizontalInfo> &scanlineInfoMap,
+        const std::vector<uint32_t> &heuristicScanlines
+    ) {
+        std::vector<double> otherHOffsets;
+        std::vector<int32_t> otherResolutions;
+
+        for (const auto &entry: scanlineInfoMap) {
+            otherHOffsets.emplace_back(entry.second.offset);
+            otherResolutions.emplace_back(entry.second.resolution);
+        }
+
+        for (const auto &scanlineId: heuristicScanlines) {
+            auto [resolution, hOffset] = heuristicHAndResolution(otherHOffsets, otherResolutions);
+
+            scanlineInfoMap.emplace(
+                scanlineId, ScanlineHorizontalInfo{
+                    .resolution = resolution,
+                    .offset = hOffset,
+                    .heuristic = true
+                }
+            );
+
+            LOG_INFO("Scanline ", scanlineId, ", resolution: ", resolution, ", h: ", hOffset);
+        }
+    }
+
+    std::pair<int32_t, double> HorizontalIntrinsicsEstimator::heuristicHAndResolution(
+        const std::vector<double> &hOffsets, const std::vector<int32_t> &resolutions
+    ) {
+        int32_t mostCommonResolution = Stats::intMode(resolutions);
+        double medianHOffset = hOffsets[hOffsets.size() / 2];
+
+        return {mostCommonResolution, medianHOffset};
     }
 } // accurate_ri

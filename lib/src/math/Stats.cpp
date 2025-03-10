@@ -78,4 +78,37 @@ namespace accurate_ri::Stats {
             .intercept = intercept
         };
     }
+
+    template<typename T>
+    T intModeImpl(const std::vector<T> &values) {
+        if (values.empty()) {
+            return 0;
+        }
+
+        std::unordered_map<T, int64_t> frequencies;
+
+        for (const auto &value : values) {
+            frequencies[value]++;
+        }
+
+        T mode = values[0];
+        T maxCount = 0;
+
+        for (const auto &[value, count] : frequencies) {
+            if (count > maxCount) {
+                maxCount = count;
+                mode = value;
+            }
+        }
+
+        return mode;
+    }
+
+    int64_t intMode(const std::vector<int64_t> &values) {
+        return intModeImpl(values);
+    }
+
+    int32_t intMode(const std::vector<int32_t> &values) {
+        return intModeImpl(values);
+    }
 }
