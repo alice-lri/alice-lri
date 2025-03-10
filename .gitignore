@@ -10,3 +10,5 @@ scripts/buffers/
 output/
 
 .idea/
+
+examples/experiments/

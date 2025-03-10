@@ -32,9 +32,9 @@ int main(int argc, char **argv) {
     switch (argc) {
         case 1:
             std::cout << "Using default parameters" << std::endl;
-            //path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000000000.bin";
+            path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000000000.bin";
             //path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000009025.bin";
-            path = "../../Datasets/LiDAR/kitti_organized/Organized/road/2011_10_03_drive_0042/data/0000000000.bin";
+            //path = "../../Datasets/LiDAR/kitti_organized/Organized/road/2011_10_03_drive_0042/data/0000000000.bin";
             accurateDigits = std::nullopt;
             outputPath = "../../Datasets/output/accurate_ri_cpp/";
             break;
