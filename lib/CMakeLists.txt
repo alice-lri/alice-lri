@@ -1,5 +1,5 @@
 # TODO define release mode where we disable eigen debug and optimize the code for the native platform and so on
-
+set(CMAKE_CXX_STANDARD 20)
 option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
 
 # Convert human-readable log level to numeric values
@@ -28,6 +28,8 @@ if(ENABLE_TRACE_FILE)
     endif()
 endif()
 
+include(${CMAKE_BINARY_DIR}/lib/conan_toolchain.cmake)
+
 find_package(Eigen3 REQUIRED)
 include_directories(EIGEN3_INCLUDE_DIR)
 
@@ -36,6 +38,8 @@ message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
 
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 add_subdirectory(external/json)
+
+find_package(SQLiteCpp REQUIRED)
 
 add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/utils/Timer.h
@@ -85,7 +89,10 @@ target_include_directories(accurate_ri
         PRIVATE src
 )
 
-target_link_libraries(accurate_ri PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(accurate_ri PRIVATE
+        nlohmann_json::nlohmann_json
+        SQLiteCpp
+)
 
 if(ENABLE_STRICT_WARNINGS) #TODO make this trigger in release mode
     message(STATUS "Strict warnings enabled")

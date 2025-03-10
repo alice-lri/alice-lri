@@ -1,5 +1,4 @@
 #include "PointUtils.h"
-
 #include <algorithm>
 #include <cmath>
 
