@@ -81,8 +81,6 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/ransac/CustomRansac.h
         src/ransac/CustomEstimator.cpp
         src/ransac/CustomEstimator.h
-        src/intrinsics/horizontal/helper/HorizontalStructs.h
-        src/intrinsics/IntrinsicsStructs.h
         include/accurate_ri/public_structs.hpp
 )
 
