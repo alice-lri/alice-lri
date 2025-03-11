@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 namespace accurate_ri {
     class MadResolutionLoss {

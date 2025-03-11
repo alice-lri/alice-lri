@@ -1,5 +1,5 @@
 #pragma once
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 namespace accurate_ri {
     struct PointArrayExtraInfo {

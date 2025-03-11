@@ -31,10 +31,10 @@ endif()
 include(${CMAKE_BINARY_DIR}/lib/conan_toolchain.cmake)
 
 find_package(Eigen3 REQUIRED)
-include_directories(EIGEN3_INCLUDE_DIR)
+include_directories(Eigen3_INCLUDE_DIRS)
 
 #print out the EIGEN3_INCLUDE_DIR
-message(STATUS "EIGEN3_INCLUDE_DIR: ${EIGEN3_INCLUDE_DIR}")
+message(STATUS "EIGEN3_INCLUDE_DIR: ${Eigen3_INCLUDE_DIRS}")
 
 
 find_package(nlohmann_json REQUIRED)
@@ -86,7 +86,7 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
 
 target_include_directories(accurate_ri
         PUBLIC include
-        PRIVATE src ${nlohmann_json_INCLUDE_DIRS}
+        PRIVATE src ${nlohmann_json_INCLUDE_DIRS} ${Eigen3_INCLUDE_DIRS}
 )
 
 target_link_libraries(accurate_ri PRIVATE

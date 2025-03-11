@@ -1,5 +1,5 @@
 #include "CustomEstimator.h"
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include "math/Stats.h"
 
 namespace accurate_ri {

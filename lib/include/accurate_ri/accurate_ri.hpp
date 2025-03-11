@@ -2,7 +2,7 @@
 #include <optional>
 #include <string>
 #include <vector>
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 #include "accurate_ri/public_structs.hpp"
 
 namespace accurate_ri {

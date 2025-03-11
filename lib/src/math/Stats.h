@@ -1,5 +1,5 @@
 #pragma once
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 namespace accurate_ri::Stats {
     struct WLSResult {

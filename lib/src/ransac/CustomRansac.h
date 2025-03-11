@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <optional>
-#include <eigen3/Eigen/Core>
+#include <Eigen/Core>
 
 #include "math/Stats.h"
 #include "ransac/CustomEstimator.h"

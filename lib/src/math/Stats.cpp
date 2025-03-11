@@ -1,5 +1,5 @@
 #include <boost/math/distributions/students_t.hpp>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include "Stats.h"
 #include "utils/Timer.h"
 

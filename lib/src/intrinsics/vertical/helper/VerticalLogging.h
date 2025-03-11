@@ -3,7 +3,7 @@
 #include "utils/Logger.h"
 #include <filesystem>
 #include <variant>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 #include "hough/HoughTransform.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 

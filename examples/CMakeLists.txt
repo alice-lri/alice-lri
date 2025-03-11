@@ -11,9 +11,11 @@ find_package(SQLiteCpp REQUIRED)
 
 find_package(nlohmann_json REQUIRED)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
-target_link_libraries(accurate_ri PRIVATE
-        nlohmann_json::nlohmann_json
-)
+
+find_package(Eigen3 REQUIRED)
+include_directories(Eigen3_INCLUDE_DIRS)
+
+target_link_libraries(accurate_ri PRIVATE)
 
 add_executable(examples main.cpp ${SRC_FILES} ${HEADER_FILES})
 add_executable(examples_sql main_sql.cpp ${SRC_FILES} ${HEADER_FILES})
@@ -22,6 +24,12 @@ add_executable(eigen_lazy_vs_immediate eigen_lazy_vs_immediate.cpp)
 
 target_link_libraries(examples PRIVATE accurate_ri)
 target_link_libraries(examples_sql PRIVATE accurate_ri SQLiteCpp nlohmann_json::nlohmann_json)
+
+target_include_directories(examples PRIVATE ${Eigen3_INCLUDE_DIRS})
+target_include_directories(examples_sql PRIVATE ${Eigen3_INCLUDE_DIRS})
+target_include_directories(eigen_loop_vs_select PRIVATE ${Eigen3_INCLUDE_DIRS})
+target_include_directories(eigen_lazy_vs_immediate PRIVATE ${Eigen3_INCLUDE_DIRS})
+
 
 if(ENABLE_STRICT_WARNINGS) #TODO make this trigger in release mode
     message(STATUS "Strict warnings enabled")
