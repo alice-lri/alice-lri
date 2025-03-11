@@ -102,7 +102,7 @@ CREATE TABLE intrinsics_result_scanline_info
     vertical_uncertainty real NOT NULL,
     vertical_last_scanline boolean NOT NULL,
     vertical_hough_votes real NOT NULL,
-    vertical_hough_hash integer NOT NULL,
+    vertical_hough_hash text NOT NULL,
     horizontal_offset real NOT NULL,
     horizontal_resolution integer NOT NULL,
     horizontal_heuristic boolean NOT NULL,
