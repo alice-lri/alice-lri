@@ -1,0 +1,7 @@
+{
+  "db_dir": "/home/samuel.soutullo/GitHub/AccurateRI/examples/experiments",
+  "dataset_root_path": {
+    "durlar": "/home/samuel.soutullo/Datasets/LiDAR/durlar/dataset/DurLAR/",
+    "kitti": "/home/samuel.soutullo/Datasets/LiDAR/kitti/"
+  }
+}

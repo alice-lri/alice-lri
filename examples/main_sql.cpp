@@ -1,69 +1,98 @@
 #include <chrono>
+#include <fstream>
 #include <iostream>
 #include <optional>
 #include "accurate_ri/accurate_ri.hpp"
 #include "FileUtils.h"
 #include <SQLiteCpp/SQLiteCpp.h>
+#include <nlohmann/json.hpp>
+
+struct DatasetFrame {
+    int64_t id;
+    int64_t datasetId;
+    std::string datasetName;
+    std::string relativePath;
+};
+
+struct Config {
+    std::string dbDir;
+    std::unordered_map<std::string, std::string> datasetRootPath;
+};
+
+Config loadConfig() {
+    std::ifstream configFile("config.json");
+    nlohmann::json jsonConfig;
+    configFile >> jsonConfig;
+
+    Config config;
+    config.dbDir = jsonConfig["db_dir"];
+
+    for (const auto& [key, value] : jsonConfig["dataset_root_path"].items()) {
+        config.datasetRootPath[key] = value;
+    }
+
+    return config;
+}
 
 int main(const int argc, const char **argv) {
-    std::string path;
-    std::optional<int> accurateDigits = std::nullopt;
-    std::optional<std::string> outputPath = std::nullopt;
-
     if (argc != 3) {
         std::cerr << "Usage: " << argv[0] << " <process id> <total processes>";
         return -1;
     }
 
-    const char *dbDirEnv = std::getenv("LIDAR_SCANLINES_EXPERIMENTS_DB_DIR");
-    if (dbDirEnv == nullptr) {
-        std::cerr << "Environment variable LIDAR_SCANLINES_EXPERIMENTS_DB_DIR is not set." << std::endl;
-        return -1;
-    }
+    const int processId = std::stoi(argv[1]);
+    const int totalProcesses = std::stoi(argv[2]);
+    const Config config = loadConfig();
 
-    const std::string processId = argv[1];
-    const std::string totalProcesses = argv[2];
-
-    std::filesystem::path dbPath = std::filesystem::path(dbDirEnv) / processId;
+    std::filesystem::path dbPath = std::filesystem::path(config.dbDir) / std::to_string(processId);
     dbPath += ".sqlite";
     const SQLite::Database db(dbPath, SQLite::OPEN_READWRITE);
 
-    SQLite::Statement datasetsQuery(db, "select (id, name) from dataset");
-    std::unordered_map<int64_t, std::string> results;
+    SQLite::Statement datasetsQuery(db, "select id, name from dataset");
+    std::unordered_map<int64_t, std::string> datasetsMap;
 
     while (datasetsQuery.executeStep()) {
-        results.emplace(datasetsQuery.getColumn(0), datasetsQuery.getColumn(1));
+        datasetsMap.emplace(datasetsQuery.getColumn(0), datasetsQuery.getColumn(1));
     }
 
-    SQLite::Statement query(db, "select * from dataset_frame where id % ? == ?");
-    query.bind(1, totalProcesses);
-    query.bind(2, processId);
+    SQLite::Statement framesQuery(db, "select id, dataset_id, relative_path from dataset_frame where id % ? == ?");
+    framesQuery.bind(1, totalProcesses);
+    framesQuery.bind(2, processId);
 
-    std::vector<int64_t> framesIds;
-    while (query.executeStep()) {
-        framesIds.a
+    std::vector<DatasetFrame> frames;
+    while (framesQuery.executeStep()) {
+        frames.emplace_back(
+            DatasetFrame{
+                .id = framesQuery.getColumn(0),
+                .datasetId = framesQuery.getColumn(1),
+                .datasetName = datasetsMap.at(framesQuery.getColumn(1)),
+                .relativePath = framesQuery.getColumn(2),
+            }
+        );
     }
 
+    std::cout << "Number of frames: " << frames.size() << std::endl;
 
-    // TODO remove this abomination
-    if (path.find("kitti") != std::string::npos) {
-        accurate_ri::setResidualThreshold(5e-4);
-    } else if (path.find("durlar") != std::string::npos && !accurateDigits.has_value()) {
-        accurate_ri::setResidualThreshold(1e-6);
-    } else if (path.find("durlar") != std::string::npos && accurateDigits.value() == 6) {
-        accurate_ri::setResidualThreshold(1e-5);
-    } else if (path.find("durlar") != std::string::npos && accurateDigits.value() == 4) {
-        accurate_ri::setResidualThreshold(2e-4);
+    for (const DatasetFrame &frame: frames) {
+        if (frame.datasetName == "kitti") {
+            accurate_ri::setResidualThreshold(5e-4);
+        } else if (frame.datasetName == "durlar") {
+            accurate_ri::setResidualThreshold(1e-6);
+        } else {
+            throw std::runtime_error("Unknown dataset name");
+        }
+
+        std::filesystem::path framePath = config.datasetRootPath.at(frame.datasetName);
+        framePath /= frame.relativePath;
+
+        const FileUtils::Points points = FileUtils::loadBinaryFile(framePath.string(), std::nullopt);
+
+        auto start = std::chrono::high_resolution_clock::now();
+        accurate_ri::IntrinsicsResult result = accurate_ri::execute(points.x, points.y, points.z);
+        auto end = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> duration = end - start;
+        std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
     }
-
-    FileUtils::Points points = FileUtils::loadBinaryFile(path, accurateDigits);
-    accurate_ri::setOutputPath(outputPath);
-
-    auto start = std::chrono::high_resolution_clock::now();
-    accurate_ri::IntrinsicsResult result = accurate_ri::execute(points.x, points.y, points.z);
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> duration = end - start;
-    std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
 
     return 0;
 }
