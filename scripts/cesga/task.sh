@@ -18,9 +18,10 @@ EXEC_DIR=$(dirname "$EXECUTABLE_PATH")
 EXEC_FILE=$(basename "$EXECUTABLE_PATH")
 
 cd "$EXEC_DIR" || { echo "Failed to cd into $EXEC_DIR"; exit 1; }
-cp "${DB_DIR}/initial.sqlite" "${DB_DIR}/${SLURM_PROCID}.sqlite"
+cp "${DB_DIR}/initial.sqlite" "${DB_DIR}/${TASK_INDEX}.sqlite"
 
 eval "$(conda shell.bash hook)"
 conda activate "${CONDA_ENV_NAME}"
 
+echo "Running task $TASK_INDEX of $TASK_COUNT..."
 ./"$EXEC_FILE" "$TASK_INDEX" "$TASK_COUNT"
