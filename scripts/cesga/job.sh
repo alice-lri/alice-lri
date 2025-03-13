@@ -2,10 +2,10 @@
 #SBATCH -J accurate_ri
 #SBATCH -o logs/%j.out
 #SBATCH -e logs/%j.err
-#SBATCH -n 1
+#SBATCH -n 2048
 #SBATCH -c 1
-#SBATCH -t 00:10:00
-#SBATCH --mem-per-cpu=3G
+#SBATCH -t 06:00:00
+#SBATCH --mem-per-cpu=1G
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
 #SBATCH --mail-user=s.soutullo@usc.es
