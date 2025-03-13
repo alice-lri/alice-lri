@@ -6,6 +6,11 @@
 #SBATCH -c 1
 #SBATCH -t 00:10:00
 #SBATCH --mem-per-cpu=3G
+#SBATCH --mail-type=begin
+#SBATCH --mail-type=end
+#SBATCH --mail-user=s.soutullo@usc.es
+
+echo "Beginning job..."
 
 export CONDA_ENV_NAME=$1
 export EXECUTABLE_PATH=$2
