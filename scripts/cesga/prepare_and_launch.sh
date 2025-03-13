@@ -36,11 +36,11 @@ else
   echo "Conda environment is up to date."
 fi
 
-conda activate "${CONDA_ENV_NAME}"
-
 echo "Building project..."
 cmake -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=INFO -DENABLE_PROFILING=ON -S "${SRC_PATH}" -B "${SRC_PATH}/build"
 make -C "${SRC_PATH}/build"
+
+conda activate "${CONDA_ENV_NAME}"
 
 echo "Preparing job..."
 python pre_job.py
