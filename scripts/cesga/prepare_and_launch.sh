@@ -14,7 +14,7 @@ module load cesga/system miniconda3/22.11.1-1
 
 ACTUAL_DB_DIR="${BASE_DB_DIR}/$(date +'%Y%m%d_%H%M%S_%3N')"
 mkdir -p "${ACTUAL_DB_DIR}"
-mkdir .cache
+mkdir -p .cache
 
 if ! command -v conda &> /dev/null
 then
