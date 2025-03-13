@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -J accurate_ri
-#SBATCH -o logs/%j/stdout.log
-#SBATCH -e logs/%j/stderr.log
+#SBATCH -o logs/%j.out
+#SBATCH -e logs/%j.err
 #SBATCH -n 1
 #SBATCH -c 1
 #SBATCH -t 00:10:00
