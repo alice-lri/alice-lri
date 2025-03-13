@@ -5,6 +5,7 @@
     },
     "include": [
         "../cmake-build-debug/lib/CMakePresets.json",
-        "../cmake-build-release/lib/CMakePresets.json"
+        "../cmake-build-release/lib/CMakePresets.json",
+        "../build/lib/CMakePresets.json"
     ]
 }
