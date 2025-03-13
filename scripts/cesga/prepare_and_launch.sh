@@ -22,7 +22,7 @@ then
     exit
 fi
 
-if ! conda env list | grep -q "^${CONDA_ENV_NAME}\$"; then
+if ! conda env list | awk '{print $1}' | grep -wq "${CONDA_ENV_NAME}"; then
     echo "Conda environment \`${CONDA_ENV_NAME}\` does not exist. Creating..."
     conda create --name "${CONDA_ENV_NAME}" -y
     rm -f .cache/conda_env
