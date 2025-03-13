@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 ## Adjust these as needed
 CONDA_ENV_NAME="accurate_ri_env"
