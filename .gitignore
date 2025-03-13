@@ -12,3 +12,5 @@ output/
 .idea/
 
 examples/experiments/
+
+scripts/cesga/.cache

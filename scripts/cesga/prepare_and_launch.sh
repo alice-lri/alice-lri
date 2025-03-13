@@ -5,7 +5,7 @@ CONDA_ENV_NAME="accurate_ri_env"
 BASE_DB_DIR="${STORE2}/accurate_ri"
 KITTI_PATH="${STORE2}/datasets_lidar/kitti"
 DURLAR_PATH="${STORE2}/datasets_lidar/durlar/dataset/DurLAR"
-SRC_PATH="../../examples"
+SRC_PATH="../.."
 EXECUTABLE_NAME="examples_sql"
 
 cd "$(dirname "$0")" || exit
@@ -13,6 +13,7 @@ module load cesga/system miniconda3/22.11.1-1
 
 ACTUAL_DB_DIR="${BASE_DB_DIR}/$(date +'%Y%m%d_%H%M%S_%3N')"
 mkdir -p "${ACTUAL_DB_DIR}"
+mkdir .cache
 
 if ! command -v conda &> /dev/null
 then
@@ -23,10 +24,17 @@ fi
 if ! conda env list | grep -q "^${CONDA_ENV_NAME}\$"; then
     echo "Conda environment \`${CONDA_ENV_NAME}\` does not exist. Creating..."
     conda create --name "${CONDA_ENV_NAME}" -y
+    rm -f .cache/conda_env
 fi
 
-echo "Updating conda environment..."
-conda env update --file conda_env.yml --name "${CONDA_ENV_NAME}" --prune
+if [ conda_env.yml -nt .cache/conda_env ]; then
+  echo "Updating conda environment..."
+  conda env update --file conda_env.yml --name "${CONDA_ENV_NAME}" --prune
+  touch .cache/conda_env
+else
+  echo "Conda environment is up to date."
+fi
+
 conda activate "${CONDA_ENV_NAME}"
 
 echo "Building project..."
