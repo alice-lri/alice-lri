@@ -10,11 +10,16 @@ SRC_PATH="../.."
 EXECUTABLE_NAME="examples_sql"
 
 cd "$(dirname "$0")" || exit
-module load cesga/system miniconda3/22.11.1-1
 
 ACTUAL_DB_DIR="${BASE_DB_DIR}/$(date +'%Y%m%d_%H%M%S_%3N')"
 mkdir -p "${ACTUAL_DB_DIR}"
 mkdir -p .cache
+
+echo "Building project..."
+cmake -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=INFO -DENABLE_PROFILING=ON -S "${SRC_PATH}" -B "${SRC_PATH}/build"
+make -C "${SRC_PATH}/build"
+
+module load cesga/system miniconda3/22.11.1-1
 
 if ! command -v conda &> /dev/null
 then
@@ -35,10 +40,6 @@ if [ conda_env.yml -nt .cache/conda_env ]; then
 else
   echo "Conda environment is up to date."
 fi
-
-echo "Building project..."
-cmake -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=INFO -DENABLE_PROFILING=ON -S "${SRC_PATH}" -B "${SRC_PATH}/build"
-make -C "${SRC_PATH}/build"
 
 conda activate "${CONDA_ENV_NAME}"
 
