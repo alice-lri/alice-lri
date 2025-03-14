@@ -19,9 +19,10 @@ EXEC_FILE=$(basename "$EXECUTABLE_PATH")
 
 cd "$EXEC_DIR" || { echo "Failed to cd into $EXEC_DIR"; exit 1; }
 cp "${DB_DIR}/initial.sqlite" "${DB_DIR}/${TASK_INDEX}.sqlite"
+mkdir -p traces
 
 eval "$(conda shell.bash hook)"
 conda activate "${CONDA_ENV_NAME}"
 
 echo "Running task $TASK_INDEX of $TASK_COUNT..."
-./"$EXEC_FILE" "$TASK_INDEX" "$TASK_COUNT"
+./"$EXEC_FILE" "$TASK_INDEX" "$TASK_COUNT" 2>&1 | tee "traces/${TASK_INDEX}.log"
