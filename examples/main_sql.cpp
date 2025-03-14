@@ -179,6 +179,7 @@ int main(const int argc, const char **argv) {
         framePath /= frame.relativePath;
 
         const FileUtils::Points points = FileUtils::loadBinaryFile(framePath.string(), std::nullopt);
+        accurate_ri::setCloudPath(framePath.string());
 
         auto start = std::chrono::high_resolution_clock::now();
         accurate_ri::IntrinsicsResult result = accurate_ri::execute(points.x, points.y, points.z);

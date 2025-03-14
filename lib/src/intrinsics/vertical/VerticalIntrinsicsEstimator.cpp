@@ -373,6 +373,10 @@ namespace accurate_ri {
             );
             LOG_INFO("Offset: ", heuristicOffsetAngle.offset, ", Angle: ", heuristicOffsetAngle.angle);
 
+            if (heuristicLimits.indices.size() == 0) {
+                return std::nullopt;
+            }
+
             return ScanlineEstimationResult{
                 .heuristic = true,
                 .uncertainty = std::numeric_limits<double>::infinity(),

@@ -38,7 +38,7 @@ namespace accurate_ri {
         }
 
         if (trial == maxTrials) {
-            LOG_ERROR("RANSAC could not find a valid consensus set at trial ", trial);
+            LOG_WARN("RANSAC could not find a valid consensus set at trial ", trial);
             return std::nullopt;
         }
 
