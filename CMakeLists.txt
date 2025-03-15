@@ -14,6 +14,9 @@ execute_process(
         RESULT_VARIABLE conan_result_examples
 )
 
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/lib")
+list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/examples")
+
 # Check if Conan ran successfully
 if (NOT conan_result_lib EQUAL 0)
     message(FATAL_ERROR "Conan install failed for the library!")
