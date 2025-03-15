@@ -60,6 +60,7 @@ jq -n \
     }
   }' > "${SRC_PATH}/build/examples/config.json"
 
+mkdir -p logs
 
 echo "Launching job..."
 sbatch job.sh "${CONDA_ENV_NAME}" "${SRC_PATH}/build/examples/${EXECUTABLE_NAME}" "${ACTUAL_DB_DIR}"
