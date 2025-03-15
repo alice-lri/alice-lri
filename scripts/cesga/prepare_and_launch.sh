@@ -8,10 +8,42 @@ KITTI_PATH="${STORE2}/datasets_lidar/kitti"
 DURLAR_PATH="${STORE2}/datasets_lidar/durlar/dataset/DurLAR"
 SRC_PATH="../.."
 EXECUTABLE_NAME="examples_sql"
+JOB_COUNT=32
 
 cd "$(dirname "$0")" || exit
 
-ACTUAL_DB_DIR="${BASE_DB_DIR}/$(date +'%Y%m%d_%H%M%S_%3N')"
+if [ -n "$1" ]; then
+  BATCH_ID=$1
+  RESUME_BATCH=true
+else
+  BATCH_ID="$(date +'%Y%m%d_%H%M%S_%3N')"
+  RESUME_BATCH=false
+fi
+
+LOGS_DIR="logs/${BATCH_ID}"
+ACTUAL_DB_DIR="${BASE_DB_DIR}/${BATCH_ID}"
+
+if [ "$RESUME_BATCH" = true ]; then
+  if [ ! -d "${LOGS_DIR}" ]; then
+    echo "Log directory ${LOGS_DIR} does not exist."
+    exit 1
+  fi
+
+  if [ ! -d "${ACTUAL_DB_DIR}" ]; then
+    echo "DB directory ${ACTUAL_DB_DIR} does not exist."
+    exit 1
+  fi
+
+  JOBS_TO_RUN=()
+  for i in $(seq 0 $((JOB_COUNT - 1))); do
+    if [ ! -f "${ACTUAL_DB_DIR}/job_${i}.success" ]; then
+      JOBS_TO_RUN+=("$i")
+    fi
+  done
+else
+  JOBS_TO_RUN=$(seq 0 $((JOB_COUNT - 1)))
+fi
+
 mkdir -p "${ACTUAL_DB_DIR}"
 mkdir -p .cache
 
@@ -62,5 +94,9 @@ jq -n \
 
 mkdir -p logs
 
-echo "Launching job..."
-sbatch job.sh "${CONDA_ENV_NAME}" "${SRC_PATH}/build/examples/${EXECUTABLE_NAME}" "${ACTUAL_DB_DIR}"
+for i in "${JOBS_TO_RUN[@]}"; do
+  echo "Launching job ${i}..."
+  sbatch --job-name="accurate_ri_${i}" \
+   job.sh "${CONDA_ENV_NAME}" "${SRC_PATH}/build/examples/${EXECUTABLE_NAME}" "${ACTUAL_DB_DIR}" \
+    "${i}" "${JOB_COUNT}"
+done
