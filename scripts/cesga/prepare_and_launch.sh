@@ -41,7 +41,9 @@ if [ "$RESUME_BATCH" = true ]; then
     fi
   done
 else
-  JOBS_TO_RUN=$(seq 0 $((JOB_COUNT - 1)))
+    for i in $(seq 0 $((JOB_COUNT - 1))); do
+      JOBS_TO_RUN+=("$i")
+    done
 fi
 
 echo "Will run jobs: " "${JOBS_TO_RUN[@]}"
