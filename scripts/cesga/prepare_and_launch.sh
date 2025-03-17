@@ -44,6 +44,15 @@ else
   JOBS_TO_RUN=$(seq 0 $((JOB_COUNT - 1)))
 fi
 
+echo "Will run jobs: " "${JOBS_TO_RUN[@]}"
+echo "Continue? (y/n)"
+read -r CONTINUE
+
+if [ "$CONTINUE" != "y" ]; then
+  echo "Aborting."
+  exit 1
+fi
+
 mkdir -p "${ACTUAL_DB_DIR}"
 mkdir -p .cache
 
