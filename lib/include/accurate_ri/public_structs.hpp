@@ -10,6 +10,11 @@ namespace accurate_ri {
         [[nodiscard]] double diff() const {
             return upper - lower;
         }
+
+        inline void clampBoth(const double minValue, const double maxValue) {
+            lower = std::clamp(lower, minValue, maxValue);
+            upper = std::clamp(upper, minValue, maxValue);
+        }
     };
 
     struct ScanlineAngleBounds {

@@ -315,10 +315,12 @@ namespace accurate_ri {
                     .angle = scanlineFit.fit->intercept
                 };
 
-                const OffsetAngleMargin ci = {
+                OffsetAngleMargin ci = {
                     .offset = {.lower = scanlineFit.fit->slopeCi[0], .upper = scanlineFit.fit->slopeCi[1]},
                     .angle = {.lower = scanlineFit.fit->interceptCi[0], .upper = scanlineFit.fit->interceptCi[1]}
                 };
+
+                ci.offset.clampBoth(-points.getMinRange(), points.getMinRange());
 
                 return ScanlineEstimationResult{
                     .heuristic = false,
@@ -339,7 +341,9 @@ namespace accurate_ri {
             const double invRangesMean = invRanges.mean();
             const double phisMean = phis.mean();
 
-            const HeuristicScanline &heuristic = computeHeuristicScanline(invRangesMean, phisMean);
+            HeuristicScanline heuristic = computeHeuristicScanline(invRangesMean, phisMean);
+            heuristic.offsetCi.clampBoth(-points.getMinRange(), points.getMinRange());
+
             const double heuristicAngle = (phis - (heuristic.offset * invRanges).asin()).mean();
 
             const RealMargin &angleMarginTmp = {
