@@ -73,6 +73,12 @@ namespace accurate_ri {
             const auto &thetas = thetasByScanline[scanlineIdx];
             const double coordsEps = points.getCoordsEps();
 
+            if (invRangesXy.size() < 2) {
+                LOG_WARN("Warning: Scanline ", scanlineIdx, " has less than 2 points, queueing for heuristics");
+                heuristicScanlines.emplace_back(scanlineIdx);
+                continue;
+            }
+
             int32_t resolution = computeOptimalResolution(invRangesXy, thetas);
             const std::optional<double> offset = RansacHOffset::computeOffset(
                 invRangesXy, thetas, resolution, coordsEps
