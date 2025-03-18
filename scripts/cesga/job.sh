@@ -9,7 +9,7 @@
 #SBATCH --mail-type=begin
 #SBATCH --mail-type=end
 #SBATCH --mail-user=s.soutullo@usc.es
-set -e
+set -euo pipefail
 
 CONDA_ENV_NAME=$1
 EXECUTABLE_PATH=$2
