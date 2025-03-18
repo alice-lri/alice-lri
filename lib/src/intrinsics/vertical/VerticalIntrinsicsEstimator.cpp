@@ -299,7 +299,7 @@ namespace accurate_ri {
     std::optional<ScanlineEstimationResult> VerticalIntrinsicsEstimator::estimateScanline(
         const PointArray &points, const VerticalBounds &errorBounds, const ScanlineLimits &scanlineLimits
     ) {
-        bool requiresHeuristicFitting = false;
+        bool requiresHeuristicFitting = true;
 
         if (scanlineLimits.indices.size() == 0) {
             return std::nullopt;
@@ -381,7 +381,10 @@ namespace accurate_ri {
                 .heuristic = true,
                 .uncertainty = std::numeric_limits<double>::infinity(),
                 .values = heuristicOffsetAngle,
-                .ci = heuristicMargin,
+                .ci = OffsetAngleMargin {
+                    .offset = heuristic.offsetCi,
+                    .angle = heuristicAngleCi
+                },
                 .limits = std::move(heuristicLimits),
                 .dependencies = std::vector<uint32_t>()
             };

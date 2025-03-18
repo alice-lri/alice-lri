@@ -48,6 +48,10 @@ namespace accurate_ri {
             return true;
         }
 
+        if (scanline.limits.indices.size() == scanlinePool.getUnassignedPoints()) {
+            return true;
+        }
+
         std::queue<uint32_t> scanlinesToRemoveQueue;
         std::unordered_set<uint32_t> scanlinesToRemoveSet;
 
@@ -262,11 +266,13 @@ namespace accurate_ri {
             }
         }
 
+        const bool theoreticalIntersection = theoreticalIntersectionMask.any();
+
         return {
             .empiricalIntersectionMask = std::move(empiricalIntersectionMask),
             .theoreticalIntersectionMask = std::move(theoreticalIntersectionMask),
             .empiricalIntersection = empiricalIntersection,
-            .theoreticalIntersection = theoreticalIntersectionMask.any()
+            .theoreticalIntersection = theoreticalIntersection
         };
     }
 } // accurate_ri
