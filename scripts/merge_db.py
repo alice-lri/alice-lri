@@ -1,13 +1,30 @@
 import glob
 import sqlite3
+import argparse
+import os
+import shutil
+import re
+
+def get_db_files(folder_path):
+    return [folder_path + "/" + f for f in os.listdir(folder_path) if re.fullmatch(r'\d+\.sqlite', f)]
 
 
-def get_db_files(path_pattern, exclude_substring):
-    return [f for f in glob.glob(path_pattern) if exclude_substring not in f]
+def backup_db(merged_db_path):
+    base_backup_db_path = merged_db_path + '.bak'
+    backup_db_path = base_backup_db_path
+
+    if os.path.exists(base_backup_db_path):
+        index = 1
+        while os.path.exists(f'{base_backup_db_path}.{index}'):
+            index += 1
+        backup_db_path = f'{base_backup_db_path}.{index}'
+
+    if os.path.exists(merged_db_path):
+        shutil.copy(merged_db_path, backup_db_path)
 
 
 def insert_merged_experiment(cursor):
-    cursor.execute("INSERT INTO experiment(timestamp) VALUES (DATETIME('now'))")
+    cursor.execute("INSERT INTO experiment(timestamp) VALUES (DATETIME('now', 'localtime', 'subsec'))")
     return cursor.lastrowid
 
 
@@ -68,12 +85,17 @@ def insert_scanlines(cursor, frame_id, scanlines):
     """, data)
 
 
-def merge_databases(db_files, merged_db_path='../large/merge.sqlite'):
+def merge_databases(db_files, merged_db_path):
     merge_conn = sqlite3.connect(merged_db_path)
     merge_c = merge_conn.cursor()
     merged_experiment_id = insert_merged_experiment(merge_c)
 
-    for db_file in db_files:
+    files_count = len(db_files)
+    print(db_files)
+
+    for file_index, db_file in enumerate(db_files):
+        print(f"Merging database {file_index + 1}/{files_count}")
+
         with sqlite3.connect(db_file) as conn:
             c = conn.cursor()
             assert_single_experiment(c)
@@ -89,5 +111,12 @@ def merge_databases(db_files, merged_db_path='../large/merge.sqlite'):
 
 
 if __name__ == "__main__":
-    db_files = get_db_files('../large/*.sqlite', exclude_substring='initial')
-    merge_databases(db_files)
+    parser = argparse.ArgumentParser(description="Merge SQLite databases.")
+    parser.add_argument("part_dbs_folder_path")
+    parser.add_argument("master_db_path")
+    args = parser.parse_args()
+
+    backup_db(args.master_db_path)
+
+    db_files = get_db_files(args.part_dbs_folder_path)
+    merge_databases(db_files, args.master_db_path)
