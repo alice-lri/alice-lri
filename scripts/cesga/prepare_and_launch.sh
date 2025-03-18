@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 
 ## Adjust these as needed
 CONDA_ENV_NAME="accurate_ri_env"

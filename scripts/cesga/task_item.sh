@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -eo pipefail
 
 CONDA_ENV_NAME=$1
 EXECUTABLE_PATH=$2
