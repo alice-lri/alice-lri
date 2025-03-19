@@ -17,11 +17,19 @@ namespace accurate_ri {
     public:
         PointArray(Eigen::ArrayXd &&x_, Eigen::ArrayXd &&y_, Eigen::ArrayXd &&z_)
             : x(std::move(x_)), y(std::move(y_)), z(std::move(z_)) {
+            if (x.size() == 0 || y.size() == 0 || z.size() == 0) {
+                return;
+            }
+
             computeExtraInfo();
         }
 
         PointArray(const Eigen::ArrayXd &x_, const Eigen::ArrayXd &y_, const Eigen::ArrayXd &z_)
             : x(x_), y(y_), z(z_) {
+            if (x.size() == 0 || y.size() == 0 || z.size() == 0) {
+                return;
+            }
+
             computeExtraInfo();
         }
 

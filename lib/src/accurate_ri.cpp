@@ -40,6 +40,11 @@ namespace accurate_ri {
 
     IntrinsicsResult execute(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) {
         PROFILE_SCOPE("TOTAL");
+
+        if (xArray.size() == 0 || yArray.size() == 0 || zArray.size() == 0) {
+            return IntrinsicsResult();
+        }
+
         const PointArray points(xArray, yArray, zArray);
         IntrinsicsEstimator estimator = IntrinsicsEstimator();
 
