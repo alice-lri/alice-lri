@@ -1,12 +1,11 @@
 #!/bin/bash
 set -eo pipefail
+cd "$(dirname "$0")" || exit
 
-source paths.sh
-SRC_PATH="../.."
+source ../helper/paths.sh
+SRC_PATH="../../.."
 EXECUTABLE_NAME="examples_sql"
 JOB_COUNT=32
-
-cd "$(dirname "$0")" || exit
 
 if [ -n "$1" ]; then
   BATCH_ID=$1
@@ -16,12 +15,12 @@ else
   RESUME_BATCH=false
 fi
 
-LOGS_DIR="logs/${BATCH_ID}"
+ACTUAL_LOGS_DIR="${BASE_LOGS_DIR}/${BATCH_ID}"
 ACTUAL_DB_DIR="${BASE_DB_DIR}/${BATCH_ID}"
 
 if [ "$RESUME_BATCH" = true ]; then
-  if [ ! -d "${LOGS_DIR}" ]; then
-    echo "Log directory ${LOGS_DIR} does not exist."
+  if [ ! -d "${ACTUAL_LOGS_DIR}" ]; then
+    echo "Log directory ${ACTUAL_LOGS_DIR} does not exist."
     exit 1
   fi
 
@@ -52,13 +51,13 @@ if [ "$CONTINUE" != "y" ]; then
 fi
 
 mkdir -p "${ACTUAL_DB_DIR}"
-mkdir -p .cache
+mkdir -p "${ACTUAL_LOGS_DIR}"
 
 echo "Building project..."
 cmake -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=INFO -DENABLE_PROFILING=ON -S "${SRC_PATH}" -B "${SRC_PATH}/build"
 make -C "${SRC_PATH}/build"
 
-source init_conda.sh
+source ../conda/init_conda.sh
 
 echo "Preparing job..."
 python pre_job.py
@@ -77,11 +76,10 @@ jq -n \
     }
   }' > "${SRC_PATH}/build/examples/config.json"
 
-mkdir -p logs
 
 for i in "${JOBS_TO_RUN[@]}"; do
   echo "Launching job ${i}..."
-  sbatch --job-name="accurate_ri_${i}" \
+  sbatch --job-name="accurate_ri_${i}" -o "${ACTUAL_LOGS_DIR}/${i}.log" -e "${ACTUAL_LOGS_DIR}/${i}.log"\
    job.sh "${CONDA_ENV_NAME}" "${SRC_PATH}/build/examples/${EXECUTABLE_NAME}" "${ACTUAL_DB_DIR}" \
     "${i}" "${JOB_COUNT}"
 done
