@@ -16,3 +16,7 @@ examples/experiments/
 large/
 
 scripts/cesga/.cache
+
+scripts/cesga/helper/__pycache__/
+
+*.pyc

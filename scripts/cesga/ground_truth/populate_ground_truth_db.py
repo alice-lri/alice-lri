@@ -1,7 +1,12 @@
 import numpy as np
-import glob
 import sqlite3
-
+import argparse
+import os
+import sys
+from pathlib import Path
+parent_dir = Path(__file__).resolve().parent.parent
+sys.path.append(str(parent_dir))
+from helper.funcs import backup_db
 
 def load_binary(file_path):
     data = np.fromfile(file_path, dtype=np.float32)
@@ -155,7 +160,7 @@ def compute_ground_truth(points, v_angles, v_offsets, h_offsets, h_resolutions, 
         h_offset = h_offsets[i]
         h_resolution = h_resolutions[i]
 
-        points_count = np.sum(scanlines_ids == i)
+        points_count = int(np.sum(scanlines_ids == i))
 
         result['scanlines'].append({
             'v_offset': v_offset,
@@ -168,22 +173,20 @@ def compute_ground_truth(points, v_angles, v_offsets, h_offsets, h_resolutions, 
     return scanlines_ids, result
 
 
-def get_sensor_properties(input_path):
-    v_offsets, v_angles, h_offsets, h_resolutions = None, None, None, None
-
-    if 'kitti' in input_path:
-        v_offsets, v_angles, h_offsets, h_resolutions = get_kitti_constants()
-    elif 'durlar' in input_path:
-        v_offsets, v_angles, h_offsets, h_resolutions = get_durlar_constants()
-
-    return v_angles, v_offsets, h_offsets, h_resolutions
+def get_sensor_properties(dataset_name):
+    if dataset_name == 'kitti':
+        return get_kitti_constants()
+    elif dataset_name == 'durlar':
+        return get_durlar_constants()
+    else:
+        raise ValueError(f"Unknown dataset name: {dataset_name}")
 
 
-def compute_ground_truth_from_file(input_path):
+def compute_ground_truth_from_file(input_path, dataset_name):
     points, _ = load_binary(input_path)
     points = points[calculate_range(points) > 0]
 
-    v_angles, v_offsets, h_offsets, h_resolutions = get_sensor_properties(input_path)
+    v_offsets, v_angles, h_offsets, h_resolutions = get_sensor_properties(dataset_name)
     scanlines_ids, result = compute_ground_truth(points, v_angles, v_offsets, h_offsets, h_resolutions)
 
     return result
@@ -204,39 +207,82 @@ def store_ground_truth(ground_truth, frame_id, db_cursor):
            scanline['h_resolution']) for idx, scanline in enumerate(ground_truth['scanlines'])])
 
 
-def relative_path_to_frame_id_dict(db_cursor):
-    db_cursor.execute("SELECT id, relative_path FROM dataset_frame")
-    rows = db_cursor.fetchall()
+def get_frames_for_process(db_path, process_id, total_processes):
+    """Get frames that should be processed by this process based on ID."""
 
-    return {relative_path: id for id, relative_path in rows}
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    
+    # Get all dataset names with their IDs
+    cur.execute("SELECT id, name FROM dataset")
+    datasets = {row[0]: row[1] for row in cur.fetchall()}
+    
+    # Get frames assigned to this process based on ID modulo
+    cur.execute(
+        "SELECT id, dataset_id, relative_path FROM dataset_frame WHERE id % ? = ?",
+        (total_processes, process_id)
+    )
+    
+    frames = []
+    for frame_id, dataset_id, relative_path in cur.fetchall():
+        dataset_name = datasets.get(dataset_id)
+        if dataset_name:
+            frames.append({
+                'id': frame_id,
+                'dataset_id': dataset_id,
+                'dataset_name': dataset_name,
+                'relative_path': relative_path
+            })
+    
+    conn.close()
+    return frames
 
 
 if __name__ == "__main__":
-    prefixes = [
-        "/home/samuel.soutullo/Datasets/LiDAR/durlar/dataset/DurLAR/",
-        "/home/samuel.soutullo/Datasets/LiDAR/kitti/"
-    ]
+    parser = argparse.ArgumentParser(description='Populate ground truth database in parallel.')
+    parser.add_argument('process_id', type=int, help='ID of the current process (0-indexed)')
+    parser.add_argument('total_processes', type=int, help='Total number of processes')
+    parser.add_argument('--db_path', type=str, required=True, help='Path to the SQLite database')
+    parser.add_argument('--kitti_root', type=str, required=True, help='Root path for KITTI dataset')
+    parser.add_argument('--durlar_root', type=str, required=True, help='Root path for DurLAR dataset')
+    args = parser.parse_args()
 
-    patterns = [
-        "*/ouster_points/data/*.bin",
-        "*/*/velodyne_points/data/*.bin"
-    ]
+    assert os.path.exists(args.db_path), f"Database path does not exist: {args.db_path}"
+    assert os.path.exists(args.kitti_root), f"KITTI root path does not exist: {args.kitti_root}"
+    assert os.path.exists(args.durlar_root), f"DurLAR root path does not exist: {args.durlar_root}"
 
-    conn = sqlite3.connect("../large/master.sqlite")
+    process_id = args.process_id
+    total_processes = args.total_processes
+
+    backup_db(args.db_path)
+    
+    # Create a mapping of dataset names to their root paths
+    dataset_roots = {
+        'kitti': args.kitti_root,
+        'durlar': args.durlar_root
+    }
+    
+    # Get frames to process for this worker
+    frames = get_frames_for_process(args.db_path, process_id, total_processes)
+    print(f"Process {process_id}/{total_processes} - Assigned {len(frames)} frames")
+    
+    # Connect to the database for writing results
+    conn = sqlite3.connect(args.db_path)
     cur = conn.cursor()
-    path_frame_id_dict = relative_path_to_frame_id_dict(cur)
+    
+    for i, frame in enumerate(frames):
+        # Build the full path to the file
+        full_path = os.path.join(dataset_roots[frame['dataset_name']], frame['relative_path'])
+        
+        # Process the file
+        ground_truth = compute_ground_truth_from_file(full_path, frame['dataset_name'])
+        store_ground_truth(ground_truth, frame['id'], cur)
 
-    for prefix, pattern in zip(prefixes, patterns):
-        files = glob.glob(prefix + pattern)
+        print(f"Process {process_id}/{total_processes} - Processed {i+1}/{len(frames)} frames")
 
-        for i, file in enumerate(files):
-            file_relative = file.replace(prefix, "")
-            assert file_relative in path_frame_id_dict, f"File {file_relative} not found in database"
 
-            ground_truth = compute_ground_truth_from_file(file)
-            store_ground_truth(ground_truth, path_frame_id_dict[file_relative], cur)
-
-            print(f"Processed {i}/{len(files)} files")
-
+# Only commit at the end
     conn.commit()
     conn.close()
+    
+    print(f"Process {process_id}/{total_processes} - Finished all {len(frames)} frames successfully")
