@@ -1,4 +1,3 @@
-import glob
 import sqlite3
 import argparse
 import os
@@ -91,7 +90,6 @@ def merge_databases(db_files, merged_db_path):
     merged_experiment_id = insert_merged_experiment(merge_c)
 
     files_count = len(db_files)
-    print(db_files)
 
     for file_index, db_file in enumerate(db_files):
         print(f"Merging database {file_index + 1}/{files_count}")
