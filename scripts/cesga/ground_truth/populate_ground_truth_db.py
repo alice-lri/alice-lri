@@ -2,12 +2,6 @@ import numpy as np
 import sqlite3
 import argparse
 import os
-import sys
-from pathlib import Path
-
-parent_dir = Path(__file__).resolve().parent.parent
-sys.path.append(str(parent_dir))
-from helper.funcs import backup_db
 
 
 def load_binary(file_path):
@@ -256,8 +250,6 @@ if __name__ == "__main__":
 
     process_id = args.process_id
     total_processes = args.total_processes
-
-    backup_db(args.db_path)
 
     # Create a mapping of dataset names to their root paths
     dataset_roots = {
