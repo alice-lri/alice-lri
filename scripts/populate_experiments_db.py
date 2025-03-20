@@ -23,7 +23,7 @@ for prefix, pattern, dataset, scanlines_count in zip(prefixes, patterns, dataset
     cur = conn.cursor()
 
     cur.execute('''
-    INSERT OR IGNORE INTO dataset(name, typical_scanlines_count)
+    INSERT OR IGNORE INTO dataset(name, laser_count)
     VALUES (?, ?) 
     ''', (dataset, scanlines_count))
 

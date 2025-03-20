@@ -2,7 +2,7 @@ CREATE TABLE dataset
 (
     id integer PRIMARY KEY AUTOINCREMENT,
     name text NOT NULL UNIQUE,
-    typical_scanlines_count integer NOT NULL
+    laser_count integer NOT NULL
 );
 
 CREATE INDEX dataset_name_idx ON dataset (name);
@@ -31,30 +31,32 @@ CREATE TABLE dataset_scanline_info
 (
     id integer PRIMARY KEY AUTOINCREMENT,
     dataset_id integer NOT NULL REFERENCES dataset (id),
-    scanline_idx integer NOT NULL,
+    laser_idx integer NOT NULL,
     vertical_angle real NOT NULL,
     vertical_offset real NOT NULL,
     horizontal_resolution integer NOT NULL,
     horizontal_offset real NOT NULL,
 
-    UNIQUE (dataset_id, scanline_idx)
+    UNIQUE (dataset_id, laser_idx)
 );
 
 CREATE INDEX dataset_scanline_info_dataset_id ON dataset_scanline_info (dataset_id);
-CREATE INDEX dataset_scanline_info_dataset_id_scanline_idx ON dataset_scanline_info (dataset_id, scanline_idx);
+CREATE INDEX dataset_scanline_info_dataset_id_laser_idx ON dataset_scanline_info (dataset_id, laser_idx);
 
 CREATE TABLE dataset_frame_scanline_info_empirical
 (
     id integer PRIMARY KEY AUTOINCREMENT,
     dataset_frame_id integer NOT NULL REFERENCES dataset_frame (id),
     scanline_idx integer NOT NULL,
+    laser_idx integer NOT NULL,
     points_count integer NOT NULL,
     vertical_offset real NOT NULL,
     vertical_angle real NOT NULL,
     horizontal_offset real NOT NULL,
     horizontal_resolution integer NOT NULL,
 
-    UNIQUE (dataset_frame_id, scanline_idx)
+    UNIQUE (dataset_frame_id, scanline_idx),
+    UNIQUE (dataset_frame_id, laser_idx)
 );
 
 CREATE INDEX dataset_frame_scanline_info_empirical_dataset_frame_id_idx ON dataset_frame_scanline_info_empirical (dataset_frame_id);

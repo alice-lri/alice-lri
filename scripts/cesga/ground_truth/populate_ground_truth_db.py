@@ -4,9 +4,11 @@ import argparse
 import os
 import sys
 from pathlib import Path
+
 parent_dir = Path(__file__).resolve().parent.parent
 sys.path.append(str(parent_dir))
 from helper.funcs import backup_db
+
 
 def load_binary(file_path):
     data = np.fromfile(file_path, dtype=np.float32)
@@ -128,23 +130,23 @@ def compute_ground_truth(points, v_angles, v_offsets, h_offsets, h_resolutions, 
     ranges = calculate_range(points)
     scanlines_ids = np.full(len(points), -1, dtype=int)
 
-    i = 0
-    while i < len(v_offsets):
-        v = v_offsets[i]
+    laser_idx = 0
+    while laser_idx < len(v_offsets):
+        v = v_offsets[laser_idx]
         phi_correction = np.arcsin(v / ranges)
 
         # find indices where correction was successful and phi is equal to the corresponding v_angle +- 1e-3
-        idx = np.where(np.abs(phis - phi_correction - v_angles[i]) < threshold)[0]
+        idx = np.where(np.abs(phis - phi_correction - v_angles[laser_idx]) < threshold)[0]
 
         if len(idx) == 0:
-            i += 1
+            laser_idx += 1
             continue
 
         assert np.all(scanlines_ids[idx] == -1), "Some points were assigned to multiple scanlines"
 
         # assign scanline id to the corresponding indices
-        scanlines_ids[idx] = i
-        i += 1
+        scanlines_ids[idx] = laser_idx
+        laser_idx += 1
 
     assert np.all(scanlines_ids != -1), "Some points were not assigned to any scanline"
 
@@ -154,15 +156,16 @@ def compute_ground_truth(points, v_angles, v_offsets, h_offsets, h_resolutions, 
         'scanlines': []
     }
 
-    for i in np.unique(scanlines_ids):
-        v_offset = v_offsets[i]
-        v_angle = v_angles[i]
-        h_offset = h_offsets[i]
-        h_resolution = h_resolutions[i]
+    for laser_idx in np.unique(scanlines_ids):
+        v_offset = v_offsets[laser_idx]
+        v_angle = v_angles[laser_idx]
+        h_offset = h_offsets[laser_idx]
+        h_resolution = h_resolutions[laser_idx]
 
-        points_count = int(np.sum(scanlines_ids == i))
+        points_count = int(np.sum(scanlines_ids == laser_idx))
 
         result['scanlines'].append({
+            'laser_idx': int(laser_idx),
             'v_offset': v_offset,
             'v_angle': v_angle,
             'h_offset': h_offset,
@@ -199,12 +202,12 @@ def store_ground_truth(ground_truth, frame_id, db_cursor):
     ''', (frame_id, ground_truth['points_count'], ground_truth['scanlines_count']))
 
     db_cursor.executemany('''
-        INSERT OR IGNORE INTO dataset_frame_scanline_info_empirical(dataset_frame_id, scanline_idx, points_count,
+        INSERT OR IGNORE INTO dataset_frame_scanline_info_empirical(dataset_frame_id, scanline_idx, laser_idx, points_count,
                                                                     vertical_offset, vertical_angle, horizontal_offset,
                                                                     horizontal_resolution)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    ''', [(frame_id, idx, scanline['points_count'], scanline['v_offset'], scanline['v_angle'], scanline['h_offset'],
-           scanline['h_resolution']) for idx, scanline in enumerate(ground_truth['scanlines'])])
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ''', [(frame_id, idx, scanline['laser_idx'], scanline['points_count'], scanline['v_offset'], scanline['v_angle'],
+           scanline['h_offset'], scanline['h_resolution']) for idx, scanline in enumerate(ground_truth['scanlines'])])
 
 
 def get_frames_for_process(db_path, process_id, total_processes):
@@ -212,17 +215,17 @@ def get_frames_for_process(db_path, process_id, total_processes):
 
     conn = sqlite3.connect(db_path)
     cur = conn.cursor()
-    
+
     # Get all dataset names with their IDs
     cur.execute("SELECT id, name FROM dataset")
     datasets = {row[0]: row[1] for row in cur.fetchall()}
-    
+
     # Get frames assigned to this process based on ID modulo
     cur.execute(
         "SELECT id, dataset_id, relative_path FROM dataset_frame WHERE id % ? = ?",
         (total_processes, process_id)
     )
-    
+
     frames = []
     for frame_id, dataset_id, relative_path in cur.fetchall():
         dataset_name = datasets.get(dataset_id)
@@ -233,7 +236,7 @@ def get_frames_for_process(db_path, process_id, total_processes):
                 'dataset_name': dataset_name,
                 'relative_path': relative_path
             })
-    
+
     conn.close()
     return frames
 
@@ -255,34 +258,33 @@ if __name__ == "__main__":
     total_processes = args.total_processes
 
     backup_db(args.db_path)
-    
+
     # Create a mapping of dataset names to their root paths
     dataset_roots = {
         'kitti': args.kitti_root,
         'durlar': args.durlar_root
     }
-    
+
     # Get frames to process for this worker
     frames = get_frames_for_process(args.db_path, process_id, total_processes)
     print(f"Process {process_id}/{total_processes} - Assigned {len(frames)} frames")
-    
+
     # Connect to the database for writing results
     conn = sqlite3.connect(args.db_path)
     cur = conn.cursor()
-    
+
     for i, frame in enumerate(frames):
         # Build the full path to the file
         full_path = os.path.join(dataset_roots[frame['dataset_name']], frame['relative_path'])
-        
+
         # Process the file
         ground_truth = compute_ground_truth_from_file(full_path, frame['dataset_name'])
         store_ground_truth(ground_truth, frame['id'], cur)
 
-        print(f"Process {process_id}/{total_processes} - Processed {i+1}/{len(frames)} frames")
+        print(f"Process {process_id}/{total_processes} - Processed {i + 1}/{len(frames)} frames")
 
-
-# Only commit at the end
+    # Only commit at the end
     conn.commit()
     conn.close()
-    
+
     print(f"Process {process_id}/{total_processes} - Finished all {len(frames)} frames successfully")
