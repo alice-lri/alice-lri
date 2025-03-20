@@ -1,6 +1,8 @@
 #!/bin/bash
 set -eo pipefail
 
+JOB_COUNT=32
+
 if [ -n "$1" ]; then
   BATCH_ID=$1
   RESUME_BATCH=true

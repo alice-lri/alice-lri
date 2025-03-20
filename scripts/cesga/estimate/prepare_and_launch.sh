@@ -4,6 +4,8 @@ cd "$(dirname "$0")" || exit
 
 source ../helper/paths.sh
 source ../helper/multi_batch_job_header.sh
+SRC_PATH="../../.."
+EXECUTABLE_NAME="examples_sql"
 
 echo "Building project..."
 cmake -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=INFO -DENABLE_PROFILING=ON -S "${SRC_PATH}" -B "${SRC_PATH}/build"
