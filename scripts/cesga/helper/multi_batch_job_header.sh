@@ -1,0 +1,48 @@
+#!/bin/bash
+set -eo pipefail
+
+if [ -n "$1" ]; then
+  BATCH_ID=$1
+  RESUME_BATCH=true
+else
+  BATCH_ID="$(date +'%Y%m%d_%H%M%S_%3N')"
+  RESUME_BATCH=false
+fi
+
+ACTUAL_LOGS_DIR="${BASE_LOGS_DIR}/${BATCH_ID}"
+ACTUAL_DB_DIR="${BASE_DB_DIR}/${BATCH_ID}"
+
+if [ "$RESUME_BATCH" = true ]; then
+  if [ ! -d "${ACTUAL_LOGS_DIR}" ]; then
+    echo "Log directory ${ACTUAL_LOGS_DIR} does not exist."
+    exit 1
+  fi
+
+  if [ ! -d "${ACTUAL_DB_DIR}" ]; then
+    echo "DB directory ${ACTUAL_DB_DIR} does not exist."
+    exit 1
+  fi
+
+  JOBS_TO_RUN=()
+  for i in $(seq 0 $((JOB_COUNT - 1))); do
+    if [ ! -f "${ACTUAL_DB_DIR}/job_${i}.success" ]; then
+      JOBS_TO_RUN+=("$i")
+    fi
+  done
+else
+    for i in $(seq 0 $((JOB_COUNT - 1))); do
+      JOBS_TO_RUN+=("$i")
+    done
+fi
+
+echo "Will run jobs: " "${JOBS_TO_RUN[@]}"
+echo "Continue? (y/n)"
+read -r CONTINUE
+
+if [ "$CONTINUE" != "y" ]; then
+  echo "Aborting."
+  exit 1
+fi
+
+mkdir -p "${ACTUAL_DB_DIR}"
+mkdir -p "${ACTUAL_LOGS_DIR}"
