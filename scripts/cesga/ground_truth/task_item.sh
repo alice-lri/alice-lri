@@ -24,7 +24,7 @@ eval "$(conda shell.bash hook)"
 conda activate "${CONDA_ENV_NAME}"
 
 echo "Running task $TASK_INDEX of $TASK_COUNT..."
-python populate_ground_truth.py "$TASK_INDEX" "$TASK_COUNT" \
+python populate_ground_truth_db.py "$TASK_INDEX" "$TASK_COUNT" \
   --db_path="${DB_FILE_PATH}" \
   --kitti_root="${KITTI_PATH}" \
   --durlar_root="${DURLAR_PATH}" 2>&1 | tee "${TRACE_FILE_PATH}"
