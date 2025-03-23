@@ -460,6 +460,7 @@ namespace accurate_ri {
             );
 
             // TODO review and justify these constants
+            // TODO maybe this is not even necessary, maybe we can just rely on heuristics and conflict resolution
             if (offsetCiWidth > std::max(0.05 * fitResult->slope, 1e-2)) {
                 LOG_WARN("CI too wide: ", offsetCiWidth);
                 ciTooWide = true;

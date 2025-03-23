@@ -27,7 +27,7 @@ namespace accurate_ri {
         Eigen::ArrayXi indices;
         Eigen::ArrayX<bool> mask;
         Eigen::ArrayXd lowerLimit;
-        Eigen::ArrayXd upperLimit;
+        Eigen::ArrayXd upperLimit; // TODO just realized the limits are not really neccessary to store
     };
 
     struct HoughScanlineEstimation {
