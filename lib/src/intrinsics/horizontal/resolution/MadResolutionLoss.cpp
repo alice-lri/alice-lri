@@ -15,7 +15,7 @@ namespace accurate_ri {
     ) {
         auto df = computeDiffThetaIdealWrtDiffRxy(invRangesXy, thetas, resolution);
         const double median = Utils::medianInPlace(df);
-        const double mad = (df - median).abs().mean() * resolution;
+        const double mad = (df - median).abs().mean() * resolution; // TODO consider harmonic mean?
 
         return mad;
     }
