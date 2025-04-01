@@ -181,8 +181,9 @@ namespace accurate_ri {
             };
         }
 
-        if (scanline.uncertainty >= conflictingScanlinesUncertainties.minCoeff()) {
-            if (scanline.uncertainty == std::numeric_limits<double>::infinity()) {
+        const double minConflictingUncertainty = conflictingScanlinesUncertainties.minCoeff() - 1e-6;
+        if (scanline.uncertainty >= minConflictingUncertainty) {
+            if (minConflictingUncertainty == std::numeric_limits<double>::infinity()) {
                 LOG_INFO(
                     "New uncertainty is infinite, but so are the conflicting scanlines uncertainties. Intersects other empirical: ",
                     intersectionInfo.empiricalIntersection? "True": "False", "."
