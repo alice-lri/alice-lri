@@ -168,9 +168,9 @@ int main(const int argc, const char **argv) {
 
     for (const DatasetFrame &frame: frames) {
         if (frame.datasetName == "kitti") {
-            accurate_ri::setResidualThreshold(5e-4);
+            accurate_ri::setResidualThreshold(8e-4);
         } else if (frame.datasetName == "durlar") {
-            accurate_ri::setResidualThreshold(1e-6);
+            accurate_ri::setResidualThreshold(1e-5);
         } else {
             throw std::runtime_error("Unknown dataset name");
         }
