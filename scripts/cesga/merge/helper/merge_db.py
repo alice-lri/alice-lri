@@ -178,6 +178,7 @@ if __name__ == "__main__":
                         help="Type of databases to merge: experiments or ground_truth")
     args = parser.parse_args()
 
+    print("Backing up database...")
     backup_db(args.master_db_path)
     db_files = get_db_files(args.part_dbs_folder_path)
 
