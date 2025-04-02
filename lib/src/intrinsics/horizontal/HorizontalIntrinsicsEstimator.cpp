@@ -12,7 +12,7 @@ namespace accurate_ri {
     template<typename T>
     int32_t computeOptimalResolution(const Eigen::ArrayBase<T> &invRangesXy, const Eigen::ArrayBase<T> &thetas) {
         // TODO do not hardcode these
-        constexpr int32_t minResolution = 1000;
+        const int32_t minResolution = invRangesXy.innerSize();
         constexpr int32_t maxResolution = 10000;
 
         double minLoss = std::numeric_limits<double>::infinity();
