@@ -21,7 +21,7 @@ namespace accurate_ri {
         );
 
         std::pair<double, double> optimizeOffsetPrecise(
-            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, double resolution
+            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, double resolution, double offsetGuess
         );
 
         double computeCoarseLoss(

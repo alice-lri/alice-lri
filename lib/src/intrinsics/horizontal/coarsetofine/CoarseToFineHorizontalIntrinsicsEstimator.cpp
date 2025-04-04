@@ -71,7 +71,7 @@ namespace accurate_ri {
             bestResInt = refineResolutionPrecise(thetas, rangesXy, bestResInt, bestOffset);
             bestResolution = 2 * M_PI / bestResInt;
 
-            const auto offsetPairPrecise = optimizeOffsetPrecise(thetas, rangesXy, bestResolution);
+            const auto offsetPairPrecise = optimizeOffsetPrecise(thetas, rangesXy, bestResolution, bestOffset);
             bestOffset = offsetPairPrecise.first;
             double bestLoss = offsetPairPrecise.second;
 
@@ -191,14 +191,15 @@ namespace accurate_ri {
     std::pair<double, double> CoarseToFineHorizontalIntrinsicsEstimator::optimizeOffsetPrecise(
         const Eigen::ArrayXd &thetas,
         const Eigen::ArrayXd &ranges,
-        const double resolution
+        const double resolution,
+        const double offsetGuess
     ) {
-        double offsetStart = -0.2;
-        double offsetEnd = 0.2;
+        double offsetStart = offsetGuess - 1e-2;
+        double offsetEnd =  offsetGuess + 1e-2;
         double bestOffset = 0.0;
         double bestLoss = std::numeric_limits<double>::infinity();
 
-        for (double step: {1e-2, 1e-4, 1e-7}) {
+        for (double step: {1e-4, 1e-7}) {
             double localBestOffset = bestOffset;
             double localBestLoss = std::numeric_limits<double>::infinity();
 
