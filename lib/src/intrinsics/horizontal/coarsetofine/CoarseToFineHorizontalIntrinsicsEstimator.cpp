@@ -8,36 +8,74 @@
 #include "utils/Utils.h"
 
 namespace accurate_ri {
-
-    double CoarseToFineHorizontalIntrinsicsEstimator::computeCoarseLoss(
-        const Eigen::ArrayXd &thetas,
-        const Eigen::ArrayXd &ranges,
-        const double offset,
-        const double resolution
+    HorizontalIntrinsicsResult CoarseToFineHorizontalIntrinsicsEstimator::estimate(
+        const PointArray &points, const VerticalIntrinsicsResult &vertical
     ) {
-        Eigen::ArrayXd corrected = thetas - offset / ranges;
-        corrected -= corrected.minCoeff();
-        std::ranges::sort(corrected);
+        HorizontalIntrinsicsResult result;
+        result.scanlines.resize(vertical.scanlinesCount);
 
-        const Eigen::ArrayXd diffs = Utils::diff(corrected);
-        const Eigen::ArrayXd idealDiffs = (diffs / resolution).round() * resolution;
+        std::vector<std::vector<int>> pointsByScanline(vertical.scanlinesCount);
+        for (int i = 0; i < vertical.pointsCount; ++i) {
+            const int32_t scanlineIdx = vertical.fullScanlines.pointsScanlinesIds[i];
 
-        return (diffs - idealDiffs).abs().mean() / resolution;
-    }
+            if (scanlineIdx >= 0) {
+                pointsByScanline[scanlineIdx].push_back(i);
+            }
+        }
 
-    double CoarseToFineHorizontalIntrinsicsEstimator::computePreciseLoss(
-        const Eigen::ArrayXd &thetas,
-        const Eigen::ArrayXd &ranges,
-        const double offset,
-        const double resolution
-    ) {
-        Eigen::ArrayXd corrected = thetas - offset / ranges;
-        corrected -= corrected.minCoeff();
-        std::ranges::sort(corrected);
+        for (int scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
+            const auto &indices = pointsByScanline[scanlineIdx];
+            if (indices.size() < 2) { // TODO heuristic
+                result.scanlines[scanlineIdx] = {0, 0.0, true};
+                continue;
+            }
 
-        const Eigen::ArrayXd aligned = (corrected / resolution).round() * resolution;
+            std::vector<std::pair<double, double>> thetaRangePairs;
 
-        return (corrected - aligned).abs().mean() / resolution;
+            for (int idx: indices) {
+                double theta = points.getTheta(idx);
+                double range = points.getRange(idx);
+
+                thetaRangePairs.emplace_back(theta, range);
+            }
+
+
+            std::ranges::sort(
+                thetaRangePairs, [](const std::pair<double, double> &a, const std::pair<double, double> &b) {
+                    return a.first < b.first;
+                }
+            );
+
+            Eigen::ArrayXd thetas = Eigen::ArrayXd(thetaRangePairs.size());
+            Eigen::ArrayXd ranges = Eigen::ArrayXd(thetaRangePairs.size());
+
+            for (int i = 0; i < thetaRangePairs.size(); ++i) {
+                thetas(i) = thetaRangePairs[i].first;
+                ranges(i) = thetaRangePairs[i].second;
+            }
+
+            thetas = thetas - thetas.minCoeff();
+
+            int32_t bestResInt = optimizeResolutionCoarse(thetas, ranges);
+            double bestResolution = 2 * M_PI / bestResInt;
+            auto offsetPairCoarse = optimizeOffsetCoarse(thetas, ranges, bestResolution);
+            double bestOffset = offsetPairCoarse.first;
+
+            bestResInt = refineResolutionPrecise(thetas, ranges, bestResInt, bestOffset);
+            bestResolution = 2 * M_PI / bestResInt;
+            auto offsetPairPrecise = optimizeOffsetPrecise(thetas, ranges, bestResolution);
+            bestOffset = offsetPairPrecise.first;
+            double bestLoss = offsetPairPrecise.second;
+
+            result.scanlines[scanlineIdx] = {bestResInt, bestOffset, false};
+
+            LOG_INFO(
+                "Scanline ID: ", scanlineIdx, "\tRes: ", bestResInt, "\tOffset: ", bestOffset, "\tPoints: ",
+                thetas.size(), "\tLoss: ", bestLoss
+            );
+        }
+
+        return result;
     }
 
     int32_t CoarseToFineHorizontalIntrinsicsEstimator::optimizeResolutionCoarse(
@@ -171,73 +209,34 @@ namespace accurate_ri {
         return {bestOffset, bestLoss};
     }
 
-    HorizontalIntrinsicsResult CoarseToFineHorizontalIntrinsicsEstimator::estimate(
-        const PointArray &points, const VerticalIntrinsicsResult &vertical
+    double CoarseToFineHorizontalIntrinsicsEstimator::computeCoarseLoss(
+        const Eigen::ArrayXd &thetas,
+        const Eigen::ArrayXd &ranges,
+        const double offset,
+        const double resolution
     ) {
-        HorizontalIntrinsicsResult result;
-        result.scanlines.resize(vertical.scanlinesCount);
+        Eigen::ArrayXd corrected = thetas - offset / ranges;
+        corrected -= corrected.minCoeff();
+        std::ranges::sort(corrected);
 
-        std::vector<std::vector<int>> pointsByScanline(vertical.scanlinesCount);
-        for (int i = 0; i < vertical.pointsCount; ++i) {
-            const int32_t scanlineIdx = vertical.fullScanlines.pointsScanlinesIds[i];
+        const Eigen::ArrayXd diffs = Utils::diff(corrected);
+        const Eigen::ArrayXd idealDiffs = (diffs / resolution).round() * resolution;
 
-            if (scanlineIdx >= 0) {
-                pointsByScanline[scanlineIdx].push_back(i);
-            }
-        }
+        return (diffs - idealDiffs).abs().mean() / resolution;
+    }
 
-        for (int scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
-            const auto &indices = pointsByScanline[scanlineIdx];
-            if (indices.size() < 2) { // TODO heuristic
-                result.scanlines[scanlineIdx] = {0, 0.0, true};
-                continue;
-            }
+    double CoarseToFineHorizontalIntrinsicsEstimator::computePreciseLoss(
+        const Eigen::ArrayXd &thetas,
+        const Eigen::ArrayXd &ranges,
+        const double offset,
+        const double resolution
+    ) {
+        Eigen::ArrayXd corrected = thetas - offset / ranges;
+        corrected -= corrected.minCoeff();
+        std::ranges::sort(corrected);
 
-            std::vector<std::pair<double, double>> thetaRangePairs;
+        const Eigen::ArrayXd aligned = (corrected / resolution).round() * resolution;
 
-            for (int idx: indices) {
-                double theta = points.getTheta(idx);
-                double range = points.getRange(idx);
-
-                thetaRangePairs.emplace_back(theta, range);
-            }
-
-
-            std::ranges::sort(
-                thetaRangePairs, [](const std::pair<double, double> &a, const std::pair<double, double> &b) {
-                    return a.first < b.first;
-                }
-            );
-
-            Eigen::ArrayXd thetas = Eigen::ArrayXd(thetaRangePairs.size());
-            Eigen::ArrayXd ranges = Eigen::ArrayXd(thetaRangePairs.size());
-
-            for (int i = 0; i < thetaRangePairs.size(); ++i) {
-                thetas(i) = thetaRangePairs[i].first;
-                ranges(i) = thetaRangePairs[i].second;
-            }
-
-            thetas = thetas - thetas.minCoeff();
-
-            int32_t bestResInt = optimizeResolutionCoarse(thetas, ranges);
-            double bestResolution = 2 * M_PI / bestResInt;
-            auto offsetPairCoarse = optimizeOffsetCoarse(thetas, ranges, bestResolution);
-            double bestOffset = offsetPairCoarse.first;
-
-            bestResInt = refineResolutionPrecise(thetas, ranges, bestResInt, bestOffset);
-            bestResolution = 2 * M_PI / bestResInt;
-            auto offsetPairPrecise = optimizeOffsetPrecise(thetas, ranges, bestResolution);
-            bestOffset = offsetPairPrecise.first;
-            double bestLoss = offsetPairPrecise.second;
-
-            result.scanlines[scanlineIdx] = {bestResInt, bestOffset, false};
-
-            LOG_INFO(
-                "Scanline ID: ", scanlineIdx, "\tRes: ", bestResInt, "\tOffset: ", bestOffset, "\tPoints: ",
-                thetas.size(), "\tLoss: ", bestLoss
-            );
-        }
-
-        return result;
+        return (corrected - aligned).abs().mean() / resolution;
     }
 } // namespace accurate_ri
