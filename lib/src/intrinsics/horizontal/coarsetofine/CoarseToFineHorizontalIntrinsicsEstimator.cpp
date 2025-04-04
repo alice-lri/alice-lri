@@ -3,10 +3,12 @@
 #include <cmath>
 #include <limits>
 #include <algorithm>
+#include <unordered_set>
 #include <vector>
 #include "utils/Logger.h"
 #include "utils/Utils.h"
 
+// TODO fix inconsistent naming for resolution
 namespace accurate_ri {
     HorizontalIntrinsicsResult CoarseToFineHorizontalIntrinsicsEstimator::estimate(
         const PointArray &points, const VerticalIntrinsicsResult &vertical
@@ -14,56 +16,62 @@ namespace accurate_ri {
         HorizontalIntrinsicsResult result;
         result.scanlines.resize(vertical.scanlinesCount);
 
-        std::vector<std::vector<int>> pointsByScanline(vertical.scanlinesCount);
+        std::vector<std::vector<int32_t>> pointsByScanline(vertical.scanlinesCount);
         for (int i = 0; i < vertical.pointsCount; ++i) {
             const int32_t scanlineIdx = vertical.fullScanlines.pointsScanlinesIds[i];
 
             if (scanlineIdx >= 0) {
-                pointsByScanline[scanlineIdx].push_back(i);
+                pointsByScanline[scanlineIdx].emplace_back(i);
             }
         }
 
+        for (auto &scanline: pointsByScanline) {
+            std::ranges::sort(
+                scanline, [&](const int32_t a, const int32_t b) {
+                    return points.getTheta(a) < points.getTheta(b);
+                }
+            );
+        }
+
+        std::vector<Eigen::ArrayXd> rangesXyByScanline;
+        std::vector<Eigen::ArrayXd> thetasByScanline;
+
+        rangesXyByScanline.reserve(vertical.scanlinesCount);
+        thetasByScanline.reserve(vertical.scanlinesCount);
+
         for (int scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
+            rangesXyByScanline.emplace_back(points.getRangesXy()(pointsByScanline[scanlineIdx]));
+
+            Eigen::ArrayXd scanlineThetas = points.getThetas()(pointsByScanline[scanlineIdx]);
+            scanlineThetas -= scanlineThetas.minCoeff();
+            thetasByScanline.emplace_back(std::move(scanlineThetas));
+        }
+
+        std::unordered_set<uint32_t> heuristicScanlines;
+
+        for (uint32_t scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
             const auto &indices = pointsByScanline[scanlineIdx];
-            if (indices.size() < 2) { // TODO heuristic
-                result.scanlines[scanlineIdx] = {0, 0.0, true};
+
+            if (indices.size() < 16) {
+                LOG_WARN("Warning: Scanline ", scanlineIdx, " has less than 16 points, queueing for heuristics");
+                heuristicScanlines.insert(scanlineIdx);
+
                 continue;
             }
 
-            std::vector<std::pair<double, double>> thetaRangePairs;
+            const Eigen::ArrayXd &thetas = thetasByScanline[scanlineIdx];
+            const Eigen::ArrayXd &rangesXy = rangesXyByScanline[scanlineIdx];
 
-            for (int idx: indices) {
-                double theta = points.getTheta(idx);
-                double range = points.getRange(idx);
-
-                thetaRangePairs.emplace_back(theta, range);
-            }
-
-
-            std::ranges::sort(
-                thetaRangePairs, [](const std::pair<double, double> &a, const std::pair<double, double> &b) {
-                    return a.first < b.first;
-                }
-            );
-
-            Eigen::ArrayXd thetas = Eigen::ArrayXd(thetaRangePairs.size());
-            Eigen::ArrayXd ranges = Eigen::ArrayXd(thetaRangePairs.size());
-
-            for (int i = 0; i < thetaRangePairs.size(); ++i) {
-                thetas(i) = thetaRangePairs[i].first;
-                ranges(i) = thetaRangePairs[i].second;
-            }
-
-            thetas = thetas - thetas.minCoeff();
-
-            int32_t bestResInt = optimizeResolutionCoarse(thetas, ranges);
+            int32_t bestResInt = optimizeResolutionCoarse(thetas, rangesXy);
             double bestResolution = 2 * M_PI / bestResInt;
-            auto offsetPairCoarse = optimizeOffsetCoarse(thetas, ranges, bestResolution);
+
+            const auto offsetPairCoarse = optimizeOffsetCoarse(thetas, rangesXy, bestResolution);
             double bestOffset = offsetPairCoarse.first;
 
-            bestResInt = refineResolutionPrecise(thetas, ranges, bestResInt, bestOffset);
+            bestResInt = refineResolutionPrecise(thetas, rangesXy, bestResInt, bestOffset);
             bestResolution = 2 * M_PI / bestResInt;
-            auto offsetPairPrecise = optimizeOffsetPrecise(thetas, ranges, bestResolution);
+
+            const auto offsetPairPrecise = optimizeOffsetPrecise(thetas, rangesXy, bestResolution);
             bestOffset = offsetPairPrecise.first;
             double bestLoss = offsetPairPrecise.second;
 
@@ -73,6 +81,10 @@ namespace accurate_ri {
                 "Scanline ID: ", scanlineIdx, "\tRes: ", bestResInt, "\tOffset: ", bestOffset, "\tPoints: ",
                 thetas.size(), "\tLoss: ", bestLoss
             );
+        }
+
+        if (!heuristicScanlines.empty()) {
+            updateHeuristicScanlines(result.scanlines, heuristicScanlines, rangesXyByScanline, thetasByScanline);
         }
 
         return result;
@@ -238,5 +250,79 @@ namespace accurate_ri {
         const Eigen::ArrayXd aligned = (corrected / resolution).round() * resolution;
 
         return (corrected - aligned).abs().mean() / resolution;
+    }
+
+    void CoarseToFineHorizontalIntrinsicsEstimator::updateHeuristicScanlines(
+        std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<uint32_t> &heuristicScanlines,
+        const std::vector<Eigen::ArrayXd> &rangesXyByScanline, const std::vector<Eigen::ArrayXd> &thetasByScanline
+    ) {
+        std::vector<double> otherOffsets;
+        std::unordered_set<int32_t> otherResolutions;
+
+        for (int i = 0; i < scanlines.size(); ++i) {
+            if (heuristicScanlines.contains(i)) {
+                continue;
+            }
+
+            otherResolutions.insert(scanlines[i].resolution);
+
+            const double currentOffset = scanlines[i].offset;
+            double minOffsetDiff = std::numeric_limits<double>::infinity();
+
+            for (const double otherOffset: otherOffsets) {
+                const double offsetDiff = std::abs(currentOffset - otherOffset);
+
+                if (offsetDiff < minOffsetDiff) {
+                    minOffsetDiff = offsetDiff;
+                }
+            }
+
+            if (minOffsetDiff > 1e-6) {
+                otherOffsets.emplace_back(scanlines[i].offset);
+            }
+        }
+
+        for (const uint32_t scanlineIdx: heuristicScanlines) {
+            const Eigen::ArrayXd &thetas = thetasByScanline[scanlineIdx];
+            const Eigen::ArrayXd &rangesXy = rangesXyByScanline[scanlineIdx];
+
+            const auto [bestResInt, bestOffset] = optimizeFromCandidatesPrecise(
+                thetas, rangesXy, otherResolutions, otherOffsets
+            );
+
+            scanlines[scanlineIdx] = {bestResInt, bestOffset, true};
+
+            LOG_INFO(
+                "Scanline ID: ", scanlineIdx, "\tRes: ", bestResInt, "\tOffset: ", bestOffset, "\tPoints: ",
+                thetas.size()
+            );
+        }
+    }
+
+    std::pair<int32_t, double> CoarseToFineHorizontalIntrinsicsEstimator::optimizeFromCandidatesPrecise(
+        const Eigen::ArrayXd &thetas,
+        const Eigen::ArrayXd &ranges,
+        const std::unordered_set<int32_t> &candidateResInts,
+        const std::vector<double> &candidateOffsets
+    ) {
+        int32_t bestResInt = -1;
+        double bestOffset = 0;
+        double bestLoss = std::numeric_limits<double>::infinity();
+
+        for (const int32_t resInt: candidateResInts) {
+            double resolution = 2 * M_PI / resInt;
+
+            for (double offset: candidateOffsets) {
+                const double loss = computePreciseLoss(thetas, ranges, offset, resolution);
+
+                if (loss < bestLoss) {
+                    bestLoss = loss;
+                    bestResInt = resInt;
+                    bestOffset = offset;
+                }
+            }
+        }
+
+        return {bestResInt, bestOffset};
     }
 } // namespace accurate_ri
