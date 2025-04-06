@@ -33,7 +33,7 @@ def assert_single_experiment(cursor):
     ids = set(row[0] for row in cursor.fetchall())
 
     if len(ids) != 1:
-        raise ValueError(f"Multiple experiment IDs found: {ids}")
+        raise ValueError(f"Unexpected experiment IDs found: {ids}")
 
 
 def fetch_frames(cursor):
