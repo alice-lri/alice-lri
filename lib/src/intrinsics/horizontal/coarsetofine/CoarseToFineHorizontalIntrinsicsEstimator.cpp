@@ -5,6 +5,8 @@
 #include <algorithm>
 #include <unordered_set>
 #include <vector>
+
+#include "intrinsics/horizontal/offset/RansacHOffset.h"
 #include "utils/Logger.h"
 #include "utils/Utils.h"
 
@@ -63,17 +65,11 @@ namespace accurate_ri {
             const Eigen::ArrayXd &rangesXy = rangesXyByScanline[scanlineIdx];
 
             int32_t bestResInt = optimizeResolutionCoarse(thetas, rangesXy);
-            double bestResolution = 2 * M_PI / bestResInt;
 
-            const auto offsetPairCoarse = optimizeOffsetCoarse(thetas, rangesXy, bestResolution);
-            double bestOffset = offsetPairCoarse.first;
-
-            bestResInt = refineResolutionPrecise(thetas, rangesXy, bestResInt, bestOffset);
-            bestResolution = 2 * M_PI / bestResInt;
-
-            const auto offsetPairPrecise = optimizeOffsetPrecise(thetas, rangesXy, bestResolution, bestOffset);
-            bestOffset = offsetPairPrecise.first;
-            double bestLoss = offsetPairPrecise.second;
+            const ResolutionOffsetLoss optimizeResult = optimizeJoint(thetas, rangesXy, bestResInt);
+            bestResInt = optimizeResult.resolution;
+            const double bestOffset = optimizeResult.offset;
+            const double bestLoss = optimizeResult.loss;
 
             result.scanlines[scanlineIdx] = {bestResInt, bestOffset, false};
 
@@ -152,40 +148,46 @@ namespace accurate_ri {
         return {bestOffset, bestLoss};
     }
 
-    int32_t CoarseToFineHorizontalIntrinsicsEstimator::refineResolutionPrecise(
+    ResolutionOffsetLoss CoarseToFineHorizontalIntrinsicsEstimator::optimizeJoint(
         const Eigen::ArrayXd &thetas,
         const Eigen::ArrayXd &ranges,
-        const int32_t initialResInt,
-        const double offset
+        const int32_t initialResInt
     ) {
-        const uint32_t minDiv = 1;
-        const uint32_t maxDiv = 30;
-        const int32_t minDelta = -50;
-        const int32_t maxDelta = 50;
+        constexpr uint32_t minDiv = 1;
+        constexpr uint32_t maxDiv = 30;
+        constexpr int32_t minDelta = -50;
+        constexpr int32_t maxDelta = 50;
 
         double minLoss = std::numeric_limits<double>::infinity();
+        double bestOffset = 0;
         int32_t bestCandidate = initialResInt;
 
-        for (uint32_t div = minDiv; div < maxDiv; ++div) {
+        for (int32_t div = minDiv; div < maxDiv; ++div) {
             for (int32_t delta = minDelta; delta < maxDelta; ++delta) {
-                const int64_t candidateMultiple = initialResInt + delta;
+                const int32_t candidateMultiple = initialResInt + delta;
 
                 if (candidateMultiple <= 0 || candidateMultiple % div != 0) {
                     continue;
                 }
 
-                const uint32_t candidate = candidateMultiple / div;
-                const double resolution = 2 * M_PI / candidate;
-                const double loss = computePreciseLoss(thetas, ranges, offset, resolution);
 
-                if (loss < minLoss) {
-                    minLoss = loss;
+                const int32_t candidate = candidateMultiple / div;
+                // TODO use acutal coords eps
+                const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(1/ranges, thetas, candidate, 0);
+
+                if (!rhResult.has_value()) {
+                    continue;
+                }
+
+                if (rhResult->loss < minLoss) {
+                    minLoss = rhResult->loss;
                     bestCandidate = candidate;
+                    bestOffset = rhResult->offset;
                 }
             }
         }
 
-        return bestCandidate;
+        return {.resolution = bestCandidate, .offset = bestOffset, .loss = minLoss};
     }
 
     std::pair<double, double> CoarseToFineHorizontalIntrinsicsEstimator::optimizeOffsetPrecise(

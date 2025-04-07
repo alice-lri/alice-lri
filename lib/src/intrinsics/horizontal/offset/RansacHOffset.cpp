@@ -7,9 +7,10 @@
 #include "point/PointArray.h"
 #include "ransac/CustomRansac.h"
 #include "utils/Logger.h"
+#include "utils/Timer.h"
 
 namespace accurate_ri {
-    std::optional<double> RansacHOffset::computeOffset(
+    std::optional<RansacHOffsetResult> RansacHOffset::computeOffset(
         const Eigen::ArrayXd &invRangesXy, const Eigen::ArrayXd &thetas, const uint32_t resolution,
         const double coordsEps
     ) {
@@ -21,9 +22,16 @@ namespace accurate_ri {
             residualThreshold = *getResidualThreshold();
         }
 
-        CustomRansac ransac = CustomRansac(2, residualThreshold, 1000, thetaStep);
-        const std::optional<Stats::LRResult> ransacResult = ransac.fit(invRangesXy, diffToIdeal);
+        CustomRansac ransac = CustomRansac(2, residualThreshold, 100, thetaStep);
+        const std::optional<CustomRansacResult> ransacResult = ransac.fit(invRangesXy, diffToIdeal);
 
-        return ransacResult.has_value() ? std::optional(ransacResult->slope) : std::nullopt;
+        return ransacResult.has_value()
+                   ? std::make_optional<RansacHOffsetResult>(
+                       {
+                           .offset = ransacResult->model.slope,
+                           .loss = ransacResult->loss * resolution,
+                       }
+                   )
+                   : std::nullopt;
     }
 } // accurate_ri

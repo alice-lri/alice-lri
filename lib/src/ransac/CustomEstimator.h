@@ -28,5 +28,9 @@ namespace accurate_ri {
         [[nodiscard]] MultiLineResult getLastMultiLine() const {
             return multiLineResult;
         }
+
+        void setModel(const Stats::LRResult &lrResult) {
+            this->lrResult = lrResult;
+        }
     };
 } // accurate_ri

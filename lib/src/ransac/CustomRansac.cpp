@@ -15,7 +15,7 @@ namespace accurate_ri {
         }
     };
 
-    std::optional<Stats::LRResult> CustomRansac::fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
+    std::optional<CustomRansacResult> CustomRansac::fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
         uint32_t trial = 0;
 
         for (trial = 0; trial < maxTrials; ++trial) {
@@ -38,15 +38,15 @@ namespace accurate_ri {
         }
 
         if (trial == maxTrials) {
-            LOG_WARN("RANSAC could not find a valid consensus set at trial ", trial);
+            //LOG_WARN("RANSAC could not find a valid consensus set at trial ", trial);
             return std::nullopt;
         }
 
-        refineSlope(x, y);
-        return model;
+        const double loss = refineSlope(x, y);
+        return std::make_optional<CustomRansacResult>({.model = *model, .loss = loss});
     }
 
-    void CustomRansac::refineSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
+    double CustomRansac::refineSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
         const MultiLineResult &multi = estimator.getLastMultiLine();
         std::unordered_map<int64_t, MultiLineItem> multiLineMap;
 
@@ -67,5 +67,13 @@ namespace accurate_ri {
         }
 
         model->slope = (shiftedX * shiftedY).sum() / shiftedX.square().sum();
+        model->intercept = y.mean() - model->slope * x.mean();
+
+        estimator.setModel(*model);
+        Eigen::ArrayXd residuals = estimator.computeResiduals(shiftedX, shiftedY);
+        residuals -= residuals.mean();
+        const double loss = residuals.square().mean();
+
+        return loss;
     }
 } // accurate_ri

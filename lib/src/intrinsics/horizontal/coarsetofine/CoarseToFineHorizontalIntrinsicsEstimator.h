@@ -5,6 +5,12 @@
 #include "point/PointArray.h"
 
 namespace accurate_ri {
+    struct ResolutionOffsetLoss {
+        int32_t resolution;
+        double offset;
+        double loss;
+    };
+
     class CoarseToFineHorizontalIntrinsicsEstimator {
     public:
         HorizontalIntrinsicsResult estimate(const PointArray &points, const VerticalIntrinsicsResult &vertical);
@@ -16,8 +22,8 @@ namespace accurate_ri {
             const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, double resolution
         );
 
-        int32_t refineResolutionPrecise(
-            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, int32_t initialResInt, double offset
+        ResolutionOffsetLoss optimizeJoint(
+            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, int32_t initialResInt
         );
 
         std::pair<double, double> optimizeOffsetPrecise(

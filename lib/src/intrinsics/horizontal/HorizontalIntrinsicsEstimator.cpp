@@ -80,26 +80,28 @@ namespace accurate_ri {
             }
 
             int32_t resolution = computeOptimalResolution(invRangesXy, thetas);
-            const std::optional<double> offset = RansacHOffset::computeOffset(
+            const std::optional<RansacHOffsetResult> rhResult  = RansacHOffset::computeOffset(
                 invRangesXy, thetas, resolution, coordsEps
             );
 
-            if (!offset.has_value()) {
+            if (!rhResult.has_value()) {
                 LOG_WARN("Warning: Scanline ", scanlineIdx, " has no valid consensus set, queueing for heuristics");
                 heuristicScanlines.emplace_back(scanlineIdx);
                 continue;
             }
 
+            double offset = rhResult->offset;
+
             scanlinesInfoMap.emplace(
                 scanlineIdx, ScanlineHorizontalInfo{
                     .resolution = resolution,
-                    .offset = *offset,
+                    .offset = offset,
                     .heuristic = false
                 }
             );
 
             LOG_INFO(
-                "Scanline ", scanlineIdx, ", optimal resolution: ", resolution, ", h: ", offset.value(), ", length: ",
+                "Scanline ", scanlineIdx, ", optimal resolution: ", resolution, ", h: ", offset, ", length: ",
                 thetas.size()
             );
         }
