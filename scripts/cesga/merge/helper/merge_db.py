@@ -23,8 +23,12 @@ def get_db_files(folder_path):
     return [folder_path + "/" + f for f in os.listdir(folder_path) if re.fullmatch(r'\d+\.sqlite', f)]
 
 
-def insert_merged_experiment(cursor):
-    cursor.execute("INSERT INTO experiment(timestamp) VALUES (DATETIME('now', 'localtime', 'subsec'))")
+def insert_merged_experiment(cursor, label, description):
+    cursor.execute("""
+        INSERT INTO experiment(timestamp, label, description) 
+        VALUES (DATETIME('now', 'localtime', 'subsec'), ?, ?)
+    """, (label, description))
+
     return cursor.lastrowid
 
 
@@ -85,10 +89,10 @@ def insert_scanlines(cursor, frame_id, scanlines):
     """, data)
 
 
-def merge_experiment_databases(db_files, master_db_path):
+def merge_experiment_databases(db_files, master_db_path, label, description):
     master_conn = sqlite3.connect(master_db_path)
     master_c = master_conn.cursor()
-    merged_experiment_id = insert_merged_experiment(master_c)
+    merged_experiment_id = insert_merged_experiment(master_c, label, description)
 
     files_count = len(db_files)
 
@@ -189,6 +193,6 @@ if __name__ == "__main__":
     db_files = get_db_files(args.part_dbs_folder_path)
 
     if args.type == "experiments":
-        merge_experiment_databases(db_files, args.master_db_path)
+        merge_experiment_databases(db_files, args.master_db_path, args.label, args.description)
     elif args.type == "ground_truth":
         merge_ground_truth_databases(db_files, args.master_db_path)
