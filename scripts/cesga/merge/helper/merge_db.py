@@ -176,7 +176,13 @@ if __name__ == "__main__":
     parser.add_argument("master_db_path")
     parser.add_argument("--type", choices=["experiments", "ground_truth"], required=True,
                         help="Type of databases to merge: experiments or ground_truth")
+    parser.add_argument("--label")
+    parser.add_argument("--description")
     args = parser.parse_args()
+
+    if args.type == "experiments":
+        if not args.label or not args.description:
+            parser.error("--label and --description required when --type is 'experiments'")
 
     print("Backing up database...")
     backup_db(args.master_db_path)
