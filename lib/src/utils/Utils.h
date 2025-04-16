@@ -44,16 +44,16 @@ namespace accurate_ri::Utils {
     }
 
     // TODO make sure to use this function everywhere
-    inline auto eigenMaskToIndices(const Eigen::ArrayX<bool> &mask) {
-        std::vector<int32_t> indicesVector;
-        indicesVector.reserve(mask.size());
+    inline Eigen::ArrayXi eigenMaskToIndices(const Eigen::ArrayX<bool> &mask) {
+        Eigen::ArrayXi indices(mask.count());
 
+        int j = 0;
         for (int i = 0; i < mask.size(); ++i) {
             if (mask(i)) {
-                indicesVector.emplace_back(i);
+                indices(j++) = i;
             }
         }
 
-        return Eigen::Map<const Eigen::ArrayXi>(indicesVector.data(), indicesVector.size());
+        return indices;
     }
 }

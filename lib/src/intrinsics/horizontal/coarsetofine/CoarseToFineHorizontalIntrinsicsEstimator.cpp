@@ -119,6 +119,7 @@ namespace accurate_ri {
         return {bestOffset, bestLoss};
     }
 
+    // TODO now that we have fit to bounds do deltas first, then divisors.
     ResolutionOffsetLoss CoarseToFineHorizontalIntrinsicsEstimator::optimizeJoint(
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t initialResInt
     ) {
@@ -140,7 +141,6 @@ namespace accurate_ri {
                 }
 
                 const int32_t candidate = candidateMultiple / div;
-                // TODO use acutal coords eps
                 const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
                     scanlineArray, scanlineIdx, candidate
                 );
@@ -153,8 +153,14 @@ namespace accurate_ri {
                     minLoss = rhResult->loss;
                     bestCandidate = candidate;
                     bestOffset = rhResult->offset;
+                    goto success; // TODO get rid of this abomination when refactoring for deltas first
                 }
             }
+        }
+
+        success:
+        if (minLoss == std::numeric_limits<double>::infinity()) {
+            LOG_ERROR("Horizontal optimization failed for scanline ", scanlineIdx);
         }
 
         return {.resolution = bestCandidate, .offset = bestOffset, .loss = minLoss};

@@ -18,6 +18,14 @@ namespace accurate_ri {
         }
     };
 
+    uint32_t my_random() {
+        static uint32_t state = 42;
+        static const uint32_t a = 1664525;
+        static const uint32_t c = 1013904223;
+        state = a * state + c;  // wraps automatically on 32-bit unsigned
+        return state;
+    }
+
     std::optional<CustomRansacResult> CustomRansac::fit(
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
     ) {
@@ -30,8 +38,8 @@ namespace accurate_ri {
         uint32_t trial = 0;
 
         for (trial = 0; trial < maxTrials; ++trial) {
-            const uint32_t sampleIndex1 = std::rand() % y.size();
-            uint32_t sampleIndex2 = std::rand() % y.size();
+            const uint32_t sampleIndex1 = my_random() % y.size();
+            uint32_t sampleIndex2 = my_random() % y.size();
             sampleIndex2 = sampleIndex1 != sampleIndex2 ? sampleIndex2 : (sampleIndex2 + 1) % y.size();
 
             const auto sampleIndices = Eigen::Array2i(sampleIndex1, sampleIndex2);
@@ -39,17 +47,23 @@ namespace accurate_ri {
             const auto sampleY = y(sampleIndices);
 
             model = estimator.fit(sampleX, sampleY);
+            LOG_INFO("CustomRANSAC using ", sampleIndices[0], " ", sampleIndices[1], " unrefined offset: ", model->slope);
+            LOG_INFO("X values are ", sampleX[0], " ", sampleX[1]);
+            LOG_INFO("Y values are ", sampleY[0], " ", sampleY[1]);
             refineFit(x, y);
 
-            const Eigen::ArrayXd &residuals = estimator.computeResiduals(x, y);
-
             const double hOffset = model->slope;
-            Eigen::ArrayXd looseBounds = scanlineArray.getCorrectionBounds(scanlineIdx, hOffset);
-            looseBounds = 2 * (looseBounds + yBounds) + 1e-6;
+            if (std::abs(hOffset) >= scanlineArray.getRangesXy(scanlineIdx).minCoeff()) { // TODO optimize this
+                continue;
+            }
 
+            Eigen::ArrayXd looseBounds = scanlineArray.getCorrectionBounds(scanlineIdx, hOffset);
+            looseBounds = 1.25 * (looseBounds + yBounds) + 1e-6;
+
+            const Eigen::ArrayXd &residuals = estimator.computeResiduals(x, y);
             const uint32_t inliersCount = (residuals.abs() < looseBounds).count();
 
-            LOG_DEBUG("CustomRANSAC iteration with offset ", hOffset, " and ", inliersCount, " inliers");
+            LOG_INFO("CustomRANSAC iteration with offset ", hOffset, " and ", inliersCount, " inliers");
 
             if (inliersCount == x.size()) {
                 LOG_INFO("Found consensus set at trial ", trial, " with offset ", hOffset);
@@ -68,6 +82,7 @@ namespace accurate_ri {
     }
 
     void CustomRansac::refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
+        estimator.computeResiduals(x, y); // TODO this is done to update the multilineresult, but maybe it can be avoided
         const MultiLineResult &multi = estimator.getLastMultiLine();
         std::unordered_map<int64_t, MultiLineItem> multiLineMap;
 
@@ -92,7 +107,7 @@ namespace accurate_ri {
 
         const double interceptCorrection = estimator.computeResiduals(x, y).mean();
         model->intercept += interceptCorrection;
-        estimator.setModel(*model);
+        estimator.setModel(*model); // TODO having to sync the model every time like this is crazy and shitty
     }
 
     std::optional<double> CustomRansac::fitToBounds(
@@ -135,9 +150,9 @@ namespace accurate_ri {
             const bool canPivot = leftOutlierIndices.size() > 0 && rightOutlierIndices.size() > 0;
 
             if (!canPivot) {
-                LOG_DEBUG("Cannot pivot");
+                LOG_INFO("Cannot pivot");
 
-                if (std::rand() % 2 == 0) {
+                if (my_random() % 2 == 0) {
                     fitToBoundsModifyIntercept(residuals, residualBounds, outlierIndices);
                 } else {
                     fitToBoundsModifySlope(x, residuals, residualBounds, outlierIndices, pivotPoint);
@@ -160,7 +175,7 @@ namespace accurate_ri {
         }
 
         if (iteration == maxFitToBoundsIterations) {
-            LOG_DEBUG("Fit to bounds not possible");
+            LOG_INFO("Fit to bounds not possible");
             return std::nullopt;
         }
 
@@ -181,9 +196,10 @@ namespace accurate_ri {
             interceptCorrection = 1e-10 * Utils::sign(interceptCorrection);
         }
 
-        LOG_DEBUG("Applying intercept correction of ", interceptCorrection);
+        LOG_INFO("Applying intercept correction of ", interceptCorrection);
 
         model->intercept += interceptCorrection;
+        estimator.setModel(*model);
     }
 
     void CustomRansac::fitToBoundsModifySlope(
@@ -211,8 +227,9 @@ namespace accurate_ri {
             slopeCorrection = 1e-10 * Utils::sign(slopeCorrection);
         }
 
-        LOG_DEBUG("Applying slope correction of ", slopeCorrection);
+        LOG_INFO("Applying slope correction of ", slopeCorrection);
 
         model->slope += slopeCorrection;
+        estimator.setModel(*model);
     }
 } // accurate_ri

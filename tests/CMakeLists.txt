@@ -8,6 +8,7 @@ add_executable(accurate_ri_tests
     stats_tests.cpp
     vertical_intrinsics_tests.cpp
     point_array_tests.cpp
+        utils_tests.cpp
 )
 
 # Find the Eigen package
