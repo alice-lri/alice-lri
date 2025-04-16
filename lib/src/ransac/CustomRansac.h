@@ -34,6 +34,6 @@ namespace accurate_ri {
         std::optional<CustomRansacResult> fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
 
     private:
-        double refineSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
+        void refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
     };
 } // accurate_ri

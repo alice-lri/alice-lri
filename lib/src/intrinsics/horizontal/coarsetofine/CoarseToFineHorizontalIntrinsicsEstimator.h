@@ -2,6 +2,7 @@
 #include <unordered_set>
 
 #include "accurate_ri/public_structs.hpp"
+#include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "point/PointArray.h"
 
 namespace accurate_ri {
@@ -40,7 +41,7 @@ namespace accurate_ri {
 
         void updateHeuristicScanlines(
             std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<uint32_t> &heuristicScanlines,
-            const std::vector<Eigen::ArrayXd> &rangesXyByScanline, const std::vector<Eigen::ArrayXd> &thetasByScanline
+            const HorizontalScanlineArray &scanlineArray
         );
 
         std::pair<int32_t, double> optimizeFromCandidatesPrecise(

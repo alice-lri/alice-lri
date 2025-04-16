@@ -5,6 +5,8 @@ namespace accurate_ri {
     struct PointArrayExtraInfo {
         Eigen::ArrayXd range, rangeXy, phi, theta;
         Eigen::ArrayXd invRange, invRangeXy;
+        Eigen::ArrayXd thetaUpperBound; // TODO precompute phi bounds as well if possible
+        Eigen::ArrayXd rangeXyMinusBound;
         double maxRange = 0, minRange = 0;
         double coordsEps = 0;
     };
@@ -41,6 +43,10 @@ namespace accurate_ri {
         [[nodiscard]] inline double getY(const size_t index) const { return y[index]; }
         [[nodiscard]] inline double getZ(const size_t index) const { return z[index]; }
 
+        [[nodiscard]] inline const Eigen::ArrayXd& getXs() const { return x; }
+        [[nodiscard]] inline const Eigen::ArrayXd& getYs() const { return y; }
+        [[nodiscard]] inline const Eigen::ArrayXd& getZs() const { return z; }
+
         [[nodiscard]] inline double getRange(const size_t index) const { return extraInfo.range[index]; }
         [[nodiscard]] inline double getRangeXy(const size_t index) const { return extraInfo.rangeXy[index]; }
         [[nodiscard]] inline double getPhi(const size_t index) const { return extraInfo.phi[index]; }
@@ -60,9 +66,13 @@ namespace accurate_ri {
         [[nodiscard]] inline double getMaxRange() const { return extraInfo.maxRange; }
         [[nodiscard]] inline double getMinRange() const { return extraInfo.minRange; }
 
+        [[nodiscard]] inline const Eigen::ArrayXd& getThetaUpperBound() const { return extraInfo.thetaUpperBound; }
+        [[nodiscard]] inline const Eigen::ArrayXd& getRangeXyMinusBound() const { return extraInfo.rangeXyMinusBound; }
+
         [[nodiscard]] size_t size() const { return x.size(); }
 
     private:
         void computeExtraInfo();
+        void computeThetasUpperBound() const;
     };
 }

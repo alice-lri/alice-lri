@@ -15,8 +15,11 @@ namespace accurate_ri {
         }
     };
 
+    // TODO refactor CustomRansac and stop trying to pretend is generic when its not
     std::optional<CustomRansacResult> CustomRansac::fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
         uint32_t trial = 0;
+
+
 
         for (trial = 0; trial < maxTrials; ++trial) {
             const uint32_t sampleIndex1 = std::rand() % y.size();
@@ -27,26 +30,29 @@ namespace accurate_ri {
             const auto sampleX = x(sampleIndices);
             const auto sampleY = y(sampleIndices);
 
-            const Stats::LRResult &currentModel = estimator.fit(sampleX, sampleY);
+            model = estimator.fit(sampleX, sampleY);
+            refineFit(x, y);
+
             const Eigen::ArrayXd &residuals = estimator.computeResiduals(x, y);
             const uint32_t inliersCount = (residuals < residualThreshold).count();
 
             if (inliersCount == x.size()) {
-                model = currentModel;
+                // model = currentModel;
                 break;
             }
         }
 
         if (trial == maxTrials) {
-            //LOG_WARN("RANSAC could not find a valid consensus set at trial ", trial);
+            LOG_DEBUG("RANSAC could not find a valid consensus set at trial ", trial);
             return std::nullopt;
         }
 
-        const double loss = refineSlope(x, y);
+        // const double loss = refineFit(x, y);
+        const double loss = 0;
         return std::make_optional<CustomRansacResult>({.model = *model, .loss = loss});
     }
 
-    double CustomRansac::refineSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
+    void CustomRansac::refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
         const MultiLineResult &multi = estimator.getLastMultiLine();
         std::unordered_map<int64_t, MultiLineItem> multiLineMap;
 
@@ -57,8 +63,8 @@ namespace accurate_ri {
             multiLineItem.push(x(pointIdx), y(pointIdx));
         }
 
-        Eigen::ArrayXd shiftedX = Eigen::ArrayXd(x.size());
-        Eigen::ArrayXd shiftedY = Eigen::ArrayXd(y.size());
+        auto shiftedX = Eigen::ArrayXd(x.size());
+        auto shiftedY = Eigen::ArrayXd(y.size());
 
         for (uint32_t pointIdx = 0; pointIdx < multi.linesIdx.size(); ++pointIdx) {
             const MultiLineItem& multiLineItem = multiLineMap.at(multi.linesIdx[pointIdx]);
@@ -67,13 +73,10 @@ namespace accurate_ri {
         }
 
         model->slope = (shiftedX * shiftedY).sum() / shiftedX.square().sum();
-        model->intercept = y.mean() - model->slope * x.mean();
-
         estimator.setModel(*model);
-        Eigen::ArrayXd residuals = estimator.computeResiduals(shiftedX, shiftedY);
-        residuals -= residuals.mean();
-        const double loss = residuals.square().mean();
 
-        return loss;
+        const double interceptCorrection = estimator.computeResiduals(x, y).mean();
+        model->intercept += interceptCorrection;
+        estimator.setModel(*model);
     }
 } // accurate_ri

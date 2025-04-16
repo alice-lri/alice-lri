@@ -71,6 +71,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/vertical/pool/VerticalScanlinePool.h
         src/intrinsics/horizontal/helper/HorizontalLogging.cpp
         src/intrinsics/horizontal/helper/HorizontalLogging.h
+        src/intrinsics/horizontal/helper/HorizontalScanlineArray.cpp
+        src/intrinsics/horizontal/helper/HorizontalScanlineArray.h
         src/intrinsics/horizontal/resolution/MadResolutionLoss.cpp
         src/intrinsics/horizontal/resolution/MadResolutionLoss.h
         src/intrinsics/horizontal/helper/HorizontalMath.cpp
