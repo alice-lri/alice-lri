@@ -10,7 +10,7 @@ namespace accurate_ri {
 
     const Eigen::ArrayXd &CustomEstimator::computeResiduals(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
         const auto &multi = computeMultiLine(x, y);
-        residuals = (multi.distances - multi.linesIdx.cast<double>() * thetaStep).abs();
+        residuals = multi.distances - multi.linesIdx.cast<double>() * thetaStep;
 
         return residuals;
     }

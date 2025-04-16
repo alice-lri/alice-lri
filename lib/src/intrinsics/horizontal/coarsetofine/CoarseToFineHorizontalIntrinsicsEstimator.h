@@ -17,14 +17,14 @@ namespace accurate_ri {
         HorizontalIntrinsicsResult estimate(const PointArray &points, const VerticalIntrinsicsResult &vertical);
 
     private:
-        int32_t optimizeResolutionCoarse(const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges);
+        int32_t optimizeResolutionCoarse(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx);
 
         std::pair<double, double> optimizeOffsetCoarse(
             const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, double resolution
         );
 
         ResolutionOffsetLoss optimizeJoint(
-            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, int32_t initialResInt
+            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t initialResInt
         );
 
         std::pair<double, double> optimizeOffsetPrecise(

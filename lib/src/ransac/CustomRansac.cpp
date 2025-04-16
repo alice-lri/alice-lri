@@ -1,5 +1,7 @@
 #include "CustomRansac.h"
 #include <limits>
+
+#include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "utils/Logger.h"
 
 namespace accurate_ri {
@@ -15,16 +17,22 @@ namespace accurate_ri {
         }
     };
 
-    // TODO refactor CustomRansac and stop trying to pretend is generic when its not
-    std::optional<CustomRansacResult> CustomRansac::fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
+    std::optional<CustomRansacResult> CustomRansac::fit(
+        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
+    ) {
+        const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
+        const Eigen::ArrayXd &x = scanlineArray.getInvRangesXy(scanlineIdx);
+        const Eigen::ArrayXd y = HorizontalMath::computeDiffToIdeal(thetas, resolution, false);
+
+        const Eigen::ArrayXd &yBounds = scanlineArray.getThetasUpperBounds(scanlineIdx);
+
         uint32_t trial = 0;
-
-
+        double loss = std::numeric_limits<double>::infinity();
 
         for (trial = 0; trial < maxTrials; ++trial) {
             const uint32_t sampleIndex1 = std::rand() % y.size();
             uint32_t sampleIndex2 = std::rand() % y.size();
-            sampleIndex2 = sampleIndex1 != sampleIndex2 ? sampleIndex2 : (sampleIndex2 + 1) % y.size(); // Bias is fine
+            sampleIndex2 = sampleIndex1 != sampleIndex2 ? sampleIndex2 : (sampleIndex2 + 1) % y.size();
 
             const auto sampleIndices = Eigen::Array2i(sampleIndex1, sampleIndex2);
             const auto sampleX = x(sampleIndices);
@@ -34,10 +42,15 @@ namespace accurate_ri {
             refineFit(x, y);
 
             const Eigen::ArrayXd &residuals = estimator.computeResiduals(x, y);
-            const uint32_t inliersCount = (residuals < residualThreshold).count();
+
+            const double hOffset = model->slope;
+            Eigen::ArrayXd looseBounds = scanlineArray.getCorrectionBounds(scanlineIdx, hOffset);
+            looseBounds = 2 * (looseBounds + yBounds) + 1e-6;
+
+            const uint32_t inliersCount = (residuals.abs() < looseBounds).count();
 
             if (inliersCount == x.size()) {
-                // model = currentModel;
+                loss = residuals.square().sum();
                 break;
             }
         }
@@ -47,8 +60,6 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
-        // const double loss = refineFit(x, y);
-        const double loss = 0;
         return std::make_optional<CustomRansacResult>({.model = *model, .loss = loss});
     }
 
@@ -59,7 +70,7 @@ namespace accurate_ri {
         for (uint32_t pointIdx = 0; pointIdx < multi.linesIdx.size(); ++pointIdx) {
             int64_t lineIdx = multi.linesIdx[pointIdx];
 
-            MultiLineItem& multiLineItem = multiLineMap[lineIdx];
+            MultiLineItem &multiLineItem = multiLineMap[lineIdx];
             multiLineItem.push(x(pointIdx), y(pointIdx));
         }
 
@@ -67,7 +78,7 @@ namespace accurate_ri {
         auto shiftedY = Eigen::ArrayXd(y.size());
 
         for (uint32_t pointIdx = 0; pointIdx < multi.linesIdx.size(); ++pointIdx) {
-            const MultiLineItem& multiLineItem = multiLineMap.at(multi.linesIdx[pointIdx]);
+            const MultiLineItem &multiLineItem = multiLineMap.at(multi.linesIdx[pointIdx]);
             shiftedX(pointIdx) = x(pointIdx) - multiLineItem.xMean;
             shiftedY(pointIdx) = y(pointIdx) - multiLineItem.yMean;
         }

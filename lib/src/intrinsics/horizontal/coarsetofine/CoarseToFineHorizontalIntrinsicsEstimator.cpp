@@ -33,12 +33,9 @@ namespace accurate_ri {
                 continue;
             }
 
-            const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
-            const Eigen::ArrayXd &rangesXy = scanlineArray.getRangesXy(scanlineIdx);
+            int32_t bestResInt = optimizeResolutionCoarse(scanlineArray, scanlineIdx);
 
-            int32_t bestResInt = optimizeResolutionCoarse(thetas, rangesXy);
-
-            const ResolutionOffsetLoss optimizeResult = optimizeJoint(thetas, rangesXy, bestResInt);
+            const ResolutionOffsetLoss optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResInt);
             bestResInt = optimizeResult.resolution;
             const double bestOffset = optimizeResult.offset;
             const double bestLoss = optimizeResult.loss;
@@ -47,7 +44,7 @@ namespace accurate_ri {
 
             LOG_INFO(
                 "Scanline ID: ", scanlineIdx, "\tRes: ", bestResInt, "\tOffset: ", bestOffset, "\tPoints: ",
-                thetas.size(), "\tLoss: ", bestLoss
+                scanlineArray.getSize(scanlineIdx), "\tLoss: ", bestLoss
             );
         }
 
@@ -59,19 +56,21 @@ namespace accurate_ri {
     }
 
     int32_t CoarseToFineHorizontalIntrinsicsEstimator::optimizeResolutionCoarse(
-        const Eigen::ArrayXd &thetas,
-        const Eigen::ArrayXd &ranges
+        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
     ) {
         int32_t bestResInt = -1;
         int32_t resStart = 500;
         int32_t resEnd = 50000;
+
+        const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
+        const Eigen::ArrayXd &rangesXy = scanlineArray.getRangesXy(scanlineIdx);
 
         for (const int32_t step: {117, 1}) {
             double minLoss = std::numeric_limits<double>::infinity();
 
             for (int32_t resInt = resStart; resInt < resEnd; resInt += step) {
                 const double resolution = 2 * M_PI / resInt;
-                const double loss = computeCoarseLoss(thetas, ranges, 0, resolution);
+                const double loss = computeCoarseLoss(thetas, rangesXy, 0, resolution);
 
                 if (loss < minLoss) {
                     minLoss = loss;
@@ -121,9 +120,7 @@ namespace accurate_ri {
     }
 
     ResolutionOffsetLoss CoarseToFineHorizontalIntrinsicsEstimator::optimizeJoint(
-        const Eigen::ArrayXd &thetas,
-        const Eigen::ArrayXd &ranges,
-        const int32_t initialResInt
+        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t initialResInt
     ) {
         constexpr uint32_t minDiv = 1;
         constexpr uint32_t maxDiv = 30;
@@ -142,11 +139,10 @@ namespace accurate_ri {
                     continue;
                 }
 
-
                 const int32_t candidate = candidateMultiple / div;
                 // TODO use acutal coords eps
                 const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
-                    1 / ranges, thetas, candidate, 0
+                    scanlineArray, scanlineIdx, candidate
                 );
 
                 if (!rhResult.has_value()) {

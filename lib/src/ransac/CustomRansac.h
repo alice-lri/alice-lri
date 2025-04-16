@@ -3,9 +3,11 @@
 #include <optional>
 #include <Eigen/Core>
 
+#include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "math/Stats.h"
 #include "ransac/CustomEstimator.h"
 
+// TODO thetaStep is basically resolution, find better namings
 namespace accurate_ri {
     struct CustomRansacResult {
         Stats::LRResult model;
@@ -14,24 +16,18 @@ namespace accurate_ri {
 
     class CustomRansac {
     private:
-        const uint32_t minSamples;
-        const double residualThreshold;
         const uint32_t maxTrials;
-        const double thetaStep;
+        const int32_t resolution;
 
         CustomEstimator estimator;
         std::optional<Stats::LRResult> model = std::nullopt;
 
     public:
         CustomRansac(
-            const uint32_t minSamples, const double residualThreshold, const uint32_t maxTrials, const double thetaStep
-        ) : minSamples(minSamples),
-            residualThreshold(residualThreshold),
-            maxTrials(maxTrials),
-            thetaStep(thetaStep),
-            estimator(thetaStep) {}
+            const uint32_t maxTrials, const int32_t resolution
+        ) : maxTrials(maxTrials), resolution(resolution), estimator(2 * M_PI / resolution) {}
 
-        std::optional<CustomRansacResult> fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
+        std::optional<CustomRansacResult> fit(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx);
 
     private:
         void refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);

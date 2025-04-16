@@ -12,10 +12,17 @@ namespace accurate_ri {
         std::vector<Eigen::ArrayXd> invRangesXyByScanline;
         std::vector<Eigen::ArrayXd> thetasByScanline;
 
+        std::vector<Eigen::ArrayXd> thetasUpperBoundsByScanline;
+        std::vector<Eigen::ArrayXd> rangesXyMinusBoundsByScanline;
+
+        const double coordsEps;
+
     public:
         HorizontalScanlineArray(
             const PointArray &points, const std::vector<int> &pointsScanlinesIds, const int32_t scanlinesCount
         );
+
+        Eigen::ArrayXd getCorrectionBounds(const int32_t scanlineIdx, const double hOffset) const;
 
         [[nodiscard]] inline const int32_t &getSize(const int32_t scanlineIdx) const {
             return scanlineSizes[scanlineIdx];
@@ -39,6 +46,14 @@ namespace accurate_ri {
 
         [[nodiscard]] inline const Eigen::ArrayXd &getThetas(const int32_t scanlineIdx) const {
             return thetasByScanline[scanlineIdx];
+        }
+
+        [[nodiscard]] inline const Eigen::ArrayXd &getThetasUpperBounds(const int32_t scanlineIdx) const {
+            return thetasUpperBoundsByScanline[scanlineIdx];
+        }
+
+        [[nodiscard]] inline const Eigen::ArrayXd &getRangesXyMinusBounds(const int32_t scanlineIdx) const {
+            return rangesXyMinusBoundsByScanline[scanlineIdx];
         }
     };
 }

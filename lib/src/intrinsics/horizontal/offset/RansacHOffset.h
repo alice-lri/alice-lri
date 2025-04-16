@@ -1,5 +1,7 @@
 #pragma once
 #include <optional>
+
+#include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "point/PointArray.h"
 
 namespace accurate_ri {
@@ -11,8 +13,7 @@ namespace accurate_ri {
     class RansacHOffset {
     public:
         static std::optional<RansacHOffsetResult> computeOffset(
-            const Eigen::ArrayXd &invRangesXy, const Eigen::ArrayXd &thetas, const uint32_t resolution,
-            const double coordsEps
+            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t resolution
         );
     };
 } // accurate_ri

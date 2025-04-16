@@ -1,29 +1,16 @@
 #include "RansacHOffset.h"
-
 #include <accurate_ri/accurate_ri.hpp>
 #include <cstdint>
-
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
-#include "point/PointArray.h"
+#include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "ransac/CustomRansac.h"
-#include "utils/Logger.h"
-#include "utils/Timer.h"
 
 namespace accurate_ri {
     std::optional<RansacHOffsetResult> RansacHOffset::computeOffset(
-        const Eigen::ArrayXd &invRangesXy, const Eigen::ArrayXd &thetas, const uint32_t resolution,
-        const double coordsEps
+        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t resolution
     ) {
-        auto diffToIdeal = HorizontalMath::computeDiffToIdeal(thetas, resolution, false);
-        double residualThreshold = coordsEps * 1.5;
-        double thetaStep = 2 * M_PI / resolution;
-
-        if (getResidualThreshold()) {
-            residualThreshold = *getResidualThreshold();
-        }
-
-        CustomRansac ransac = CustomRansac(2, residualThreshold, 100, thetaStep);
-        const std::optional<CustomRansacResult> ransacResult = ransac.fit(invRangesXy, diffToIdeal);
+        CustomRansac ransac(100, resolution);
+        const std::optional<CustomRansacResult> ransacResult = ransac.fit(scanlineArray, scanlineIdx);
 
         return ransacResult.has_value()
                    ? std::make_optional<RansacHOffsetResult>(
