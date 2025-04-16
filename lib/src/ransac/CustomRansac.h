@@ -17,6 +17,7 @@ namespace accurate_ri {
     class CustomRansac {
     private:
         const uint32_t maxTrials;
+        const uint32_t maxFitToBoundsIterations;
         const int32_t resolution;
 
         CustomEstimator estimator;
@@ -24,12 +25,29 @@ namespace accurate_ri {
 
     public:
         CustomRansac(
-            const uint32_t maxTrials, const int32_t resolution
-        ) : maxTrials(maxTrials), resolution(resolution), estimator(2 * M_PI / resolution) {}
+            const uint32_t maxTrials, const uint32_t maxFitToBoundsIterations, const int32_t resolution
+        ) : maxTrials(maxTrials),
+            maxFitToBoundsIterations(maxFitToBoundsIterations),
+            resolution(resolution),
+            estimator(2 * M_PI / resolution) {}
 
         std::optional<CustomRansacResult> fit(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx);
 
     private:
         void refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
+
+        std::optional<double> fitToBounds(
+            const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const HorizontalScanlineArray &scanlineArray,
+            int32_t scanlineIdx
+        );
+
+        void fitToBoundsModifyIntercept(
+            const Eigen::ArrayXd &residuals, const Eigen::ArrayXd &residualBounds, const Eigen::ArrayXi &outlierIndices
+        );
+
+        void fitToBoundsModifySlope(
+            const Eigen::ArrayXd &x, const Eigen::ArrayXd &residuals, const Eigen::ArrayXd &residualBounds,
+            const Eigen::ArrayXi &outlierIndices, const double pivotPoint
+        );
     };
 } // accurate_ri

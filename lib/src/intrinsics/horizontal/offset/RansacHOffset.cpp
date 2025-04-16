@@ -9,7 +9,7 @@ namespace accurate_ri {
     std::optional<RansacHOffsetResult> RansacHOffset::computeOffset(
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t resolution
     ) {
-        CustomRansac ransac(100, resolution);
+        CustomRansac ransac(100, 100, resolution);
         const std::optional<CustomRansacResult> ransacResult = ransac.fit(scanlineArray, scanlineIdx);
 
         return ransacResult.has_value()

@@ -43,7 +43,6 @@ namespace accurate_ri {
         for (uint32_t scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
             const auto &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
             const auto &thetas = scanlineArray.getThetas(scanlineIdx);
-            const double coordsEps = points.getCoordsEps();
 
             if (invRangesXy.size() < 2) {
                 LOG_WARN("Warning: Scanline ", scanlineIdx, " has less than 2 points, queueing for heuristics");

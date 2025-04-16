@@ -24,6 +24,7 @@ void setCloudPath(const std::string &path) {
 
 // TODO perf, identify memory  bottlenecks. Reuse Eigen buffers as much as possible, especially in loops
 // TODO review each time I add to a collection whether I am copying or not. Especially maps/sets, use emplace
+// TODO maybe every function that does not return an eigen pre-allocated buffer should take a parameter out instead
 int main(int argc, char **argv) {
     std::string path;
     std::optional<int> accurateDigits = std::nullopt;
