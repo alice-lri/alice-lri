@@ -47,9 +47,6 @@ namespace accurate_ri {
             const auto sampleY = y(sampleIndices);
 
             model = estimator.fit(sampleX, sampleY);
-            LOG_INFO("CustomRANSAC using ", sampleIndices[0], " ", sampleIndices[1], " unrefined offset: ", model->slope);
-            LOG_INFO("X values are ", sampleX[0], " ", sampleX[1]);
-            LOG_INFO("Y values are ", sampleY[0], " ", sampleY[1]);
             refineFit(x, y);
 
             const double hOffset = model->slope;
@@ -63,10 +60,10 @@ namespace accurate_ri {
             const Eigen::ArrayXd &residuals = estimator.computeResiduals(x, y);
             const uint32_t inliersCount = (residuals.abs() < looseBounds).count();
 
-            LOG_INFO("CustomRANSAC iteration with offset ", hOffset, " and ", inliersCount, " inliers");
+            LOG_DEBUG("CustomRANSAC iteration with offset ", hOffset, " and ", inliersCount, " inliers");
 
             if (inliersCount == x.size()) {
-                LOG_INFO("Found consensus set at trial ", trial, " with offset ", hOffset);
+                LOG_DEBUG("Found consensus set at trial ", trial, " with offset ", hOffset);
                 break;
             }
         }
@@ -128,7 +125,7 @@ namespace accurate_ri {
             const auto outlierIndices = Utils::eigenMaskToIndices(outlierResidualMask);
 
             if (outlierIndices.size() == 0) {
-                LOG_INFO("Fitted to bounds after ", iteration, " iterations");
+                LOG_DEBUG("Fitted to bounds after ", iteration, " iterations");
                 loss = residuals.square().sum();
                 break;
             }
@@ -150,7 +147,7 @@ namespace accurate_ri {
             const bool canPivot = leftOutlierIndices.size() > 0 && rightOutlierIndices.size() > 0;
 
             if (!canPivot) {
-                LOG_INFO("Cannot pivot");
+                LOG_DEBUG("Cannot pivot");
 
                 if (my_random() % 2 == 0) {
                     fitToBoundsModifyIntercept(residuals, residualBounds, outlierIndices);
@@ -175,7 +172,7 @@ namespace accurate_ri {
         }
 
         if (iteration == maxFitToBoundsIterations) {
-            LOG_INFO("Fit to bounds not possible");
+            LOG_DEBUG("Fit to bounds not possible");
             return std::nullopt;
         }
 
@@ -196,7 +193,7 @@ namespace accurate_ri {
             interceptCorrection = 1e-10 * Utils::sign(interceptCorrection);
         }
 
-        LOG_INFO("Applying intercept correction of ", interceptCorrection);
+        LOG_DEBUG("Applying intercept correction of ", interceptCorrection);
 
         model->intercept += interceptCorrection;
         estimator.setModel(*model);
@@ -227,7 +224,7 @@ namespace accurate_ri {
             slopeCorrection = 1e-10 * Utils::sign(slopeCorrection);
         }
 
-        LOG_INFO("Applying slope correction of ", slopeCorrection);
+        LOG_DEBUG("Applying slope correction of ", slopeCorrection);
 
         model->slope += slopeCorrection;
         estimator.setModel(*model);
