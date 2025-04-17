@@ -52,7 +52,7 @@ namespace accurate_ri {
 
             model = estimator.fit(sampleX, sampleY);
             const Eigen::ArrayXd weights = yBounds.inverse().square();
-            refineFit(x, y, weights);
+            refineFit(x, y, weights); // TODO maybe refine only if residuals inside 2x bounds or smth like that
 
             const double hOffset = model->slope;
             if (std::abs(hOffset) >= scanlineArray.getRangesXy(scanlineIdx).minCoeff()) { // TODO optimize this
