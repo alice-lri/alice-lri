@@ -280,7 +280,7 @@ namespace accurate_ri {
             }
         }
 
-        for (const uint32_t scanlineIdx: heuristicScanlines) {
+        for (const int32_t scanlineIdx: heuristicScanlines) {
             const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
             const Eigen::ArrayXd &rangesXy = scanlineArray.getRangesXy(scanlineIdx);
 

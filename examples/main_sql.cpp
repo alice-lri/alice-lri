@@ -167,14 +167,6 @@ int main(const int argc, const char **argv) {
     std::cout << "Number of frames: " << frames.size() << std::endl;
 
     for (const DatasetFrame &frame: frames) {
-        if (frame.datasetName == "kitti") {
-            accurate_ri::setResidualThreshold(6e-4);
-        } else if (frame.datasetName == "durlar") {
-            accurate_ri::setResidualThreshold(1e-5);
-        } else {
-            throw std::runtime_error("Unknown dataset name");
-        }
-
         std::filesystem::path framePath = config.datasetRootPath.at(frame.datasetName);
         framePath /= frame.relativePath;
 

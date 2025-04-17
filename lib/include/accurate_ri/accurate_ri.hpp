@@ -18,7 +18,4 @@ namespace accurate_ri {
 
     void setOutputPath(const std::optional<std::string>& path);
     std::optional<std::string> getOutputPath();
-
-    std::optional<double> getResidualThreshold();
-    void setResidualThreshold(const std::optional<double>& res);
 }

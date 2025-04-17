@@ -8,7 +8,6 @@ namespace accurate_ri {
     // TODO remove this, the library should be path agnostic, just here for the trace file
     std::string cloudPath;
     std::optional<std::string> outputPath = std::nullopt;
-    std::optional<double> residualThresholdOverride = std::nullopt;
 
     void hello() {
         LOG_INFO("Hello");
@@ -65,13 +64,5 @@ namespace accurate_ri {
 
     std::optional<std::string> getOutputPath() {
         return outputPath;
-    }
-
-    std::optional<double> getResidualThreshold() {
-        return residualThresholdOverride;
-    }
-
-    void setResidualThreshold(const std::optional<double> &res) {
-        residualThresholdOverride = res;
     }
 }

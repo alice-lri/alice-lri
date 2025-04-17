@@ -29,12 +29,6 @@ TEST_F(AccurateRIAPITest, PathHandling) {
     EXPECT_EQ(accurate_ri::getOutputPath(), outputPath);
 }
 
-TEST_F(AccurateRIAPITest, ResidualThreshold) {
-    const std::optional<double> threshold = 0.05;
-    accurate_ri::setResidualThreshold(threshold);
-    EXPECT_EQ(accurate_ri::getResidualThreshold(), threshold);
-}
-
 TEST_F(AccurateRIAPITest, ExecuteWithEmptyData) {
     std::vector<float> emptyX, emptyY, emptyZ;
     // Expect no crash with empty data

@@ -35,8 +35,8 @@ int main(int argc, char **argv) {
             std::cout << "Using default parameters" << std::endl;
             //path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000019161.bin";
             //path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000000000.bin";
-            path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0002_sync/velodyne_points/data/0000000000.bin";
-            //path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000825.bin";
+            //path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0002_sync/velodyne_points/data/0000000000.bin";
+            path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000825.bin";
             accurateDigits = std::nullopt;
             outputPath = "../../Datasets/output/accurate_ri_cpp/";
             break;
@@ -55,17 +55,6 @@ int main(int argc, char **argv) {
         default:
             std::cout << "Usage: " << argv[0] << " [path] [accurateDigits] [outputPath]" << std::endl;
             return 1;
-    }
-
-    // TODO remove this abomination
-    if (path.find("kitti") != std::string::npos) {
-        accurate_ri::setResidualThreshold(6e-4);
-    } else if (path.find("durlar") != std::string::npos && !accurateDigits.has_value()) {
-        accurate_ri::setResidualThreshold(1e-5);
-    } else if (path.find("durlar") != std::string::npos && accurateDigits.value() == 6) {
-        accurate_ri::setResidualThreshold(1e-5);
-    } else if (path.find("durlar") != std::string::npos && accurateDigits.value() == 4) {
-        accurate_ri::setResidualThreshold(2e-4);
     }
 
     FileUtils::Points points = FileUtils::loadBinaryFile(path, accurateDigits);
