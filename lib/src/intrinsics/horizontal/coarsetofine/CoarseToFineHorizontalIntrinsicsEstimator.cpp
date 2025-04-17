@@ -23,9 +23,9 @@ namespace accurate_ri {
             points, vertical.fullScanlines.pointsScanlinesIds, vertical.scanlinesCount
         );
 
-        std::unordered_set<uint32_t> heuristicScanlines;
+        std::unordered_set<int32_t> heuristicScanlines;
 
-        for (uint32_t scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
+        for (int32_t scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
             if (scanlineArray.getSize(scanlineIdx) < 16) {
                 LOG_WARN("Warning: Scanline ", scanlineIdx, " has less than 16 points, queueing for heuristics");
                 heuristicScanlines.insert(scanlineIdx);
@@ -34,11 +34,18 @@ namespace accurate_ri {
             }
 
             int32_t bestResInt = optimizeResolutionCoarse(scanlineArray, scanlineIdx);
+            const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResInt);
 
-            const ResolutionOffsetLoss optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResInt);
-            bestResInt = optimizeResult.resolution;
-            const double bestOffset = optimizeResult.offset;
-            const double bestLoss = optimizeResult.loss;
+            if (!optimizeResult) {
+                LOG_ERROR("Horizontal optimization failed for scanline ", scanlineIdx);
+                heuristicScanlines.insert(scanlineIdx);
+
+                continue;
+            }
+
+            bestResInt = optimizeResult->resolution;
+            const double bestOffset = optimizeResult->offset;
+            const double bestLoss = optimizeResult->loss;
 
             result.scanlines[scanlineIdx] = {bestResInt, bestOffset, false};
 
@@ -119,51 +126,63 @@ namespace accurate_ri {
         return {bestOffset, bestLoss};
     }
 
-    // TODO now that we have fit to bounds do deltas first, then divisors.
-    ResolutionOffsetLoss CoarseToFineHorizontalIntrinsicsEstimator::optimizeJoint(
+    std::optional<ResolutionOffsetLoss> CoarseToFineHorizontalIntrinsicsEstimator::optimizeJoint(
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t initialResInt
     ) {
-        constexpr uint32_t minDiv = 1;
-        constexpr uint32_t maxDiv = 30;
-        constexpr int32_t minDelta = -50; // TODO maybe derive bounds for these deltas as a function of number of points
         constexpr int32_t maxDelta = 50;
 
         double minLoss = std::numeric_limits<double>::infinity();
         double bestOffset = 0;
-        int32_t bestCandidate = initialResInt;
+        int32_t bestResolution = initialResInt;
 
-        for (int32_t div = minDiv; div < maxDiv; ++div) {
-            for (int32_t delta = minDelta; delta < maxDelta; ++delta) {
-                const int32_t candidateMultiple = initialResInt + delta;
+        for (int32_t i = 0; i < 2 * maxDelta + 1; ++i) {
+            const int32_t delta = i % 2 == 0 ? -i / 2 : (i + 1) / 2;
+            const int32_t candidateResolution = initialResInt + delta;
 
-                if (candidateMultiple <= 0 || candidateMultiple % div != 0) {
-                    continue;
-                }
+            const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
+                scanlineArray, scanlineIdx, candidateResolution
+            );
 
-                const int32_t candidate = candidateMultiple / div;
-                const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
-                    scanlineArray, scanlineIdx, candidate
-                );
+            if (rhResult.has_value()) {
+                minLoss = rhResult->loss;
+                bestResolution = candidateResolution;
+                bestOffset = rhResult->offset;
 
-                if (!rhResult.has_value()) {
-                    continue;
-                }
-
-                if (rhResult->loss < minLoss) {
-                    minLoss = rhResult->loss;
-                    bestCandidate = candidate;
-                    bestOffset = rhResult->offset;
-                    goto success; // TODO get rid of this abomination when refactoring for deltas first
-                }
+                break;
             }
         }
 
-        success:
         if (minLoss == std::numeric_limits<double>::infinity()) {
-            LOG_ERROR("Horizontal optimization failed for scanline ", scanlineIdx);
+            return std::nullopt;
         }
 
-        return {.resolution = bestCandidate, .offset = bestOffset, .loss = minLoss};
+        const int32_t maxDiv = bestResolution / scanlineArray.getSize(scanlineIdx);
+
+        for (int32_t divisor = 2; divisor <= maxDiv; ++divisor) {
+            if (bestResolution % divisor != 0) {
+                continue;
+            }
+
+            const int32_t candidateResolution = bestResolution / divisor;
+
+            const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
+                scanlineArray, scanlineIdx, candidateResolution
+            );
+
+            if (!rhResult.has_value()) {
+                continue;
+            }
+
+            if (rhResult->loss < minLoss) {
+                minLoss = rhResult->loss;
+                bestResolution = candidateResolution;
+                bestOffset = rhResult->offset;
+            }
+        }
+
+        return std::make_optional<ResolutionOffsetLoss>({
+            .resolution = bestResolution, .offset = bestOffset, .loss = minLoss
+        });
     }
 
     std::pair<double, double> CoarseToFineHorizontalIntrinsicsEstimator::optimizeOffsetPrecise(
@@ -232,7 +251,7 @@ namespace accurate_ri {
     }
 
     void CoarseToFineHorizontalIntrinsicsEstimator::updateHeuristicScanlines(
-        std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<uint32_t> &heuristicScanlines,
+        std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
         const HorizontalScanlineArray &scanlineArray
     ) {
         std::vector<double> otherOffsets;

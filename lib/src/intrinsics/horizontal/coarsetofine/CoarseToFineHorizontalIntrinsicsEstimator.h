@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 #include <unordered_set>
 
 #include "accurate_ri/public_structs.hpp"
@@ -23,7 +24,7 @@ namespace accurate_ri {
             const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, double resolution
         );
 
-        ResolutionOffsetLoss optimizeJoint(
+        std::optional<ResolutionOffsetLoss> optimizeJoint(
             const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t initialResInt
         );
 
@@ -40,7 +41,7 @@ namespace accurate_ri {
         );
 
         void updateHeuristicScanlines(
-            std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<uint32_t> &heuristicScanlines,
+            std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
             const HorizontalScanlineArray &scanlineArray
         );
 
