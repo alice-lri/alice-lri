@@ -34,7 +34,7 @@ namespace accurate_ri {
         std::optional<CustomRansacResult> fit(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx);
 
     private:
-        void refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
+        void refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &weights);
 
         std::optional<double> fitToBounds(
             const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const HorizontalScanlineArray &scanlineArray,

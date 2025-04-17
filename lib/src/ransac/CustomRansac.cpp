@@ -7,15 +7,18 @@
 
 namespace accurate_ri {
     struct MultiLineItem {
-        double xMean = 0;
-        double yMean = 0;
-        int64_t count = 0;
+        double xWeightedSum = 0;
+        double yWeightedSum = 0;
+        double weightSum = 0;
 
-        inline void push(const double x, const double y) {
-            count++;
-            xMean += (x - xMean) / static_cast<double>(count);
-            yMean += (y - yMean) / static_cast<double>(count);
+        inline void push(const double x, const double y, const double weight) {
+            xWeightedSum += x * weight;
+            yWeightedSum += y * weight;
+            weightSum += weight;
         }
+
+        [[nodiscard]] inline double xMean() const { return xWeightedSum / weightSum; }
+        [[nodiscard]] inline double yMean() const { return yWeightedSum / weightSum; }
     };
 
     uint32_t my_random() {
@@ -35,6 +38,7 @@ namespace accurate_ri {
 
         const Eigen::ArrayXd &yBounds = scanlineArray.getThetasUpperBounds(scanlineIdx);
 
+        std::optional<double> loss = std::nullopt;
         uint32_t trial = 0;
 
         for (trial = 0; trial < maxTrials; ++trial) {
@@ -47,7 +51,8 @@ namespace accurate_ri {
             const auto sampleY = y(sampleIndices);
 
             model = estimator.fit(sampleX, sampleY);
-            refineFit(x, y);
+            const Eigen::ArrayXd weights = yBounds.inverse().square();
+            refineFit(x, y, weights);
 
             const double hOffset = model->slope;
             if (std::abs(hOffset) >= scanlineArray.getRangesXy(scanlineIdx).minCoeff()) { // TODO optimize this
@@ -55,7 +60,7 @@ namespace accurate_ri {
             }
 
             Eigen::ArrayXd looseBounds = scanlineArray.getCorrectionBounds(scanlineIdx, hOffset);
-            looseBounds = 1.25 * (looseBounds + yBounds) + 1e-6;
+            looseBounds = 1.1 * (looseBounds + yBounds) + 1e-6;
 
             const Eigen::ArrayXd &residuals = estimator.computeResiduals(x, y);
             const uint32_t inliersCount = (residuals.abs() < looseBounds).count();
@@ -64,6 +69,7 @@ namespace accurate_ri {
 
             if (inliersCount == x.size()) {
                 LOG_DEBUG("Found consensus set at trial ", trial, " with offset ", hOffset);
+                loss = residuals.square().sum();
                 break;
             }
         }
@@ -73,21 +79,21 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
-        const std::optional<double> loss = fitToBounds(x, y, scanlineArray, scanlineIdx);
-
         return loss? std::make_optional<CustomRansacResult>({.model = *model, .loss = *loss}) : std::nullopt;
     }
 
-    void CustomRansac::refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
+    void CustomRansac::refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &weights) {
         estimator.computeResiduals(x, y); // TODO this is done to update the multilineresult, but maybe it can be avoided
         const MultiLineResult &multi = estimator.getLastMultiLine();
         std::unordered_map<int64_t, MultiLineItem> multiLineMap;
+
+        const double totalWeight = weights.sum();
 
         for (uint32_t pointIdx = 0; pointIdx < multi.linesIdx.size(); ++pointIdx) {
             int64_t lineIdx = multi.linesIdx[pointIdx];
 
             MultiLineItem &multiLineItem = multiLineMap[lineIdx];
-            multiLineItem.push(x(pointIdx), y(pointIdx));
+            multiLineItem.push(x(pointIdx), y(pointIdx), weights(pointIdx));
         }
 
         auto shiftedX = Eigen::ArrayXd(x.size());
@@ -95,18 +101,19 @@ namespace accurate_ri {
 
         for (uint32_t pointIdx = 0; pointIdx < multi.linesIdx.size(); ++pointIdx) {
             const MultiLineItem &multiLineItem = multiLineMap.at(multi.linesIdx[pointIdx]);
-            shiftedX(pointIdx) = x(pointIdx) - multiLineItem.xMean;
-            shiftedY(pointIdx) = y(pointIdx) - multiLineItem.yMean;
+            shiftedX(pointIdx) = x(pointIdx) - multiLineItem.xMean();
+            shiftedY(pointIdx) = y(pointIdx) - multiLineItem.yMean();
         }
 
-        model->slope = (shiftedX * shiftedY).sum() / shiftedX.square().sum();
+        model->slope = (weights * shiftedX * shiftedY).sum() / (weights * shiftedX.square()).sum();
         estimator.setModel(*model);
 
-        const double interceptCorrection = estimator.computeResiduals(x, y).mean();
+        const double interceptCorrection = (estimator.computeResiduals(x, y) * weights).sum() / totalWeight;
         model->intercept += interceptCorrection;
         estimator.setModel(*model); // TODO having to sync the model every time like this is crazy and shitty
     }
 
+    // TODO maybe at some point recover this, but not for now
     std::optional<double> CustomRansac::fitToBounds(
         const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const HorizontalScanlineArray &scanlineArray,
         const int32_t scanlineIdx
@@ -147,7 +154,7 @@ namespace accurate_ri {
             const bool canPivot = leftOutlierIndices.size() > 0 && rightOutlierIndices.size() > 0;
 
             if (!canPivot) {
-                LOG_DEBUG("Cannot pivot");
+                LOG_INFO("Cannot pivot");
 
                 if (my_random() % 2 == 0) {
                     fitToBoundsModifyIntercept(residuals, residualBounds, outlierIndices);
@@ -172,7 +179,7 @@ namespace accurate_ri {
         }
 
         if (iteration == maxFitToBoundsIterations) {
-            LOG_DEBUG("Fit to bounds not possible");
+            LOG_INFO("Fit to bounds not possible");
             return std::nullopt;
         }
 
@@ -193,7 +200,7 @@ namespace accurate_ri {
             interceptCorrection = 1e-10 * Utils::sign(interceptCorrection);
         }
 
-        LOG_DEBUG("Applying intercept correction of ", interceptCorrection);
+        LOG_INFO("Applying intercept correction of ", interceptCorrection);
 
         model->intercept += interceptCorrection;
         estimator.setModel(*model);
@@ -224,7 +231,7 @@ namespace accurate_ri {
             slopeCorrection = 1e-10 * Utils::sign(slopeCorrection);
         }
 
-        LOG_DEBUG("Applying slope correction of ", slopeCorrection);
+        LOG_INFO("Applying slope correction of ", slopeCorrection);
 
         model->slope += slopeCorrection;
         estimator.setModel(*model);
