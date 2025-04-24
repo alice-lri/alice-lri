@@ -60,10 +60,10 @@ namespace accurate_ri {
             }
 
             Eigen::ArrayXd looseBounds = scanlineArray.getCorrectionBounds(scanlineIdx, hOffset);
-            looseBounds = 1.1 * (looseBounds + yBounds) + 1e-6;
+            looseBounds = 1.25 * (looseBounds + yBounds) + 1e-7;
 
             const Eigen::ArrayXd &residuals = estimator.computeResiduals(x, y);
-            const uint32_t inliersCount = (residuals.abs() < looseBounds).count();
+            const uint32_t inliersCount = (residuals.abs() <= looseBounds).count();
 
             LOG_DEBUG("CustomRANSAC iteration with offset ", hOffset, " and ", inliersCount, " inliers");
 
