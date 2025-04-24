@@ -129,7 +129,7 @@ namespace accurate_ri {
     std::optional<ResolutionOffsetLoss> CoarseToFineHorizontalIntrinsicsEstimator::optimizeJoint(
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t initialResInt
     ) {
-        constexpr int32_t maxDelta = 50;
+        constexpr int32_t maxDelta = 50; // TODO infer this more smartly, use gaussian thingies or something to derive bounds w.r.t to points
 
         double minLoss = std::numeric_limits<double>::infinity();
         double bestOffset = 0;
@@ -156,14 +156,15 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
-        const int32_t maxDiv = bestResolution / scanlineArray.getSize(scanlineIdx);
+        const int32_t bestMultipleResolution = bestResolution;
+        const int32_t maxDiv = bestMultipleResolution / scanlineArray.getSize(scanlineIdx);
 
         for (int32_t divisor = 2; divisor <= maxDiv; ++divisor) {
-            if (bestResolution % divisor != 0) {
+            if (bestMultipleResolution % divisor != 0) {
                 continue;
             }
 
-            const int32_t candidateResolution = bestResolution / divisor;
+            const int32_t candidateResolution = bestMultipleResolution / divisor;
 
             const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
                 scanlineArray, scanlineIdx, candidateResolution
