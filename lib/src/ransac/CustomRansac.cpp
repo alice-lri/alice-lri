@@ -35,6 +35,7 @@ namespace accurate_ri {
         const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
         const Eigen::ArrayXd &x = scanlineArray.getInvRangesXy(scanlineIdx);
         const Eigen::ArrayXd y = HorizontalMath::computeDiffToIdeal(thetas, resolution, false);
+        const double minRangeXy = scanlineArray.getRangesXy(scanlineIdx).minCoeff();
 
         const Eigen::ArrayXd &yBounds = scanlineArray.getThetasUpperBounds(scanlineIdx);
 
@@ -55,7 +56,7 @@ namespace accurate_ri {
             refineFit(x, y, weights); // TODO maybe refine only if residuals inside 2x bounds or smth like that
 
             const double hOffset = model->slope;
-            if (std::abs(hOffset) >= scanlineArray.getRangesXy(scanlineIdx).minCoeff()) { // TODO optimize this
+            if (std::abs(hOffset) >= 0.5 || std::abs(hOffset) >= minRangeXy) {
                 continue;
             }
 
