@@ -26,7 +26,6 @@ namespace accurate_ri {
     }
 
     IntrinsicsResult execute(const std::vector<double> &x, const std::vector<double> &y, const std::vector<double> &z) {
-        LOG_DEBUG(*residualThresholdOverride);
         const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(x.data(), x.size());
         const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXd>(y.data(), y.size());
         const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(z.data(), z.size());

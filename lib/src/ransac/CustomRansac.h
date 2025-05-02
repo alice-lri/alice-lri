@@ -34,20 +34,15 @@ namespace accurate_ri {
         std::optional<CustomRansacResult> fit(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx);
 
     private:
-        void refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &weights);
-
-        std::optional<double> fitToBounds(
-            const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const HorizontalScanlineArray &scanlineArray,
-            int32_t scanlineIdx
+        bool refineFit(
+            const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &weights,
+            const HorizontalScanlineArray &
+            scanlineArray, int32_t scanlineIdx
         );
 
-        void fitToBoundsModifyIntercept(
-            const Eigen::ArrayXd &residuals, const Eigen::ArrayXd &residualBounds, const Eigen::ArrayXi &outlierIndices
-        );
-
-        void fitToBoundsModifySlope(
-            const Eigen::ArrayXd &x, const Eigen::ArrayXd &residuals, const Eigen::ArrayXd &residualBounds,
-            const Eigen::ArrayXi &outlierIndices, const double pivotPoint
+        bool fitToBoundsQp(
+            const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &eps, const double slope,
+            const double intercept, double &deltaSlopeOut, double &deltaInterceptOut
         );
     };
 } // accurate_ri

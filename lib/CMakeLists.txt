@@ -40,6 +40,13 @@ message(STATUS "EIGEN3_INCLUDE_DIR: ${Eigen3_INCLUDE_DIRS}")
 find_package(nlohmann_json REQUIRED)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
+find_package(osqp REQUIRED)
+add_subdirectory(external/osqp-eigen)
+target_include_directories(OsqpEigen PUBLIC ${osqp_INCLUDE_DIRS}/osqp)
+target_link_libraries(OsqpEigen PUBLIC osqp::osqp)
+
+message(STATUS "osqp_INCLUDE_DIRS: ${osqp_INCLUDE_DIRS}")
+
 add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/utils/Timer.h
         src/point/PointUtils.cpp
@@ -94,7 +101,7 @@ target_include_directories(accurate_ri
 )
 
 target_link_libraries(accurate_ri PRIVATE
-        nlohmann_json::nlohmann_json
+        nlohmann_json::nlohmann_json osqp::osqp OsqpEigen::OsqpEigen
 )
 
 if(ENABLE_STRICT_WARNINGS) #TODO make this trigger in release mode

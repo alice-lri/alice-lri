@@ -3,7 +3,8 @@
 
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "utils/Logger.h"
-#include "utils/Utils.h"
+#include <vector>
+#include "OsqpEigen/Solver.hpp"
 
 namespace accurate_ri {
     struct MultiLineItem {
@@ -17,15 +18,20 @@ namespace accurate_ri {
             weightSum += weight;
         }
 
-        [[nodiscard]] inline double xMean() const { return xWeightedSum / weightSum; }
-        [[nodiscard]] inline double yMean() const { return yWeightedSum / weightSum; }
+        [[nodiscard]] inline double xMean() const {
+            return xWeightedSum / weightSum;
+        }
+
+        [[nodiscard]] inline double yMean() const {
+            return yWeightedSum / weightSum;
+        }
     };
 
     uint32_t my_random() {
         static uint32_t state = 42;
         static const uint32_t a = 1664525;
         static const uint32_t c = 1013904223;
-        state = a * state + c;  // wraps automatically on 32-bit unsigned
+        state = a * state + c; // wraps automatically on 32-bit unsigned
         return state;
     }
 
@@ -47,29 +53,21 @@ namespace accurate_ri {
             uint32_t sampleIndex2 = my_random() % y.size();
             sampleIndex2 = sampleIndex1 != sampleIndex2 ? sampleIndex2 : (sampleIndex2 + 1) % y.size();
 
+            LOG_DEBUG("Selected indices: ", sampleIndex1, ", ", sampleIndex2);
             const auto sampleIndices = Eigen::Array2i(sampleIndex1, sampleIndex2);
             const auto sampleX = x(sampleIndices);
             const auto sampleY = y(sampleIndices);
 
             model = estimator.fit(sampleX, sampleY);
+            LOG_DEBUG("Two-point slope: ", model->slope);
+
             const Eigen::ArrayXd weights = yBounds.inverse().square();
-            refineFit(x, y, weights); // TODO maybe refine only if residuals inside 2x bounds or smth like that
+            const bool refined = refineFit(x, y, weights, scanlineArray, scanlineIdx);
 
-            const double hOffset = model->slope;
-            if (std::abs(hOffset) >= 0.5 || std::abs(hOffset) >= minRangeXy) {
-                continue;
-            }
+            if (refined) {
+                const Eigen::ArrayXd &residuals = estimator.computeResiduals(x, y);
 
-            Eigen::ArrayXd looseBounds = scanlineArray.getCorrectionBounds(scanlineIdx, hOffset);
-            looseBounds = 1.25 * (looseBounds + yBounds) + 1e-7;
-
-            const Eigen::ArrayXd &residuals = estimator.computeResiduals(x, y);
-            const uint32_t inliersCount = (residuals.abs() <= looseBounds).count();
-
-            LOG_DEBUG("CustomRANSAC iteration with offset ", hOffset, " and ", inliersCount, " inliers");
-
-            if (inliersCount == x.size()) {
-                LOG_DEBUG("Found consensus set at trial ", trial, " with offset ", hOffset);
+                LOG_DEBUG("Found consensus set at trial ", trial);
                 loss = residuals.square().sum();
                 break;
             }
@@ -80,11 +78,15 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
-        return loss? std::make_optional<CustomRansacResult>({.model = *model, .loss = *loss}) : std::nullopt;
+        return loss ? std::make_optional<CustomRansacResult>({.model = *model, .loss = *loss}) : std::nullopt;
     }
 
-    void CustomRansac::refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &weights) {
-        estimator.computeResiduals(x, y); // TODO this is done to update the multilineresult, but maybe it can be avoided
+    bool CustomRansac::refineFit(
+        const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &weights, const HorizontalScanlineArray &
+        scanlineArray, const int32_t scanlineIdx
+    ) {
+        estimator.computeResiduals(x, y);
+        // TODO this is done to update the multilineresult, but maybe it can be avoided
         const MultiLineResult &multi = estimator.getLastMultiLine();
         std::unordered_map<int64_t, MultiLineItem> multiLineMap;
 
@@ -112,129 +114,126 @@ namespace accurate_ri {
         const double interceptCorrection = (estimator.computeResiduals(x, y) * weights).sum() / totalWeight;
         model->intercept += interceptCorrection;
         estimator.setModel(*model); // TODO having to sync the model every time like this is crazy and shitty
+
+        LOG_DEBUG("Refined slope: ", model->slope);
+
+        const double slope = model->slope;
+        const double intercept = model->intercept;
+        double deltaSlopeOut = 0, deltaInterceptOut = 0;
+
+        Eigen::ArrayXd residualThreshold = scanlineArray.getCorrectionBounds(scanlineIdx, slope);
+        residualThreshold += scanlineArray.getThetasUpperBounds(scanlineIdx);
+        residualThreshold += 1e-7;
+
+        const bool bounded = fitToBoundsQp(
+            shiftedX, shiftedY, residualThreshold, slope, intercept, deltaSlopeOut, deltaInterceptOut
+        );
+
+        if (!bounded) {
+            return false;
+        }
+
+        model->slope += deltaSlopeOut;
+        model->intercept += deltaInterceptOut;
+
+        estimator.setModel(*model);
+        LOG_DEBUG("Bounded slope: ", model->slope);
+        return true;
     }
 
-    // TODO maybe at some point recover this, but not for now
-    std::optional<double> CustomRansac::fitToBounds(
-        const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const HorizontalScanlineArray &scanlineArray,
-        const int32_t scanlineIdx
+    // TODO fix this method code aesthetics
+    bool CustomRansac::fitToBoundsQp(
+        const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &eps, const double slope,
+        const double intercept, double &deltaSlopeOut, double &deltaInterceptOut
     ) {
-        std::optional<double> loss = std::nullopt;
-        int32_t iteration;
+        int n = x.size();
+        Eigen::MatrixXd A(2 * n, 2);
+        Eigen::VectorXd l(2 * n), u(2 * n);
 
-        for (iteration = 0; iteration < maxFitToBoundsIterations; ++iteration) {
-            const double hOffset = model->slope;
-            Eigen::ArrayXd residualBounds = scanlineArray.getCorrectionBounds(scanlineIdx, hOffset);
-            residualBounds += scanlineArray.getThetasUpperBounds(scanlineIdx) + 1e-6;
+        for (int i = 0; i < n; ++i) {
+            double xi = x[i];
+            double yi = y[i];
+            double eps_i = eps[i];
+            double predicted = slope * xi + intercept;
 
-            const Eigen::ArrayXd &residuals = estimator.computeResiduals(x, y);
+            // + constraint
+            A.row(i) = Eigen::RowVector2d(xi, 1.0);
+            l[i] = yi - eps_i - predicted;
+            u[i] = yi + eps_i - predicted;
 
-            const auto outlierResidualMask = residuals.abs() >= residualBounds;
-            const auto outlierIndices = Utils::eigenMaskToIndices(outlierResidualMask);
+            // - constraint
+            A.row(n + i) = -A.row(i);
+            l[n + i] = -u[i];
+            u[n + i] = -l[i];
+        }
 
-            if (outlierIndices.size() == 0) {
-                LOG_DEBUG("Fitted to bounds after ", iteration, " iterations");
-                loss = residuals.square().sum();
+        // QP: min 1/2 xᵀPx + qᵀx
+        Eigen::SparseMatrix<double> P(2, 2);
+        Eigen::SparseMatrix<double> A_sparse = A.sparseView();
+        Eigen::VectorXd q = Eigen::Vector2d::Zero();
+
+        P.insert(0, 0) = 2.0;
+        P.insert(1, 1) = 2.0;
+
+        OsqpEigen::Solver solver;
+        solver.settings()->setVerbosity(false);
+        solver.settings()->setWarmStart(true);
+        solver.settings()->setAbsoluteTolerance(1e-8);
+        solver.settings()->setRelativeTolerance(1e-8);
+
+        solver.data()->setNumberOfVariables(2);
+        solver.data()->setNumberOfConstraints(2 * n);
+
+        if (!solver.data()->setHessianMatrix(P))
+            return false;
+        if (!solver.data()->setGradient(q))
+            return false;
+        if (!solver.data()->setLinearConstraintsMatrix(A_sparse))
+            return false;
+        if (!solver.data()->setLowerBound(l))
+            return false;
+        if (!solver.data()->setUpperBound(u))
+            return false;
+
+        if (!solver.initSolver())
+            return false;
+
+        if (solver.solveProblem() != OsqpEigen::ErrorExitFlag::NoError)
+            return false;
+
+        if (solver.getStatus() != OsqpEigen::Status::Solved)
+            return false;
+
+        Eigen::VectorXd solution = solver.getSolution();
+        deltaSlopeOut = solution[0];
+        deltaInterceptOut = solution[1];
+
+        if (!std::isfinite(deltaSlopeOut)) {
+            LOG_DEBUG("QP solution is invalid, infinite values");
+            return false;
+        }
+
+        // Verify constraints
+        bool all_satisfied = true;
+
+        for (int i = 0; i < n; ++i) {
+            double predicted_adjusted = (slope + deltaSlopeOut) * x[i] + (intercept + deltaInterceptOut);
+            double residual = y[i] - predicted_adjusted;
+            double max_error = eps[i];
+
+            if (std::abs(residual) > max_error + 1e-8) {  // small tolerance for float error
+                all_satisfied = false;
                 break;
             }
-
-            double pivotPoint;
-            if (outlierIndices.size() > 1) {
-                pivotPoint = x(outlierIndices).mean();
-            } else {
-                pivotPoint = x.mean();
-            }
-
-            const auto leftMask = x <= pivotPoint;
-            const auto rightMask = x > pivotPoint;
-            const auto leftOutlierMask = leftMask && outlierResidualMask;
-            const auto rightOutlierMask = rightMask && outlierResidualMask;
-            const auto leftOutlierIndices = Utils::eigenMaskToIndices(leftOutlierMask);
-            const auto rightOutlierIndices = Utils::eigenMaskToIndices(rightOutlierMask);
-
-            const bool canPivot = leftOutlierIndices.size() > 0 && rightOutlierIndices.size() > 0;
-
-            if (!canPivot) {
-                LOG_DEBUG("Cannot pivot");
-
-                if (my_random() % 2 == 0) {
-                    fitToBoundsModifyIntercept(residuals, residualBounds, outlierIndices);
-                } else {
-                    fitToBoundsModifySlope(x, residuals, residualBounds, outlierIndices, pivotPoint);
-                }
-
-                continue;
-            }
-
-            const double leftOutlierMean = residuals(leftOutlierIndices).mean();
-            const double rightOutlierMean = residuals(rightOutlierIndices).mean();
-
-            if (leftOutlierMean * rightOutlierMean > 0) {
-                fitToBoundsModifyIntercept(residuals, residualBounds, outlierIndices);
-            } else if (leftOutlierMean * rightOutlierMean < 0) {
-                fitToBoundsModifySlope(x, residuals, residualBounds, outlierIndices, pivotPoint);
-            } else {
-                LOG_ERROR("Inconsistency found on data when fitting to bounds");
-                return std::nullopt;
-            }
         }
 
-        if (iteration == maxFitToBoundsIterations) {
-            LOG_DEBUG("Fit to bounds not possible");
-            return std::nullopt;
+        if (!all_satisfied) {
+            LOG_ERROR("QP solution is invalid, some constraints are violated");
+            return false;
         }
 
-        return loss;
-    }
 
-    void CustomRansac::fitToBoundsModifyIntercept(
-        const Eigen::ArrayXd &residuals, const Eigen::ArrayXd &residualBounds, const Eigen::ArrayXi &outlierIndices
-    ) {
-        const auto outlierResiduals = residuals(outlierIndices);
-        const auto outlierBounds = residualBounds(outlierIndices);
-        const auto outlierResidualSigns = outlierResiduals.sign();
-
-        const double interceptCorrectionAbs = (outlierResiduals.abs() - outlierBounds).mean();
-        double interceptCorrection = (interceptCorrectionAbs * outlierResidualSigns).mean();
-
-        if (std::abs(interceptCorrection) < 1e-10) {
-            interceptCorrection = 1e-10 * Utils::sign(interceptCorrection);
-        }
-
-        LOG_DEBUG("Applying intercept correction of ", interceptCorrection);
-
-        model->intercept += interceptCorrection;
-        estimator.setModel(*model);
-    }
-
-    void CustomRansac::fitToBoundsModifySlope(
-        const Eigen::ArrayXd &x, const Eigen::ArrayXd &residuals, const Eigen::ArrayXd &residualBounds,
-        const Eigen::ArrayXi &outlierIndices, const double pivotPoint
-    ) {
-        const auto xOutliers = x(outlierIndices);
-        const auto outlierResiduals = residuals(outlierIndices);
-        const auto outlierBounds = residualBounds(outlierIndices);
-        const auto outlierResidualSigns = outlierResiduals.sign();
-
-        const auto diffsToPivot = xOutliers - pivotPoint;
-
-        if ((diffsToPivot == 0).any()) {
-            return;
-        }
-
-        Eigen::ArrayXd diffsToBounds = outlierResiduals.abs() - outlierBounds;
-        diffsToBounds *= outlierResidualSigns;
-
-        Eigen::ArrayXd slopeDeltas = diffsToBounds / diffsToPivot;
-        double slopeCorrection = Utils::medianInPlace(slopeDeltas);
-
-        if (std::abs(slopeCorrection) < 1e-10) {
-            slopeCorrection = 1e-10 * Utils::sign(slopeCorrection);
-        }
-
-        LOG_DEBUG("Applying slope correction of ", slopeCorrection);
-
-        model->slope += slopeCorrection;
-        estimator.setModel(*model);
+        LOG_DEBUG("Bounds feasible. Delta slope: ", deltaSlopeOut);
+        return true;
     }
 } // accurate_ri
