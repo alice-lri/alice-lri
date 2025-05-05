@@ -33,7 +33,6 @@ include_directories(Eigen3_INCLUDE_DIRS)
 #print out the EIGEN3_INCLUDE_DIR
 message(STATUS "EIGEN3_INCLUDE_DIR: ${Eigen3_INCLUDE_DIRS}")
 
-
 find_package(nlohmann_json REQUIRED)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
@@ -43,6 +42,11 @@ target_include_directories(OsqpEigen PUBLIC ${osqp_INCLUDE_DIRS}/osqp)
 target_link_libraries(OsqpEigen PUBLIC osqp::osqp)
 
 message(STATUS "osqp_INCLUDE_DIRS: ${osqp_INCLUDE_DIRS}")
+
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+message(STATUS "Python3 include dir: ${Python3_INCLUDE_DIRS}")
+message(STATUS "Python3 library: ${Python3_LIBRARIES}")
 
 add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/utils/Timer.h
@@ -90,15 +94,18 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         include/accurate_ri/public_structs.hpp
         src/intrinsics/horizontal/coarsetofine/CoarseToFineHorizontalIntrinsicsEstimator.cpp
         src/intrinsics/horizontal/coarsetofine/CoarseToFineHorizontalIntrinsicsEstimator.h
+        src/utils/Plotter.h
+        src/plotty/matplotlibcpp.hpp
+        src/plotty/matplotlibcpp.cpp
 )
 
 target_include_directories(accurate_ri
         PUBLIC include
-        PRIVATE src ${nlohmann_json_INCLUDE_DIRS} ${Eigen3_INCLUDE_DIRS}
+        PRIVATE src ${nlohmann_json_INCLUDE_DIRS} ${Eigen3_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS}
 )
 
 target_link_libraries(accurate_ri PRIVATE
-        nlohmann_json::nlohmann_json osqp::osqp OsqpEigen::OsqpEigen
+        nlohmann_json::nlohmann_json osqp::osqp OsqpEigen::OsqpEigen ${Python3_LIBRARIES}
 )
 
 if(ENABLE_STRICT_WARNINGS) #TODO make this trigger in release mode
