@@ -94,7 +94,6 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         include/accurate_ri/public_structs.hpp
         src/intrinsics/horizontal/coarsetofine/CoarseToFineHorizontalIntrinsicsEstimator.cpp
         src/intrinsics/horizontal/coarsetofine/CoarseToFineHorizontalIntrinsicsEstimator.h
-        src/utils/Plotter.h
         src/plotty/matplotlibcpp.hpp
         src/plotty/matplotlibcpp.cpp
 )
