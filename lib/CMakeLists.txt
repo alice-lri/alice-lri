@@ -23,9 +23,6 @@ endif ()
 
 if(ENABLE_TRACE_FILE)
     add_definitions(-DENABLE_TRACE_FILE)
-    if (NOT LOG_LEVEL STREQUAL "INFO")
-        message(FATAL_ERROR "LOG_LEVEL must be set to INFO when ENABLE_TRACE_FILE is enabled")
-    endif()
 endif()
 
 include(${CMAKE_BINARY_DIR}/lib/conan_toolchain.cmake)

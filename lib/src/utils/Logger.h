@@ -49,9 +49,8 @@ namespace accurate_ri {
             std::lock_guard lock(getInstance().logMutex);
             std::cout << getColor(level) << logStream.str() << COLOR_RESET;
 #ifdef ENABLE_TRACE_FILE
-            std::ofstream traceFile("ref_tracing/trace.txt", getInstance().firstLog ? std::ios_base::trunc : std::ios_base::app);
-            (traceFile << ... << formatValue(std::forward<Args>(args)));
-            traceFile << std::endl;
+            std::ofstream traceFile("ref_tracing/trace.log", getInstance().firstLog ? std::ios_base::trunc : std::ios_base::app);
+            traceFile << logStream.str();
             traceFile.close();
 #endif
             getInstance().firstLog = false;
