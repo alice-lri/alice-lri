@@ -34,13 +34,15 @@ namespace accurate_ri {
         const PointArray &points, const VerticalIntrinsicsResult &vertical
     ) {
         const HorizontalScanlineArray scanlineArray(
-            points, vertical.fullScanlines.pointsScanlinesIds, vertical.scanlinesCount
+            points, vertical.fullScanlines.pointsScanlinesIds, vertical.scanlinesCount, SortingCriteria::RANGES_XY
         );
 
         std::vector<uint32_t> heuristicScanlines;
         std::unordered_map<uint32_t, ScanlineHorizontalInfo> scanlinesInfoMap;
 
         for (uint32_t scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
+            LOG_DEBUG("Processing scanline ", scanlineIdx);
+
             const auto &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
             const auto &thetas = scanlineArray.getThetas(scanlineIdx);
 
@@ -51,6 +53,8 @@ namespace accurate_ri {
             }
 
             int32_t resolution = computeOptimalResolution(invRangesXy, thetas);
+            LOG_DEBUG("Resolution: ", resolution);
+
             const std::optional<RansacHOffsetResult> rhResult  = RansacHOffset::computeOffset(
                 scanlineArray, scanlineIdx, resolution
             );

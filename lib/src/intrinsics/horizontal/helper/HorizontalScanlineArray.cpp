@@ -2,7 +2,8 @@
 
 namespace accurate_ri {
     HorizontalScanlineArray::HorizontalScanlineArray(
-        const PointArray &points, const std::vector<int> &pointsScanlinesIds, const int32_t scanlinesCount
+        const PointArray &points, const std::vector<int> &pointsScanlinesIds, const int32_t scanlinesCount,
+        const SortingCriteria sortingCriteria
     ): coordsEps(points.getCoordsEps()) {
         std::vector<std::vector<int32_t>> pointsByScanline(scanlinesCount);
 
@@ -14,14 +15,7 @@ namespace accurate_ri {
             }
         }
 
-        // TODO check if sorting is still necessary
-        for (auto &scanline: pointsByScanline) {
-            std::ranges::sort(
-                scanline, [&](const int32_t a, const int32_t b) {
-                    return points.getTheta(a) < points.getTheta(b);
-                }
-            );
-        }
+        sortScanlineByCriteria(points, sortingCriteria, pointsByScanline);
 
         scanlineSizes.reserve(scanlinesCount);
         xsByScanline.reserve(scanlinesCount);
@@ -35,7 +29,7 @@ namespace accurate_ri {
 
 
         for (int scanlineIdx = 0; scanlineIdx < scanlinesCount; ++scanlineIdx) {
-            const std::vector<int> scanlineIndices = pointsByScanline[scanlineIdx];
+            const std::vector<int> &scanlineIndices = pointsByScanline[scanlineIdx];
 
             scanlineSizes.emplace_back(scanlineIndices.size());
             xsByScanline.emplace_back(points.getXs()(scanlineIndices));
@@ -55,9 +49,33 @@ namespace accurate_ri {
     Eigen::ArrayXd HorizontalScanlineArray::getCorrectionBounds(
         const int32_t scanlineIdx, const double hOffset
     ) const {
-        const Eigen::ArrayXd& rangesXyMinusBounds = rangesXyMinusBoundsByScanline[scanlineIdx];
-        const Eigen::ArrayXd& rangesXy = rangesXyByScanline[scanlineIdx];
+        const Eigen::ArrayXd &rangesXyMinusBounds = rangesXyMinusBoundsByScanline[scanlineIdx];
+        const Eigen::ArrayXd &rangesXy = rangesXyByScanline[scanlineIdx];
 
         return (std::abs(hOffset) / rangesXyMinusBounds).asin() - (std::abs(hOffset) / rangesXy).asin();
+    }
+
+    void HorizontalScanlineArray::sortScanlineByCriteria(
+        const PointArray &points, const SortingCriteria sortingCriteria,
+        std::vector<std::vector<int32_t>> &pointsByScanline
+    ) {
+        if (sortingCriteria == SortingCriteria::NONE) {
+            return;
+        }
+
+        auto comparator = [&](const int32_t a, const int32_t b) {
+            switch (sortingCriteria) {
+                case SortingCriteria::RANGES_XY:
+                    return points.getRangeXy(a) < points.getRangeXy(b);
+                case SortingCriteria::THETAS:
+                    return points.getTheta(a) < points.getTheta(b);
+                default:
+                    throw std::invalid_argument("Invalid sorting criteria");
+            }
+        };
+
+        for (auto &scanline : pointsByScanline) {
+            std::ranges::sort(scanline, comparator);
+        }
     }
 }
