@@ -36,7 +36,7 @@ namespace accurate_ri {
     }
 
     std::optional<CustomRansacResult> CustomRansac::fit(
-        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
+        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const std::optional<double> offsetGuess
     ) {
         const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
         const Eigen::ArrayXd &x = scanlineArray.getInvRangesXy(scanlineIdx);
@@ -49,16 +49,31 @@ namespace accurate_ri {
         uint32_t trial = 0;
 
         for (trial = 0; trial < maxTrials; ++trial) {
-            const uint32_t sampleIndex1 = my_random() % y.size();
-            uint32_t sampleIndex2 = my_random() % y.size();
-            sampleIndex2 = sampleIndex1 != sampleIndex2 ? sampleIndex2 : (sampleIndex2 + 1) % y.size();
+            if (!offsetGuess) {
+                const uint32_t sampleIndex1 = my_random() % y.size();
+                uint32_t sampleIndex2 = my_random() % y.size();
+                sampleIndex2 = sampleIndex1 != sampleIndex2 ? sampleIndex2 : (sampleIndex2 + 1) % y.size();
 
-            LOG_DEBUG("Selected indices: ", sampleIndex1, ", ", sampleIndex2);
-            const auto sampleIndices = Eigen::Array2i(sampleIndex1, sampleIndex2);
-            const auto sampleX = x(sampleIndices);
-            const auto sampleY = y(sampleIndices);
+                LOG_DEBUG("Selected indices: ", sampleIndex1, ", ", sampleIndex2);
+                const auto sampleIndices = Eigen::Array2i(sampleIndex1, sampleIndex2);
+                const auto sampleX = x(sampleIndices);
+                const auto sampleY = y(sampleIndices);
 
-            model = estimator.fit(sampleX, sampleY);
+                model = estimator.fit(sampleX, sampleY);
+            } else {
+                model->slope = offsetGuess.value();
+                model->intercept = 0;
+                estimator.setModel(*model);
+
+                LOG_DEBUG("Residuals abs mean:", estimator.computeResiduals(x, y).abs().mean());
+                model->intercept = estimator.computeResiduals(x, y).mean();
+                estimator.setModel(*model);
+
+                LOG_DEBUG("Residuals mean: ", model->intercept);
+                LOG_DEBUG("Residuals abs mean after:", estimator.computeResiduals(x, y).abs().mean());
+                LOG_DEBUG("Residuals mean after:", estimator.computeResiduals(x, y).mean());
+            }
+
             LOG_DEBUG("Two-point slope: ", model->slope);
 
             const Eigen::ArrayXd weights = yBounds.inverse().square();
@@ -120,6 +135,9 @@ namespace accurate_ri {
         const double slope = model->slope;
         const double intercept = model->intercept;
         double deltaSlopeOut = 0, deltaInterceptOut = 0;
+        estimator.setModel(*model);
+
+        return true;
 
         Eigen::ArrayXd residualThreshold = scanlineArray.getCorrectionBounds(scanlineIdx, slope);
         residualThreshold += scanlineArray.getThetasUpperBounds(scanlineIdx);

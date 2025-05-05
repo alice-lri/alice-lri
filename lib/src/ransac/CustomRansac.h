@@ -31,7 +31,7 @@ namespace accurate_ri {
             resolution(resolution),
             estimator(2 * M_PI / resolution) {}
 
-        std::optional<CustomRansacResult> fit(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx);
+        std::optional<CustomRansacResult> fit(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, std::optional<double> offsetGuess);
 
     private:
         bool refineFit(

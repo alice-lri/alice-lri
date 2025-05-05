@@ -13,7 +13,8 @@ namespace accurate_ri {
     class RansacHOffset {
     public:
         static std::optional<RansacHOffsetResult> computeOffset(
-            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t resolution
+            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t resolution, std::optional<double>
+            offsetGuess
         );
     };
 } // accurate_ri

@@ -2,6 +2,7 @@
 #include <cstdint>
 
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
+#include "utils/Logger.h"
 #include "utils/Utils.h"
 
 namespace accurate_ri {
@@ -15,7 +16,11 @@ namespace accurate_ri {
     ) {
         auto df = computeDiffThetaIdealWrtDiffRxy(invRangesXy, thetas, resolution);
         const double median = Utils::medianInPlace(df);
-        const double mad = (df - median).abs().mean() * resolution; // TODO consider harmonic mean?
+        const double mad = (df - median).abs().mean() * resolution;
+
+        if (resolution == 4000) {
+            LOG_INFO("MAD median (offset): ", median);
+        }
 
         return mad;
     }
@@ -24,7 +29,7 @@ namespace accurate_ri {
     Eigen::ArrayXd computeDiffThetaIdealWrtDiffRxy(
         const Eigen::ArrayBase<T> &invRangesXy, const Eigen::ArrayBase<T> &thetas, const uint32_t resolution
     ) {
-        const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(thetas, resolution, true);
+        const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(thetas, resolution, false);
         const auto diffInvRangesXy = Utils::diff(invRangesXy);
         const auto diffInvRangesXyEpsMask = diffInvRangesXy.abs() >= 1e-7; // TODO optimize this is the same every time
 

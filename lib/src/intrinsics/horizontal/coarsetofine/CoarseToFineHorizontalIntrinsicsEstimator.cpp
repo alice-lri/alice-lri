@@ -6,6 +6,7 @@
 #include <unordered_set>
 #include <vector>
 
+#include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "intrinsics/horizontal/offset/RansacHOffset.h"
 #include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "utils/Logger.h"
@@ -20,12 +21,14 @@ namespace accurate_ri {
         result.scanlines.resize(vertical.scanlinesCount);
 
         const HorizontalScanlineArray scanlineArray(
-            points, vertical.fullScanlines.pointsScanlinesIds, vertical.scanlinesCount
+            points, vertical.fullScanlines.pointsScanlinesIds, vertical.scanlinesCount, SortingCriteria::RANGES_XY
         );
 
         std::unordered_set<int32_t> heuristicScanlines;
 
         for (int32_t scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
+            LOG_DEBUG("Processing horizontal scanline: ", scanlineIdx);
+
             if (scanlineArray.getSize(scanlineIdx) < 16) {
                 LOG_WARN("Warning: Scanline ", scanlineIdx, " has less than 16 points, queueing for heuristics");
                 heuristicScanlines.insert(scanlineIdx);
@@ -135,20 +138,41 @@ namespace accurate_ri {
         double bestOffset = 0;
         int32_t bestResolution = initialResInt;
 
+        const auto diffInvRangesXy = Utils::diff(scanlineArray.getInvRangesXy(scanlineIdx));
+
+        const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
+        const Eigen::ArrayXd &rangesXy = scanlineArray.getRangesXy(scanlineIdx);
+
         for (int32_t i = 0; i < 2 * maxDelta + 1; ++i) {
             const int32_t delta = i % 2 == 0 ? -i / 2 : (i + 1) / 2;
             const int32_t candidateResolution = initialResInt + delta;
+            LOG_DEBUG("Candidate resolution: ", candidateResolution);
+
+            const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
+                scanlineArray.getThetas(scanlineIdx), candidateResolution, false
+            );
+
+            const auto diffDiffToIdeal = Utils::diff(diffToIdeal);
+            Eigen::ArrayX<bool> nonJumpMask = diffDiffToIdeal.abs() <= 0.5 * (diffToIdeal.maxCoeff() - diffToIdeal.minCoeff());
+            nonJumpMask = nonJumpMask && diffInvRangesXy.abs() < 1e-2;
+            const auto nonJumpIndices = Utils::eigenMaskToIndices(nonJumpMask);
+
+            const double offsetGuess = diffDiffToIdeal(nonJumpIndices).sum() / diffInvRangesXy(nonJumpIndices).sum();
+            LOG_DEBUG("Offset guess: ", offsetGuess);
 
             const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
-                scanlineArray, scanlineIdx, candidateResolution
+                scanlineArray, scanlineIdx, candidateResolution, offsetGuess
             );
 
             if (rhResult.has_value()) {
-                minLoss = rhResult->loss;
-                bestResolution = candidateResolution;
-                bestOffset = rhResult->offset;
+                const double resolutionDouble = 2 * M_PI / candidateResolution;
+                const double loss = computePreciseLoss(thetas, rangesXy, rhResult->offset, resolutionDouble);
 
-                break;
+                if (loss < minLoss) {
+                    minLoss = loss;
+                    bestResolution = candidateResolution;
+                    bestOffset = rhResult->offset;
+                }
             }
         }
 
@@ -156,30 +180,30 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
-        const int32_t bestMultipleResolution = bestResolution;
-        const int32_t maxDiv = bestMultipleResolution / scanlineArray.getSize(scanlineIdx);
-
-        for (int32_t divisor = 2; divisor <= maxDiv; ++divisor) {
-            if (bestMultipleResolution % divisor != 0) {
-                continue;
-            }
-
-            const int32_t candidateResolution = bestMultipleResolution / divisor;
-
-            const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
-                scanlineArray, scanlineIdx, candidateResolution
-            );
-
-            if (!rhResult.has_value()) {
-                continue;
-            }
-
-            if (rhResult->loss < minLoss) {
-                minLoss = rhResult->loss;
-                bestResolution = candidateResolution;
-                bestOffset = rhResult->offset;
-            }
-        }
+        // const int32_t bestMultipleResolution = bestResolution;
+        // const int32_t maxDiv = bestMultipleResolution / scanlineArray.getSize(scanlineIdx);
+        //
+        // for (int32_t divisor = 2; divisor <= maxDiv; ++divisor) {
+        //     if (bestMultipleResolution % divisor != 0) {
+        //         continue;
+        //     }
+        //
+        //     const int32_t candidateResolution = bestMultipleResolution / divisor;
+        //
+        //     const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
+        //         scanlineArray, scanlineIdx, candidateResolution
+        //     );
+        //
+        //     if (!rhResult.has_value()) {
+        //         continue;
+        //     }
+        //
+        //     if (rhResult->loss < minLoss) {
+        //         minLoss = rhResult->loss;
+        //         bestResolution = candidateResolution;
+        //         bestOffset = rhResult->offset;
+        //     }
+        // }
 
         return std::make_optional<ResolutionOffsetLoss>({
             .resolution = bestResolution, .offset = bestOffset, .loss = minLoss

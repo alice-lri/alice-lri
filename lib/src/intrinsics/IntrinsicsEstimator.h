@@ -10,7 +10,7 @@ namespace accurate_ri {
 
 class IntrinsicsEstimator {
 private:
-    HorizontalIntrinsicsEstimator horizontalIntrinsicsEstimator;
+    CoarseToFineHorizontalIntrinsicsEstimator horizontalIntrinsicsEstimator;
     VerticalIntrinsicsEstimator verticalIntrinsicsEstimator;
 
 public:

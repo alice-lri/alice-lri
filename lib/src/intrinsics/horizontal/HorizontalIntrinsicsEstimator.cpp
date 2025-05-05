@@ -56,7 +56,7 @@ namespace accurate_ri {
             LOG_DEBUG("Resolution: ", resolution);
 
             const std::optional<RansacHOffsetResult> rhResult  = RansacHOffset::computeOffset(
-                scanlineArray, scanlineIdx, resolution
+                scanlineArray, scanlineIdx, resolution, std::nullopt
             );
 
             if (!rhResult.has_value()) {

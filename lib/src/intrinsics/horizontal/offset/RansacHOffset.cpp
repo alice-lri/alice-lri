@@ -7,10 +7,11 @@
 
 namespace accurate_ri {
     std::optional<RansacHOffsetResult> RansacHOffset::computeOffset(
-        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t resolution
+        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t resolution,
+        const std::optional<double> offsetGuess
     ) {
-        CustomRansac ransac(1000, 100, resolution);
-        const std::optional<CustomRansacResult> ransacResult = ransac.fit(scanlineArray, scanlineIdx);
+        CustomRansac ransac(1, 1, resolution);
+        const std::optional<CustomRansacResult> ransacResult = ransac.fit(scanlineArray, scanlineIdx, offsetGuess);
 
         return ransacResult.has_value()
                    ? std::make_optional<RansacHOffsetResult>(
