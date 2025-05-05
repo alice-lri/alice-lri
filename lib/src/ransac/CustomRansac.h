@@ -44,5 +44,7 @@ namespace accurate_ri {
             const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &eps, const double slope,
             const double intercept, double &deltaSlopeOut, double &deltaInterceptOut
         );
+
+        double computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, const double k);
     };
 } // accurate_ri

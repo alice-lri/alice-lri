@@ -5,6 +5,7 @@
 #include "utils/Logger.h"
 #include <vector>
 #include "OsqpEigen/Solver.hpp"
+#include "plotty/matplotlibcpp.hpp"
 
 namespace accurate_ri {
     struct MultiLineItem {
@@ -65,13 +66,8 @@ namespace accurate_ri {
                 model->intercept = 0;
                 estimator.setModel(*model);
 
-                LOG_DEBUG("Residuals abs mean:", estimator.computeResiduals(x, y).abs().mean());
-                model->intercept = estimator.computeResiduals(x, y).mean();
+                model->intercept = computeCircularMeanIntercept(estimator.computeResiduals(x, y), 2 * M_PI / resolution);
                 estimator.setModel(*model);
-
-                LOG_DEBUG("Residuals mean: ", model->intercept);
-                LOG_DEBUG("Residuals abs mean after:", estimator.computeResiduals(x, y).abs().mean());
-                LOG_DEBUG("Residuals mean after:", estimator.computeResiduals(x, y).mean());
             }
 
             LOG_DEBUG("Two-point slope: ", model->slope);
@@ -253,5 +249,29 @@ namespace accurate_ri {
 
         LOG_DEBUG("Bounds feasible. Delta slope: ", deltaSlopeOut);
         return true;
+    }
+
+    double CustomRansac::computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, const double k) {
+        constexpr double twoPi = 2.0 * M_PI;
+
+        // Step 1: Map residuals mod k into [0, k)
+        Eigen::ArrayXd mod = residuals.unaryExpr([k](double r) {
+            double m = std::fmod(r, k);
+            return m < 0 ? m + k : m;
+        });
+
+        // Step 2: Convert to angles in [0, 2π)
+        Eigen::ArrayXd theta = (twoPi / k) * mod;
+
+        // Step 3: Compute mean of cos and sin
+        double x_sum = theta.cos().mean();
+        double y_sum = theta.sin().mean();
+
+        // Step 4: Compute circular mean angle
+        double theta_bar = std::atan2(y_sum, x_sum);
+        if (theta_bar < 0) theta_bar += twoPi;
+
+        // Step 5: Convert back to b in [0, k)
+        return (k * theta_bar) / twoPi;
     }
 } // accurate_ri
