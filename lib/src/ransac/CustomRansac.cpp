@@ -41,7 +41,7 @@ namespace accurate_ri {
     ) {
         const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
         const Eigen::ArrayXd &x = scanlineArray.getInvRangesXy(scanlineIdx);
-        const Eigen::ArrayXd y = HorizontalMath::computeDiffToIdeal(thetas, resolution, false);
+        const Eigen::ArrayXd y = HorizontalMath::computeDiffToIdeal(thetas, resolution, true); // TODO we are now recomputing this multiple times
         const double minRangeXy = scanlineArray.getRangesXy(scanlineIdx).minCoeff();
 
         const Eigen::ArrayXd &yBounds = scanlineArray.getThetasUpperBounds(scanlineIdx);
