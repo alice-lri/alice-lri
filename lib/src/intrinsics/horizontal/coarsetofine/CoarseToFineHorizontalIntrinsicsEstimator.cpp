@@ -153,7 +153,7 @@ namespace accurate_ri {
             );
 
             const auto diffDiffToIdeal = Utils::diff(diffToIdeal);
-            const Eigen::ArrayX<bool> nonJumpMask = diffInvRangesXy.abs() < 1e-2;
+            const Eigen::ArrayX<bool> nonJumpMask = diffInvRangesXy.abs() < 1e-2; // TODO derive this more elegantly, assuming a max offset or something
             const auto nonJumpIndices = Utils::eigenMaskToIndices(nonJumpMask);
 
             const double offsetGuess = diffDiffToIdeal(nonJumpIndices).sum() / diffInvRangesXy(nonJumpIndices).sum();
