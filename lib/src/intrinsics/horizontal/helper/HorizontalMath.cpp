@@ -14,9 +14,9 @@ namespace accurate_ri::HorizontalMath {
             const auto diffDiffToIdeal = Utils::diff(diffToIdeal);
             const auto jumpMask = (diffDiffToIdeal.abs() >= thetaStep / 1.5).cast<double>();
             const auto signs = diffDiffToIdeal.sign().cast<double>();
-            const auto diffDiffToIdealNoJumps = diffDiffToIdeal - thetaStep * jumpMask * signs;
+            const Eigen::ArrayXd diffDiffToIdealNoJumps = diffDiffToIdeal - thetaStep * jumpMask * signs;
 
-            // Diff to ideal is the cumulative sum of diffDiffToIdealNoJumps, with first element being 0
+            // Diff to ideal is the cumulative sum of diffDiffToIdealNoJumps, with the first element being 0
             diffToIdeal[0] = 0;
             std::partial_sum(diffDiffToIdealNoJumps.begin(), diffDiffToIdealNoJumps.end(), diffToIdeal.begin() + 1);
         }

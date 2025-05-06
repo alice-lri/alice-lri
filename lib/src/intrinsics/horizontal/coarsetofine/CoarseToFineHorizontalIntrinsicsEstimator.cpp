@@ -149,12 +149,11 @@ namespace accurate_ri {
             LOG_DEBUG("Candidate resolution: ", candidateResolution);
 
             const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
-                scanlineArray.getThetas(scanlineIdx), candidateResolution, false
+                scanlineArray.getThetas(scanlineIdx), candidateResolution, true
             );
 
             const auto diffDiffToIdeal = Utils::diff(diffToIdeal);
-            Eigen::ArrayX<bool> nonJumpMask = diffDiffToIdeal.abs() <= 0.5 * (diffToIdeal.maxCoeff() - diffToIdeal.minCoeff());
-            nonJumpMask = nonJumpMask && diffInvRangesXy.abs() < 1e-2;
+            const Eigen::ArrayX<bool> nonJumpMask = diffInvRangesXy.abs() < 1e-2;
             const auto nonJumpIndices = Utils::eigenMaskToIndices(nonJumpMask);
 
             const double offsetGuess = diffDiffToIdeal(nonJumpIndices).sum() / diffInvRangesXy(nonJumpIndices).sum();
@@ -172,6 +171,7 @@ namespace accurate_ri {
             const double loss = computePreciseLoss(thetas, rangesXy, rhResult->offset, resolutionDouble);
 
             if (loss < minLoss) {
+                LOG_DEBUG("New loss is better than previous one: ", loss, " < ", minLoss);
                 minLoss = loss;
                 bestResolution = candidateResolution;
                 bestOffset = rhResult->offset;
