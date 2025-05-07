@@ -51,5 +51,11 @@ namespace accurate_ri {
             const std::unordered_set<int32_t> &candidateResInts,
             const std::vector<double> &candidateOffsets
         );
+
+        [[nodiscard]] double computeWeightedAverageSlope(
+            const Eigen::ArrayXd &diffDiffToIdeal,
+            const Eigen::ArrayXd &diffInvRangesXY,
+            const Eigen::ArrayX<bool> &nonJumpMask
+        ) const;
     };
 } // accurate_ri

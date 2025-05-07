@@ -156,7 +156,7 @@ namespace accurate_ri {
             const Eigen::ArrayX<bool> nonJumpMask = diffInvRangesXy.abs() < 1e-2; // TODO derive this more elegantly, assuming a max offset or something
             const auto nonJumpIndices = Utils::eigenMaskToIndices(nonJumpMask);
 
-            const double offsetGuess = diffDiffToIdeal(nonJumpIndices).sum() / diffInvRangesXy(nonJumpIndices).sum();
+            const double offsetGuess = computeWeightedAverageSlope(diffDiffToIdeal, diffInvRangesXy, nonJumpMask);
             LOG_DEBUG("Offset guess: ", offsetGuess);
 
             const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
@@ -352,5 +352,50 @@ namespace accurate_ri {
         }
 
         return {bestResInt, bestOffset};
+    }
+
+    double CoarseToFineHorizontalIntrinsicsEstimator::computeWeightedAverageSlope(
+        const Eigen::ArrayXd& diffDiffToIdeal,
+        const Eigen::ArrayXd& diffInvRangesXY,
+        const Eigen::ArrayX<bool>& nonJumpMask
+    ) const {
+        std::vector<double> diffSums;
+        std::vector<double> invRangesSums;
+        std::vector<int> counts;
+
+        constexpr int expectedSegments = 64;
+        diffSums.reserve(expectedSegments);
+        invRangesSums.reserve(expectedSegments);
+        counts.reserve(expectedSegments);
+
+        diffSums.emplace_back(0.0);
+        invRangesSums.emplace_back(0.0);
+        counts.emplace_back(0);
+
+        for (int i = 0; i < nonJumpMask.size(); ++i) {
+            if (!nonJumpMask[i]) {
+                diffSums.emplace_back(0.0);
+                invRangesSums.emplace_back(0.0);
+                counts.emplace_back(0);
+            } else {
+                diffSums.back() += diffDiffToIdeal[i];
+                invRangesSums.back() += diffInvRangesXY[i];
+                counts.back() += 1;
+            }
+        }
+
+        const Eigen::ArrayXd diffSumsEig = Eigen::Map<Eigen::ArrayXd>(diffSums.data(), diffSums.size());
+        const Eigen::ArrayXd invSumsEig = Eigen::Map<Eigen::ArrayXd>(invRangesSums.data(), invRangesSums.size());
+        const Eigen::ArrayXi countsEig = Eigen::Map<Eigen::ArrayXi>(counts.data(), counts.size());
+
+        const Eigen::ArrayX<bool> validMask = invSumsEig != 0;
+        const Eigen::ArrayXi validIndices = Utils::eigenMaskToIndices(validMask);
+        Eigen::ArrayXd slopes = Eigen::ArrayXd::Zero(diffSumsEig.size());
+        slopes(validIndices) = diffSumsEig(validIndices) / invSumsEig(validIndices);
+
+        const Eigen::ArrayXd weightedSlopes = slopes * countsEig.cast<double>();
+        const double totalWeight = countsEig.sum();
+
+        return (totalWeight > 0.0) ? weightedSlopes.sum() / totalWeight : 0.0;
     }
 } // namespace accurate_ri
