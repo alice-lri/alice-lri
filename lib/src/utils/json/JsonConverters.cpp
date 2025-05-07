@@ -124,4 +124,28 @@ namespace accurate_ri {
         j["final"] = std::vector<double>(vb.final.data(), vb.final.data() + vb.final.size());
         return j;
     }
+
+    nlohmann::json horizontalScanlineInfoToJson(const ScanlineHorizontalInfo &shi) {
+        nlohmann::json j;
+        j["resolution"] = shi.resolution;
+        j["offset"] = shi.offset;
+        j["heuristic"] = shi.heuristic;
+        return j;
+    }
+
+    nlohmann::json horizontalIntrinsicsToJson(const HorizontalIntrinsicsResult &hir) {
+        nlohmann::json j;
+        j["scanlines_attributes"] = nlohmann::json::array();
+        for (const auto &scanline: hir.scanlines) {
+            j["scanlines_attributes"].push_back(horizontalScanlineInfoToJson(scanline));
+        }
+        return j;
+    }
+
+    nlohmann::json intrinsicsResultToJson(const IntrinsicsResult &i) {
+        nlohmann::json j;
+        j["vertical"] = verticalIntrinsicsResultToJson(i.vertical);
+        j["horizontal"] = horizontalIntrinsicsToJson(i.horizontal);
+        return j;
+    }
 } // accurate_ri

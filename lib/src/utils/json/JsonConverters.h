@@ -26,4 +26,10 @@ namespace accurate_ri {
     nlohmann::json houghCellToJson(const HoughCell &hc);
 
     nlohmann::json verticalBoundsToJson(const VerticalBounds &vb);
+
+    nlohmann::json horizontalScanlineInfoToJson(const ScanlineHorizontalInfo &shi);
+
+    nlohmann::json horizontalIntrinsicsToJson(const HorizontalIntrinsicsResult &hir);
+
+    nlohmann::json intrinsicsResultToJson(const IntrinsicsResult &i);
 }

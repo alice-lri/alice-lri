@@ -55,7 +55,7 @@ namespace accurate_ri {
         NO_MORE_PEAKS
     };
 
-    struct ScanlineHorizontalInfo {
+    struct ScanlineHorizontalInfo { // TODO maybe rename to HorizontalScanlineInfo
         int32_t resolution;
         double offset;
         bool heuristic;

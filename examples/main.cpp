@@ -65,15 +65,22 @@ int main(int argc, char **argv) {
             return 1;
     }
 
+    if (accurateDigits == -1) {
+        accurateDigits = std::nullopt;
+    }
+
     FileUtils::Points points = FileUtils::loadBinaryFile(path, accurateDigits);
     setCloudPath(path);
-    accurate_ri::setOutputPath(outputPath);
 
     auto start = std::chrono::high_resolution_clock::now();
     accurate_ri::IntrinsicsResult result = accurate_ri::execute(points.x, points.y, points.z);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
     std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
+
+    if (outputPath) {
+        accurate_ri::writeToJson(result, *outputPath);
+    }
 
     return 0;
 }

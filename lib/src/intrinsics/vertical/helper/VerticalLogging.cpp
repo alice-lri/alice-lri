@@ -2,17 +2,9 @@
 #include <accurate_ri/accurate_ri.hpp>
 #include <nlohmann/json_fwd.hpp>
 
-#include "intrinsics/vertical/helper/JsonConverters.h"
+#include "../../../utils/json/JsonConverters.h"
 
 namespace accurate_ri::VerticalLogging {
-    void writeToJson(const VerticalIntrinsicsResult &result) {
-        const std::optional<std::string> outputPath = getOutputPath();
-        if (outputPath) {
-            nlohmann::json json = verticalIntrinsicsResultToJson(result);
-            std::ofstream outFile(std::filesystem::path(*outputPath) / "summary.json");
-            outFile << json.dump(4);
-        }
-    }
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
     void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough) {

@@ -17,8 +17,6 @@ namespace accurate_ri::VerticalLogging {
     void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough);
 #endif
 
-    void writeToJson(const VerticalIntrinsicsResult &result);
-
     template<typename T>
     bool writeBinaryFile(const std::filesystem::path &filePath, const T &data, const std::string &dataName) {
         std::ofstream outFile(filePath, std::ios::binary);

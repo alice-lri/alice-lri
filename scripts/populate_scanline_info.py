@@ -5,9 +5,6 @@ from cesga.ground_truth.populate_ground_truth_db import get_sensor_properties
 db_path = "../large/master.sqlite"
 datasets = ["durlar", "kitti"]
 
-conn = sqlite3.connect(db_path)
-cur = conn.cursor()
-
 with sqlite3.connect(db_path) as conn:
     cur = conn.cursor()
 

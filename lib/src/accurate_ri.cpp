@@ -1,13 +1,12 @@
 #include "accurate_ri/accurate_ri.hpp"
 #include "intrinsics/IntrinsicsEstimator.h"
-#include "intrinsics/vertical/helper/JsonConverters.h"
+#include "utils/json/JsonConverters.h"
 #include "utils/Logger.h"
 #include "utils/Timer.h"
 
 namespace accurate_ri {
     // TODO remove this, the library should be path agnostic, just here for the trace file
     std::string cloudPath;
-    std::optional<std::string> outputPath = std::nullopt;
 
     void hello() {
         LOG_INFO("Hello");
@@ -49,19 +48,17 @@ namespace accurate_ri {
         return estimator.estimate(points);
     }
 
+    void writeToJson(const IntrinsicsResult &result, const std::string &outputPath) {
+        nlohmann::json json = intrinsicsResultToJson(result);
+        std::ofstream outFile(outputPath);
+        outFile << json.dump(4);
+    }
+
     void setCloudPath(const std::string &path) {
         cloudPath = path;
     }
 
     std::string getCloudPath() {
         return cloudPath;
-    }
-
-    void setOutputPath(const std::optional<std::string> &path) {
-        outputPath = path;
-    }
-
-    std::optional<std::string> getOutputPath() {
-        return outputPath;
     }
 }

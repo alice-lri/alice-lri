@@ -188,8 +188,6 @@ namespace accurate_ri {
             .fullScanlines = std::move(fullScanlines)
         };
 
-        VerticalLogging::writeToJson(result);
-
         return result;
     }
 

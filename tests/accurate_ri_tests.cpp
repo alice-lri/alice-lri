@@ -19,16 +19,6 @@ TEST_F(AccurateRIAPITest, HelloFunctionWorks) {
     // No assertion needed - just checking it doesn't crash
 }
 
-TEST_F(AccurateRIAPITest, PathHandling) {
-    const std::string testPath = "/test/path/to/cloud";
-    accurate_ri::setCloudPath(testPath);
-    EXPECT_EQ(accurate_ri::getCloudPath(), testPath);
-    
-    const std::optional<std::string> outputPath = "/test/output/path";
-    accurate_ri::setOutputPath(outputPath);
-    EXPECT_EQ(accurate_ri::getOutputPath(), outputPath);
-}
-
 TEST_F(AccurateRIAPITest, ExecuteWithEmptyData) {
     std::vector<float> emptyX, emptyY, emptyZ;
     // Expect no crash with empty data
