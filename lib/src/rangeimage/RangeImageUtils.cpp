@@ -10,8 +10,8 @@ namespace accurate_ri::RangeImageUtils {
         const IntrinsicsResult &intrinsics, const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &z
     ) {
         PROFILE_SCOPE("RangeImageUtils::computeRangeImage");
-        const auto ranges = (x.square() + y.square() + z.square()).sqrt();
-        const auto phis = (z / ranges).asin();
+        const Eigen::ArrayXd ranges = (x.square() + y.square() + z.square()).sqrt();
+        const Eigen::ArrayXd phis = (z / ranges).asin();
 
         Eigen::ArrayXd vOffsets(intrinsics.vertical.scanlinesCount);
         Eigen::ArrayXd vAngles(intrinsics.vertical.scanlinesCount);
@@ -21,36 +21,34 @@ namespace accurate_ri::RangeImageUtils {
             vAngles(laserIdx) = intrinsics.vertical.fullScanlines.scanlines[laserIdx].values.angle;
         }
 
-        const auto phiCorrectionMat = (vOffsets.matrix() * ranges.inverse().transpose().matrix()).array().asin();
-        const auto correctedPhisMat = phis.transpose().replicate(vOffsets.size(), 1) - phiCorrectionMat;
-
-        const auto vAnglesMat = vAngles.replicate(1, phis.size());
-        const Eigen::ArrayXXd diffToIdealMat = (correctedPhisMat - vAnglesMat).abs();
-
         Eigen::ArrayXi minIndices(phis.size());
-        for (int i = 0; i < vOffsets.size(); ++i) {
-            int32_t minRow;
-            diffToIdealMat.col(i).minCoeff(&minRow);
-            minIndices(i) = minRow;
+        for (int pointIdx = 0; pointIdx < phis.size(); ++pointIdx) {
+            double minDiff = std::numeric_limits<double>::max();
+            int32_t minIdx = -1;
+            for (int offsetIdx = 0; offsetIdx < vOffsets.size(); ++offsetIdx) {
+                const double phiCorrection = std::asin(vOffsets(offsetIdx) / ranges(pointIdx));
+                const double diff = std::abs(phis(pointIdx) - phiCorrection - vAngles(offsetIdx));
 
-            if (minIndices(i) != intrinsics.vertical.fullScanlines.pointsScanlinesIds[i]) {
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    minIdx = offsetIdx;
+                }
+            }
+            minIndices(pointIdx) = minIdx;
+
+            if (minIndices(pointIdx) != intrinsics.vertical.fullScanlines.pointsScanlinesIds[pointIdx]) {
                 LOG_ERROR(
-                    "MISMATCH: ", i, " ", intrinsics.vertical.fullScanlines.pointsScanlinesIds[i], " ", minIndices(i)
+                    "MISMATCH: ", pointIdx, " ", intrinsics.vertical.fullScanlines.pointsScanlinesIds[pointIdx], " ", minIndices(pointIdx)
                 );
-                LOG_INFO("Phi :", phis(i));
+                LOG_INFO("Phi :", phis(pointIdx));
                 LOG_INFO(
-                    "V angle :", vAngles(intrinsics.vertical.fullScanlines.pointsScanlinesIds[i]), " ",
-                    vAngles(minIndices(i))
-                );
-                LOG_INFO(
-                    "Diffs :", diffToIdealMat(intrinsics.vertical.fullScanlines.pointsScanlinesIds[i], i), " ",
-                    diffToIdealMat(minIndices(i), i)
+                    "V angle :", vAngles(intrinsics.vertical.fullScanlines.pointsScanlinesIds[pointIdx]), " ",
+                    vAngles(minIndices(pointIdx))
                 );
                 throw std::runtime_error("MISMATCH");
             }
         }
-
-
+        
         return RangeImage();
     }
 }
