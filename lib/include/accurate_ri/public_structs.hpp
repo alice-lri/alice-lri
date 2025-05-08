@@ -82,6 +82,6 @@ namespace accurate_ri {
     struct RangeImage {
         int32_t width;
         int32_t height;
-        std::vector<double> data;
+        std::vector<double> pixels;
     };
 }
