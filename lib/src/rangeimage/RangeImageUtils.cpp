@@ -3,13 +3,15 @@
 #include <Eigen/Core>
 
 #include "utils/Logger.h"
+#include "utils/Timer.h"
 
 namespace accurate_ri::RangeImageUtils {
     RangeImage computeRangeImage(
         const IntrinsicsResult &intrinsics, const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &z
     ) {
-        const Eigen::ArrayXd ranges = (x.square() + y.square() + z.square()).sqrt();
-        const Eigen::ArrayXd phis = (z / ranges).asin();
+        PROFILE_SCOPE("RangeImageUtils::computeRangeImage");
+        const auto ranges = (x.square() + y.square() + z.square()).sqrt();
+        const auto phis = (z / ranges).asin();
 
         Eigen::ArrayXd vOffsets(intrinsics.vertical.scanlinesCount);
         Eigen::ArrayXd vAngles(intrinsics.vertical.scanlinesCount);
@@ -19,51 +21,10 @@ namespace accurate_ri::RangeImageUtils {
             vAngles(laserIdx) = intrinsics.vertical.fullScanlines.scanlines[laserIdx].values.angle;
         }
 
-        const Eigen::ArrayXXd phiCorrectionMat = (vOffsets.matrix() * ranges.inverse().transpose().matrix()).array().
-                asin();
-        LOG_INFO("Correction Mat: ", phiCorrectionMat.rows(), " x ", phiCorrectionMat.cols());
+        const auto phiCorrectionMat = (vOffsets.matrix() * ranges.inverse().transpose().matrix()).array().asin();
+        const auto correctedPhisMat = phis.transpose().replicate(vOffsets.size(), 1) - phiCorrectionMat;
 
-        for (int offsetIdx = 0; offsetIdx < vOffsets.size(); ++offsetIdx) {
-            for (int pointIdx = 0; pointIdx < phis.size(); ++pointIdx) {
-                double expected = std::asin(vOffsets(offsetIdx) / ranges(pointIdx));
-
-                if (std::abs(phiCorrectionMat(offsetIdx, pointIdx) - expected) >= 1e-6) {
-                    LOG_ERROR("Correction mismatch");
-                    LOG_INFO("Expected: ", expected);
-                    LOG_INFO("Actual: ", phiCorrectionMat(offsetIdx, pointIdx));
-                    throw std::runtime_error("Correction mismatch");
-                }
-            }
-        }
-
-        const Eigen::ArrayXXd phisMat = phis.transpose().replicate(vOffsets.size(), 1);
-        const Eigen::ArrayXXd correctedPhisMat = phisMat - phiCorrectionMat;
-        // const Eigen::ArrayXXd diffToIdeal = vAngles.replicate()
-        LOG_INFO("Corrected Phis Mat: ", correctedPhisMat.rows(), " x ", correctedPhisMat.cols());
-
-        for (int offsetIdx = 0; offsetIdx < vOffsets.size(); ++offsetIdx) {
-            for (int pointIdx = 0; pointIdx < phis.size(); ++pointIdx) {
-                double expected = phis(pointIdx) - std::asin(vOffsets(offsetIdx) / ranges(pointIdx));
-
-                if (std::abs(correctedPhisMat(offsetIdx, pointIdx) - expected) >= 1e-6) {
-                    LOG_ERROR("Corrected mismatch");
-                    LOG_INFO("Expected: ", expected);
-                    LOG_INFO("Actual: ", correctedPhisMat(offsetIdx, pointIdx));
-
-                    LOG_INFO("Expected phis: ", phis(pointIdx));
-                    LOG_INFO("Actual phis: ", phisMat(offsetIdx, pointIdx));
-
-                    LOG_INFO("Expected correction: ", std::asin(vOffsets(offsetIdx) / ranges(pointIdx)));
-                    LOG_INFO("Actual correction: ", phiCorrectionMat(offsetIdx, pointIdx));
-
-                    throw std::runtime_error("Correction mismatch");
-                }
-            }
-        }
-
-        const Eigen::ArrayXXd vAnglesMat = vAngles.replicate(1, phis.size());
-        LOG_INFO("V Angles Mat: ", vAnglesMat.rows(), " x ", vAnglesMat.cols());
-
+        const auto vAnglesMat = vAngles.replicate(1, phis.size());
         const Eigen::ArrayXXd diffToIdealMat = (correctedPhisMat - vAnglesMat).abs();
 
         Eigen::ArrayXi minIndices(phis.size());
