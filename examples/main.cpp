@@ -43,8 +43,8 @@ int main(int argc, char **argv) {
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0046_sync/velodyne_points/data/0000000124.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_09_30/2011_09_30_drive_0028_sync/velodyne_points/data/0000004131.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0018_sync/velodyne_points/data/0000000183.bin";
-            // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0018_sync/velodyne_points/data/0000000000.bin";
-            path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0018_sync/velodyne_points/data/0000000192.bin";
+            path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0018_sync/velodyne_points/data/0000000000.bin";
+            // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0018_sync/velodyne_points/data/0000000192.bin";
             accurateDigits = std::nullopt;
             outputPath = "../../Datasets/output/accurate_ri_cpp/";
             break;
@@ -72,6 +72,7 @@ int main(int argc, char **argv) {
     FileUtils::Points points = FileUtils::loadBinaryFile(path, accurateDigits);
     setCloudPath(path);
 
+    double initialZ = points.z[12];
     auto start = std::chrono::high_resolution_clock::now();
     accurate_ri::IntrinsicsResult result = accurate_ri::execute(points.x, points.y, points.z);
     auto end = std::chrono::high_resolution_clock::now();
@@ -81,6 +82,12 @@ int main(int argc, char **argv) {
     if (outputPath) {
         accurate_ri::writeToJson(result, *outputPath);
     }
+
+    double finalZ = points.z[12];
+
+    std::cout << "Initial Z: " << initialZ << std::endl;
+    std::cout << "Final Z: " << finalZ << std::endl;
+    accurate_ri::computeRangeImage(result, points.x, points.y, points.z);
 
     return 0;
 }

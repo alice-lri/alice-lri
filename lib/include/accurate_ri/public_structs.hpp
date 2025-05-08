@@ -78,4 +78,10 @@ namespace accurate_ri {
         VerticalIntrinsicsResult vertical;
         HorizontalIntrinsicsResult horizontal;
     };
+
+    struct RangeImage {
+        int32_t width;
+        int32_t height;
+        std::vector<double> data;
+    };
 }

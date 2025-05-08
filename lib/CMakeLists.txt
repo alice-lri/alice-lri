@@ -96,6 +96,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/horizontal/coarsetofine/CoarseToFineHorizontalIntrinsicsEstimator.h
         src/plotty/matplotlibcpp.hpp
         src/plotty/matplotlibcpp.cpp
+        src/rangeimage/RangeImageUtils.cpp
+        src/rangeimage/RangeImageUtils.h
 )
 
 target_include_directories(accurate_ri
