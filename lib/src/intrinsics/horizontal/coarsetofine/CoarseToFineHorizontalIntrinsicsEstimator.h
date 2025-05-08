@@ -57,5 +57,7 @@ namespace accurate_ri {
             const Eigen::ArrayXd &diffInvRangesXY,
             const Eigen::ArrayX<bool> &nonJumpMask
         ) const;
+
+        int32_t madOptimalResolution(const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx);
     };
 } // accurate_ri

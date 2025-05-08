@@ -18,10 +18,6 @@ namespace accurate_ri {
         const double median = Utils::medianInPlace(df);
         const double mad = (df - median).abs().mean() * resolution;
 
-        if (resolution == 4000) {
-            LOG_INFO("MAD median (offset): ", median);
-        }
-
         return mad;
     }
 

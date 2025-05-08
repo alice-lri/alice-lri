@@ -9,6 +9,7 @@
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "intrinsics/horizontal/offset/RansacHOffset.h"
 #include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
+#include "intrinsics/horizontal/resolution/MadResolutionLoss.h"
 #include "utils/Logger.h"
 #include "utils/Utils.h"
 
@@ -36,7 +37,8 @@ namespace accurate_ri {
                 continue;
             }
 
-            int32_t bestResInt = optimizeResolutionCoarse(scanlineArray, scanlineIdx);
+            // int32_t bestResInt = optimizeResolutionCoarse(scanlineArray, scanlineIdx);
+            int32_t bestResInt = madOptimalResolution(scanlineArray, scanlineIdx);
             const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResInt);
 
             if (!optimizeResult) {
@@ -132,7 +134,8 @@ namespace accurate_ri {
     std::optional<ResolutionOffsetLoss> CoarseToFineHorizontalIntrinsicsEstimator::optimizeJoint(
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t initialResInt
     ) {
-        constexpr int32_t maxDelta = 50; // TODO infer this more smartly, use gaussian thingies or something to derive bounds w.r.t to points
+        constexpr int32_t maxDelta = 50;
+        // TODO infer this more smartly, use gaussian thingies or something to derive bounds w.r.t to points
 
         double minLoss = std::numeric_limits<double>::infinity();
         double bestOffset = 0;
@@ -145,36 +148,51 @@ namespace accurate_ri {
 
         for (int32_t i = 0; i < 2 * maxDelta + 1; ++i) {
             const int32_t delta = i % 2 == 0 ? -i / 2 : (i + 1) / 2;
-            const int32_t candidateResolution = initialResInt + delta;
-            LOG_DEBUG("Candidate resolution: ", candidateResolution);
+            const int32_t candidateResolutionMult = initialResInt + delta;
 
-            const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
-                scanlineArray.getThetas(scanlineIdx), candidateResolution, true
-            );
-
-            const auto diffDiffToIdeal = Utils::diff(diffToIdeal);
-            const Eigen::ArrayX<bool> nonJumpMask = diffInvRangesXy.abs() < 1e-2; // TODO derive this more elegantly, assuming a max offset or something
-            const auto nonJumpIndices = Utils::eigenMaskToIndices(nonJumpMask);
-
-            const double offsetGuess = computeWeightedAverageSlope(diffDiffToIdeal, diffInvRangesXy, nonJumpMask);
-            LOG_DEBUG("Offset guess: ", offsetGuess);
-
-            const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
-                scanlineArray, scanlineIdx, candidateResolution, offsetGuess
-            );
-
-            if (!rhResult.has_value()) {
+            if (candidateResolutionMult < 0) {
                 continue;
             }
 
-            const double resolutionDouble = 2 * M_PI / candidateResolution;
-            const double loss = computePreciseLoss(thetas, rangesXy, rhResult->offset, resolutionDouble);
+            const int32_t maxDiv = candidateResolutionMult / scanlineArray.getSize(scanlineIdx);
 
-            if (loss < minLoss) {
-                LOG_DEBUG("New loss is better than previous one: ", loss, " < ", minLoss);
-                minLoss = loss;
-                bestResolution = candidateResolution;
-                bestOffset = rhResult->offset;
+            for (int32_t divisor = 1; divisor <= maxDiv; ++divisor) {
+                if (candidateResolutionMult % divisor != 0) {
+                    continue;
+                }
+
+                const int32_t candidateResolution = candidateResolutionMult / divisor;
+
+                LOG_DEBUG("Candidate resolution: ", candidateResolution);
+
+                const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
+                    scanlineArray.getThetas(scanlineIdx), candidateResolution, true
+                );
+
+                const auto diffDiffToIdeal = Utils::diff(diffToIdeal);
+                const Eigen::ArrayX<bool> nonJumpMask = diffInvRangesXy.abs() < 1e-2;
+                // TODO derive this more elegantly, assuming a max offset or something
+                const auto nonJumpIndices = Utils::eigenMaskToIndices(nonJumpMask);
+
+                const double offsetGuess = computeWeightedAverageSlope(diffDiffToIdeal, diffInvRangesXy, nonJumpMask);
+                LOG_DEBUG("Offset guess: ", offsetGuess);
+
+                const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
+                    scanlineArray, scanlineIdx, candidateResolution, offsetGuess
+                );
+
+                if (!rhResult.has_value()) {
+                    continue;
+                }
+
+                const double resolutionDouble = 2 * M_PI / candidateResolution;
+                const double loss = computePreciseLoss(thetas, rangesXy, rhResult->offset, resolutionDouble);
+
+                if (loss < minLoss) {
+                    minLoss = loss;
+                    bestResolution = candidateResolution;
+                    bestOffset = rhResult->offset;
+                }
             }
         }
 
@@ -182,37 +200,13 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
-        const int32_t bestMultipleResolution = bestResolution;
-        const int32_t maxDiv = bestMultipleResolution / scanlineArray.getSize(scanlineIdx);
-
-        for (int32_t divisor = 2; divisor <= maxDiv; ++divisor) {
-            if (bestMultipleResolution % divisor != 0) {
-                continue;
+        return std::make_optional<ResolutionOffsetLoss>(
+            {
+                .resolution = bestResolution,
+                .offset = bestOffset,
+                .loss = minLoss
             }
-
-            const int32_t candidateResolution = bestMultipleResolution / divisor;
-
-            const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
-                scanlineArray, scanlineIdx, candidateResolution, bestOffset
-            );
-
-            if (!rhResult.has_value()) {
-                continue;
-            }
-
-            const double resolutionDouble = 2 * M_PI / candidateResolution;
-            const double loss = computePreciseLoss(thetas, rangesXy, rhResult->offset, resolutionDouble);
-
-            if (loss < minLoss) {
-                minLoss = loss;
-                bestResolution = candidateResolution;
-                bestOffset = rhResult->offset;
-            }
-        }
-
-        return std::make_optional<ResolutionOffsetLoss>({
-            .resolution = bestResolution, .offset = bestOffset, .loss = minLoss
-        });
+        );
     }
 
     std::pair<double, double> CoarseToFineHorizontalIntrinsicsEstimator::optimizeOffsetPrecise(
@@ -355,9 +349,9 @@ namespace accurate_ri {
     }
 
     double CoarseToFineHorizontalIntrinsicsEstimator::computeWeightedAverageSlope(
-        const Eigen::ArrayXd& diffDiffToIdeal,
-        const Eigen::ArrayXd& diffInvRangesXY,
-        const Eigen::ArrayX<bool>& nonJumpMask
+        const Eigen::ArrayXd &diffDiffToIdeal,
+        const Eigen::ArrayXd &diffInvRangesXY,
+        const Eigen::ArrayX<bool> &nonJumpMask
     ) const {
         std::vector<double> diffSums;
         std::vector<double> invRangesSums;
@@ -387,15 +381,40 @@ namespace accurate_ri {
         const Eigen::ArrayXd diffSumsEig = Eigen::Map<Eigen::ArrayXd>(diffSums.data(), diffSums.size());
         const Eigen::ArrayXd invSumsEig = Eigen::Map<Eigen::ArrayXd>(invRangesSums.data(), invRangesSums.size());
         const Eigen::ArrayXi countsEig = Eigen::Map<Eigen::ArrayXi>(counts.data(), counts.size());
+        const Eigen::ArrayXd weights = countsEig.cast<double>().sqrt() * -invSumsEig;
 
         const Eigen::ArrayX<bool> validMask = invSumsEig != 0;
         const Eigen::ArrayXi validIndices = Utils::eigenMaskToIndices(validMask);
         Eigen::ArrayXd slopes = Eigen::ArrayXd::Zero(diffSumsEig.size());
         slopes(validIndices) = diffSumsEig(validIndices) / invSumsEig(validIndices);
 
-        const Eigen::ArrayXd weightedSlopes = slopes * countsEig.cast<double>();
-        const double totalWeight = countsEig.sum();
+        const Eigen::ArrayXd weightedSlopes = slopes * weights;
+        const double totalWeight = weights.sum();
 
         return (totalWeight > 0.0) ? weightedSlopes.sum() / totalWeight : 0.0;
+    }
+
+    int32_t CoarseToFineHorizontalIntrinsicsEstimator::madOptimalResolution(
+        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
+    ) {
+        // TODO do not hardcode these
+        const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
+        const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
+        const int32_t minResolution = invRangesXy.innerSize();
+        constexpr int32_t maxResolution = 10000;
+
+        double minLoss = std::numeric_limits<double>::infinity();
+        int32_t optimalResolution = -1;
+
+        for (int32_t resolution = minResolution; resolution < maxResolution; ++resolution) {
+            const double loss = MadResolutionLoss::computeResolutionLoss(invRangesXy, thetas, resolution);
+
+            if (loss < minLoss) {
+                minLoss = loss;
+                optimalResolution = resolution;
+            }
+        }
+
+        return optimalResolution;
     }
 } // namespace accurate_ri
