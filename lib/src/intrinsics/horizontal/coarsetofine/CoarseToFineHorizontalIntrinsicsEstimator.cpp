@@ -10,6 +10,7 @@
 #include "intrinsics/horizontal/offset/RansacHOffset.h"
 #include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "intrinsics/horizontal/resolution/MadResolutionLoss.h"
+#include "math/Stats.h"
 #include "utils/Logger.h"
 #include "utils/Utils.h"
 
@@ -141,10 +142,11 @@ namespace accurate_ri {
         double bestOffset = 0;
         int32_t bestResolution = initialResInt;
 
-        const auto diffInvRangesXy = Utils::diff(scanlineArray.getInvRangesXy(scanlineIdx));
 
         const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
         const Eigen::ArrayXd &rangesXy = scanlineArray.getRangesXy(scanlineIdx);
+        const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
+        const auto diffInvRangesXy = Utils::diff(invRangesXy);
 
         for (int32_t i = 0; i < 2 * maxDelta + 1; ++i) {
             const int32_t delta = i % 2 == 0 ? -i / 2 : (i + 1) / 2;
@@ -169,12 +171,11 @@ namespace accurate_ri {
                     scanlineArray.getThetas(scanlineIdx), candidateResolution, true
                 );
 
-                const auto diffDiffToIdeal = Utils::diff(diffToIdeal);
                 const Eigen::ArrayX<bool> nonJumpMask = diffInvRangesXy.abs() < 1e-2;
                 // TODO derive this more elegantly, assuming a max offset or something
                 const auto nonJumpIndices = Utils::eigenMaskToIndices(nonJumpMask);
 
-                const double offsetGuess = computeWeightedAverageSlope(diffDiffToIdeal, diffInvRangesXy, nonJumpMask);
+                const double offsetGuess = computeWeightedAverageSlope(diffToIdeal, invRangesXy, nonJumpMask);
                 LOG_DEBUG("Offset guess: ", offsetGuess);
 
                 const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
@@ -349,49 +350,65 @@ namespace accurate_ri {
     }
 
     double CoarseToFineHorizontalIntrinsicsEstimator::computeWeightedAverageSlope(
-        const Eigen::ArrayXd &diffDiffToIdeal,
-        const Eigen::ArrayXd &diffInvRangesXY,
+        const Eigen::ArrayXd &diffToIdeal,
+        const Eigen::ArrayXd &invRangesXy,
         const Eigen::ArrayX<bool> &nonJumpMask
     ) const {
-        std::vector<double> diffSums;
-        std::vector<double> invRangesSums;
-        std::vector<int> counts;
+        std::vector<std::vector<double>> diffToIdealBlocks;
+        std::vector<std::vector<double>> invRangesBlocks;
+        std::vector<int32_t> blockSizes;
 
-        constexpr int expectedSegments = 64;
-        diffSums.reserve(expectedSegments);
-        invRangesSums.reserve(expectedSegments);
-        counts.reserve(expectedSegments);
+        constexpr int expectedBlocks = 8;
+        diffToIdealBlocks.reserve(expectedBlocks);
+        invRangesBlocks.reserve(expectedBlocks);
+        blockSizes.reserve(expectedBlocks);
 
-        diffSums.emplace_back(0.0);
-        invRangesSums.emplace_back(0.0);
-        counts.emplace_back(0);
+        for (int i = 0; i < diffToIdeal.size(); ++i) {
+            if (i == 0 || !nonJumpMask[i - 1]) {
+                diffToIdealBlocks.emplace_back();
+                invRangesBlocks.emplace_back();
+                blockSizes.emplace_back();
 
-        for (int i = 0; i < nonJumpMask.size(); ++i) {
-            if (!nonJumpMask[i]) {
-                diffSums.emplace_back(0.0);
-                invRangesSums.emplace_back(0.0);
-                counts.emplace_back(0);
+                diffToIdealBlocks.back().reserve(diffToIdeal.size() / expectedBlocks);
+                invRangesBlocks.back().reserve(diffToIdeal.size() / expectedBlocks);
             } else {
-                diffSums.back() += diffDiffToIdeal[i];
-                invRangesSums.back() += diffInvRangesXY[i];
-                counts.back() += 1;
+                diffToIdealBlocks.back().emplace_back(diffToIdeal[i]);
+                invRangesBlocks.back().emplace_back(invRangesXy[i]);
+                blockSizes.back()++;
             }
         }
 
-        const Eigen::ArrayXd diffSumsEig = Eigen::Map<Eigen::ArrayXd>(diffSums.data(), diffSums.size());
-        const Eigen::ArrayXd invSumsEig = Eigen::Map<Eigen::ArrayXd>(invRangesSums.data(), invRangesSums.size());
-        const Eigen::ArrayXi countsEig = Eigen::Map<Eigen::ArrayXi>(counts.data(), counts.size());
-        const Eigen::ArrayXd weights = countsEig.cast<double>().sqrt() * -invSumsEig;
+        std::vector<double> slopes;
+        std::vector<int32_t> weights;
+        int32_t totalWeight = 0;
 
-        const Eigen::ArrayX<bool> validMask = invSumsEig != 0;
-        const Eigen::ArrayXi validIndices = Utils::eigenMaskToIndices(validMask);
-        Eigen::ArrayXd slopes = Eigen::ArrayXd::Zero(diffSumsEig.size());
-        slopes(validIndices) = diffSumsEig(validIndices) / invSumsEig(validIndices);
+        slopes.reserve(blockSizes.size());
+        weights.reserve(blockSizes.size());
+        for (int32_t i = 0; i < blockSizes.size(); ++i) {
+            if (blockSizes[i] < 2) {
+                continue;
+            }
 
-        const Eigen::ArrayXd weightedSlopes = slopes * weights;
-        const double totalWeight = weights.sum();
+            const Eigen::ArrayXd fitX = Eigen::Map<Eigen::ArrayXd>(invRangesBlocks[i].data(), invRangesBlocks[i].size());
+            const Eigen::ArrayXd fitY = Eigen::Map<Eigen::ArrayXd>(diffToIdealBlocks[i].data(), diffToIdealBlocks[i].size());
 
-        return (totalWeight > 0.0) ? weightedSlopes.sum() / totalWeight : 0.0;
+            const double slope = Stats::simpleLinearRegression(fitX, fitY).slope;
+            slopes.emplace_back(slope);
+            weights.emplace_back(blockSizes[i]);
+            totalWeight += blockSizes[i];
+        }
+
+        if (slopes.empty()) {
+            return 0;
+        }
+
+        double meanSlope = 0;
+        for (int32_t i = 0; i < slopes.size(); ++i) {
+            meanSlope += slopes[i] * weights[i];
+        }
+        meanSlope /= totalWeight;
+
+        return meanSlope;
     }
 
     int32_t CoarseToFineHorizontalIntrinsicsEstimator::madOptimalResolution(
