@@ -12,6 +12,7 @@
 #include "intrinsics/horizontal/resolution/MadResolutionLoss.h"
 #include "math/Stats.h"
 #include "utils/Logger.h"
+#include "utils/Timer.h"
 #include "utils/Utils.h"
 
 // TODO fix inconsistent naming for resolution
@@ -19,6 +20,7 @@ namespace accurate_ri {
     HorizontalIntrinsicsResult CoarseToFineHorizontalIntrinsicsEstimator::estimate(
         const PointArray &points, const VerticalIntrinsicsResult &vertical
     ) {
+        PROFILE_SCOPE("CoarseToFineHorizontalIntrinsicsEstimator::estimate");
         HorizontalIntrinsicsResult result;
         result.scanlines.resize(vertical.scanlinesCount);
 

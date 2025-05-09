@@ -5,6 +5,7 @@
 #include "utils/Utils.h"
 
 namespace accurate_ri::HorizontalMath {
+    // TODO maybe try to optimize this
     Eigen::ArrayXd computeDiffToIdeal(const Eigen::ArrayXd &thetas, const uint32_t resolution, const bool reconstruct) {
         const double thetaStep = 2 * std::numbers::pi / static_cast<double>(resolution);
         const auto closestIdeal = (thetas / thetaStep).round() * thetaStep;

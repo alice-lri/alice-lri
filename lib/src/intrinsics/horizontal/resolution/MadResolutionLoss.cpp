@@ -25,7 +25,7 @@ namespace accurate_ri {
     Eigen::ArrayXd computeDiffThetaIdealWrtDiffRxy(
         const Eigen::ArrayBase<T> &invRangesXy, const Eigen::ArrayBase<T> &thetas, const uint32_t resolution
     ) {
-        const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(thetas, resolution, false);
+        const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(thetas, resolution, true);
         const auto diffInvRangesXy = Utils::diff(invRangesXy);
         const auto diffInvRangesXyEpsMask = diffInvRangesXy.abs() >= 1e-7; // TODO optimize this is the same every time
 
