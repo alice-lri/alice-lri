@@ -380,12 +380,11 @@ namespace accurate_ri {
             }
         }
 
-        std::vector<double> slopes;
-        std::vector<int32_t> weights;
-        int32_t totalWeight = 0;
 
-        slopes.reserve(blockSizes.size());
-        weights.reserve(blockSizes.size());
+        int64_t totalWeight = 0;
+        std::vector<std::pair<double, int64_t>> slopeWeightPairs;
+        slopeWeightPairs.reserve(blockSizes.size());
+
         for (int32_t i = 0; i < blockSizes.size(); ++i) {
             if (blockSizes[i] < 2) {
                 continue;
@@ -400,24 +399,31 @@ namespace accurate_ri {
                 continue;
             }
 
-            slopes.emplace_back(slope);
-            weights.emplace_back(blockSizes[i]);
+            slopeWeightPairs.emplace_back(slope, blockSizes[i]);
             totalWeight += blockSizes[i];
 
             LOG_DEBUG("Using slope ", slope, " for block ", i, " with size ", blockSizes[i]);
         }
 
-        if (slopes.empty()) {
+        if (slopeWeightPairs.empty()) {
             return 0;
         }
 
-        double meanSlope = 0;
-        for (int32_t i = 0; i < slopes.size(); ++i) {
-            meanSlope += slopes[i] * weights[i];
-        }
-        meanSlope /= totalWeight;
+        std::ranges::sort(slopeWeightPairs , [](const auto& a, const auto& b) {
+            return a.first < b.first;
+        });
 
-        return meanSlope;
+        double cumulativeWeight = 0;
+        double weightedMedianSlope = 0;
+        for (const auto& [slope, weight] : slopeWeightPairs) {
+            cumulativeWeight += weight;
+            if (cumulativeWeight >= totalWeight / 2.0) {
+                weightedMedianSlope = slope;
+                break;
+            }
+        }
+
+        return weightedMedianSlope;
     }
 
     int32_t CoarseToFineHorizontalIntrinsicsEstimator::madOptimalResolution(

@@ -3,6 +3,8 @@ cmake-build-debug/
 
 cmake-build-release/
 
+build/
+
 ref_tracing/
 
 scripts/buffers/
