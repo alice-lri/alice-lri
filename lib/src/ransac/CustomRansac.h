@@ -34,10 +34,8 @@ namespace accurate_ri {
         std::optional<CustomRansacResult> fit(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, std::optional<double> offsetGuess);
 
     private:
-        bool refineFit(
-            const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &weights,
-            const HorizontalScanlineArray &
-            scanlineArray, int32_t scanlineIdx
+        double refineFit(
+            const Eigen::ArrayXd &x, const Eigen::ArrayXd &y
         );
 
         bool fitToBoundsQp(

@@ -62,7 +62,7 @@ namespace accurate_ri::Stats {
         };
     }
 
-    LRResult simpleLinearRegression(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
+    LRResult simpleLinearRegression(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const bool computeMse) {
         const double n = static_cast<double>(x.size());
         const double Sx = x.sum();
         const double Sy = y.sum();
@@ -73,9 +73,17 @@ namespace accurate_ri::Stats {
         const double slope = (n * Sxy - Sx * Sy) / Delta;
         const double intercept = (Sxx * Sy - Sx * Sxy) / Delta;
 
+        std::optional<double> mse;
+        if (computeMse) {
+            const Eigen::ArrayXd yPred = slope * x + intercept;
+            const Eigen::ArrayXd residuals = y - yPred;
+            mse = residuals.square().mean();
+        }
+
         return {
             .slope = slope,
-            .intercept = intercept
+            .intercept = intercept,
+            .mse = mse
         };
     }
 

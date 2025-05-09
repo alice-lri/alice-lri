@@ -41,118 +41,45 @@ namespace accurate_ri {
     ) {
         const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
         const Eigen::ArrayXd &x = scanlineArray.getInvRangesXy(scanlineIdx);
-        const Eigen::ArrayXd y = HorizontalMath::computeDiffToIdeal(thetas, resolution, true); // TODO we are now recomputing this multiple times
-        const double minRangeXy = scanlineArray.getRangesXy(scanlineIdx).minCoeff();
+        const Eigen::ArrayXd y = HorizontalMath::computeDiffToIdeal(thetas, resolution, false); // TODO we are now recomputing this multiple times
 
-        const Eigen::ArrayXd &yBounds = scanlineArray.getThetasUpperBounds(scanlineIdx);
+        if (!offsetGuess) {
+            const uint32_t sampleIndex1 = my_random() % y.size();
+            uint32_t sampleIndex2 = my_random() % y.size();
+            sampleIndex2 = sampleIndex1 != sampleIndex2 ? sampleIndex2 : (sampleIndex2 + 1) % y.size();
 
-        std::optional<double> loss = std::nullopt;
-        uint32_t trial = 0;
+            LOG_DEBUG("Selected indices: ", sampleIndex1, ", ", sampleIndex2);
+            const auto sampleIndices = Eigen::Array2i(sampleIndex1, sampleIndex2);
+            const auto sampleX = x(sampleIndices);
+            const auto sampleY = y(sampleIndices);
 
-        for (trial = 0; trial < maxTrials; ++trial) {
-            if (!offsetGuess) {
-                const uint32_t sampleIndex1 = my_random() % y.size();
-                uint32_t sampleIndex2 = my_random() % y.size();
-                sampleIndex2 = sampleIndex1 != sampleIndex2 ? sampleIndex2 : (sampleIndex2 + 1) % y.size();
+            model = estimator.fit(sampleX, sampleY);
+        } else {
+            model->slope = offsetGuess.value();
+            model->intercept = 0;
+            estimator.setModel(*model);
 
-                LOG_DEBUG("Selected indices: ", sampleIndex1, ", ", sampleIndex2);
-                const auto sampleIndices = Eigen::Array2i(sampleIndex1, sampleIndex2);
-                const auto sampleX = x(sampleIndices);
-                const auto sampleY = y(sampleIndices);
-
-                model = estimator.fit(sampleX, sampleY);
-            } else {
-                model->slope = offsetGuess.value();
-                model->intercept = 0;
-                estimator.setModel(*model);
-
-                model->intercept = computeCircularMeanIntercept(estimator.computeResiduals(x, y), 2 * M_PI / resolution);
-                estimator.setModel(*model);
-            }
-
-            LOG_DEBUG("Two-point slope: ", model->slope);
-
-            const Eigen::ArrayXd weights = yBounds.inverse().square();
-            const bool refined = refineFit(x, y, weights, scanlineArray, scanlineIdx);
-
-            if (refined) {
-                const Eigen::ArrayXd &residuals = estimator.computeResiduals(x, y);
-
-                LOG_DEBUG("Found consensus set at trial ", trial);
-                loss = residuals.square().sum();
-                break;
-            }
+            model->intercept = computeCircularMeanIntercept(estimator.computeResiduals(x, y), 2 * M_PI / resolution);
+            estimator.setModel(*model);
         }
 
-        if (trial == maxTrials) {
-            LOG_DEBUG("RANSAC could not find a valid consensus set at trial ", trial);
-            return std::nullopt;
-        }
-
-        return loss ? std::make_optional<CustomRansacResult>({.model = *model, .loss = *loss}) : std::nullopt;
+        LOG_DEBUG("Two-point slope: ", model->slope);
+        const double loss = refineFit(x, y);
+        return std::make_optional<CustomRansacResult>({.model = *model, .loss = loss});
     }
 
-    bool CustomRansac::refineFit(
-        const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &weights, const HorizontalScanlineArray &
-        scanlineArray, const int32_t scanlineIdx
-    ) {
-        estimator.computeResiduals(x, y);
+    double CustomRansac::refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
         // TODO this is done to update the multilineresult, but maybe it can be avoided
+        estimator.computeResiduals(x, y);
         const MultiLineResult &multi = estimator.getLastMultiLine();
-        std::unordered_map<int64_t, MultiLineItem> multiLineMap;
 
-        const double totalWeight = weights.sum();
+        const double thetaStep = 2 * M_PI / resolution;
+        const Eigen::ArrayXd shiftedY = y - multi.linesIdx.cast<double>() * thetaStep;
 
-        for (uint32_t pointIdx = 0; pointIdx < multi.linesIdx.size(); ++pointIdx) {
-            int64_t lineIdx = multi.linesIdx[pointIdx];
+        // TODO now here we could use the wls fit method and the uncertainty maybe
+        const Stats::LRResult fitResult = Stats::simpleLinearRegression(x, shiftedY, true);
 
-            MultiLineItem &multiLineItem = multiLineMap[lineIdx];
-            multiLineItem.push(x(pointIdx), y(pointIdx), weights(pointIdx));
-        }
-
-        auto shiftedX = Eigen::ArrayXd(x.size());
-        auto shiftedY = Eigen::ArrayXd(y.size());
-
-        for (uint32_t pointIdx = 0; pointIdx < multi.linesIdx.size(); ++pointIdx) {
-            const MultiLineItem &multiLineItem = multiLineMap.at(multi.linesIdx[pointIdx]);
-            shiftedX(pointIdx) = x(pointIdx) - multiLineItem.xMean();
-            shiftedY(pointIdx) = y(pointIdx) - multiLineItem.yMean();
-        }
-
-        model->slope = (weights * shiftedX * shiftedY).sum() / (weights * shiftedX.square()).sum();
-        estimator.setModel(*model);
-
-        const double interceptCorrection = (estimator.computeResiduals(x, y) * weights).sum() / totalWeight;
-        model->intercept += interceptCorrection;
-        estimator.setModel(*model); // TODO having to sync the model every time like this is crazy and shitty
-
-        LOG_DEBUG("Refined slope: ", model->slope);
-
-        const double slope = model->slope;
-        const double intercept = model->intercept;
-        double deltaSlopeOut = 0, deltaInterceptOut = 0;
-        estimator.setModel(*model);
-
-        return true;
-
-        Eigen::ArrayXd residualThreshold = scanlineArray.getCorrectionBounds(scanlineIdx, slope);
-        residualThreshold += scanlineArray.getThetasUpperBounds(scanlineIdx);
-        residualThreshold += 1e-7;
-
-        const bool bounded = fitToBoundsQp(
-            shiftedX, shiftedY, residualThreshold, slope, intercept, deltaSlopeOut, deltaInterceptOut
-        );
-
-        if (!bounded) {
-            return false;
-        }
-
-        model->slope += deltaSlopeOut;
-        model->intercept += deltaInterceptOut;
-
-        estimator.setModel(*model);
-        LOG_DEBUG("Bounded slope: ", model->slope);
-        return true;
+        return *fitResult.mse;
     }
 
     // TODO fix this method code aesthetics
