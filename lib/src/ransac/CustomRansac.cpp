@@ -65,6 +65,7 @@ namespace accurate_ri {
 
         LOG_DEBUG("Two-point slope: ", model->slope);
         const double loss = refineFit(x, y);
+        LOG_DEBUG("Refined slope: ", model->slope);
         return std::make_optional<CustomRansacResult>({.model = *model, .loss = loss});
     }
 
@@ -78,6 +79,8 @@ namespace accurate_ri {
 
         // TODO now here we could use the wls fit method and the uncertainty maybe
         const Stats::LRResult fitResult = Stats::simpleLinearRegression(x, shiftedY, true);
+        model = fitResult;
+        estimator.setModel(*model);
 
         return *fitResult.mse;
     }
