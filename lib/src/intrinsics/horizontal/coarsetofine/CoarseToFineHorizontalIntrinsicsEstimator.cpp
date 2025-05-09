@@ -173,9 +173,8 @@ namespace accurate_ri {
                     scanlineArray.getThetas(scanlineIdx), candidateResolution, true
                 );
 
-                const Eigen::ArrayX<bool> nonJumpMask = diffInvRangesXy.abs() < 1e-2;
                 // TODO derive this more elegantly, assuming a max offset or something
-                const auto nonJumpIndices = Utils::eigenMaskToIndices(nonJumpMask);
+                const Eigen::ArrayX<bool> nonJumpMask = diffInvRangesXy.abs() < 1e-2;
 
                 const double offsetGuess = computeWeightedAverageSlope(diffToIdeal, invRangesXy, nonJumpMask);
                 LOG_DEBUG("Offset guess: ", offsetGuess);
@@ -188,8 +187,9 @@ namespace accurate_ri {
                     continue;
                 }
 
-                const double resolutionDouble = 2 * M_PI / candidateResolution;
-                const double loss = computePreciseLoss(thetas, rangesXy, rhResult->offset, resolutionDouble);
+                // const double resolutionDouble = 2 * M_PI / candidateResolution;
+                // const double loss = computePreciseLoss(thetas, rangesXy, rhResult->offset, resolutionDouble);
+                const double loss = rhResult->loss;
 
                 if (loss < minLoss) {
                     minLoss = loss;
