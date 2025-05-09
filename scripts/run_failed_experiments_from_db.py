@@ -1,9 +1,11 @@
 import sqlite3
 import subprocess
 import json
+from concurrent.futures import ProcessPoolExecutor
+import sys
+import os
 
 db_path = "../large/master.sqlite"
-datasets = ["durlar", "kitti"]
 
 wrong_resolution_query = """
                          SELECT DISTINCT d.name, df.relative_path, empirical.horizontal_resolution
@@ -17,40 +19,47 @@ wrong_resolution_query = """
                          WHERE ifr.experiment_id = 11
                            AND empirical.points_count > 30
                            AND (scanline.horizontal_resolution % empirical.horizontal_resolution != 0 OR scanline.horizontal_heuristic)
-                         ORDER BY empirical.points_count DESC;
+                         ORDER BY empirical.points_count DESC; \
                          """
 
-with sqlite3.connect(db_path) as conn:
-    cur = conn.cursor()
-    cur.execute(wrong_resolution_query)
+def verify_and_run(indexed_item):
+    idx, (dataset, relative_path, gt_resolution) = indexed_item
+    pre_path = "../../../Datasets/LiDAR/durlar/dataset/DurLAR/" if dataset == "durlar" else "../../../Datasets/LiDAR/kitti/"
+    path = pre_path + relative_path
 
-    print("Fetching wrong items:")
-    wrong_items = [(row[0], row[1], row[2]) for row in cur.fetchall()]
+    out_path = f"/tmp/scanlines_alg_out_{os.getpid()}_{idx}.json"
+
+    subprocess.run(
+        ["../cmake-build-release/examples/examples", path, "-1", out_path],
+        stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True
+    )
+
+    with open(out_path, "r") as f:
+        data = json.load(f)
+        for i, horizontal_scanline in enumerate(data["horizontal"]["scanlines_attributes"]):
+            if horizontal_scanline["resolution"] != gt_resolution:
+                raise ValueError(f"Wrong resolution for {path}, scanline {i}")
+
+    os.remove(out_path)
+    return f"OK for {path}!"
+
+if __name__ == "__main__":
+    with sqlite3.connect(db_path) as conn:
+        cur = conn.cursor()
+        cur.execute(wrong_resolution_query)
+        wrong_items = [(row[0], row[1], row[2]) for row in cur.fetchall()]
+        cur.close()
+        conn.commit()
+
     print(f"Fetched {len(wrong_items)} wrong items.")
 
-    for dataset, relative_path, gt_resolution in wrong_items:
-        if dataset == "durlar":
-            pre_path = "../../../Datasets/LiDAR/durlar/dataset/DurLAR/"
-        else:
-            pre_path = "../../../Datasets/LiDAR/kitti/"
+    try:
+        indexed_items = list(enumerate(wrong_items))
 
-        path = pre_path + relative_path
+        with ProcessPoolExecutor(max_workers=16) as executor:
+            for result in executor.map(verify_and_run, indexed_items):
+                print(result)
 
-        # execute the compiled binary with the path as arg
-        print(f"Executing {path}")
-        subprocess.run(
-            ["../cmake-build-release/examples/examples", path, "-1", "/tmp/scanlines_alg_out.json"],
-            stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True
-        )
-
-        print("Verifying results:")
-        with open("/tmp/scanlines_alg_out.json", "r") as f:
-            data = json.load(f)
-            for i, horizontal_scanline in enumerate(data["horizontal"]["scanlines_attributes"]):
-                assert horizontal_scanline[
-                           "resolution"] == gt_resolution, f"Wrong resolution for {path}, scanline {i}"
-
-        print(f"OK for {path}!")
-
-    cur.close()
-    conn.commit()
+    except Exception as e:
+        print(f"Aborting due to error: {e}", file=sys.stderr)
+        sys.exit(1)
