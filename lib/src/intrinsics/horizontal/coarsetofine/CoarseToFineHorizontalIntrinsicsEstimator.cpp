@@ -393,9 +393,16 @@ namespace accurate_ri {
             const Eigen::ArrayXd fitY = Eigen::Map<Eigen::ArrayXd>(diffToIdealBlocks[i].data(), diffToIdealBlocks[i].size());
 
             const double slope = Stats::simpleLinearRegression(fitX, fitY).slope;
+
+            if (std::abs(slope) > 0.5) {
+                continue;
+            }
+
             slopes.emplace_back(slope);
             weights.emplace_back(blockSizes[i]);
             totalWeight += blockSizes[i];
+
+            LOG_DEBUG("Using slope ", slope, " for block ", i, " with size ", blockSizes[i]);
         }
 
         if (slopes.empty()) {
