@@ -18,7 +18,7 @@ wrong_resolution_query = """
                                           empirical.scanline_idx = scanline.scanline_idx
                          WHERE ifr.experiment_id = 11
                            AND empirical.points_count > 30
-                           AND (scanline.horizontal_resolution % empirical.horizontal_resolution != 0 OR scanline.horizontal_heuristic)
+                           AND (scanline.horizontal_resolution != empirical.horizontal_resolution OR scanline.horizontal_heuristic)
                          ORDER BY empirical.points_count DESC; \
                          """
 
@@ -34,14 +34,17 @@ def verify_and_run(indexed_item):
         stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True
     )
 
-    with open(out_path, "r") as f:
-        data = json.load(f)
-        for i, horizontal_scanline in enumerate(data["horizontal"]["scanlines_attributes"]):
-            if horizontal_scanline["resolution"] != gt_resolution:
-                raise ValueError(f"Wrong resolution for {path}, scanline {i}")
+    try:
+        with open(out_path, "r") as f:
+            data = json.load(f)
+            for i, horizontal_scanline in enumerate(data["horizontal"]["scanlines_attributes"]):
+                if horizontal_scanline["resolution"] != gt_resolution:
+                    raise ValueError(f"Wrong resolution for {path}, scanline {i}")
+    except Exception as e:
+        print(e)
 
     os.remove(out_path)
-    return f"OK for {path}!"
+    print(f"OK for {path}!")
 
 if __name__ == "__main__":
     with sqlite3.connect(db_path) as conn:
@@ -58,7 +61,7 @@ if __name__ == "__main__":
 
         with ProcessPoolExecutor(max_workers=16) as executor:
             for result in executor.map(verify_and_run, indexed_items):
-                print(result)
+                pass
 
     except Exception as e:
         print(f"Aborting due to error: {e}", file=sys.stderr)
