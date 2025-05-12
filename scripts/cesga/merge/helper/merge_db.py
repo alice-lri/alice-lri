@@ -3,6 +3,7 @@ import argparse
 import os
 import re
 import shutil
+import subprocess
 
 
 def backup_db(merged_db_path):
@@ -24,10 +25,15 @@ def get_db_files(folder_path):
 
 
 def insert_merged_experiment(cursor, label, description):
+    try:
+        commit_hash = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('utf-8').strip()
+    except subprocess.CalledProcessError:
+        commit_hash = None
+
     cursor.execute("""
-        INSERT INTO experiment(timestamp, label, description) 
-        VALUES (DATETIME('now', 'localtime', 'subsec'), ?, ?)
-    """, (label, description))
+        INSERT INTO experiment(timestamp, label, description, commit_hash) 
+        VALUES (DATETIME('now', 'localtime', 'subsec'), ?, ?, ?)
+    """, (label, description, commit_hash))
 
     return cursor.lastrowid
 
