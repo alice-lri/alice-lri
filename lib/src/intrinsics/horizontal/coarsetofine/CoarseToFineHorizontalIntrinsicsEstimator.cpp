@@ -151,7 +151,7 @@ namespace accurate_ri {
         const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
         const auto diffInvRangesXy = Utils::diff(invRangesXy);
 
-        for (int32_t candidateResolution = 500; candidateResolution < 50000; ++candidateResolution) {
+        for (int32_t candidateResolution = 500; candidateResolution < 10000; ++candidateResolution) {
             LOG_DEBUG("Candidate resolution: ", candidateResolution);
 
             const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(

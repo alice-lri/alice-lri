@@ -14,7 +14,7 @@ namespace accurate_ri::HorizontalMath {
         Eigen::ArrayXd diffToIdeal = thetas - closestIdeal;
 
         if (reconstruct) {
-            const auto diffDiffToIdeal = Utils::diff(diffToIdeal);
+            const Eigen::ArrayXd diffDiffToIdeal = Utils::diff(diffToIdeal);
             const auto jumpMask = (diffDiffToIdeal.abs() >= thetaStep / 2).cast<double>();
             const auto signs = diffDiffToIdeal.sign().cast<double>();
             const Eigen::ArrayXd diffDiffToIdealNoJumps = diffDiffToIdeal - thetaStep * jumpMask * signs;
