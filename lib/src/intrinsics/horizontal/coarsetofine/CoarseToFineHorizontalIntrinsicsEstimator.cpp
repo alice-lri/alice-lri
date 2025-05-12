@@ -41,7 +41,8 @@ namespace accurate_ri {
             }
 
             // int32_t bestResInt = optimizeResolutionCoarse(scanlineArray, scanlineIdx);
-            int32_t bestResInt = madOptimalResolution(scanlineArray, scanlineIdx);
+            // int32_t bestResInt = madOptimalResolution(scanlineArray, scanlineIdx);
+            int32_t bestResInt = 1000;
             const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResInt);
 
             if (!optimizeResult) {
@@ -150,52 +151,35 @@ namespace accurate_ri {
         const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
         const auto diffInvRangesXy = Utils::diff(invRangesXy);
 
-        for (int32_t i = 0; i < 2 * maxDelta + 1; ++i) {
-            const int32_t delta = i % 2 == 0 ? -i / 2 : (i + 1) / 2;
-            const int32_t candidateResolutionMult = initialResInt + delta;
+        for (int32_t candidateResolution = 500; candidateResolution < 50000; ++candidateResolution) {
+            LOG_DEBUG("Candidate resolution: ", candidateResolution);
 
-            if (candidateResolutionMult < 0) {
-                continue;
-            }
+            const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
+                scanlineArray.getThetas(scanlineIdx), candidateResolution, true
+            );
 
-            const int32_t maxDiv = candidateResolutionMult / scanlineArray.getSize(scanlineIdx);
+            // TODO derive this more elegantly, assuming a max offset or something
+            const Eigen::ArrayX<bool> nonJumpMask = diffInvRangesXy.abs() < 1e-2;
 
-            for (int32_t divisor = 1; divisor <= maxDiv; ++divisor) {
-                if (candidateResolutionMult % divisor != 0) {
-                    continue;
-                }
+            const double offsetGuess = computeWeightedAverageSlope(diffToIdeal, invRangesXy, nonJumpMask);
+            LOG_DEBUG("Offset guess: ", offsetGuess);
 
-                const int32_t candidateResolution = candidateResolutionMult / divisor;
+            // const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
+            //     scanlineArray, scanlineIdx, candidateResolution, offsetGuess
+            // );
+            //
+            // if (!rhResult.has_value()) {
+            //     continue;
+            // }
 
-                LOG_DEBUG("Candidate resolution: ", candidateResolution);
+            const double resolutionDouble = 2 * M_PI / candidateResolution;
+            const double loss = computePreciseLoss(thetas, rangesXy, offsetGuess, resolutionDouble);
+            // const double loss = rhResult->loss;
 
-                const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
-                    scanlineArray.getThetas(scanlineIdx), candidateResolution, true
-                );
-
-                // TODO derive this more elegantly, assuming a max offset or something
-                const Eigen::ArrayX<bool> nonJumpMask = diffInvRangesXy.abs() < 1e-2;
-
-                const double offsetGuess = computeWeightedAverageSlope(diffToIdeal, invRangesXy, nonJumpMask);
-                LOG_DEBUG("Offset guess: ", offsetGuess);
-
-                const std::optional<RansacHOffsetResult> rhResult = RansacHOffset::computeOffset(
-                    scanlineArray, scanlineIdx, candidateResolution, offsetGuess
-                );
-
-                if (!rhResult.has_value()) {
-                    continue;
-                }
-
-                // const double resolutionDouble = 2 * M_PI / candidateResolution;
-                // const double loss = computePreciseLoss(thetas, rangesXy, rhResult->offset, resolutionDouble);
-                const double loss = rhResult->loss;
-
-                if (loss < minLoss) {
-                    minLoss = loss;
-                    bestResolution = candidateResolution;
-                    bestOffset = rhResult->offset;
-                }
+            if (loss < minLoss) {
+                minLoss = loss;
+                bestResolution = candidateResolution;
+                bestOffset = offsetGuess;
             }
         }
 
@@ -270,7 +254,6 @@ namespace accurate_ri {
     ) {
         Eigen::ArrayXd corrected = thetas - offset / ranges;
         corrected -= corrected.minCoeff();
-        std::ranges::sort(corrected);
 
         const Eigen::ArrayXd aligned = (corrected / resolution).round() * resolution;
 
@@ -390,8 +373,12 @@ namespace accurate_ri {
                 continue;
             }
 
-            const Eigen::ArrayXd fitX = Eigen::Map<Eigen::ArrayXd>(invRangesBlocks[i].data(), invRangesBlocks[i].size());
-            const Eigen::ArrayXd fitY = Eigen::Map<Eigen::ArrayXd>(diffToIdealBlocks[i].data(), diffToIdealBlocks[i].size());
+            const Eigen::ArrayXd fitX = Eigen::Map<Eigen::ArrayXd>(
+                invRangesBlocks[i].data(), invRangesBlocks[i].size()
+            );
+            const Eigen::ArrayXd fitY = Eigen::Map<Eigen::ArrayXd>(
+                diffToIdealBlocks[i].data(), diffToIdealBlocks[i].size()
+            );
 
             const double slope = Stats::simpleLinearRegression(fitX, fitY).slope;
 
@@ -409,13 +396,15 @@ namespace accurate_ri {
             return 0;
         }
 
-        std::ranges::sort(slopeWeightPairs , [](const auto& a, const auto& b) {
-            return a.first < b.first;
-        });
+        std::ranges::sort(
+            slopeWeightPairs, [](const auto &a, const auto &b) {
+                return a.first < b.first;
+            }
+        );
 
         double cumulativeWeight = 0;
         double weightedMedianSlope = 0;
-        for (const auto& [slope, weight] : slopeWeightPairs) {
+        for (const auto &[slope, weight]: slopeWeightPairs) {
             cumulativeWeight += weight;
             if (cumulativeWeight >= totalWeight / 2.0) {
                 weightedMedianSlope = slope;
