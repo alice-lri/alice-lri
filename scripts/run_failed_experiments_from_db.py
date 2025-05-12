@@ -16,7 +16,7 @@ wrong_resolution_query = """
                                   JOIN dataset_frame_scanline_info_empirical empirical
                                        ON df.id = empirical.dataset_frame_id AND
                                           empirical.scanline_idx = scanline.scanline_idx
-                         WHERE ifr.experiment_id = 11
+                         WHERE ifr.experiment_id = 12
                            AND empirical.points_count > 30
                            AND (scanline.horizontal_resolution != empirical.horizontal_resolution OR scanline.horizontal_heuristic)
                          ORDER BY empirical.points_count DESC; \
