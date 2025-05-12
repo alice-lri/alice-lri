@@ -2,8 +2,6 @@
 #include <cstdint>
 #include <numeric>
 #include <numbers>
-
-#include "utils/Timer.h"
 #include "utils/Utils.h"
 
 namespace accurate_ri::HorizontalMath {
