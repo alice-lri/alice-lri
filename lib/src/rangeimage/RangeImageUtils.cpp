@@ -16,7 +16,7 @@ namespace accurate_ri::RangeImageUtils {
         const Eigen::ArrayXd phis = (z / ranges).asin();
         const Eigen::ArrayXd thetas = y.binaryExpr(
             x, [](const double yi, const double xi) {
-                return std::atan2(yi, xi);
+                return std::atan2(yi, xi) + M_PI;
             }
         );
 
@@ -43,6 +43,7 @@ namespace accurate_ri::RangeImageUtils {
             minIndices(pointIdx) = bestLaserIdx;
             const double hOffset = intrinsics.horizontal.scanlines[bestLaserIdx].offset;
             correctedThetas(pointIdx) = thetas(pointIdx) - std::asin(hOffset / rangesXy(pointIdx));
+            correctedThetas(pointIdx) = correctedThetas(pointIdx) < 0 ? 2 * M_PI + correctedThetas(pointIdx) : correctedThetas(pointIdx);
         }
 
         const int32_t maxHorizontalResolution = std::ranges::max_element(
