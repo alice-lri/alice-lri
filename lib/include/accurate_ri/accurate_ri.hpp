@@ -15,9 +15,4 @@ namespace accurate_ri {
     RangeImage projectToRangeImage(const IntrinsicsResult &intrinsics, const PointCloud::Double &points);
 
     PointCloud::Double unProjectToPointCloud(const IntrinsicsResult &intrinsics, const RangeImage &rangeImage);
-
-    // TODO remove this, the library should be path agnostic, just here for the trace file
-    void setCloudPath(const std::string &path);
-
-    std::string getCloudPath();
 }

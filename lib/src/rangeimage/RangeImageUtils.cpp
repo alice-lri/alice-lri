@@ -73,4 +73,28 @@ namespace accurate_ri::RangeImageUtils {
             .pixels = std::move(pixels)
         };
     }
+
+    PointCloud::Double unProjectRangeImage(const IntrinsicsResult &intrinsics, const RangeImage &image) {
+        std::vector<double> xs, ys, zs;
+
+        for (int32_t row = 0; row < image.height; ++row) {
+            const int32_t scanlineIdx = image.height - row - 1;
+            const auto verticalValues = intrinsics.vertical.fullScanlines.scanlines[scanlineIdx].values;
+            const auto horizontalValues = intrinsics.horizontal.scanlines[scanlineIdx];
+
+            for (int32_t col = 0; col < image.width; ++col) {
+                const double range = image.pixels[row * image.width + col];
+                const double originalPhi = verticalValues.angle + std::asin(verticalValues.offset / range);
+                const double rangeXy = range * std::cos(originalPhi);
+                double originalTheta = col * 2 * M_PI / horizontalValues.resolution; // TODO handle different resolutions per scanline
+                originalTheta += std::asin(horizontalValues.offset / rangeXy);
+
+                xs.emplace_back(rangeXy * std::cos(originalTheta));
+                ys.emplace_back(rangeXy * std::sin(originalTheta));
+                zs.emplace_back(range * std::sin(originalPhi));
+            }
+        }
+
+        return PointCloud::Double(std::move(xs), std::move(ys), std::move(zs));
+    }
 }

@@ -6,8 +6,6 @@
 #include "utils/Timer.h"
 
 namespace accurate_ri {
-    // TODO remove this, the library should be path agnostic, just here for the trace file
-    std::string cloudPath;
 
     IntrinsicsResult execute(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) {
         PROFILE_SCOPE("TOTAL");
@@ -75,14 +73,6 @@ namespace accurate_ri {
     }
 
     PointCloud::Double unProjectToPointCloud(const IntrinsicsResult &intrinsics, const RangeImage &rangeImage) {
-        return {}; // TODO
-    }
-
-    void setCloudPath(const std::string &path) {
-        cloudPath = path;
-    }
-
-    std::string getCloudPath() {
-        return cloudPath;
+        return RangeImageUtils::unProjectRangeImage(intrinsics, rangeImage);
     }
 }

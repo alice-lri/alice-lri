@@ -10,7 +10,6 @@ namespace accurate_ri::VerticalLogging {
     void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough) {
         LOG_INFO("==| Parameters |==");
         LOG_INFO("Number of points: ", points.size());
-        LOG_INFO("Cloud path: ", getCloudPath()); // TODO remove this
         LOG_INFO("Coord distortion compensation strategy: ", "upper_bound");
         LOG_INFO("Hough model: ", "arcsin");
         LOG_INFO("Voting strategy: ", "single");

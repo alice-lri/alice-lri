@@ -171,7 +171,6 @@ int main(const int argc, const char **argv) {
         framePath /= frame.relativePath;
 
         FileUtils::Points points = FileUtils::loadBinaryFile(framePath.string(), std::nullopt);
-        accurate_ri::setCloudPath(framePath.string());
 
         const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
 

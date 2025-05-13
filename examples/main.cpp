@@ -12,16 +12,6 @@ std::optional<int> secureStoi(const std::string &str) {
     }
 }
 
-// TODO this is a temporary hack to compare traces, remove
-void setCloudPath(const std::string &path) {
-    const std::string from = "../../Datasets/LiDAR";
-    const std::string to = "../../datasets";
-    std::string newPath = path;
-
-    newPath.replace(newPath.find(from), from.length(), to);
-    accurate_ri::setCloudPath(newPath);
-}
-
 // TODO perf, identify memory  bottlenecks. Reuse Eigen buffers as much as possible, especially in loops
 // TODO review each time I add to a collection whether I am copying or not. Especially maps/sets, use emplace
 // TODO maybe every function that does not return an eigen pre-allocated buffer should take a parameter out instead
@@ -73,7 +63,6 @@ int main(int argc, char **argv) {
     }
 
     FileUtils::Points points = FileUtils::loadBinaryFile(path, accurateDigits);
-    setCloudPath(path);
 
     double initialZ = points.z[12];
     auto start = std::chrono::high_resolution_clock::now();
