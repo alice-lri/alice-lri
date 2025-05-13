@@ -10,6 +10,7 @@
 #define PRINT_PROFILE_REPORT() Timer::printSortedReport()
 #else
 #define PROFILE_SCOPE(name) do {} while (0)
+#define PRINT_PROFILE_REPORT() do {} while (0)
 #endif
 
 #ifdef ENABLE_PROFILING

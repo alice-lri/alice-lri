@@ -1,1 +1,103 @@
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
+#include <accurate_ri/public_structs.hpp>
+#include <accurate_ri/accurate_ri.hpp>
 
+namespace py = pybind11;
+using namespace accurate_ri;
+
+PYBIND11_MODULE(_accurate_ri, m) {
+    m.doc() = "Python bindings for the AccurateRI C++ library";
+
+    // Enum
+    py::enum_<EndReason>(m, "EndReason")
+        .value("ALL_ASSIGNED", EndReason::ALL_ASSIGNED)
+        .value("MAX_ITERATIONS", EndReason::MAX_ITERATIONS)
+        .value("NO_MORE_PEAKS", EndReason::NO_MORE_PEAKS)
+        .export_values();
+
+    // Structs
+    py::class_<RealMargin>(m, "RealMargin")
+        .def(py::init<>())
+        .def_readwrite("lower", &RealMargin::lower)
+        .def_readwrite("upper", &RealMargin::upper)
+        .def("diff", &RealMargin::diff)
+        .def("clamp_both", &RealMargin::clampBoth);
+
+    py::class_<ScanlineAngleBounds>(m, "ScanlineAngleBounds")
+        .def(py::init<>())
+        .def_readwrite("bottom", &ScanlineAngleBounds::bottom)
+        .def_readwrite("top", &ScanlineAngleBounds::top);
+
+    py::class_<OffsetAngleMargin>(m, "OffsetAngleMargin")
+        .def(py::init<>())
+        .def_readwrite("offset", &OffsetAngleMargin::offset)
+        .def_readwrite("angle", &OffsetAngleMargin::angle);
+
+    py::class_<OffsetAngle>(m, "OffsetAngle")
+        .def(py::init<>())
+        .def_readwrite("offset", &OffsetAngle::offset)
+        .def_readwrite("angle", &OffsetAngle::angle);
+
+    py::class_<ScanlineInfo>(m, "ScanlineInfo")
+        .def(py::init<>())
+        .def_readwrite("id", &ScanlineInfo::id)
+        .def_readwrite("points_count", &ScanlineInfo::pointsCount)
+        .def_readwrite("values", &ScanlineInfo::values)
+        .def_readwrite("ci", &ScanlineInfo::ci)
+        .def_readwrite("theoretical_angle_bounds", &ScanlineInfo::theoreticalAngleBounds)
+        .def_readwrite("dependencies", &ScanlineInfo::dependencies)
+        .def_readwrite("uncertainty", &ScanlineInfo::uncertainty)
+        .def_readwrite("hough_votes", &ScanlineInfo::houghVotes)
+        .def_readwrite("hough_hash", &ScanlineInfo::houghHash);
+
+    py::class_<FullScanlines>(m, "FullScanlines")
+        .def(py::init<>())
+        .def_readwrite("scanlines", &FullScanlines::scanlines)
+        .def_readwrite("points_scanlines_ids", &FullScanlines::pointsScanlinesIds);
+
+    py::class_<ScanlineHorizontalInfo>(m, "ScanlineHorizontalInfo")
+        .def(py::init<>())
+        .def_readwrite("resolution", &ScanlineHorizontalInfo::resolution)
+        .def_readwrite("offset", &ScanlineHorizontalInfo::offset)
+        .def_readwrite("heuristic", &ScanlineHorizontalInfo::heuristic);
+
+    py::class_<HorizontalIntrinsicsResult>(m, "HorizontalIntrinsicsResult")
+        .def(py::init<>())
+        .def_readwrite("scanlines", &HorizontalIntrinsicsResult::scanlines);
+
+    py::class_<VerticalIntrinsicsResult>(m, "VerticalIntrinsicsResult")
+        .def(py::init<>())
+        .def_readwrite("iterations", &VerticalIntrinsicsResult::iterations)
+        .def_readwrite("scanlines_count", &VerticalIntrinsicsResult::scanlinesCount)
+        .def_readwrite("unassigned_points", &VerticalIntrinsicsResult::unassignedPoints)
+        .def_readwrite("points_count", &VerticalIntrinsicsResult::pointsCount)
+        .def_readwrite("end_reason", &VerticalIntrinsicsResult::endReason)
+        .def_readwrite("full_scanlines", &VerticalIntrinsicsResult::fullScanlines);
+
+    py::class_<IntrinsicsResult>(m, "IntrinsicsResult")
+        .def(py::init<>())
+        .def_readwrite("vertical", &IntrinsicsResult::vertical)
+        .def_readwrite("horizontal", &IntrinsicsResult::horizontal);
+
+    py::class_<RangeImage>(m, "RangeImage")
+        .def(py::init<>())
+        .def_readwrite("width", &RangeImage::width)
+        .def_readwrite("height", &RangeImage::height)
+        .def_readwrite("pixels", &RangeImage::pixels);
+
+    // Main functions
+    m.def("execute", py::overload_cast<const std::vector<float>&, const std::vector<float>&, const std::vector<float>&>(&execute),
+          "Estimate intrinsics from point cloud (float)");
+    m.def("execute", py::overload_cast<const std::vector<double>&, const std::vector<double>&, const std::vector<double>&>(&execute),
+          "Estimate intrinsics from point cloud (double)");
+
+    m.def("compute_range_image", py::overload_cast<const IntrinsicsResult&, const std::vector<float>&, const std::vector<float>&, const std::vector<float>&>(&computeRangeImage),
+          "Compute range image from intrinsics and point cloud (float)");
+    m.def("compute_range_image", py::overload_cast<const IntrinsicsResult&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&>(&computeRangeImage),
+          "Compute range image from intrinsics and point cloud (double)");
+
+    m.def("write_to_json", &writeToJson, "Write intrinsics result to JSON");
+    m.def("set_cloud_path", &setCloudPath, "Set point cloud path for debugging (temporary)");
+    m.def("get_cloud_path", &getCloudPath, "Get current point cloud path (temporary)");
+}

@@ -1,0 +1,27 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "accurate_ri"
+version = "0.1.0"
+description = "Python bindings for AccurateRI"
+authors = [
+    { name = "Samuel Soutullo", email = "s.soutullo@usc.es" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.7"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: C++",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[tool.scikit-build]
+cmake.minimum-version = "3.20"
+build-dir = "build"
+wheel.packages = ["accurate_ri"]
+
+[tool.scikit-build.cmake.define]
+LOG_LEVEL = "NONE"

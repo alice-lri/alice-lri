@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <vector>
+#include <algorithm>
 
 namespace accurate_ri {
     struct RealMargin {

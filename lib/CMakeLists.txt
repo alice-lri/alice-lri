@@ -37,7 +37,9 @@ find_package(nlohmann_json REQUIRED)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
 find_package(osqp REQUIRED)
-add_subdirectory(external/osqp-eigen)
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libs for dependencies" FORCE)
+add_subdirectory(external/osqp-eigen EXCLUDE_FROM_ALL)
+set_target_properties(OsqpEigen PROPERTIES POSITION_INDEPENDENT_CODE ON)
 target_include_directories(OsqpEigen PUBLIC ${osqp_INCLUDE_DIRS}/osqp)
 target_link_libraries(OsqpEigen PUBLIC osqp::osqp)
 

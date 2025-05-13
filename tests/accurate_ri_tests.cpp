@@ -13,12 +13,6 @@ protected:
     }
 };
 
-TEST_F(AccurateRIAPITest, HelloFunctionWorks) {
-    // This is a simple test for the hello function
-    accurate_ri::hello();
-    // No assertion needed - just checking it doesn't crash
-}
-
 TEST_F(AccurateRIAPITest, ExecuteWithEmptyData) {
     std::vector<float> emptyX, emptyY, emptyZ;
     // Expect no crash with empty data
