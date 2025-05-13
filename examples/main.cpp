@@ -77,7 +77,10 @@ int main(int argc, char **argv) {
 
     double initialZ = points.z[12];
     auto start = std::chrono::high_resolution_clock::now();
-    accurate_ri::IntrinsicsResult result = accurate_ri::execute(points.x, points.y, points.z);
+
+    const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
+
+    accurate_ri::IntrinsicsResult result = accurate_ri::execute(cloud);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
     std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
@@ -90,7 +93,7 @@ int main(int argc, char **argv) {
 
     std::cout << "Initial Z: " << initialZ << std::endl;
     std::cout << "Final Z: " << finalZ << std::endl;
-    accurate_ri::computeRangeImage(result, points.x, points.y, points.z);
+    accurate_ri::projectToRangeImage(result, cloud);
 
     return 0;
 }

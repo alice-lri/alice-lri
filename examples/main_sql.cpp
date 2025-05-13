@@ -170,11 +170,13 @@ int main(const int argc, const char **argv) {
         std::filesystem::path framePath = config.datasetRootPath.at(frame.datasetName);
         framePath /= frame.relativePath;
 
-        const FileUtils::Points points = FileUtils::loadBinaryFile(framePath.string(), std::nullopt);
+        FileUtils::Points points = FileUtils::loadBinaryFile(framePath.string(), std::nullopt);
         accurate_ri::setCloudPath(framePath.string());
 
+        const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
+
         auto start = std::chrono::high_resolution_clock::now();
-        accurate_ri::IntrinsicsResult result = accurate_ri::execute(points.x, points.y, points.z);
+        accurate_ri::IntrinsicsResult result = accurate_ri::execute(cloud);
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration = end - start;
 

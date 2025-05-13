@@ -14,9 +14,9 @@ protected:
 };
 
 TEST_F(AccurateRIAPITest, ExecuteWithEmptyData) {
-    std::vector<float> emptyX, emptyY, emptyZ;
+    const accurate_ri::PointCloud::Double empty;
     // Expect no crash with empty data
-    accurate_ri::IntrinsicsResult result = accurate_ri::execute(emptyX, emptyY, emptyZ);
+    accurate_ri::IntrinsicsResult result = accurate_ri::execute(empty);
     
     // Basic checks on result structure
     EXPECT_EQ(result.vertical.pointsCount, 0);

@@ -13,19 +13,21 @@ namespace accurate_ri {
         PROFILE_SCOPE("TOTAL");
 
         if (xArray.size() == 0 || yArray.size() == 0 || zArray.size() == 0) {
-            return IntrinsicsResult();
+            return {};
         }
 
         const PointArray points(xArray, yArray, zArray);
-        IntrinsicsEstimator estimator = IntrinsicsEstimator();
+        IntrinsicsEstimator estimator{};
 
         return estimator.estimate(points);
     }
 
-    IntrinsicsResult execute(const std::vector<float> &x, const std::vector<float> &y, const std::vector<float> &z) {
-        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(x.data(), x.size()).cast<double>();
-        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXf>(y.data(), y.size()).cast<double>();
-        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(z.data(), z.size()).cast<double>();
+    IntrinsicsResult execute(const PointCloud::Float &points) {
+        const auto size = static_cast<Eigen::Index>(points.x.size());
+
+        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(points.x.data(), size).cast<double>();
+        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXf>(points.y.data(), size).cast<double>();
+        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(points.z.data(), size).cast<double>();
 
         const IntrinsicsResult result = execute(xArray, yArray, zArray);
         PRINT_PROFILE_REPORT();
@@ -33,10 +35,12 @@ namespace accurate_ri {
         return result;
     }
 
-    IntrinsicsResult execute(const std::vector<double> &x, const std::vector<double> &y, const std::vector<double> &z) {
-        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(x.data(), x.size());
-        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXd>(y.data(), y.size());
-        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(z.data(), z.size());
+    IntrinsicsResult execute(const PointCloud::Double &points) {
+        const auto size = static_cast<Eigen::Index>(points.x.size());
+
+        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
+        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
+        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
 
         const IntrinsicsResult result = execute(xArray, yArray, zArray);
         PRINT_PROFILE_REPORT();
@@ -50,33 +54,28 @@ namespace accurate_ri {
         outFile << json.dump(4);
     }
 
-    RangeImage computeRangeImage(
-        const IntrinsicsResult &intrinsics, const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray,
-        const Eigen::ArrayXd &zArray
-    ) {
+    RangeImage projectToRangeImage(const IntrinsicsResult &intrinsics, const PointCloud::Float &points) {
+        const auto size = static_cast<Eigen::Index>(points.x.size());
+
+        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(points.x.data(), size).cast<double>();
+        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXf>(points.y.data(), size).cast<double>();
+        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(points.z.data(), size).cast<double>();
+
         return RangeImageUtils::computeRangeImage(intrinsics, xArray, yArray, zArray);
     }
 
-    RangeImage computeRangeImage(
-        const IntrinsicsResult &intrinsics, const std::vector<float> &x, const std::vector<float> &y,
-        const std::vector<float> &z
-    ) {
-        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(x.data(), x.size()).cast<double>();
-        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXf>(y.data(), y.size()).cast<double>();
-        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(z.data(), z.size()).cast<double>();
+    RangeImage projectToRangeImage(const IntrinsicsResult &intrinsics, const PointCloud::Double &points) {
+        const auto size = static_cast<Eigen::Index>(points.x.size());
 
-        return computeRangeImage(intrinsics, xArray, yArray, zArray);
+        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
+        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
+        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
+
+        return RangeImageUtils::computeRangeImage(intrinsics, xArray, yArray, zArray);
     }
 
-    RangeImage computeRangeImage(
-        const IntrinsicsResult &intrinsics, const std::vector<double> &x, const std::vector<double> &y,
-        const std::vector<double> &z
-    ) {
-        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(x.data(), x.size());
-        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXd>(y.data(), y.size());
-        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(z.data(), z.size());
-
-        return computeRangeImage(intrinsics, xArray, yArray, zArray);
+    PointCloud::Double unProjectToPointCloud(const IntrinsicsResult &intrinsics, const RangeImage &rangeImage) {
+        return {}; // TODO
     }
 
     void setCloudPath(const std::string &path) {

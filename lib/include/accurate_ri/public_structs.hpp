@@ -85,4 +85,18 @@ namespace accurate_ri {
         int32_t height;
         std::vector<double> pixels;
     };
+
+    namespace PointCloud {
+        struct Float {
+            std::vector<float> x;
+            std::vector<float> y;
+            std::vector<float> z;
+        };
+
+        struct Double {
+            std::vector<double> x;
+            std::vector<double> y;
+            std::vector<double> z;
+        };
+    }
 }
