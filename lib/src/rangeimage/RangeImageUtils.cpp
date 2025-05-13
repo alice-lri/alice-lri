@@ -43,7 +43,7 @@ namespace accurate_ri::RangeImageUtils {
             minIndices(pointIdx) = bestLaserIdx;
             const double hOffset = intrinsics.horizontal.scanlines[bestLaserIdx].offset;
             correctedThetas(pointIdx) = thetas(pointIdx) - std::asin(hOffset / rangesXy(pointIdx));
-            correctedThetas(pointIdx) = correctedThetas(pointIdx) < 0 ? 2 * M_PI + correctedThetas(pointIdx) : correctedThetas(pointIdx);
+            correctedThetas(pointIdx) = correctedThetas(pointIdx) < 0 ? 2 * M_PI + correctedThetas(pointIdx) : correctedThetas(pointIdx); // TODO this should wrap around on both sides
         }
 
         const int32_t maxHorizontalResolution = std::ranges::max_element(
@@ -84,10 +84,15 @@ namespace accurate_ri::RangeImageUtils {
 
             for (int32_t col = 0; col < image.width; ++col) {
                 const double range = image.pixels[row * image.width + col];
+
+                if (range <= 0) {
+                    continue;
+                }
+
                 const double originalPhi = verticalValues.angle + std::asin(verticalValues.offset / range);
                 const double rangeXy = range * std::cos(originalPhi);
-                double originalTheta = col * 2 * M_PI / horizontalValues.resolution; // TODO handle different resolutions per scanline
-                originalTheta += std::asin(horizontalValues.offset / rangeXy);
+                double originalTheta = col * 2 * M_PI / horizontalValues.resolution - M_PI; // TODO handle different resolutions per scanline
+                originalTheta += std::asin(horizontalValues.offset / rangeXy); // TODO wrap around on both sides
 
                 xs.emplace_back(rangeXy * std::cos(originalTheta));
                 ys.emplace_back(rangeXy * std::sin(originalTheta));
