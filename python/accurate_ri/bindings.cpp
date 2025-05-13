@@ -9,7 +9,7 @@ using namespace accurate_ri;
 PYBIND11_MODULE(_accurate_ri, m) {
     m.doc() = "Python bindings for the AccurateRI C++ library";
 
-    // Enum
+    // Enums
     py::enum_<EndReason>(m, "EndReason")
         .value("ALL_ASSIGNED", EndReason::ALL_ASSIGNED)
         .value("MAX_ITERATIONS", EndReason::MAX_ITERATIONS)
@@ -86,18 +86,27 @@ PYBIND11_MODULE(_accurate_ri, m) {
         .def_readwrite("height", &RangeImage::height)
         .def_readwrite("pixels", &RangeImage::pixels);
 
-    // Main functions
-    m.def("execute", py::overload_cast<const std::vector<float>&, const std::vector<float>&, const std::vector<float>&>(&execute),
-          "Estimate intrinsics from point cloud (float)");
-    m.def("execute", py::overload_cast<const std::vector<double>&, const std::vector<double>&, const std::vector<double>&>(&execute),
-          "Estimate intrinsics from point cloud (double)");
+    // Functions with vector inputs
+    m.def("execute", [](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
+        return execute(PointCloud::Float{x, y, z});
+    }, "Estimate intrinsics from float vectors");
 
-    m.def("compute_range_image", py::overload_cast<const IntrinsicsResult&, const std::vector<float>&, const std::vector<float>&, const std::vector<float>&>(&computeRangeImage),
-          "Compute range image from intrinsics and point cloud (float)");
-    m.def("compute_range_image", py::overload_cast<const IntrinsicsResult&, const std::vector<double>&, const std::vector<double>&, const std::vector<double>&>(&computeRangeImage),
-          "Compute range image from intrinsics and point cloud (double)");
+    m.def("execute", [](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
+        return execute(PointCloud::Double{x, y, z});
+    }, "Estimate intrinsics from double vectors");
+
+    m.def("project_to_range_image", [](const IntrinsicsResult& intr, const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
+        return projectToRangeImage(intr, PointCloud::Float{x, y, z});
+    }, "Project float cloud to range image");
+
+    m.def("project_to_range_image", [](const IntrinsicsResult& intr, const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
+        return projectToRangeImage(intr, PointCloud::Double{x, y, z});
+    }, "Project double cloud to range image");
+
+    m.def("unproject_to_point_cloud", [](const IntrinsicsResult& intr, const RangeImage& ri) {
+        auto cloud = unProjectToPointCloud(intr, ri);
+        return py::make_tuple(cloud.x, cloud.y, cloud.z);
+    }, "Unproject range image to 3D point cloud");
 
     m.def("write_to_json", &writeToJson, "Write intrinsics result to JSON");
-    m.def("set_cloud_path", &setCloudPath, "Set point cloud path for debugging (temporary)");
-    m.def("get_cloud_path", &getCloudPath, "Get current point cloud path (temporary)");
 }
