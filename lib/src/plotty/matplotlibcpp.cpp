@@ -51,9 +51,12 @@
 // SOFTWARE.
 
 #define PY_SSIZE_T_CLEAN
+#include <plotty/matplotlibcpp.hpp>
+
+#ifdef ENABLE_PYTHON_DEBUG
+
 #include <Python.h>
 
-#include <plotty/matplotlibcpp.hpp>
 
 namespace plotty {
 namespace {
@@ -764,3 +767,64 @@ void save(const std::string& filename) {
 }
 
 }  // namespace plotty
+#else
+namespace plotty {
+
+bool ion() { return false; }
+bool figure(std::string) { return false; }
+
+bool hist(const Eigen::Ref<const Eigen::VectorXd>&, int, const std::string) { return false; }
+
+bool boxplot(const Eigen::Ref<const Eigen::MatrixXd>&, const std::vector<std::string>&) { return false; }
+bool boxplot(const Eigen::Ref<const Eigen::MatrixXd>&, std::initializer_list<const std::string>) { return false; }
+bool boxplot(const Eigen::Ref<const Eigen::MatrixXd>&) { return false; }
+
+bool subplot(const size_t, const size_t, const size_t) { return false; }
+
+bool plot(const Eigen::Ref<const Eigen::MatrixXd>&, const Eigen::Ref<const Eigen::MatrixXd>&,
+          const std::map<std::string, std::string>&) { return false; }
+
+bool plot(const Eigen::Ref<const Eigen::MatrixXd>&, const Eigen::Ref<const Eigen::MatrixXd>&,
+          const std::string&) { return false; }
+
+bool labelPlot(const std::string&, const Eigen::Ref<const Eigen::MatrixXd>&,
+               const Eigen::Ref<const Eigen::MatrixXd>&, const std::string&) { return false; }
+
+bool labelPlot(const std::string&, const Eigen::Ref<const Eigen::MatrixXd>&, const std::string&) { return false; }
+
+bool plot(const Eigen::Ref<const Eigen::MatrixXd>&, const std::string&) { return false; }
+
+bool plot(const std::vector<double>&, const std::string&) { return false; }
+
+bool plot(const std::vector<double>&, const std::vector<double>&,
+          const std::map<std::string, std::string>&) { return false; }
+
+bool plot(const std::vector<double>&, const Eigen::Ref<const Eigen::MatrixXd>&,
+          const std::map<std::string, std::string>&) { return false; }
+
+bool plot(const std::vector<double>&, const std::vector<double>&,
+          const std::string&) { return false; }
+
+bool plot(const std::vector<double>&, const Eigen::Ref<const Eigen::MatrixXd>&,
+          const std::string&) { return false; }
+
+bool labelPlot(const std::string&, const std::vector<double>&,
+               const std::vector<double>&, const std::string&) { return false; }
+
+bool labelPlot(const std::string&, const std::vector<double>&,
+               const Eigen::Ref<const Eigen::MatrixXd>&, const std::string&) { return false; }
+
+void legend() {}
+void ylim(double, double) {}
+void xlim(double, double) {}
+void title(const std::string&) {}
+void axis(const std::string&) {}
+void xlabel(const std::string&) {}
+void ylabel(const std::string&) {}
+void grid(bool) {}
+void show(bool) {}
+void save(const std::string&) {}
+
+}
+
+#endif

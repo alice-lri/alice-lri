@@ -21,9 +21,11 @@ if (ENABLE_PROFILING)
     add_definitions(-DENABLE_PROFILING)
 endif ()
 
-if(ENABLE_TRACE_FILE)
+if (ENABLE_TRACE_FILE)
     add_definitions(-DENABLE_TRACE_FILE)
-endif()
+endif ()
+
+option(ENABLE_PYTHON_DEBUG "Build with Python support for debug/plotting" ON)
 
 include(${CMAKE_BINARY_DIR}/lib/conan_toolchain.cmake)
 
@@ -45,10 +47,12 @@ target_link_libraries(OsqpEigen PUBLIC osqp::osqp)
 
 message(STATUS "osqp_INCLUDE_DIRS: ${osqp_INCLUDE_DIRS}")
 
-find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+if (ENABLE_PYTHON_DEBUG)
+    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
-message(STATUS "Python3 include dir: ${Python3_INCLUDE_DIRS}")
-message(STATUS "Python3 library: ${Python3_LIBRARIES}")
+    message(STATUS "Python3 include dir: ${Python3_INCLUDE_DIRS}")
+    message(STATUS "Python3 library: ${Python3_LIBRARIES}")
+endif ()
 
 add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/utils/Timer.h
@@ -102,16 +106,37 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/rangeimage/RangeImageUtils.h
 )
 
+# Include dirs base
+set(_accurate_ri_private_include_dirs
+        src
+        ${nlohmann_json_INCLUDE_DIRS}
+        ${Eigen3_INCLUDE_DIRS}
+)
+
+# Link libraries base
+set(_accurate_ri_private_libraries
+        nlohmann_json::nlohmann_json
+        osqp::osqp
+        OsqpEigen::OsqpEigen
+)
+
+if (ENABLE_PYTHON_DEBUG)
+    list(APPEND _accurate_ri_private_include_dirs ${Python3_INCLUDE_DIRS})
+    list(APPEND _accurate_ri_private_libraries ${Python3_LIBRARIES})
+endif ()
+
 target_include_directories(accurate_ri
-        PUBLIC include
-        PRIVATE src ${nlohmann_json_INCLUDE_DIRS} ${Eigen3_INCLUDE_DIRS} ${Python3_INCLUDE_DIRS}
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        PRIVATE
+        ${_accurate_ri_private_include_dirs}
 )
 
-target_link_libraries(accurate_ri PRIVATE
-        nlohmann_json::nlohmann_json osqp::osqp OsqpEigen::OsqpEigen ${Python3_LIBRARIES}
-)
+target_link_libraries(accurate_ri PRIVATE ${_accurate_ri_private_libraries})
 
-if(ENABLE_STRICT_WARNINGS) #TODO make this trigger in release mode
+
+if (ENABLE_STRICT_WARNINGS) #TODO make this trigger in release mode
     message(STATUS "Strict warnings enabled")
     target_compile_options(accurate_ri PRIVATE
             -Wall -Wextra -Wpedantic  # General best practices
@@ -120,7 +145,41 @@ if(ENABLE_STRICT_WARNINGS) #TODO make this trigger in release mode
             -Wpessimizing-move -Wredundant-move -Werror=unused-value
             -Werror=unused-variable -Werror=unused-parameter
     )
-endif()
+endif ()
 
-install(TARGETS accurate_ri DESTINATION lib)
-install(DIRECTORY include/ DESTINATION include)
+# Installation
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+
+install(TARGETS accurate_ri
+        EXPORT accurate_riTargets
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+install(EXPORT accurate_riTargets
+        FILE accurate_riTargets.cmake
+        NAMESPACE accurate_ri::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/accurate_ri
+)
+
+write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/accurate_riConfigVersion.cmake"
+        VERSION 1.0.0
+        COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/accurate_riConfig.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/accurate_riConfig.cmake"
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/accurate_ri
+)
+
+install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/accurate_riConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/accurate_riConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/accurate_ri
+)
