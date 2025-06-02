@@ -80,6 +80,7 @@ namespace accurate_ri {
         HorizontalIntrinsicsResult horizontal;
     };
 
+    // TODO convencience method for getting and setting pixels
     struct RangeImage {
         int32_t width;
         int32_t height;
