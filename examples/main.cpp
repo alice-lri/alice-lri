@@ -18,6 +18,7 @@ std::optional<int> secureStoi(const std::string &str) {
 // TODO handle receiving points like all zeros and stuff like that
 // TODO get rid of all ArrayX<bool> apparently they are not safe. Use uint8_t maybe
 // TODO define proper classes for Json and so on, right now exporting too much
+// TODO public headers should have NO STL things (vector, string, etc.) https://chatgpt.com/c/683d803b-3f7c-8010-be9d-1ed7dbe70a0c
 int main(int argc, char **argv) {
     std::string path;
     std::optional<int> accurateDigits = std::nullopt;
