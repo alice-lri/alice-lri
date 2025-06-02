@@ -175,7 +175,7 @@ int main(const int argc, const char **argv) {
         const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
 
         auto start = std::chrono::high_resolution_clock::now();
-        accurate_ri::IntrinsicsResult result = accurate_ri::execute(cloud);
+        accurate_ri::IntrinsicsResult result = accurate_ri::train(cloud);
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration = end - start;
 

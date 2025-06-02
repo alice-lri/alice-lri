@@ -7,7 +7,7 @@
 
 namespace accurate_ri {
 
-    IntrinsicsResult execute(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) {
+    IntrinsicsResult train(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) {
         PROFILE_SCOPE("TOTAL");
 
         if (xArray.size() == 0 || yArray.size() == 0 || zArray.size() == 0) {
@@ -20,30 +20,37 @@ namespace accurate_ri {
         return estimator.estimate(points);
     }
 
-    IntrinsicsResult execute(const PointCloud::Float &points) {
+    IntrinsicsResult train(const PointCloud::Float &points) {
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
         const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(points.x.data(), size).cast<double>();
         const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXf>(points.y.data(), size).cast<double>();
         const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(points.z.data(), size).cast<double>();
 
-        const IntrinsicsResult result = execute(xArray, yArray, zArray);
+        const IntrinsicsResult result = train(xArray, yArray, zArray);
         PRINT_PROFILE_REPORT();
 
         return result;
     }
 
-    IntrinsicsResult execute(const PointCloud::Double &points) {
+    IntrinsicsResult train(const PointCloud::Double &points) {
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
         const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
         const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
         const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
 
-        const IntrinsicsResult result = execute(xArray, yArray, zArray);
+        const IntrinsicsResult result = train(xArray, yArray, zArray);
         PRINT_PROFILE_REPORT();
 
         return result;
+    }
+
+    IntrinsicsResult readFromJson(const std::string &path) {
+        std::ifstream inFile(path);
+        nlohmann::json json;
+        inFile >> json;
+        return intrinsicsResultFromJson(json);
     }
 
     void writeToJson(const IntrinsicsResult &result, const std::string &outputPath) {

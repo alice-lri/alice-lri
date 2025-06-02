@@ -8,11 +8,19 @@ namespace accurate_ri {
         return j;
     }
 
+    OffsetAngle offsetAngleFromJson(const nlohmann::json &j) {
+        return OffsetAngle{j.at("offset"), j.at("angle")};
+    }
+
     nlohmann::json realMarginToJson(const RealMargin &rm) {
         nlohmann::json j;
         j["lower"] = rm.lower;
         j["upper"] = rm.upper;
         return j;
+    }
+
+    RealMargin realMarginFromJson(const nlohmann::json &j) {
+        return RealMargin{j.at("lower"), j.at("upper")};
     }
 
     nlohmann::json offsetAngleMarginToJson(const OffsetAngleMargin &oam) {
@@ -22,14 +30,10 @@ namespace accurate_ri {
         return j;
     }
 
-    nlohmann::json scanlineLimitsToJson(const ScanlineLimits &sl) {
-        nlohmann::json j;
-        j["indices"] = std::vector<int>(sl.indices.data(), sl.indices.data() + sl.indices.size());
-        j["mask"] = std::vector<bool>(sl.mask.data(), sl.mask.data() + sl.mask.size());
-        j["lowerLimit"] = std::vector<double>(sl.lowerLimit.data(), sl.lowerLimit.data() + sl.lowerLimit.size());
-        j["upperLimit"] = std::vector<double>(sl.upperLimit.data(), sl.upperLimit.data() + sl.upperLimit.size());
-        return j;
+    OffsetAngleMargin offsetAngleMarginFromJson(const nlohmann::json &j) {
+        return OffsetAngleMargin{realMarginFromJson(j.at("offset")), realMarginFromJson(j.at("angle"))};
     }
+
 
     nlohmann::json heuristicScanlineToJson(const HeuristicScanline &hsl) {
         nlohmann::json j;
@@ -39,6 +43,14 @@ namespace accurate_ri {
         return j;
     }
 
+    HeuristicScanline heuristicScanlineFromJson(const nlohmann::json &j) {
+        return HeuristicScanline{
+            j.at("offset"),
+            realMarginFromJson(j.at("offsetCi")),
+            j.at("dependencies").get<std::vector<uint32_t>>()
+        };
+    }
+
     nlohmann::json scanlineAngleBoundsToJson(const ScanlineAngleBounds &sab) {
         nlohmann::json j;
         j["bottom"] = realMarginToJson(sab.bottom);
@@ -46,8 +58,13 @@ namespace accurate_ri {
         return j;
     }
 
+    ScanlineAngleBounds scanlineAngleBoundsFromJson(const nlohmann::json &j) {
+        return ScanlineAngleBounds{realMarginFromJson(j.at("bottom")), realMarginFromJson(j.at("top"))};
+    }
+
     nlohmann::json scanlineInfoToJson(const ScanlineInfo &si) {
         nlohmann::json j;
+        j["id"] = si.id;
         j["offset"] = si.values.offset;
         j["angle"] = si.values.angle;
         j["hough_votes"] = si.houghVotes;
@@ -58,39 +75,81 @@ namespace accurate_ri {
         j["upper_min_theoretical_angle"] = si.theoreticalAngleBounds.top.lower;
         j["upper_max_theoretical_angle"] = si.theoreticalAngleBounds.top.upper;
         j["uncertainty"] = si.uncertainty;
-        j["angle_ci"] = nlohmann::json::array();
-        j["angle_ci"].push_back(si.ci.angle.lower);
-        j["angle_ci"].push_back(si.ci.angle.upper);
-        j["offset_ci"] = nlohmann::json::array();
-        j["offset_ci"].push_back(si.ci.offset.lower);
-        j["offset_ci"].push_back(si.ci.offset.upper);
+        j["angle_ci"] = {si.ci.angle.lower, si.ci.angle.upper};
+        j["offset_ci"] = {si.ci.offset.lower, si.ci.offset.upper};
         j["dependencies"] = si.dependencies;
         j["last_scanline_assignment"] = false;
         return j;
     }
 
+    ScanlineInfo scanlineInfoFromJson(const nlohmann::json &j) {
+        return ScanlineInfo{
+            .id = j.at("id").get<uint32_t>(),
+            .pointsCount = j.at("count"),
+            .values = OffsetAngle{j.at("offset"), j.at("angle")},
+            .ci = OffsetAngleMargin{
+                .offset = RealMargin{j.at("offset_ci")[0], j.at("offset_ci")[1]},
+                .angle = RealMargin{j.at("angle_ci")[0], j.at("angle_ci")[1]}
+            },
+            .theoreticalAngleBounds = ScanlineAngleBounds{
+                .bottom = RealMargin{j.at("lower_min_theoretical_angle"), j.at("lower_max_theoretical_angle")},
+                .top = RealMargin{j.at("upper_min_theoretical_angle"), j.at("upper_max_theoretical_angle")}
+            },
+            .dependencies = j.at("dependencies").get<std::vector<uint32_t>>(),
+            .uncertainty = j.at("uncertainty"),
+            .houghVotes = j.at("hough_votes"),
+            .houghHash = j.at("hash")
+        };
+    }
+
     nlohmann::json hashToConflictValueToJson(const HashToConflictValue &htc) {
         nlohmann::json j;
-        // Convert unordered_set to vector for JSON serialization
-        j["conflictingScanlines"] = std::vector<uint32_t>(htc.conflictingScanlines.begin(),
-                                                          htc.conflictingScanlines.end());
+        j["conflictingScanlines"] = std::vector<uint32_t>(
+            htc.conflictingScanlines.begin(), htc.conflictingScanlines.end()
+        );
         j["votes"] = htc.votes;
         return j;
     }
 
-    nlohmann::json endReasonToJson(const EndReason er) {
-        std::string endReasonStr;
-        switch (er) {
-            case EndReason::ALL_ASSIGNED: endReasonStr = "ALL_ASSIGNED";
-                break;
-            case EndReason::MAX_ITERATIONS: endReasonStr = "MAX_ITERATIONS";
-                break;
-            case EndReason::NO_MORE_PEAKS: endReasonStr = "NO_MORE_PEAKS";
-                break;
-            default: endReasonStr = "UNKNOWN";
-                break; // Handle unexpected values if needed
+    HashToConflictValue hashToConflictValueFromJson(const nlohmann::json &j) {
+        std::unordered_set<uint32_t> scanlines;
+        for (const auto &el : j.at("conflictingScanlines")) {
+            scanlines.insert(el.get<uint32_t>());
         }
-        return endReasonStr;
+
+        return HashToConflictValue{
+            .conflictingScanlines = std::move(scanlines),
+            .votes = j.at("votes")
+        };
+    }
+
+    nlohmann::json endReasonToJson(const EndReason er) {
+        switch (er) {
+            case EndReason::ALL_ASSIGNED:
+                return "ALL_ASSIGNED";
+            case EndReason::MAX_ITERATIONS:
+                return "MAX_ITERATIONS";
+            case EndReason::NO_MORE_PEAKS:
+                return "NO_MORE_PEAKS";
+            default:
+                return "UNKNOWN";
+        }
+    }
+
+    EndReason endReasonFromJson(const nlohmann::json &j) {
+        const std::string reason = j.get<std::string>();
+
+        if (reason == "ALL_ASSIGNED") {
+            return EndReason::ALL_ASSIGNED;
+        }
+        if (reason == "MAX_ITERATIONS") {
+            return EndReason::MAX_ITERATIONS;
+        }
+        if (reason == "NO_MORE_PEAKS") {
+            return EndReason::NO_MORE_PEAKS;
+        }
+
+        throw std::invalid_argument("Unknown end reason: " + reason);
     }
 
     nlohmann::json verticalIntrinsicsResultToJson(const VerticalIntrinsicsResult &vir) {
@@ -107,6 +166,19 @@ namespace accurate_ri {
         return j;
     }
 
+    VerticalIntrinsicsResult verticalIntrinsicsResultFromJson(const nlohmann::json &j) {
+        VerticalIntrinsicsResult vir;
+        vir.iterations = j.at("iterations");
+        vir.scanlinesCount = j.at("scanlines_count");
+        vir.endReason = endReasonFromJson(j.at("end_reason"));
+        vir.unassignedPoints = j.at("unassigned_points");
+        vir.pointsCount = j.at("points_count");
+        for (const auto &entry: j.at("scanlines_attributes")) {
+            vir.fullScanlines.scanlines.push_back(scanlineInfoFromJson(entry));
+        }
+        return vir;
+    }
+
     nlohmann::json houghCellToJson(const HoughCell &hc) {
         nlohmann::json j;
         j["maxOffsetIndex"] = hc.maxOffsetIndex;
@@ -117,6 +189,16 @@ namespace accurate_ri {
         return j;
     }
 
+    HoughCell houghCellFromJson(const nlohmann::json &j) {
+        return HoughCell{
+            .maxOffsetIndex = j.at("maxOffsetIndex"),
+            .maxAngleIndex = j.at("maxAngleIndex"),
+            .maxValues = offsetAngleFromJson(j.at("maxValues")),
+            .votes = j.at("votes"),
+            .hash = j.at("hash")
+        };
+    }
+
     nlohmann::json verticalBoundsToJson(const VerticalBounds &vb) {
         nlohmann::json j;
         j["phis"] = std::vector<double>(vb.phis.data(), vb.phis.data() + vb.phis.size());
@@ -125,12 +207,28 @@ namespace accurate_ri {
         return j;
     }
 
+    VerticalBounds verticalBoundsFromJson(const nlohmann::json &j) {
+        return VerticalBounds{
+            Eigen::Map<const Eigen::ArrayXd>(j.at("phis").get<std::vector<double>>().data(), j.at("phis").size()),
+            Eigen::Map<const Eigen::ArrayXd>(j.at("correction").get<std::vector<double>>().data(), j.at("correction").size()),
+            Eigen::Map<const Eigen::ArrayXd>(j.at("final").get<std::vector<double>>().data(), j.at("final").size())
+        };
+    }
+
     nlohmann::json horizontalScanlineInfoToJson(const ScanlineHorizontalInfo &shi) {
         nlohmann::json j;
         j["resolution"] = shi.resolution;
         j["offset"] = shi.offset;
         j["heuristic"] = shi.heuristic;
         return j;
+    }
+
+    ScanlineHorizontalInfo horizontalScanlineInfoFromJson(const nlohmann::json &j) {
+        return ScanlineHorizontalInfo{
+            .resolution = j.at("resolution"),
+            .offset = j.at("offset"),
+            .heuristic = j.at("heuristic")
+        };
     }
 
     nlohmann::json horizontalIntrinsicsToJson(const HorizontalIntrinsicsResult &hir) {
@@ -142,10 +240,25 @@ namespace accurate_ri {
         return j;
     }
 
+    HorizontalIntrinsicsResult horizontalIntrinsicsFromJson(const nlohmann::json &j) {
+        HorizontalIntrinsicsResult hir;
+        for (const auto &scanline : j.at("scanlines_attributes")) {
+            hir.scanlines.push_back(horizontalScanlineInfoFromJson(scanline));
+        }
+        return hir;
+    }
+
     nlohmann::json intrinsicsResultToJson(const IntrinsicsResult &i) {
         nlohmann::json j;
         j["vertical"] = verticalIntrinsicsResultToJson(i.vertical);
         j["horizontal"] = horizontalIntrinsicsToJson(i.horizontal);
         return j;
+    }
+
+    IntrinsicsResult intrinsicsResultFromJson(const nlohmann::json &j) {
+        return IntrinsicsResult{
+            .vertical = verticalIntrinsicsResultFromJson(j.at("vertical")),
+            .horizontal = horizontalIntrinsicsFromJson(j.at("horizontal"))
+        };
     }
 } // accurate_ri

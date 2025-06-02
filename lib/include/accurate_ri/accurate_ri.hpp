@@ -4,9 +4,11 @@
 #include "accurate_ri/public_structs.hpp"
 
 namespace accurate_ri {
-    IntrinsicsResult execute(const PointCloud::Float &points);
+    IntrinsicsResult train(const PointCloud::Float &points);
 
-    IntrinsicsResult execute(const PointCloud::Double &points);
+    IntrinsicsResult train(const PointCloud::Double &points);
+
+    IntrinsicsResult readFromJson(const std::string &path);
 
     void writeToJson(const IntrinsicsResult &result, const std::string &outputPath);
 

@@ -16,6 +16,8 @@ std::optional<int> secureStoi(const std::string &str) {
 // TODO review each time I add to a collection whether I am copying or not. Especially maps/sets, use emplace
 // TODO maybe every function that does not return an eigen pre-allocated buffer should take a parameter out instead
 // TODO handle receiving points like all zeros and stuff like that
+// TODO get rid of all ArrayX<bool> apparently they are not safe. Use uint8_t maybe
+// TODO define proper classes for Json and so on, right now exporting too much
 int main(int argc, char **argv) {
     std::string path;
     std::optional<int> accurateDigits = std::nullopt;
@@ -38,7 +40,7 @@ int main(int argc, char **argv) {
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0018_sync/velodyne_points/data/0000000000.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0086_sync/velodyne_points/data/0000000386.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0086_sync/velodyne_points/data/0000000421.bin";
-            path = "../../Datasets/LiDAR/kitti/2011_09_28/2011_09_28_drive_0205_sync/velodyne_points/data/0000000023.bin";
+            path = "../../Datasets/LiDAR/kitti/2011_09_28/2011_09_28_drive_0205_sync/velodyne_points/data/0000000000.bin";
             accurateDigits = std::nullopt;
             outputPath = "../../Datasets/output/accurate_ri_cpp/";
             break;
@@ -70,14 +72,14 @@ int main(int argc, char **argv) {
 
     const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
 
-    accurate_ri::IntrinsicsResult result = accurate_ri::execute(cloud);
+    accurate_ri::IntrinsicsResult result = accurate_ri::train(cloud);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
     std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
 
-    if (outputPath) {
-        accurate_ri::writeToJson(result, *outputPath);
-    }
+    accurate_ri::writeToJson(result, "out.json");
+    const auto readIntrinsics = accurate_ri::readFromJson("out.json");
+    accurate_ri::writeToJson(readIntrinsics, "out2.json");
 
     double finalZ = points.z[12];
 
