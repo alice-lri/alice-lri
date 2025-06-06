@@ -62,8 +62,6 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/vertical/VerticalIntrinsicsEstimator.h
         src/intrinsics/IntrinsicsEstimator.cpp
         src/intrinsics/IntrinsicsEstimator.h
-        src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.cpp
-        src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.h
         src/hough/HoughTransform.cpp
         src/hough/HoughTransform.h
         src/hash/HashUtils.cpp
@@ -83,23 +81,19 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/vertical/conflict/ScanlineConflictSolver.h
         src/intrinsics/vertical/pool/VerticalScanlinePool.cpp
         src/intrinsics/vertical/pool/VerticalScanlinePool.h
-        src/intrinsics/horizontal/helper/HorizontalLogging.cpp
-        src/intrinsics/horizontal/helper/HorizontalLogging.h
         src/intrinsics/horizontal/helper/HorizontalScanlineArray.cpp
         src/intrinsics/horizontal/helper/HorizontalScanlineArray.h
         src/intrinsics/horizontal/resolution/MadResolutionLoss.cpp
         src/intrinsics/horizontal/resolution/MadResolutionLoss.h
         src/intrinsics/horizontal/helper/HorizontalMath.cpp
         src/intrinsics/horizontal/helper/HorizontalMath.h
-        src/intrinsics/horizontal/offset/RansacHOffset.cpp
-        src/intrinsics/horizontal/offset/RansacHOffset.h
-        src/ransac/CustomRansac.cpp
-        src/ransac/CustomRansac.h
-        src/ransac/CustomEstimator.cpp
-        src/ransac/CustomEstimator.h
+        src/intrinsics/horizontal/multiline/PeriodicMultilineFitter.cpp
+        src/intrinsics/horizontal/multiline/PeriodicMultilineFitter.h
+        src/intrinsics/horizontal/multiline/CustomEstimator.cpp
+        src/intrinsics/horizontal/multiline/CustomEstimator.h
         include/accurate_ri/public_structs.hpp
-        src/intrinsics/horizontal/coarsetofine/CoarseToFineHorizontalIntrinsicsEstimator.cpp
-        src/intrinsics/horizontal/coarsetofine/CoarseToFineHorizontalIntrinsicsEstimator.h
+        src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.cpp
+        src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.h
         src/plotty/matplotlibcpp.hpp
         src/plotty/matplotlibcpp.cpp
         src/rangeimage/RangeImageUtils.cpp
