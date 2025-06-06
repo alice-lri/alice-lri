@@ -16,8 +16,7 @@ namespace accurate_ri {
         std::vector<Eigen::ArrayXd> invRangesXyByScanline;
         std::vector<Eigen::ArrayXd> thetasByScanline;
 
-        std::vector<Eigen::ArrayXd> thetasUpperBoundsByScanline;
-        std::vector<Eigen::ArrayXd> rangesXyMinusBoundsByScanline;
+        std::vector<Eigen::ArrayXd> invRangesXyDiffByScanline;
 
         const double coordsEps;
 
@@ -26,8 +25,6 @@ namespace accurate_ri {
             const PointArray &points, const std::vector<int> &pointsScanlinesIds, int32_t scanlinesCount,
             SortingCriteria sortingCriteria
         );
-
-        [[nodiscard]] Eigen::ArrayXd getCorrectionBounds(int32_t scanlineIdx, double hOffset) const;
 
         [[nodiscard]] inline const int32_t &getSize(const int32_t scanlineIdx) const {
             return scanlineSizes[scanlineIdx];
@@ -53,12 +50,8 @@ namespace accurate_ri {
             return thetasByScanline[scanlineIdx];
         }
 
-        [[nodiscard]] inline const Eigen::ArrayXd &getThetasUpperBounds(const int32_t scanlineIdx) const {
-            return thetasUpperBoundsByScanline[scanlineIdx];
-        }
-
-        [[nodiscard]] inline const Eigen::ArrayXd &getRangesXyMinusBounds(const int32_t scanlineIdx) const {
-            return rangesXyMinusBoundsByScanline[scanlineIdx];
+        [[nodiscard]] inline const Eigen::ArrayXd &getInvRangesXyDiff(const int32_t scanlineIdx) const {
+            return invRangesXyDiffByScanline[scanlineIdx];
         }
 
     private:

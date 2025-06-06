@@ -98,6 +98,9 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/plotty/matplotlibcpp.cpp
         src/rangeimage/RangeImageUtils.cpp
         src/rangeimage/RangeImageUtils.h
+        src/Constants.h
+        src/intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.cpp
+        src/intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.h
 )
 
 # Include dirs base

@@ -1,5 +1,7 @@
 #include "HorizontalScanlineArray.h"
 
+#include "utils/Utils.h"
+
 namespace accurate_ri {
     HorizontalScanlineArray::HorizontalScanlineArray(
         const PointArray &points, const std::vector<int> &pointsScanlinesIds, const int32_t scanlinesCount,
@@ -24,8 +26,7 @@ namespace accurate_ri {
         invRangesXyByScanline.reserve(scanlinesCount);
         thetasByScanline.reserve(scanlinesCount);
 
-        thetasUpperBoundsByScanline.reserve(scanlinesCount);
-        rangesXyMinusBoundsByScanline.reserve(scanlinesCount);
+        invRangesXyDiffByScanline.reserve(scanlinesCount);
 
 
         for (int scanlineIdx = 0; scanlineIdx < scanlinesCount; ++scanlineIdx) {
@@ -38,21 +39,11 @@ namespace accurate_ri {
             invRangesXyByScanline.emplace_back(points.getInvRangesXy()(scanlineIndices));
             thetasByScanline.emplace_back(points.getThetas()(scanlineIndices));
 
-            thetasUpperBoundsByScanline.emplace_back(points.getThetaUpperBound()(scanlineIndices));
-            rangesXyMinusBoundsByScanline.emplace_back(points.getRangeXyMinusBound()(scanlineIndices));
+            invRangesXyDiffByScanline.emplace_back(Utils::diff(getInvRangesXyDiff(scanlineIdx)));
 
             // TODO check if this is still necessary
             thetasByScanline[scanlineIdx] -= thetasByScanline[scanlineIdx].minCoeff();
         }
-    }
-
-    Eigen::ArrayXd HorizontalScanlineArray::getCorrectionBounds(
-        const int32_t scanlineIdx, const double hOffset
-    ) const {
-        const Eigen::ArrayXd &rangesXyMinusBounds = rangesXyMinusBoundsByScanline[scanlineIdx];
-        const Eigen::ArrayXd &rangesXy = rangesXyByScanline[scanlineIdx];
-
-        return (std::abs(hOffset) / rangesXyMinusBounds).asin() - (std::abs(hOffset) / rangesXy).asin();
     }
 
     void HorizontalScanlineArray::sortScanlineByCriteria(

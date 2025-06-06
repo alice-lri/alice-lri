@@ -11,6 +11,9 @@ namespace accurate_ri {
         int32_t resolution;
         double offset;
         double loss;
+
+        ResolutionOffsetLoss(const int32_t resolution, const double offset, const double loss)
+            : resolution(resolution), offset(offset), loss(loss) {}
     };
 
     class HorizontalIntrinsicsEstimator {
@@ -18,22 +21,18 @@ namespace accurate_ri {
         HorizontalIntrinsicsResult estimate(const PointArray &points, const VerticalIntrinsicsResult &vertical);
 
     private:
-        int32_t optimizeResolutionCoarse(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx);
-
-        std::pair<double, double> optimizeOffsetCoarse(
-            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, double resolution
+        std::optional<ScanlineHorizontalInfo> estimateScanline(
+            const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
         );
 
         std::optional<ResolutionOffsetLoss> optimizeJoint(
-            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t initialResInt
+            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t initialResolution
         );
 
-        std::pair<double, double> optimizeOffsetPrecise(
-            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, double resolution, double offsetGuess
-        );
+        std::vector<int32_t> generateCandidateResolutions(int32_t initialResolution, int32_t scanlineSize);
 
-        double computeCoarseLoss(
-            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, double offset, double resolution
+        ResolutionOffsetLoss optimizeJointCandidateResolution(
+            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t resolution
         );
 
         double computePreciseLoss(
@@ -45,18 +44,20 @@ namespace accurate_ri {
             const HorizontalScanlineArray &scanlineArray
         );
 
-        std::pair<int32_t, double> optimizeFromCandidatesPrecise(
-            const Eigen::ArrayXd &thetas,
-            const Eigen::ArrayXd &ranges,
-            const std::unordered_set<int32_t> &candidateResInts,
-            const std::vector<double> &candidateOffsets
+        std::unordered_set<int32_t> getUniqueResolutions(
+            std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
         );
 
-        [[nodiscard]] double computeWeightedAverageSlope(
-            const Eigen::ArrayXd &diffDiffToIdeal,
-            const Eigen::ArrayXd &diffInvRangesXY,
-            const Eigen::ArrayX<bool> &nonJumpMask
-        ) const;
+        std::unordered_set<double> getUniqueOffsets(
+            std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
+        );
+
+        ResolutionOffsetLoss optimizeFromCandidatesPrecise(
+            const Eigen::ArrayXd &thetas,
+            const Eigen::ArrayXd &ranges,
+            const std::unordered_set<int32_t> &candidateResolutions,
+            const std::unordered_set<double> &candidateOffsets
+        );
 
         int32_t madOptimalResolution(const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx);
     };
