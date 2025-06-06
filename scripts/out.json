@@ -1,0 +1,3599 @@
+{
+    "horizontal": {
+        "scanlines_attributes": [
+            {
+                "heuristic": false,
+                "offset": -0.00116310651329952,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003916910218238531,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.000386175291021794,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011576043313378003,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011631064786912257,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003916904011778751,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.000386174634747617,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011576047342646573,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011631061029174002,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00038893299104462054,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003861758895089892,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011576041824827848,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011631064765186673,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00039169128307372207,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038617458701133134,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011603540368008783,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011603553260426554,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00039169047532715403,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038617554758962674,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011603551283540518,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011631045579498258,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003916905855473123,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038341698137477705,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011603538390854628,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.001163105315851425,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00039169070724327836,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038617515024287657,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011603553349403364,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011658576643806804,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00039169024466327796,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038617488300775934,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011603539300530283,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011658573613589343,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003889320822208672,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003861748758991602,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011603547986076392,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011631056679825805,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00038893307080198336,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038617523204965835,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011631047275340006,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011631060409291387,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003916903964031305,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003889327401018301,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011603550392404788,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011631057569770108,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00038893291363995984,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003861748949751728,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.001163105034201468,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011631056707588914,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00039169131502304416,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038893756064606143,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011630989248685188,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011603532042079544,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00038893315074661,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038894314006665163,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011603527845476015,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011603514457925693,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003889287282929161,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003861773239642415,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011603483096026088,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011603576748514125,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00038893091397842496,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.000388939606320256,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011631001405872992,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.001160351869956169,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003889312182463565,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038894036426901323,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011631034742933671,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011603519467377778,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00038617266446030015,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038893776354635527,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011631083901525246,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.001160351268920437,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00038616887591655196,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038893246471334526,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.001163108076756527,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011603641842253404,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003861768588917519,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003889304044869286,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.001163103619039988,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011575942115198139,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003834182608304005,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00038893246467047173,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011631032327313637,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011603544868020925,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00038618132407262137,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003889349724169067,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011631056001872068,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011576003689016897,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003861756807762059,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003916956193966261,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011658593565790486,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011576057235816225,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003861727520189888,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00039168385884166097,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011658535847551515,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011548404392658378,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003834163018544089,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003944444788315065,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011658557575509685,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011576007698460811,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003834070501477365,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003916875044968869,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011658590397861154,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011548478529514504,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.00038341817923410136,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003944421721973104,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011658553227824975,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011548563625339424,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.000380658874387018,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003944427826269372,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011658577781175118,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011548577162347634,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003806653067754143,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00039169294496131933,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00116860346127212,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011520981668904052,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003806542274595177,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003944481506981757,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011686132934076434,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011520942984960167,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003806649367745519,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.00039444892185389074,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011658492216316777,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0011521027624396757,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": -0.0003806581951490041,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0003944457647032562,
+                "resolution": 2048
+            },
+            {
+                "heuristic": false,
+                "offset": 0.0011658496151488655,
+                "resolution": 2048
+            }
+        ]
+    },
+    "vertical": {
+        "end_reason": "ALL_ASSIGNED",
+        "iterations": 127,
+        "points_count": 227952,
+        "scanlines_attributes": [
+            {
+                "angle": -0.3703718242583458,
+                "angle_ci": [
+                    -0.37037198611307903,
+                    -0.3703716624036126
+                ],
+                "count": 1218,
+                "dependencies": [],
+                "hash": 11188809268161131243,
+                "hough_votes": 3711.6395662874866,
+                "id": 0,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.2388130561971224,
+                "lower_min_theoretical_angle": -0.36997945120277304,
+                "offset": 0.03948721386881385,
+                "offset_ci": [
+                    0.039486641882330475,
+                    0.03948778585529722
+                ],
+                "uncertainty": -28197.46641177122,
+                "upper_max_theoretical_angle": -0.2388088989324208,
+                "upper_min_theoretical_angle": -0.3699791161211228
+            },
+            {
+                "angle": -0.3651345721503389,
+                "angle_ci": [
+                    -0.36513471308764756,
+                    -0.36513443121303024
+                ],
+                "count": 1685,
+                "dependencies": [],
+                "hash": 4417271260593674456,
+                "hough_votes": 6086.97138201725,
+                "id": 1,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.2335723150088135,
+                "lower_min_theoretical_angle": -0.3647421678890884,
+                "offset": 0.03948823060331996,
+                "offset_ci": [
+                    0.03948767681842206,
+                    0.03948878438821787
+                ],
+                "uncertainty": -40341.6078224711,
+                "upper_max_theoretical_angle": -0.23356832156755364,
+                "upper_min_theoretical_angle": -0.3647418750041696
+            },
+            {
+                "angle": -0.3597237510464263,
+                "angle_ci": [
+                    -0.359723904754539,
+                    -0.35972359733831355
+                ],
+                "count": 1608,
+                "dependencies": [],
+                "hash": 2067238943929897415,
+                "hough_votes": 5982.906011988575,
+                "id": 2,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.22819931534276972,
+                "lower_min_theoretical_angle": -0.3593314717150781,
+                "offset": 0.03947701041652372,
+                "offset_ci": [
+                    0.03947639429092857,
+                    0.039477626542118865
+                ],
+                "uncertainty": -38495.24304817204,
+                "upper_max_theoretical_angle": -0.2281948785618055,
+                "upper_min_theoretical_angle": -0.359331152049099
+            },
+            {
+                "angle": -0.3544863338363191,
+                "angle_ci": [
+                    -0.35448656282378094,
+                    -0.3544861048488573
+                ],
+                "count": 1508,
+                "dependencies": [],
+                "hash": 8671528980580945523,
+                "hough_votes": 6308.768722167839,
+                "id": 3,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.22306365024829336,
+                "lower_min_theoretical_angle": -0.35409443141059643,
+                "offset": 0.03944703121036137,
+                "offset_ci": [
+                    0.03944605251026925,
+                    0.03944800991045348
+                ],
+                "uncertainty": -36634.51811090683,
+                "upper_max_theoretical_angle": -0.223056632967942,
+                "upper_min_theoretical_angle": -0.35409395397724563
+            },
+            {
+                "angle": -0.34855235569263066,
+                "angle_ci": [
+                    -0.3485525133536614,
+                    -0.3485521980315999
+                ],
+                "count": 1542,
+                "dependencies": [],
+                "hash": 7947276441955502157,
+                "hough_votes": 5807.976762872141,
+                "id": 4,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.21717216675162793,
+                "lower_min_theoretical_angle": -0.348160508214454,
+                "offset": 0.039433994887296174,
+                "offset_ci": [
+                    0.039433350111258494,
+                    0.039434639663333854
+                ],
+                "uncertainty": -36854.85301402795,
+                "upper_max_theoretical_angle": -0.2171675301276893,
+                "upper_min_theoretical_angle": -0.34816018007301336
+            },
+            {
+                "angle": -0.3434902758204235,
+                "angle_ci": [
+                    -0.34349043030151893,
+                    -0.3434901213393281
+                ],
+                "count": 1670,
+                "dependencies": [],
+                "hash": 5791210635865896261,
+                "hough_votes": 6574.821412488314,
+                "id": 5,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.21211764897592836,
+                "lower_min_theoretical_angle": -0.34309844760513686,
+                "offset": 0.03943174481608764,
+                "offset_ci": [
+                    0.03943109249865084,
+                    0.03943239713352444
+                ],
+                "uncertainty": -40236.21799556687,
+                "upper_max_theoretical_angle": -0.21211296817360872,
+                "upper_min_theoretical_angle": -0.34309812567362946
+            },
+            {
+                "angle": -0.3380792206689685,
+                "angle_ci": [
+                    -0.338079377676336,
+                    -0.338079063661601
+                ],
+                "count": 1613,
+                "dependencies": [],
+                "hash": 3286552401794000177,
+                "hough_votes": 6503.174476803622,
+                "id": 6,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.20676379087227612,
+                "lower_min_theoretical_angle": -0.33768756465149985,
+                "offset": 0.03941469982999447,
+                "offset_ci": [
+                    0.039414024566467136,
+                    0.03941537509352181
+                ],
+                "uncertainty": -39046.910577018585,
+                "upper_max_theoretical_angle": -0.20675895126655727,
+                "upper_min_theoretical_angle": -0.33768723721123617
+            },
+            {
+                "angle": -0.33266767091470184,
+                "angle_ci": [
+                    -0.3326678618765811,
+                    -0.3326674799528226
+                ],
+                "count": 1481,
+                "dependencies": [],
+                "hash": 14047837177355502575,
+                "hough_votes": 6452.095137303717,
+                "id": 7,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.20146316465307887,
+                "lower_min_theoretical_angle": -0.3322763778170876,
+                "offset": 0.039381791610444895,
+                "offset_ci": [
+                    0.03938093264095193,
+                    0.03938265057993786
+                ],
+                "uncertainty": -36567.32458754339,
+                "upper_max_theoretical_angle": -0.20145702603161408,
+                "upper_min_theoretical_angle": -0.3322759788153749
+            },
+            {
+                "angle": -0.3267337635640866,
+                "angle_ci": [
+                    -0.3267339297328511,
+                    -0.32673359739532215
+                ],
+                "count": 1387,
+                "dependencies": [],
+                "hash": 11796811432341415760,
+                "hough_votes": 5697.1281811023,
+                "id": 8,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.195588397709996,
+                "lower_min_theoretical_angle": -0.3263426211949785,
+                "offset": 0.039364004996745215,
+                "offset_ci": [
+                    0.03936327622657549,
+                    0.03936473376691494
+                ],
+                "uncertainty": -33595.79604061961,
+                "upper_max_theoretical_angle": -0.1955831812914736,
+                "upper_min_theoretical_angle": -0.3263422743681066
+            },
+            {
+                "angle": -0.3214969267127464,
+                "angle_ci": [
+                    -0.32149708295119944,
+                    -0.3214967704742933
+                ],
+                "count": 1676,
+                "dependencies": [],
+                "hash": 1023918207985597316,
+                "hough_votes": 7270.542588396476,
+                "id": 9,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.1903818818391143,
+                "lower_min_theoretical_angle": -0.3211058643946332,
+                "offset": 0.0393549385574536,
+                "offset_ci": [
+                    0.039354224650914656,
+                    0.03935565246399255
+                ],
+                "uncertainty": -41009.80513260979,
+                "upper_max_theoretical_angle": -0.1903767849136513,
+                "upper_min_theoretical_angle": -0.3211055377239015
+            },
+            {
+                "angle": -0.31608565214566137,
+                "angle_ci": [
+                    -0.3160858123414028,
+                    -0.3160854919499199
+                ],
+                "count": 1616,
+                "dependencies": [],
+                "hash": 11525381766256535024,
+                "hough_votes": 7257.405322373049,
+                "id": 10,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.18504785986409492,
+                "lower_min_theoretical_angle": -0.31569482295640433,
+                "offset": 0.03933192194314984,
+                "offset_ci": [
+                    0.039331171376091024,
+                    0.03933267251020866
+                ],
+                "uncertainty": -39942.95780078748,
+                "upper_max_theoretical_angle": -0.1850425093842569,
+                "upper_min_theoretical_angle": -0.3156944876422147
+            },
+            {
+                "angle": -0.31067311269566683,
+                "angle_ci": [
+                    -0.31067326663693323,
+                    -0.31067295875440043
+                ],
+                "count": 1730,
+                "dependencies": [],
+                "hash": 11846915546009901355,
+                "hough_votes": 8276.389726173997,
+                "id": 11,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.17977579568987392,
+                "lower_min_theoretical_angle": -0.3102826940209101,
+                "offset": 0.039290000447920394,
+                "offset_ci": [
+                    0.039289246935712285,
+                    0.0392907539601285
+                ],
+                "uncertainty": -44044.31241557079,
+                "upper_max_theoretical_angle": -0.17977043807486628,
+                "upper_min_theoretical_angle": -0.3102823711571154
+            },
+            {
+                "angle": -0.3045645250430308,
+                "angle_ci": [
+                    -0.3045646844676288,
+                    -0.30456436561843275
+                ],
+                "count": 1510,
+                "dependencies": [],
+                "hash": 7220934662980774115,
+                "hough_votes": 7157.924677940179,
+                "id": 12,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.17374927551899344,
+                "lower_min_theoretical_angle": -0.30417435530991666,
+                "offset": 0.03926553594652002,
+                "offset_ci": [
+                    0.03926475650084564,
+                    0.0392663153921944
+                ],
+                "uncertainty": -38014.791810226074,
+                "upper_max_theoretical_angle": -0.17374373319813052,
+                "upper_min_theoretical_angle": -0.3041740209638519
+            },
+            {
+                "angle": -0.29915210003342946,
+                "angle_ci": [
+                    -0.2991521804278501,
+                    -0.29915201963900884
+                ],
+                "count": 1732,
+                "dependencies": [],
+                "hash": 5576529163799640596,
+                "hough_votes": 8611.744356691985,
+                "id": 13,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.1684071921222926,
+                "lower_min_theoretical_angle": -0.2987620601934292,
+                "offset": 0.039244148073802596,
+                "offset_ci": [
+                    0.039243740080263996,
+                    0.039244556067341195
+                ],
+                "uncertainty": -46546.00051847561,
+                "upper_max_theoretical_angle": -0.16840429718189928,
+                "upper_min_theoretical_angle": -0.29876189129289715
+            },
+            {
+                "angle": -0.2937415048937726,
+                "angle_ci": [
+                    -0.2937415709687256,
+                    -0.2937414388188196
+                ],
+                "count": 1746,
+                "dependencies": [],
+                "hash": 15283608266526405259,
+                "hough_votes": 8783.262560690144,
+                "id": 14,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.1630792387451018,
+                "lower_min_theoretical_angle": -0.2933516959600471,
+                "offset": 0.03921941159233982,
+                "offset_ci": [
+                    0.03921907185247708,
+                    0.039219751332202554
+                ],
+                "uncertainty": -47460.16697621071,
+                "upper_max_theoretical_angle": -0.1630768298675904,
+                "upper_min_theoretical_angle": -0.29335155705546373
+            },
+            {
+                "angle": -0.2879816826328224,
+                "angle_ci": [
+                    -0.28798173928290144,
+                    -0.2879816259827434
+                ],
+                "count": 1765,
+                "dependencies": [],
+                "hash": 5986777761795328342,
+                "hough_votes": 9076.703008611026,
+                "id": 15,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.15745058226046138,
+                "lower_min_theoretical_angle": -0.28759225345294076,
+                "offset": 0.03918022015853364,
+                "offset_ci": [
+                    0.039179922825264175,
+                    0.0391805174918031
+                ],
+                "uncertainty": -48634.55608263459,
+                "upper_max_theoretical_angle": -0.15744847644997115,
+                "upper_min_theoretical_angle": -0.2875921342412294
+            },
+            {
+                "angle": -0.2820476512624856,
+                "angle_ci": [
+                    -0.28204771170331455,
+                    -0.28204759082165665
+                ],
+                "count": 1753,
+                "dependencies": [],
+                "hash": 4082874290693392429,
+                "hough_votes": 8926.220447716532,
+                "id": 16,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.15161305167752703,
+                "lower_min_theoretical_angle": -0.2816585121709037,
+                "offset": 0.03915144009753416,
+                "offset_ci": [
+                    0.03915112302183589,
+                    0.039151757173232424
+                ],
+                "uncertainty": -47329.75809661014,
+                "upper_max_theoretical_angle": -0.15161080601309185,
+                "upper_min_theoretical_angle": -0.2816583849851753
+            },
+            {
+                "angle": -0.27646259427610775,
+                "angle_ci": [
+                    -0.2764626655071165,
+                    -0.276462523045099
+                ],
+                "count": 1837,
+                "dependencies": [],
+                "hash": 11690679734262947944,
+                "hough_votes": 9480.450868440246,
+                "id": 17,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.14609005137713638,
+                "lower_min_theoretical_angle": -0.2760736500609809,
+                "offset": 0.039132984360647,
+                "offset_ci": [
+                    0.03913260505497473,
+                    0.039133363666319275
+                ],
+                "uncertainty": -48801.14570923259,
+                "upper_max_theoretical_angle": -0.1460873671384135,
+                "upper_min_theoretical_angle": -0.27607350005764214
+            },
+            {
+                "angle": -0.27105220446992395,
+                "angle_ci": [
+                    -0.2710522842459505,
+                    -0.2710521246938974
+                ],
+                "count": 1913,
+                "dependencies": [],
+                "hash": 15954308565422941775,
+                "hough_votes": 9971.428147560415,
+                "id": 18,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.14077496017267363,
+                "lower_min_theoretical_angle": -0.270663551522343,
+                "offset": 0.03910459549561498,
+                "offset_ci": [
+                    0.039104164877122205,
+                    0.03910502611410775
+                ],
+                "uncertainty": -50057.777708108115,
+                "upper_max_theoretical_angle": -0.14077191502599784,
+                "upper_min_theoretical_angle": -0.2706633834087718
+            },
+            {
+                "angle": -0.26529250446995234,
+                "angle_ci": [
+                    -0.2652925805608816,
+                    -0.26529242837902306
+                ],
+                "count": 1899,
+                "dependencies": [],
+                "hash": 3167682126772001327,
+                "hough_votes": 10046.796356135388,
+                "id": 19,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.1351589023499921,
+                "lower_min_theoretical_angle": -0.2649042740365899,
+                "offset": 0.03906170885653618,
+                "offset_ci": [
+                    0.039061291801443444,
+                    0.03906212591162892
+                ],
+                "uncertainty": -49856.36797375529,
+                "upper_max_theoretical_angle": -0.1351559555150726,
+                "upper_min_theoretical_angle": -0.2649041135628795
+            },
+            {
+                "angle": -0.25918372653213745,
+                "angle_ci": [
+                    -0.25918379881164577,
+                    -0.2591836542526291
+                ],
+                "count": 1735,
+                "dependencies": [],
+                "hash": 1400949068552847168,
+                "hough_votes": 9256.500878240178,
+                "id": 20,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.1291716586789788,
+                "lower_min_theoretical_angle": -0.2587958528988178,
+                "offset": 0.03902541697879154,
+                "offset_ci": [
+                    0.03902501646733374,
+                    0.039025817490249345
+                ],
+                "uncertainty": -45739.30887922998,
+                "upper_max_theoretical_angle": -0.1291688303671734,
+                "upper_min_theoretical_angle": -0.25879570037686844
+            },
+            {
+                "angle": -0.2535982504463061,
+                "angle_ci": [
+                    -0.25359830714363607,
+                    -0.2535981937489761
+                ],
+                "count": 1887,
+                "dependencies": [],
+                "hash": 3929648930252488453,
+                "hough_votes": 10368.281118902512,
+                "id": 21,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.12367510580130311,
+                "lower_min_theoretical_angle": -0.25321062512167414,
+                "offset": 0.03899879316061452,
+                "offset_ci": [
+                    0.038998470640879815,
+                    0.03899911568034922
+                ],
+                "uncertainty": -50706.21933790943,
+                "upper_max_theoretical_angle": -0.12367283128708192,
+                "upper_min_theoretical_angle": -0.2532105053147058
+            },
+            {
+                "angle": -0.24801311247747135,
+                "angle_ci": [
+                    -0.24801316639473397,
+                    -0.24801305856020872
+                ],
+                "count": 1901,
+                "dependencies": [],
+                "hash": 14714764597712287041,
+                "hough_votes": 10585.931803753665,
+                "id": 22,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.11820922694638161,
+                "lower_min_theoretical_angle": -0.24762583824032977,
+                "offset": 0.0389631851515446,
+                "offset_ci": [
+                    0.03896287370295429,
+                    0.038963496600134914
+                ],
+                "uncertainty": -51132.52114643362,
+                "upper_max_theoretical_angle": -0.11820703220962475,
+                "upper_min_theoretical_angle": -0.24762572421361168
+            },
+            {
+                "angle": -0.24225334987034203,
+                "angle_ci": [
+                    -0.24225339944877208,
+                    -0.24225330029191197
+                ],
+                "count": 1881,
+                "dependencies": [],
+                "hash": 7136885744985217412,
+                "hough_votes": 10763.614539118766,
+                "id": 23,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.1126092239359675,
+                "lower_min_theoretical_angle": -0.2418665453460645,
+                "offset": 0.038915480052444426,
+                "offset_ci": [
+                    0.038915186966908696,
+                    0.038915773137980156
+                ],
+                "uncertainty": -51196.244704770696,
+                "upper_max_theoretical_angle": -0.1126071609618845,
+                "upper_min_theoretical_angle": -0.24186644036210414
+            },
+            {
+                "angle": -0.23597037017310724,
+                "angle_ci": [
+                    -0.23597042230215165,
+                    -0.23597031804406282
+                ],
+                "count": 1804,
+                "dependencies": [],
+                "hash": 5726764503066105072,
+                "hough_votes": 10371.506255167666,
+                "id": 24,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.10646356911343072,
+                "lower_min_theoretical_angle": -0.235583975670262,
+                "offset": 0.03887450941055031,
+                "offset_ci": [
+                    0.03887419786490837,
+                    0.03887482095619225
+                ],
+                "uncertainty": -48610.241777419884,
+                "upper_max_theoretical_angle": -0.10646137738366585,
+                "upper_min_theoretical_angle": -0.2355838652180508
+            },
+            {
+                "angle": -0.23038528489175078,
+                "angle_ci": [
+                    -0.23038533808781553,
+                    -0.23038523169568603
+                ],
+                "count": 1929,
+                "dependencies": [],
+                "hash": 15226584247397689011,
+                "hough_votes": 11252.040625760328,
+                "id": 25,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.10097997815620066,
+                "lower_min_theoretical_angle": -0.22999919261732812,
+                "offset": 0.03884422633836213,
+                "offset_ci": [
+                    0.03884390284771567,
+                    0.0388445498290086
+                ],
+                "uncertainty": -51602.15527933834,
+                "upper_max_theoretical_angle": -0.10097770428504968,
+                "upper_min_theoretical_angle": -0.22999907979358672
+            },
+            {
+                "angle": -0.22462566635353898,
+                "angle_ci": [
+                    -0.2246257188478568,
+                    -0.22462561385922117
+                ],
+                "count": 1862,
+                "dependencies": [],
+                "hash": 12612079675927221635,
+                "hough_votes": 11148.483682824746,
+                "id": 26,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.09535961480731664,
+                "lower_min_theoretical_angle": -0.2242399865984789,
+                "offset": 0.03880266281255177,
+                "offset_ci": [
+                    0.03880233530112164,
+                    0.0388029903239819
+                ],
+                "uncertainty": -49945.132243797896,
+                "upper_max_theoretical_angle": -0.09535731543901049,
+                "upper_min_theoretical_angle": -0.22423987509829052
+            },
+            {
+                "angle": -0.2188659932080303,
+                "angle_ci": [
+                    -0.21886604546187097,
+                    -0.21886594095418963
+                ],
+                "count": 1872,
+                "dependencies": [],
+                "hash": 4996903526697957904,
+                "hough_votes": 11478.975950248072,
+                "id": 27,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.08977236112167608,
+                "lower_min_theoretical_angle": -0.21848082485262912,
+                "offset": 0.03875120153305716,
+                "offset_ci": [
+                    0.03875086739518026,
+                    0.03875153567093406
+                ],
+                "uncertainty": -50176.46287976886,
+                "upper_max_theoretical_angle": -0.08977001788619401,
+                "upper_min_theoretical_angle": -0.21848071370164862
+            },
+            {
+                "angle": -0.21258282463225533,
+                "angle_ci": [
+                    -0.21258287573078485,
+                    -0.21258277353372582
+                ],
+                "count": 1834,
+                "dependencies": [],
+                "hash": 15125635474510284499,
+                "hough_votes": 11445.05791193106,
+                "id": 28,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.08364925920991356,
+                "lower_min_theoretical_angle": -0.21219813011882102,
+                "offset": 0.03870341922460624,
+                "offset_ci": [
+                    0.03870308553932172,
+                    0.03870375290989076
+                ],
+                "uncertainty": -49089.41196400662,
+                "upper_max_theoretical_angle": -0.08364692136385563,
+                "upper_min_theoretical_angle": -0.2121980212874612
+            },
+            {
+                "angle": -0.2068230883428711,
+                "angle_ci": [
+                    -0.20682313818838607,
+                    -0.20682303849735614
+                ],
+                "count": 1970,
+                "dependencies": [],
+                "hash": 17218891254055358119,
+                "hough_votes": 12507.83015706667,
+                "id": 29,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.0780182321050456,
+                "lower_min_theoretical_angle": -0.20643877452859943,
+                "offset": 0.03866499495689424,
+                "offset_ci": [
+                    0.03866466345834788,
+                    0.038665326455440595
+                ],
+                "uncertainty": -52638.756949950395,
+                "upper_max_theoretical_angle": -0.07801591145293132,
+                "upper_min_theoretical_angle": -0.20643866824674525
+            },
+            {
+                "angle": -0.201063445788153,
+                "angle_ci": [
+                    -0.2010634935126728,
+                    -0.2010633980636332
+                ],
+                "count": 1961,
+                "dependencies": [],
+                "hash": 13409182202463412804,
+                "hough_votes": 12783.718344443916,
+                "id": 30,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.07241602577514658,
+                "lower_min_theoretical_angle": -0.2006795970646709,
+                "offset": 0.03861799080478738,
+                "offset_ci": [
+                    0.03861766477605232,
+                    0.03861831683352244
+                ],
+                "uncertainty": -52547.595305143404,
+                "upper_max_theoretical_angle": -0.0724137460559714,
+                "upper_min_theoretical_angle": -0.20067949513355732
+            },
+            {
+                "angle": -0.19530371299808807,
+                "angle_ci": [
+                    -0.1953037590070277,
+                    -0.19530366698914844
+                ],
+                "count": 1955,
+                "dependencies": [],
+                "hash": 14200013315694297080,
+                "hough_votes": 13114.868678208935,
+                "id": 31,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.06684508410981083,
+                "lower_min_theoretical_angle": -0.19492042283050598,
+                "offset": 0.03856162768687151,
+                "offset_ci": [
+                    0.03856130485071934,
+                    0.038561950523023684
+                ],
+                "uncertainty": -52637.75715934923,
+                "upper_max_theoretical_angle": -0.06684282926368965,
+                "upper_min_theoretical_angle": -0.19492032439402743
+            },
+            {
+                "angle": -0.1888457903676943,
+                "angle_ci": [
+                    -0.18884583386716808,
+                    -0.18884574686822053
+                ],
+                "count": 1936,
+                "dependencies": [],
+                "hash": 9704622882820482736,
+                "hough_votes": 13451.378026729233,
+                "id": 32,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.060576913566109086,
+                "lower_min_theoretical_angle": -0.18846306083005096,
+                "offset": 0.03850497193588158,
+                "offset_ci": [
+                    0.03850465642950978,
+                    0.03850528744225338
+                ],
+                "uncertainty": -52476.44339186449,
+                "upper_max_theoretical_angle": -0.06057471289627453,
+                "upper_min_theoretical_angle": -0.18846296755823413
+            },
+            {
+                "angle": -0.18326047931427322,
+                "angle_ci": [
+                    -0.18326051795872236,
+                    -0.18326044066982408
+                ],
+                "count": 1958,
+                "dependencies": [],
+                "hash": 9137103689502277607,
+                "hough_votes": 13937.22715532907,
+                "id": 33,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.055138748639042945,
+                "lower_min_theoretical_angle": -0.1828781816346985,
+                "offset": 0.03846101329666937,
+                "offset_ci": [
+                    0.0384607257312543,
+                    0.03846130086208444
+                ],
+                "uncertainty": -53451.428359339814,
+                "upper_max_theoretical_angle": -0.055136744900589896,
+                "upper_min_theoretical_angle": -0.1828780986284505
+            },
+            {
+                "angle": -0.1773262954804079,
+                "angle_ci": [
+                    -0.17732633151696572,
+                    -0.17732625944385008
+                ],
+                "count": 1964,
+                "dependencies": [],
+                "hash": 12866994580771080812,
+                "hough_votes": 14219.538186654163,
+                "id": 34,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.04938584968499668,
+                "lower_min_theoretical_angle": -0.17694453322737128,
+                "offset": 0.03840687536923915,
+                "offset_ci": [
+                    0.03840660271882233,
+                    0.03840714801965597
+                ],
+                "uncertainty": -53900.32977591525,
+                "upper_max_theoretical_angle": -0.049383951123072034,
+                "upper_min_theoretical_angle": -0.1769444557334446
+            },
+            {
+                "angle": -0.17139214006150513,
+                "angle_ci": [
+                    -0.17139217426981954,
+                    -0.17139210585319073
+                ],
+                "count": 1977,
+                "dependencies": [],
+                "hash": 8032726108334421486,
+                "hough_votes": 14605.392855517755,
+                "id": 35,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.04365826784946855,
+                "lower_min_theoretical_angle": -0.17101098908076384,
+                "offset": 0.038345193268960846,
+                "offset_ci": [
+                    0.03834492850938008,
+                    0.03834545802854161
+                ],
+                "uncertainty": -54310.84390256315,
+                "upper_max_theoretical_angle": -0.04365642585194815,
+                "upper_min_theoretical_angle": -0.1710109154002089
+            },
+            {
+                "angle": -0.16493445195201065,
+                "angle_ci": [
+                    -0.16493448650338824,
+                    -0.16493441740063305
+                ],
+                "count": 1984,
+                "dependencies": [],
+                "hash": 10249217349965040896,
+                "hough_votes": 14961.87246163296,
+                "id": 36,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.03740409604753622,
+                "lower_min_theoretical_angle": -0.16455390535056547,
+                "offset": 0.03828444198628756,
+                "offset_ci": [
+                    0.03828416611431799,
+                    0.038284717858257135
+                ],
+                "uncertainty": -53934.73135611027,
+                "upper_max_theoretical_angle": -0.0374021789720802,
+                "upper_min_theoretical_angle": -0.16455383076294863
+            },
+            {
+                "angle": -0.15917479262067946,
+                "angle_ci": [
+                    -0.15917482782510248,
+                    -0.15917475741625645
+                ],
+                "count": 1980,
+                "dependencies": [],
+                "hash": 13746833793407661544,
+                "hough_votes": 15497.567808728249,
+                "id": 37,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.031813361489920894,
+                "lower_min_theoretical_angle": -0.15879474805174856,
+                "offset": 0.038234020594058206,
+                "offset_ci": [
+                    0.03823373036939379,
+                    0.038234310818722625
+                ],
+                "uncertainty": -54000.61093199544,
+                "upper_max_theoretical_angle": -0.03181134700661242,
+                "upper_min_theoretical_angle": -0.15879467187268187
+            },
+            {
+                "angle": -0.15324050717716342,
+                "angle_ci": [
+                    -0.15324054348683416,
+                    -0.15324047086749268
+                ],
+                "count": 1924,
+                "dependencies": [],
+                "hash": 14365630878754959592,
+                "hough_votes": 15722.121730703226,
+                "id": 38,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.0260818208546571,
+                "lower_min_theoretical_angle": -0.15286106548632655,
+                "offset": 0.03817350650865489,
+                "offset_ci": [
+                    0.03817319565732225,
+                    0.03817381735998753
+                ],
+                "uncertainty": -52698.155827107825,
+                "upper_max_theoretical_angle": -0.026079666046790462,
+                "upper_min_theoretical_angle": -0.15286098668666687
+            },
+            {
+                "angle": -0.14730635951651844,
+                "angle_ci": [
+                    -0.14730639452774302,
+                    -0.14730632450529385
+                ],
+                "count": 1934,
+                "dependencies": [],
+                "hash": 6513901682068886077,
+                "hough_votes": 16285.054927639512,
+                "id": 39,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.020369503473167683,
+                "lower_min_theoretical_angle": -0.1469275749735436,
+                "offset": 0.038107269475293276,
+                "offset_ci": [
+                    0.038106959937421775,
+                    0.03810757901316478
+                ],
+                "uncertainty": -52990.93175727226,
+                "upper_max_theoretical_angle": -0.02036736011895729,
+                "upper_min_theoretical_angle": -0.14692749879689038
+            },
+            {
+                "angle": -0.14102318438767486,
+                "angle_ci": [
+                    -0.14102321742489127,
+                    -0.14102315135045845
+                ],
+                "count": 1964,
+                "dependencies": [],
+                "hash": 11957896896216831040,
+                "hough_votes": 16803.601159847203,
+                "id": 40,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.014304373108471241,
+                "lower_min_theoretical_angle": -0.14064504510090742,
+                "offset": 0.03804215080101235,
+                "offset_ci": [
+                    0.03804185248865293,
+                    0.03804244911337177
+                ],
+                "uncertainty": -53748.67780407671,
+                "upper_max_theoretical_angle": -0.014302308948030057,
+                "upper_min_theoretical_angle": -0.14064497309545515
+            },
+            {
+                "angle": -0.13491440923434037,
+                "angle_ci": [
+                    -0.13491443921725849,
+                    -0.13491437925142225
+                ],
+                "count": 1968,
+                "dependencies": [],
+                "hash": 1911677644394329152,
+                "hough_votes": 17535.934446607163,
+                "id": 41,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.008399068825223038,
+                "lower_min_theoretical_angle": -0.134536870883086,
+                "offset": 0.037981379967248485,
+                "offset_ci": [
+                    0.03798109476325059,
+                    0.03798166517124638
+                ],
+                "uncertainty": -53783.76888043723,
+                "upper_max_theoretical_angle": -0.00839709862222715,
+                "upper_min_theoretical_angle": -0.13453680524684955
+            },
+            {
+                "angle": -0.12898022508046722,
+                "angle_ci": [
+                    -0.12898025380336084,
+                    -0.1289801963575736
+                ],
+                "count": 1969,
+                "dependencies": [],
+                "hash": 1957203266269082815,
+                "hough_votes": 18299.107296957474,
+                "id": 42,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": -0.0026829552223690267,
+                "lower_min_theoretical_angle": -0.12860333280856323,
+                "offset": 0.03791626382270917,
+                "offset_ci": [
+                    0.037915976333681815,
+                    0.037916551311736525
+                ],
+                "uncertainty": -53673.91067789179,
+                "upper_max_theoretical_angle": -0.00268097228813044,
+                "upper_min_theoretical_angle": -0.12860326964694505
+            },
+            {
+                "angle": -0.12304600055110658,
+                "angle_ci": [
+                    -0.12304602625235893,
+                    -0.12304597484985423
+                ],
+                "count": 1940,
+                "dependencies": [],
+                "hash": 9716530312864552036,
+                "hough_votes": 18905.635863671414,
+                "id": 43,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.0030111388416644985,
+                "lower_min_theoretical_angle": -0.12266981810706865,
+                "offset": 0.03784453604920404,
+                "offset_ci": [
+                    0.03784426798061588,
+                    0.0378448041177922
+                ],
+                "uncertainty": -53600.69572241603,
+                "upper_max_theoretical_angle": 0.0030129856074508493,
+                "upper_min_theoretical_angle": -0.12266976137484843
+            },
+            {
+                "angle": -0.11676282264543672,
+                "angle_ci": [
+                    -0.11676284918236418,
+                    -0.11676279610850926
+                ],
+                "count": 1923,
+                "dependencies": [],
+                "hash": 15986312318995633579,
+                "hough_votes": 19285.93716541144,
+                "id": 44,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.009056505131392029,
+                "lower_min_theoretical_angle": -0.11638734701287812,
+                "offset": 0.03777353548301782,
+                "offset_ci": [
+                    0.0377732510805295,
+                    0.037773819885506134
+                ],
+                "uncertainty": -53071.54318044149,
+                "upper_max_theoretical_angle": 0.0090584629058989,
+                "upper_min_theoretical_angle": -0.11638728828455855
+            },
+            {
+                "angle": -0.11065413479919042,
+                "angle_ci": [
+                    -0.11065415870093041,
+                    -0.11065411089745043
+                ],
+                "count": 1978,
+                "dependencies": [],
+                "hash": 17081185758278824005,
+                "hough_votes": 20460.523072343756,
+                "id": 45,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.014942108017430303,
+                "lower_min_theoretical_angle": -0.11027931881864343,
+                "offset": 0.03770689645638377,
+                "offset_ci": [
+                    0.03770662899011711,
+                    0.03770716392265042
+                ],
+                "uncertainty": -54527.75189229528,
+                "upper_max_theoretical_angle": 0.014943947045767195,
+                "upper_min_theoretical_angle": -0.11027926569742325
+            },
+            {
+                "angle": -0.10489448623498905,
+                "angle_ci": [
+                    -0.1048945066778699,
+                    -0.1048944657921082
+                ],
+                "count": 2022,
+                "dependencies": [],
+                "hash": 4401713535652771141,
+                "hough_votes": 21868.503784873606,
+                "id": 46,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.02047197602795897,
+                "lower_min_theoretical_angle": -0.10452034898215021,
+                "offset": 0.03763824717139459,
+                "offset_ci": [
+                    0.037638005143485545,
+                    0.03763848919930364
+                ],
+                "uncertainty": -55988.20241251682,
+                "upper_max_theoretical_angle": 0.020473637730586497,
+                "upper_min_theoretical_angle": -0.10452030328441143
+            },
+            {
+                "angle": -0.09878581275356425,
+                "angle_ci": [
+                    -0.09878583142189727,
+                    -0.09878579408523123
+                ],
+                "count": 2024,
+                "dependencies": [],
+                "hash": 6183647373995651120,
+                "hough_votes": 22446.539404219668,
+                "id": 47,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.026320939333193002,
+                "lower_min_theoretical_angle": -0.09841244478708241,
+                "offset": 0.037560665505521194,
+                "offset_ci": [
+                    0.037560441075489136,
+                    0.03756088993555325
+                ],
+                "uncertainty": -56696.75565550136,
+                "upper_max_theoretical_angle": 0.026322479587792366,
+                "upper_min_theoretical_angle": -0.09841240298831871
+            },
+            {
+                "angle": -0.09232806611187798,
+                "angle_ci": [
+                    -0.09232808317958986,
+                    -0.0923280490441661
+                ],
+                "count": 1943,
+                "dependencies": [],
+                "hash": 10413002164283664908,
+                "hough_votes": 21757.298245761092,
+                "id": 48,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.032512785410564,
+                "lower_min_theoretical_angle": -0.09195548600994866,
+                "offset": 0.03748123068017539,
+                "offset_ci": [
+                    0.03748102564923252,
+                    0.03748143571111826
+                ],
+                "uncertainty": -55192.895168317125,
+                "upper_max_theoretical_angle": 0.0325141925101234,
+                "upper_min_theoretical_angle": -0.09195544779811816
+            },
+            {
+                "angle": -0.08639384994836787,
+                "angle_ci": [
+                    -0.08639385877949152,
+                    -0.08639384111724421
+                ],
+                "count": 1941,
+                "dependencies": [],
+                "hash": 6481762169101520572,
+                "hough_votes": 23006.256980586324,
+                "id": 49,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.03820640664815694,
+                "lower_min_theoretical_angle": -0.08602197598483408,
+                "offset": 0.03740927637060341,
+                "offset_ci": [
+                    0.03740916384233813,
+                    0.03740938889886868
+                ],
+                "uncertainty": -57669.01433241073,
+                "upper_max_theoretical_angle": 0.03820717781913806,
+                "upper_min_theoretical_angle": -0.08602195608530995
+            },
+            {
+                "angle": -0.08028516525813553,
+                "angle_ci": [
+                    -0.08028516597462942,
+                    -0.08028516454164164
+                ],
+                "count": 1948,
+                "dependencies": [],
+                "hash": 5204557856897884896,
+                "hough_votes": 23829.78311392471,
+                "id": 50,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.044053539355597526,
+                "lower_min_theoretical_angle": -0.07991405980262394,
+                "offset": 0.037331049713995854,
+                "offset_ci": [
+                    0.037331040296121956,
+                    0.03733105913186975
+                ],
+                "uncertainty": -67677.88587824993,
+                "upper_max_theoretical_angle": 0.04405360385023194,
+                "upper_min_theoretical_angle": -0.07991405818239083
+            },
+            {
+                "angle": -0.07435104360088293,
+                "angle_ci": [
+                    -0.07435104427444854,
+                    -0.07435104292731733
+                ],
+                "count": 1960,
+                "dependencies": [],
+                "hash": 14031276376257359632,
+                "hough_votes": 24942.461998799183,
+                "id": 51,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.049720672705745705,
+                "lower_min_theoretical_angle": -0.07398073086881363,
+                "offset": 0.03725130210123012,
+                "offset_ci": [
+                    0.03725129278933406,
+                    0.03725131141312618
+                ],
+                "uncertainty": -67980.21022816653,
+                "upper_max_theoretical_angle": 0.049720736402822485,
+                "upper_min_theoretical_angle": -0.07398072933654413
+            },
+            {
+                "angle": -0.06771878874390676,
+                "angle_ci": [
+                    -0.06771878938906727,
+                    -0.06771878809874625
+                ],
+                "count": 1860,
+                "dependencies": [],
+                "hash": 10168162763118100672,
+                "hough_votes": 24366.011822048175,
+                "id": 52,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.056060739197269394,
+                "lower_min_theoretical_angle": -0.06734934360634084,
+                "offset": 0.037164024573886546,
+                "offset_ci": [
+                    0.037164015167105914,
+                    0.03716403398066718
+                ],
+                "uncertainty": -64173.349185486484,
+                "upper_max_theoretical_angle": 0.05606080347056512,
+                "upper_min_theoretical_angle": -0.06734934212899507
+            },
+            {
+                "angle": -0.06178466859260927,
+                "angle_ci": [
+                    -0.06178466918653013,
+                    -0.061784667998688404
+                ],
+                "count": 1917,
+                "dependencies": [],
+                "hash": 11058300483984863599,
+                "hough_votes": 26053.9679236855,
+                "id": 53,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.06173666783561193,
+                "lower_min_theoretical_angle": -0.061415990102930355,
+                "offset": 0.037086898853186376,
+                "offset_ci": [
+                    0.03708688986750645,
+                    0.0370869078388663
+                ],
+                "uncertainty": -66374.68428919278,
+                "upper_max_theoretical_angle": 0.06173672918502358,
+                "upper_min_theoretical_angle": -0.061415988736436146
+            },
+            {
+                "angle": -0.055676015211926395,
+                "angle_ci": [
+                    -0.05567601576884556,
+                    -0.05567601465500723
+                ],
+                "count": 1874,
+                "dependencies": [],
+                "hash": 12195306209375869967,
+                "hough_votes": 25853.350224597634,
+                "id": 54,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.06756614066194847,
+                "lower_min_theoretical_angle": -0.05530816573888328,
+                "offset": 0.03700350071919054,
+                "offset_ci": [
+                    0.03700349208084665,
+                    0.037003509357534436
+                ],
+                "uncertainty": -64969.83545175253,
+                "upper_max_theoretical_angle": 0.06756619960984522,
+                "upper_min_theoretical_angle": -0.055308164453298184
+            },
+            {
+                "angle": -0.04974189694452958,
+                "angle_ci": [
+                    -0.04974189747797727,
+                    -0.04974189641108189
+                ],
+                "count": 1879,
+                "dependencies": [],
+                "hash": 14169645188812077157,
+                "hough_votes": 26601.747605514185,
+                "id": 55,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.0732184539232299,
+                "lower_min_theoretical_angle": -0.04937488432425043,
+                "offset": 0.03691931580761585,
+                "offset_ci": [
+                    0.0369193073880739,
+                    0.0369193242271578
+                ],
+                "uncertainty": -65438.36244172933,
+                "upper_max_theoretical_angle": 0.07321851135733057,
+                "upper_min_theoretical_angle": -0.049374883089958486
+            },
+            {
+                "angle": -0.04345871220956807,
+                "angle_ci": [
+                    -0.04345871277079726,
+                    -0.04345871164833887
+                ],
+                "count": 1688,
+                "dependencies": [],
+                "hash": 16344416877205903856,
+                "hough_votes": 23109.931721751895,
+                "id": 56,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.07920593921051619,
+                "lower_min_theoretical_angle": -0.043092577786804385,
+                "offset": 0.03683097742110977,
+                "offset_ci": [
+                    0.03683096881882359,
+                    0.036830986023395955
+                ],
+                "uncertainty": -58707.65756934747,
+                "upper_max_theoretical_angle": 0.07920599792151517,
+                "upper_min_theoretical_angle": -0.04309257649331612
+            },
+            {
+                "angle": -0.03735005777402433,
+                "angle_ci": [
+                    -0.037350058273992244,
+                    -0.037350057274056415
+                ],
+                "count": 1742,
+                "dependencies": [],
+                "hash": 6204425166249104373,
+                "hough_votes": 25074.44005604933,
+                "id": 57,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.08502706831060619,
+                "lower_min_theoretical_angle": -0.0369847772151745,
+                "offset": 0.03674507725417671,
+                "offset_ci": [
+                    0.03674506910567562,
+                    0.0367450854026778
+                ],
+                "uncertainty": -60703.128273827664,
+                "upper_max_theoretical_angle": 0.08502712385925867,
+                "upper_min_theoretical_angle": -0.0369847760532309
+            },
+            {
+                "angle": -0.031415937322230136,
+                "angle_ci": [
+                    -0.031415937804345796,
+                    -0.031415936840114476
+                ],
+                "count": 1688,
+                "dependencies": [],
+                "hash": 15834954766590522928,
+                "hough_votes": 24324.18680484612,
+                "id": 58,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.0906721995033829,
+                "lower_min_theoretical_angle": -0.031051515048727392,
+                "offset": 0.03665873694154246,
+                "offset_ci": [
+                    0.0366587289897174,
+                    0.03665874489336752
+                ],
+                "uncertainty": -58809.96241455829,
+                "upper_max_theoretical_angle": 0.0906722536978278,
+                "upper_min_theoretical_angle": -0.031051513926398603
+            },
+            {
+                "angle": -0.025307284212406463,
+                "angle_ci": [
+                    -0.0253072846764488,
+                    -0.025307283748364127
+                ],
+                "count": 1684,
+                "dependencies": [],
+                "hash": 7728439509020416384,
+                "hough_votes": 25149.317492105438,
+                "id": 59,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.09647566409405385,
+                "lower_min_theoretical_angle": -0.02494376836915569,
+                "offset": 0.03656755378268027,
+                "offset_ci": [
+                    0.036567545764953246,
+                    0.036567561800407294
+                ],
+                "uncertainty": -58610.13587327361,
+                "upper_max_theoretical_angle": 0.09647571869149846,
+                "upper_min_theoretical_angle": -0.024943767281663292
+            },
+            {
+                "angle": -0.018675033542936304,
+                "angle_ci": [
+                    -0.018675034061966904,
+                    -0.018675033023905704
+                ],
+                "count": 1442,
+                "dependencies": [],
+                "hash": 2297022670089346349,
+                "hough_votes": 20304.428162927008,
+                "id": 60,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.10277578694455458,
+                "lower_min_theoretical_angle": -0.01831250425435915,
+                "offset": 0.036468318433028175,
+                "offset_ci": [
+                    0.036468309857003625,
+                    0.036468327009052726
+                ],
+                "uncertainty": -49906.482967471246,
+                "upper_max_theoretical_angle": 0.10277584538679825,
+                "upper_min_theoretical_angle": -0.018312503045790202
+            },
+            {
+                "angle": -0.012740911760259412,
+                "angle_ci": [
+                    -0.012740912192769653,
+                    -0.01274091132774917
+                ],
+                "count": 1557,
+                "dependencies": [],
+                "hash": 17363339489439708061,
+                "hough_votes": 24028.970505662874,
+                "id": 61,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.10840969361905262,
+                "lower_min_theoretical_angle": -0.012379274131221757,
+                "offset": 0.03637861360049233,
+                "offset_ci": [
+                    0.036378605591249995,
+                    0.03637862160973466
+                ],
+                "uncertainty": -54013.82025210225,
+                "upper_max_theoretical_angle": 0.10840974809249974,
+                "upper_min_theoretical_angle": -0.01237927310696224
+            },
+            {
+                "angle": -0.006632257457794826,
+                "angle_ci": [
+                    -0.0066322578121984724,
+                    -0.00663225710339118
+                ],
+                "count": 1557,
+                "dependencies": [],
+                "hash": 5918904349384607280,
+                "hough_votes": 26278.72462880283,
+                "id": 62,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.114202423653264,
+                "lower_min_theoretical_angle": -0.006271558193681434,
+                "offset": 0.036284211349526196,
+                "offset_ci": [
+                    0.03628420389232257,
+                    0.03628421880672982
+                ],
+                "uncertainty": -54143.87136881564,
+                "upper_max_theoretical_angle": 0.11420247427360866,
+                "upper_min_theoretical_angle": -0.006271557336610691
+            },
+            {
+                "angle": -0.0005236041610475413,
+                "angle_ci": [
+                    -0.000523604464032655,
+                    -0.0005236038580624276
+                ],
+                "count": 1637,
+                "dependencies": [],
+                "hash": 16866449504613560691,
+                "hough_votes": 30308.949269563665,
+                "id": 63,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.11999059989863897,
+                "lower_min_theoretical_angle": -0.00016385684914382197,
+                "offset": 0.03618844517319189,
+                "offset_ci": [
+                    0.03618843807920096,
+                    0.03618845226718282
+                ],
+                "uncertainty": -57191.349404481516,
+                "upper_max_theoretical_angle": 0.11999064798329576,
+                "upper_min_theoretical_angle": -0.000163856102131507
+            },
+            {
+                "angle": 0.0057595802996703235,
+                "angle_ci": [
+                    0.005759579965559855,
+                    0.005759580633780792
+                ],
+                "count": 1510,
+                "dependencies": [],
+                "hash": 5706420733619799075,
+                "hough_votes": 26118.888417100894,
+                "id": 64,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.12594041213925122,
+                "lower_min_theoretical_angle": 0.006118337231698635,
+                "offset": 0.036088822256173304,
+                "offset_ci": [
+                    0.036088814978462704,
+                    0.036088829533883905
+                ],
+                "uncertainty": -52624.18414033988,
+                "upper_max_theoretical_angle": 0.12594046151379468,
+                "upper_min_theoretical_angle": 0.006118338044614357
+            },
+            {
+                "angle": 0.01186823340044041,
+                "angle_ci": [
+                    0.011868233114753752,
+                    0.011868233686127069
+                ],
+                "count": 1623,
+                "dependencies": [],
+                "hash": 289562584921011301,
+                "hough_votes": 30560.444538058146,
+                "id": 65,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.13171880612916795,
+                "lower_min_theoretical_angle": 0.012226009240705242,
+                "offset": 0.03599012497252624,
+                "offset_ci": [
+                    0.035990118203466925,
+                    0.03599013174158555
+                ],
+                "uncertainty": -56911.15990235279,
+                "upper_max_theoretical_angle": 0.13171885200089373,
+                "upper_min_theoretical_angle": 0.012226009946660385
+            },
+            {
+                "angle": 0.017976885795131778,
+                "angle_ci": [
+                    0.017976885519276987,
+                    0.017976886070986568
+                ],
+                "count": 1660,
+                "dependencies": [],
+                "hash": 9151328583492751576,
+                "hough_votes": 30913.887717994283,
+                "id": 66,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.1374934622286595,
+                "lower_min_theoretical_angle": 0.018333669362970408,
+                "offset": 0.03589030699765779,
+                "offset_ci": [
+                    0.035890300603433525,
+                    0.03589031339188205
+                ],
+                "uncertainty": -58436.763939828576,
+                "upper_max_theoretical_angle": 0.13749350557050655,
+                "upper_min_theoretical_angle": 0.018333670041809375
+            },
+            {
+                "angle": 0.02408553837219223,
+                "angle_ci": [
+                    0.024085538105103367,
+                    0.02408553863928109
+                ],
+                "count": 1742,
+                "dependencies": [],
+                "hash": 16432395739806011421,
+                "hough_votes": 32895.775327678195,
+                "id": 67,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.14326672131152876,
+                "lower_min_theoretical_angle": 0.02444132547550046,
+                "offset": 0.03579006765228821,
+                "offset_ci": [
+                    0.035790061410237106,
+                    0.035790073894339317
+                ],
+                "uncertainty": -61419.6879010637,
+                "upper_max_theoretical_angle": 0.1432667636158214,
+                "upper_min_theoretical_angle": 0.02444132613378208
+            },
+            {
+                "angle": 0.030543255953897043,
+                "angle_ci": [
+                    0.030543255646571982,
+                    0.030543256261222104
+                ],
+                "count": 1641,
+                "dependencies": [],
+                "hash": 6454551222082900563,
+                "hough_votes": 28182.923476830812,
+                "id": 68,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.14936263052487275,
+                "lower_min_theoretical_angle": 0.0308979680188445,
+                "offset": 0.035681929625788214,
+                "offset_ci": [
+                    0.03568192309370473,
+                    0.0356819361578717
+                ],
+                "uncertainty": -57554.72041021667,
+                "upper_max_theoretical_angle": 0.14936267484856505,
+                "upper_min_theoretical_angle": 0.030897968763364918
+            },
+            {
+                "angle": 0.0366519082513779,
+                "angle_ci": [
+                    0.03665190794513681,
+                    0.036651908557618997
+                ],
+                "count": 1710,
+                "dependencies": [],
+                "hash": 16107880770247280267,
+                "hough_votes": 29958.692027017023,
+                "id": 69,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.15511982580978348,
+                "lower_min_theoretical_angle": 0.03700557603045542,
+                "offset": 0.035576880716320466,
+                "offset_ci": [
+                    0.03557687413535451,
+                    0.035576887297286426
+                ],
+                "uncertainty": -60014.21904584785,
+                "upper_max_theoretical_angle": 0.15511987045655712,
+                "upper_min_theoretical_angle": 0.03700557677377978
+            },
+            {
+                "angle": 0.04258602775434753,
+                "angle_ci": [
+                    0.042586027439055436,
+                    0.04258602806963962
+                ],
+                "count": 1719,
+                "dependencies": [],
+                "hash": 421959858779265261,
+                "hough_votes": 29938.908120192682,
+                "id": 70,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.1607120542235357,
+                "lower_min_theoretical_angle": 0.042938679618833415,
+                "offset": 0.03547468694593567,
+                "offset_ci": [
+                    0.035474680175672096,
+                    0.03547469371619924
+                ],
+                "uncertainty": -60155.1459983239,
+                "upper_max_theoretical_angle": 0.1607121001531911,
+                "upper_min_theoretical_angle": 0.04293868038402337
+            },
+            {
+                "angle": 0.048694680768040635,
+                "angle_ci": [
+                    0.048694680465055915,
+                    0.048694681071025356
+                ],
+                "count": 1767,
+                "dependencies": [],
+                "hash": 10876652815016374306,
+                "hough_votes": 31812.422385247508,
+                "id": 71,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.16647055106280229,
+                "lower_min_theoretical_angle": 0.04904629213737777,
+                "offset": 0.035370018136805056,
+                "offset_ci": [
+                    0.03537001141188798,
+                    0.03537002486172213
+                ],
+                "uncertainty": -61911.30127775838,
+                "upper_max_theoretical_angle": 0.16647059666256758,
+                "upper_min_theoretical_angle": 0.0490462928770514
+            },
+            {
+                "angle": 0.054977865359270614,
+                "angle_ci": [
+                    0.05497786501286356,
+                    0.05497786570567767
+                ],
+                "count": 1681,
+                "dependencies": [],
+                "hash": 2042423187512732498,
+                "hough_votes": 27591.455647273404,
+                "id": 72,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.1723834445311454,
+                "lower_min_theoretical_angle": 0.05532837629894296,
+                "offset": 0.03525932617104858,
+                "offset_ci": [
+                    0.03525931920391981,
+                    0.03525933313817735
+                ],
+                "uncertainty": -58658.961776010976,
+                "upper_max_theoretical_angle": 0.17238349183626023,
+                "upper_min_theoretical_angle": 0.05532837713027689
+            },
+            {
+                "angle": 0.06091198487669835,
+                "angle_ci": [
+                    0.06091198453369623,
+                    0.06091198521970047
+                ],
+                "count": 1769,
+                "dependencies": [],
+                "hash": 15929142841471333013,
+                "hough_votes": 29931.744032148967,
+                "id": 73,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.1779558818542825,
+                "lower_min_theoretical_angle": 0.061261420969968554,
+                "offset": 0.03515120291066335,
+                "offset_ci": [
+                    0.0351511958070304,
+                    0.0351512100142963
+                ],
+                "uncertainty": -61669.89245055606,
+                "upper_max_theoretical_angle": 0.1779559300638195,
+                "upper_min_theoretical_angle": 0.06126142179720658
+            },
+            {
+                "angle": 0.06719517008046168,
+                "angle_ci": [
+                    0.06719516970952194,
+                    0.06719517045140141
+                ],
+                "count": 1773,
+                "dependencies": [],
+                "hash": 13968081533887124240,
+                "hough_votes": 29599.62063747789,
+                "id": 74,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.1838589851021145,
+                "lower_min_theoretical_angle": 0.06754347656627828,
+                "offset": 0.03503757450635312,
+                "offset_ci": [
+                    0.03503756693202971,
+                    0.03503758208067653
+                ],
+                "uncertainty": -61549.44231423586,
+                "upper_max_theoretical_angle": 0.1838590365142002,
+                "upper_min_theoretical_angle": 0.06754347745874976
+            },
+            {
+                "angle": 0.07312928977064437,
+                "angle_ci": [
+                    0.07312928942639675,
+                    0.07312929011489198
+                ],
+                "count": 1836,
+                "dependencies": [],
+                "hash": 17531983224042348464,
+                "hough_votes": 30967.473664756384,
+                "id": 75,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.1894391841751676,
+                "lower_min_theoretical_angle": 0.0734765444080792,
+                "offset": 0.034931761742312835,
+                "offset_ci": [
+                    0.034931754654415906,
+                    0.034931768830209764
+                ],
+                "uncertainty": -63970.3241726399,
+                "upper_max_theoretical_angle": 0.18943923227784182,
+                "upper_min_theoretical_angle": 0.07347654523749536
+            },
+            {
+                "angle": 0.0794124744803087,
+                "angle_ci": [
+                    0.07941247410960701,
+                    0.0794124748510104
+                ],
+                "count": 1732,
+                "dependencies": [],
+                "hash": 15898413490084249200,
+                "hough_votes": 27130.524480968328,
+                "id": 76,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.19533410343232296,
+                "lower_min_theoretical_angle": 0.0797585750912705,
+                "offset": 0.03481567634439384,
+                "offset_ci": [
+                    0.034815669224262866,
+                    0.03481568346452481
+                ],
+                "uncertainty": -60172.82452216429,
+                "upper_max_theoretical_angle": 0.19533415180137653,
+                "upper_min_theoretical_angle": 0.07975857597423568
+            },
+            {
+                "angle": 0.08552112697628168,
+                "angle_ci": [
+                    0.08552112657164702,
+                    0.08552112738091634
+                ],
+                "count": 1790,
+                "dependencies": [],
+                "hash": 4358188504654610973,
+                "hough_votes": 27829.59888810364,
+                "id": 77,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.20105006878917941,
+                "lower_min_theoretical_angle": 0.08586606035813683,
+                "offset": 0.03469826406655754,
+                "offset_ci": [
+                    0.03469825644121559,
+                    0.034698271691899485
+                ],
+                "uncertainty": -61985.71858176467,
+                "upper_max_theoretical_angle": 0.20105012060320449,
+                "upper_min_theoretical_angle": 0.0858660613190125
+            },
+            {
+                "angle": 0.09162977971633862,
+                "angle_ci": [
+                    0.09162977930682949,
+                    0.09162978012584776
+                ],
+                "count": 1807,
+                "dependencies": [],
+                "hash": 11305468557424255934,
+                "hough_votes": 27815.310244546385,
+                "id": 78,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.20677179294322734,
+                "lower_min_theoretical_angle": 0.09197356296234621,
+                "offset": 0.03458256788203054,
+                "offset_ci": [
+                    0.03458256021361186,
+                    0.03458257555044922
+                ],
+                "uncertainty": -62475.840710492,
+                "upper_max_theoretical_angle": 0.2067718450528359,
+                "upper_min_theoretical_angle": 0.0919735639338273
+            },
+            {
+                "angle": 0.09773843235011553,
+                "angle_ci": [
+                    0.0977384319421958,
+                    0.09773843275803527
+                ],
+                "count": 1854,
+                "dependencies": [],
+                "hash": 7105818688840897339,
+                "hough_votes": 28657.2733980888,
+                "id": 79,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.21250160317306016,
+                "lower_min_theoretical_angle": 0.09808108945273128,
+                "offset": 0.03446928446164189,
+                "offset_ci": [
+                    0.034469276831835934,
+                    0.03446929209144784
+                ],
+                "uncertainty": -64144.58253779681,
+                "upper_max_theoretical_angle": 0.21250165501899468,
+                "upper_min_theoretical_angle": 0.09808109042026587
+            },
+            {
+                "angle": 0.10384708395714047,
+                "angle_ci": [
+                    0.10384708351371016,
+                    0.10384708440057078
+                ],
+                "count": 1776,
+                "dependencies": [],
+                "hash": 12915017609873009712,
+                "hough_votes": 25721.722494945057,
+                "id": 80,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.2182153990167187,
+                "lower_min_theoretical_angle": 0.10418856722580715,
+                "offset": 0.03435120754719152,
+                "offset_ci": [
+                    0.03435119980009938,
+                    0.034351215294283664
+                ],
+                "uncertainty": -61310.41829150736,
+                "upper_max_theoretical_angle": 0.21821545171576018,
+                "upper_min_theoretical_angle": 0.10418856826669474
+            },
+            {
+                "angle": 0.1097812032081133,
+                "angle_ci": [
+                    0.10978120273969401,
+                    0.10978120367653259
+                ],
+                "count": 1846,
+                "dependencies": [],
+                "hash": 2593752824890080215,
+                "hough_votes": 26244.819004596087,
+                "id": 81,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.22374812184847878,
+                "lower_min_theoretical_angle": 0.11012149315516465,
+                "offset": 0.03423116931008908,
+                "offset_ci": [
+                    0.034231161368411,
+                    0.03423117725176716
+                ],
+                "uncertainty": -63656.76789159736,
+                "upper_max_theoretical_angle": 0.2237481758964351,
+                "upper_min_theoretical_angle": 0.11012149424989896
+            },
+            {
+                "angle": 0.11571532272723958,
+                "angle_ci": [
+                    0.11571532223694793,
+                    0.11571532321753124
+                ],
+                "count": 1835,
+                "dependencies": [],
+                "hash": 15288605644108924303,
+                "hough_votes": 25443.224579359343,
+                "id": 82,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.22928998418241153,
+                "lower_min_theoretical_angle": 0.11605444647250684,
+                "offset": 0.034113858777674984,
+                "offset_ci": [
+                    0.034113850714348685,
+                    0.03411386684100128
+                ],
+                "uncertainty": -63210.59353845045,
+                "upper_max_theoretical_angle": 0.2292900390852357,
+                "upper_min_theoretical_angle": 0.11605444761340447
+            },
+            {
+                "angle": 0.12182397490847362,
+                "angle_ci": [
+                    0.12182397440166516,
+                    0.12182397541528207
+                ],
+                "count": 1846,
+                "dependencies": [],
+                "hash": 5415437599373866917,
+                "hough_votes": 25373.257162714926,
+                "id": 83,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.23500605238940306,
+                "lower_min_theoretical_angle": 0.12216193143350881,
+                "offset": 0.03399644525534174,
+                "offset_ci": [
+                    0.03399643707178947,
+                    0.033996453438894014
+                ],
+                "uncertainty": -63612.54862283088,
+                "upper_max_theoretical_angle": 0.235006108126807,
+                "upper_min_theoretical_angle": 0.12216193260983038
+            },
+            {
+                "angle": 0.12810716004054473,
+                "angle_ci": [
+                    0.1281071595041532,
+                    0.12810716057693627
+                ],
+                "count": 1828,
+                "dependencies": [],
+                "hash": 463679314335682664,
+                "hough_votes": 24463.288411216054,
+                "id": 84,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.2408658523711063,
+                "lower_min_theoretical_angle": 0.12844385769800362,
+                "offset": 0.03386981397044874,
+                "offset_ci": [
+                    0.03386980557438716,
+                    0.03386982236651032
+                ],
+                "uncertainty": -62889.208496756335,
+                "upper_max_theoretical_angle": 0.240865909586039,
+                "upper_min_theoretical_angle": 0.12844385893771645
+            },
+            {
+                "angle": 0.13404127876444463,
+                "angle_ci": [
+                    0.1340412782323859,
+                    0.13404127929650336
+                ],
+                "count": 1866,
+                "dependencies": [],
+                "hash": 7118313008134017853,
+                "hough_votes": 25105.474664699,
+                "id": 85,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.24637920795233048,
+                "lower_min_theoretical_angle": 0.13437672532428205,
+                "offset": 0.03374396065886883,
+                "offset_ci": [
+                    0.03374395227571596,
+                    0.033743969042021704
+                ],
+                "uncertainty": -64170.27699628508,
+                "upper_max_theoretical_angle": 0.2463792650696148,
+                "upper_min_theoretical_angle": 0.1343767265550726
+            },
+            {
+                "angle": 0.1399753992762695,
+                "angle_ci": [
+                    0.13997539870527018,
+                    0.13997539984726884
+                ],
+                "count": 1892,
+                "dependencies": [],
+                "hash": 10501718053582105088,
+                "hough_votes": 25395.72196263136,
+                "id": 86,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.2519047412694152,
+                "lower_min_theoretical_angle": 0.14030963084260692,
+                "offset": 0.03362174413960771,
+                "offset_ci": [
+                    0.03362173518655186,
+                    0.03362175309266356
+                ],
+                "uncertainty": -64815.825159986765,
+                "upper_max_theoretical_angle": 0.2519048022724294,
+                "upper_min_theoretical_angle": 0.14030963216260944
+            },
+            {
+                "angle": 0.14590952090715362,
+                "angle_ci": [
+                    0.14590952030987006,
+                    0.14590952150443717
+                ],
+                "count": 1911,
+                "dependencies": [],
+                "hash": 14764923035603550344,
+                "hough_votes": 25741.417087603575,
+                "id": 87,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.257444741232397,
+                "lower_min_theoretical_angle": 0.14624258045371352,
+                "offset": 0.03350384912670012,
+                "offset_ci": [
+                    0.03350383972106382,
+                    0.033503858532336415
+                ],
+                "uncertainty": -65254.141094965635,
+                "upper_max_theoretical_angle": 0.25744480531119646,
+                "upper_min_theoretical_angle": 0.14624258183528263
+            },
+            {
+                "angle": 0.15219270446658284,
+                "angle_ci": [
+                    0.15219270389480385,
+                    0.15219270503836183
+                ],
+                "count": 1880,
+                "dependencies": [],
+                "hash": 5289625345273628360,
+                "hough_votes": 24298.153520541942,
+                "id": 88,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.26328752819501666,
+                "lower_min_theoretical_angle": 0.1525244543767582,
+                "offset": 0.033372104281043286,
+                "offset_ci": [
+                    0.033372095646548104,
+                    0.03337211291553847
+                ],
+                "uncertainty": -64419.56213689463,
+                "upper_max_theoretical_angle": 0.2632875870642676,
+                "upper_min_theoretical_angle": 0.15252445569198642
+            },
+            {
+                "angle": 0.15812682415144502,
+                "angle_ci": [
+                    0.158126823585611,
+                    0.15812682471727904
+                ],
+                "count": 1920,
+                "dependencies": [],
+                "hash": 18314644558094972288,
+                "hough_votes": 25474.119967165778,
+                "id": 89,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.26878197826645167,
+                "lower_min_theoretical_angle": 0.1584572665034717,
+                "offset": 0.0332405714544834,
+                "offset_ci": [
+                    0.03324056259752683,
+                    0.03324058031143997
+                ],
+                "uncertainty": -65621.04514572606,
+                "upper_max_theoretical_angle": 0.2687820386081742,
+                "upper_min_theoretical_angle": 0.15845726781123295
+            },
+            {
+                "angle": 0.16406094151430442,
+                "angle_ci": [
+                    0.1640609409186475,
+                    0.16406094210996133
+                ],
+                "count": 1896,
+                "dependencies": [],
+                "hash": 8206147270175404168,
+                "hough_votes": 24684.96654121172,
+                "id": 90,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.27429179101026363,
+                "lower_min_theoretical_angle": 0.16439012190697702,
+                "offset": 0.03311362907335753,
+                "offset_ci": [
+                    0.03311362010976442,
+                    0.03311363803695063
+                ],
+                "uncertainty": -64966.381291690544,
+                "upper_max_theoretical_angle": 0.27429185212169327,
+                "upper_min_theoretical_angle": 0.1643901232765042
+            },
+            {
+                "angle": 0.16999506332536274,
+                "angle_ci": [
+                    0.16999506273515716,
+                    0.16999506391556832
+                ],
+                "count": 1915,
+                "dependencies": [],
+                "hash": 3970536841389644405,
+                "hough_votes": 24902.88028307762,
+                "id": 91,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.27981905203639135,
+                "lower_min_theoretical_angle": 0.1703230336181118,
+                "offset": 0.032991899790868,
+                "offset_ci": [
+                    0.032991890819016476,
+                    0.03299190876271953
+                ],
+                "uncertainty": -65443.39672453889,
+                "upper_max_theoretical_angle": 0.27981911318942876,
+                "upper_min_theoretical_angle": 0.17032303497690052
+            },
+            {
+                "angle": 0.17627824746877907,
+                "angle_ci": [
+                    0.17627824687144303,
+                    0.1762782480661151
+                ],
+                "count": 1859,
+                "dependencies": [],
+                "hash": 15159144479216608410,
+                "hough_votes": 23142.33307535916,
+                "id": 92,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.2856449529536732,
+                "lower_min_theoretical_angle": 0.17660485761536568,
+                "offset": 0.03285507770418411,
+                "offset_ci": [
+                    0.03285506904862304,
+                    0.032855086359745184
+                ],
+                "uncertainty": -63627.99302582647,
+                "upper_max_theoretical_angle": 0.28564501200380676,
+                "upper_min_theoretical_angle": 0.17660485898212686
+            },
+            {
+                "angle": 0.1820378345676126,
+                "angle_ci": [
+                    0.18203783397806667,
+                    0.18203783515715855
+                ],
+                "count": 1890,
+                "dependencies": [],
+                "hash": 2851180474785364687,
+                "hough_votes": 24210.904047713713,
+                "id": 93,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.2909590712279002,
+                "lower_min_theoretical_angle": 0.1823631196578863,
+                "offset": 0.03272178445707016,
+                "offset_ci": [
+                    0.03272177560414866,
+                    0.03272179330999166
+                ],
+                "uncertainty": -64577.67406224805,
+                "upper_max_theoretical_angle": 0.29095913157876074,
+                "upper_min_theoretical_angle": 0.18236312101299115
+            },
+            {
+                "angle": 0.1879719543725057,
+                "angle_ci": [
+                    0.18797195376281803,
+                    0.18797195498219335
+                ],
+                "count": 1854,
+                "dependencies": [],
+                "hash": 4291781910397972655,
+                "hough_votes": 23619.30610823418,
+                "id": 94,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.2964532639692028,
+                "lower_min_theoretical_angle": 0.18829593079944668,
+                "offset": 0.03259014314124099,
+                "offset_ci": [
+                    0.032590134004173064,
+                    0.03259015227830892
+                ],
+                "uncertainty": -63197.76961478038,
+                "upper_max_theoretical_angle": 0.29645332625661236,
+                "upper_min_theoretical_angle": 0.18829593220048435
+            },
+            {
+                "angle": 0.19373154114709493,
+                "angle_ci": [
+                    0.19373154049842897,
+                    0.19373154179576088
+                ],
+                "count": 1886,
+                "dependencies": [],
+                "hash": 3560557027862728731,
+                "hough_votes": 24253.672099435727,
+                "id": 95,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.3018066632365816,
+                "lower_min_theoretical_angle": 0.1940543092007063,
+                "offset": 0.03246859256229068,
+                "offset_ci": [
+                    0.03246858286748985,
+                    0.03246860225709151
+                ],
+                "uncertainty": -64206.65793008865,
+                "upper_max_theoretical_angle": 0.30180672932672165,
+                "upper_min_theoretical_angle": 0.19405431069078935
+            },
+            {
+                "angle": 0.19984019203798647,
+                "angle_ci": [
+                    0.19984019137312592,
+                    0.19984019270284703
+                ],
+                "count": 1850,
+                "dependencies": [],
+                "hash": 7069759664440105859,
+                "hough_votes": 23196.165924837285,
+                "id": 96,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.307454903372229,
+                "lower_min_theoretical_angle": 0.20016159037223555,
+                "offset": 0.032330808638790114,
+                "offset_ci": [
+                    0.03233079900258762,
+                    0.03233081827499261
+                ],
+                "uncertainty": -63023.39440215487,
+                "upper_max_theoretical_angle": 0.30745496909992065,
+                "upper_min_theoretical_angle": 0.20016159189354277
+            },
+            {
+                "angle": 0.20542524611240173,
+                "angle_ci": [
+                    0.20542524541319046,
+                    0.205425246811613
+                ],
+                "count": 1868,
+                "dependencies": [],
+                "hash": 9281475146648182860,
+                "hough_votes": 23748.023453858088,
+                "id": 97,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.31259032330847486,
+                "lower_min_theoretical_angle": 0.20574530670342484,
+                "offset": 0.03219624393128167,
+                "offset_ci": [
+                    0.03219623357018201,
+                    0.03219625429238133
+                ],
+                "uncertainty": -63274.58610704246,
+                "upper_max_theoretical_angle": 0.31259039394594146,
+                "upper_min_theoretical_angle": 0.20574530830784582
+            },
+            {
+                "angle": 0.21153389837140885,
+                "angle_ci": [
+                    0.21153389763897298,
+                    0.2115338991038447
+                ],
+                "count": 1828,
+                "dependencies": [],
+                "hash": 8167586059166855676,
+                "hough_votes": 22733.29783350109,
+                "id": 98,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.31823079409537947,
+                "lower_min_theoretical_angle": 0.2118525659712931,
+                "offset": 0.03205612103656425,
+                "offset_ci": [
+                    0.03205611041812409,
+                    0.03205613165500441
+                ],
+                "uncertainty": -61791.27925979191,
+                "upper_max_theoretical_angle": 0.3182308665154319,
+                "upper_min_theoretical_angle": 0.2118525676472797
+            },
+            {
+                "angle": 0.21711895128497494,
+                "angle_ci": [
+                    0.2171189505058971,
+                    0.21711895206405277
+                ],
+                "count": 1844,
+                "dependencies": [],
+                "hash": 749769917267388740,
+                "hough_votes": 22913.86776172389,
+                "id": 99,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.3234115734704357,
+                "lower_min_theoretical_angle": 0.21743641596636135,
+                "offset": 0.03193511991201964,
+                "offset_ci": [
+                    0.03193510877528155,
+                    0.031935131048757726
+                ],
+                "uncertainty": -62314.358418197065,
+                "upper_max_theoretical_angle": 0.3234116494439577,
+                "upper_min_theoretical_angle": 0.21743641774593664
+            },
+            {
+                "angle": 0.22322760467121663,
+                "angle_ci": [
+                    0.22322760390495597,
+                    0.2232276054374773
+                ],
+                "count": 1807,
+                "dependencies": [],
+                "hash": 3725643169086839403,
+                "hough_votes": 21975.264170041475,
+                "id": 100,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.3290445380320732,
+                "lower_min_theoretical_angle": 0.2235436539385338,
+                "offset": 0.031792736087941434,
+                "offset_ci": [
+                    0.03179272538022744,
+                    0.03179274679565543
+                ],
+                "uncertainty": -61185.30827710839,
+                "upper_max_theoretical_angle": 0.329044611109611,
+                "upper_min_theoretical_angle": 0.2235436556839449
+            },
+            {
+                "angle": 0.22916172277047972,
+                "angle_ci": [
+                    0.22916172195161597,
+                    0.22916172358934347
+                ],
+                "count": 1816,
+                "dependencies": [],
+                "hash": 15515754572713041968,
+                "hough_votes": 22064.02081940027,
+                "id": 101,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.3344846798056079,
+                "lower_min_theoretical_angle": 0.2294763020677877,
+                "offset": 0.03164487202880634,
+                "offset_ci": [
+                    0.0316448605679728,
+                    0.031644883489639876
+                ],
+                "uncertainty": -61195.552111003184,
+                "upper_max_theoretical_angle": 0.3344847580164122,
+                "upper_min_theoretical_angle": 0.22947630393337845
+            },
+            {
+                "angle": 0.2347467764875186,
+                "angle_ci": [
+                    0.23474677566559496,
+                    0.23474677730944224
+                ],
+                "count": 1792,
+                "dependencies": [],
+                "hash": 15858650758972572160,
+                "hough_votes": 20937.3757643928,
+                "id": 102,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.33962781352252436,
+                "lower_min_theoretical_angle": 0.2350600407023365,
+                "offset": 0.031512582592707394,
+                "offset_ci": [
+                    0.03151257152075902,
+                    0.031512593664655766
+                ],
+                "uncertainty": -60386.741842059935,
+                "upper_max_theoretical_angle": 0.33962788913774794,
+                "upper_min_theoretical_angle": 0.23506004256631524
+            },
+            {
+                "angle": 0.2405063641866549,
+                "angle_ci": [
+                    0.24050636340658657,
+                    0.2405063649667232
+                ],
+                "count": 1831,
+                "dependencies": [],
+                "hash": 13238902029939994496,
+                "hough_votes": 21487.286192250853,
+                "id": 103,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.3449583683870502,
+                "lower_min_theoretical_angle": 0.24081835165526644,
+                "offset": 0.031384145005963385,
+                "offset_ci": [
+                    0.03138413435387968,
+                    0.03138415565804709
+                ],
+                "uncertainty": -61699.87811012004,
+                "upper_max_theoretical_angle": 0.34495844111025165,
+                "upper_min_theoretical_angle": 0.24081835342718683
+            },
+            {
+                "angle": 0.2462659502497836,
+                "angle_ci": [
+                    0.24626594943091829,
+                    0.2462659510686489
+                ],
+                "count": 1790,
+                "dependencies": [],
+                "hash": 10013237862514518303,
+                "hough_votes": 20616.012671261688,
+                "id": 104,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.3502552440020498,
+                "lower_min_theoretical_angle": 0.2465765606039216,
+                "offset": 0.031245619752558938,
+                "offset_ci": [
+                    0.03124560885864726,
+                    0.031245630646470617
+                ],
+                "uncertainty": -60318.037161320346,
+                "upper_max_theoretical_angle": 0.350255318414896,
+                "upper_min_theoretical_angle": 0.246576562458244
+            },
+            {
+                "angle": 0.25220007001593664,
+                "angle_ci": [
+                    0.25220006918419646,
+                    0.2522000708476768
+                ],
+                "count": 1814,
+                "dependencies": [],
+                "hash": 10645088835766760947,
+                "hough_votes": 21450.786128196694,
+                "id": 105,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.35567840266420714,
+                "lower_min_theoretical_angle": 0.2525091596050794,
+                "offset": 0.03109264186676454,
+                "offset_ci": [
+                    0.031092630380932504,
+                    0.031092653352596575
+                ],
+                "uncertainty": -60846.96799513378,
+                "upper_max_theoretical_angle": 0.35567848105295524,
+                "upper_min_theoretical_angle": 0.25250916149692004
+            },
+            {
+                "angle": 0.25778512303480217,
+                "angle_ci": [
+                    0.2577851221707603,
+                    0.25778512389884406
+                ],
+                "count": 1814,
+                "dependencies": [],
+                "hash": 7335262628059323167,
+                "hough_votes": 21050.538135927563,
+                "id": 106,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.3608082425486149,
+                "lower_min_theoretical_angle": 0.2580928576919474,
+                "offset": 0.03095634735192652,
+                "offset_ci": [
+                    0.03095633565529111,
+                    0.03095635904856193
+                ],
+                "uncertainty": -60736.31536401731,
+                "upper_max_theoretical_angle": 0.3608083224064459,
+                "upper_min_theoretical_angle": 0.25809285965258266
+            },
+            {
+                "angle": 0.26354471031737114,
+                "angle_ci": [
+                    0.263544709482801,
+                    0.2635447111519413
+                ],
+                "count": 1808,
+                "dependencies": [],
+                "hash": 14126798206168163312,
+                "hough_votes": 20902.442951389996,
+                "id": 107,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.3661278862948098,
+                "lower_min_theoretical_angle": 0.26385113549205647,
+                "offset": 0.03082461785744925,
+                "offset_ci": [
+                    0.030824606664520613,
+                    0.030824629050377885
+                ],
+                "uncertainty": -60756.54049983424,
+                "upper_max_theoretical_angle": 0.36612796272570536,
+                "upper_min_theoretical_angle": 0.2638511373837335
+            },
+            {
+                "angle": 0.2693042972175096,
+                "angle_ci": [
+                    0.2693042963309822,
+                    0.269304298104037
+                ],
+                "count": 1764,
+                "dependencies": [],
+                "hash": 17401447740854373628,
+                "hough_votes": 20293.2187629494,
+                "id": 108,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.371411008265452,
+                "lower_min_theoretical_angle": 0.2696093040540792,
+                "offset": 0.030681947448132522,
+                "offset_ci": [
+                    0.030681935643483194,
+                    0.03068195925278185
+                ],
+                "uncertainty": -59147.28546715692,
+                "upper_max_theoretical_angle": 0.371411088882315,
+                "upper_min_theoretical_angle": 0.269609306061833
+            },
+            {
+                "angle": 0.275063883227014,
+                "angle_ci": [
+                    0.27506388231583667,
+                    0.2750638841381914
+                ],
+                "count": 1780,
+                "dependencies": [],
+                "hash": 13239836383194637316,
+                "hough_votes": 20124.993127710757,
+                "id": 109,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.3766574157594582,
+                "lower_min_theoretical_angle": 0.2753673623904485,
+                "offset": 0.030528275370076106,
+                "offset_ci": [
+                    0.030528263432860255,
+                    0.030528287307291957
+                ],
+                "uncertainty": -59548.50132559864,
+                "upper_max_theoretical_angle": 0.3766574973068576,
+                "upper_min_theoretical_angle": 0.2753673644501379
+            },
+            {
+                "angle": 0.2806489350157394,
+                "angle_ci": [
+                    0.28064893409632785,
+                    0.28064893593515094
+                ],
+                "count": 1731,
+                "dependencies": [],
+                "hash": 12861057657543259035,
+                "hough_votes": 19170.70652574732,
+                "id": 110,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.38177436074382437,
+                "lower_min_theoretical_angle": 0.2809510206238116,
+                "offset": 0.03038809279219511,
+                "offset_ci": [
+                    0.03038808100872547,
+                    0.03038810457566475
+                ],
+                "uncertainty": -57953.76264498501,
+                "upper_max_theoretical_angle": 0.3817744412771211,
+                "upper_min_theoretical_angle": 0.2809510226969126
+            },
+            {
+                "angle": 0.286233989574849,
+                "angle_ci": [
+                    0.2862339886847231,
+                    0.28623399046497494
+                ],
+                "count": 1725,
+                "dependencies": [],
+                "hash": 3143170570626437403,
+                "hough_votes": 19228.841452575223,
+                "id": 111,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.38692363032113,
+                "lower_min_theoretical_angle": 0.2865347778270609,
+                "offset": 0.030257583416085674,
+                "offset_ci": [
+                    0.030257571899127648,
+                    0.0302575949330437
+                ],
+                "uncertainty": -57826.329699808,
+                "upper_max_theoretical_angle": 0.3869237090125962,
+                "upper_min_theoretical_angle": 0.28653477983629183
+            },
+            {
+                "angle": 0.29199357739430976,
+                "angle_ci": [
+                    0.29199357648888635,
+                    0.29199357829973316
+                ],
+                "count": 1731,
+                "dependencies": [],
+                "hash": 11647558475410932251,
+                "hough_votes": 19062.584032225514,
+                "id": 112,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.3921934714533385,
+                "lower_min_theoretical_angle": 0.29229290752747267,
+                "offset": 0.030110907084976015,
+                "offset_ci": [
+                    0.030110895468480593,
+                    0.030110918701471437
+                ],
+                "uncertainty": -57914.625805912365,
+                "upper_max_theoretical_angle": 0.3921935508362899,
+                "upper_min_theoretical_angle": 0.29229290956927756
+            },
+            {
+                "angle": 0.2975786302583327,
+                "angle_ci": [
+                    0.2975786292672866,
+                    0.2975786312493788
+                ],
+                "count": 1731,
+                "dependencies": [],
+                "hash": 14392819100910408024,
+                "hough_votes": 18715.71656150247,
+                "id": 113,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.3972644660994677,
+                "lower_min_theoretical_angle": 0.297876429743332,
+                "offset": 0.02995694256467383,
+                "offset_ci": [
+                    0.029956930121184448,
+                    0.02995695500816321
+                ],
+                "uncertainty": -57660.33857296272,
+                "upper_max_theoretical_angle": 0.39726455117184384,
+                "upper_min_theoretical_angle": 0.2978764319728245
+            },
+            {
+                "angle": 0.30316368280411693,
+                "angle_ci": [
+                    0.3031636818387441,
+                    0.30316368376948977
+                ],
+                "count": 1723,
+                "dependencies": [],
+                "hash": 10193609816181787765,
+                "hough_votes": 18116.19347513396,
+                "id": 114,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.4023687737266982,
+                "lower_min_theoretical_angle": 0.3034600508680959,
+                "offset": 0.029812946940999632,
+                "offset_ci": [
+                    0.02981293522943136,
+                    0.029812958652567903
+                ],
+                "uncertainty": -57605.10701767517,
+                "upper_max_theoretical_angle": 0.40236885385663923,
+                "upper_min_theoretical_angle": 0.30346005303168994
+            },
+            {
+                "angle": 0.30857420666986046,
+                "angle_ci": [
+                    0.30857420570661487,
+                    0.30857420763310606
+                ],
+                "count": 1666,
+                "dependencies": [],
+                "hash": 16532603212959698221,
+                "hough_votes": 17278.11596926883,
+                "id": 115,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.4073490972108672,
+                "lower_min_theoretical_angle": 0.30886929373063016,
+                "offset": 0.029684085374352607,
+                "offset_ci": [
+                    0.029684073829511933,
+                    0.02968409691919328
+                ],
+                "uncertainty": -55736.37030602523,
+                "upper_max_theoretical_angle": 0.4073491762200051,
+                "upper_min_theoretical_angle": 0.30886929588665485
+            },
+            {
+                "angle": 0.3145083241656549,
+                "angle_ci": [
+                    0.3145083231261119,
+                    0.3145083252051979
+                ],
+                "count": 1645,
+                "dependencies": [],
+                "hash": 14870714216999135883,
+                "hough_votes": 16711.842365207664,
+                "id": 116,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.4127650795460504,
+                "lower_min_theoretical_angle": 0.3148018682296362,
+                "offset": 0.029528877504462512,
+                "offset_ci": [
+                    0.029528865346885473,
+                    0.02952888966203955
+                ],
+                "uncertainty": -54873.87628164174,
+                "upper_max_theoretical_angle": 0.41276516279474745,
+                "upper_min_theoretical_angle": 0.31480187055043807
+            },
+            {
+                "angle": 0.31991884380755065,
+                "angle_ci": [
+                    0.3199188427721555,
+                    0.3199188448429458
+                ],
+                "count": 1687,
+                "dependencies": [],
+                "hash": 17934652844133493611,
+                "hough_votes": 17081.22964809144,
+                "id": 117,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.4176620679929953,
+                "lower_min_theoretical_angle": 0.32021085858703713,
+                "offset": 0.029375040190587377,
+                "offset_ci": [
+                    0.029375028145798163,
+                    0.029375052235376592
+                ],
+                "uncertainty": -56273.91364357401,
+                "upper_max_theoretical_angle": 0.41766215047631294,
+                "upper_min_theoretical_angle": 0.3202108608973009
+            },
+            {
+                "angle": 0.3255038973422696,
+                "angle_ci": [
+                    0.32550389634823285,
+                    0.32550389833630633
+                ],
+                "count": 1700,
+                "dependencies": [],
+                "hash": 6221871051415027440,
+                "hough_votes": 17399.109224973967,
+                "id": 118,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.42275417364135237,
+                "lower_min_theoretical_angle": 0.3257944440987176,
+                "offset": 0.029227361401387132,
+                "offset_ci": [
+                    0.029227349733999545,
+                    0.02922737306877472
+                ],
+                "uncertainty": -56866.26432448532,
+                "upper_max_theoretical_angle": 0.42275425351861706,
+                "upper_min_theoretical_angle": 0.32579444631876103
+            },
+            {
+                "angle": 0.330739888968624,
+                "angle_ci": [
+                    0.330739887864249,
+                    0.330739890072999
+                ],
+                "count": 1681,
+                "dependencies": [],
+                "hash": 8543642356939815647,
+                "hough_votes": 16881.70504400099,
+                "id": 119,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.4275663084207636,
+                "lower_min_theoretical_angle": 0.33102917325661463,
+                "offset": 0.029100376844282277,
+                "offset_ci": [
+                    0.029100364131307156,
+                    0.029100389557257397
+                ],
+                "uncertainty": -55917.02534832548,
+                "upper_max_theoretical_angle": 0.4275663954953405,
+                "upper_min_theoretical_angle": 0.3310291757181228
+            },
+            {
+                "angle": 0.3361504079042824,
+                "angle_ci": [
+                    0.33615040680653924,
+                    0.3361504090020256
+                ],
+                "count": 1651,
+                "dependencies": [],
+                "hash": 6614817820195670175,
+                "hough_votes": 16578.592325213,
+                "id": 120,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.4324927188367459,
+                "lower_min_theoretical_angle": 0.3364382503313628,
+                "offset": 0.028955333620588865,
+                "offset_ci": [
+                    0.02895532096477378,
+                    0.028955346276403948
+                ],
+                "uncertainty": -54943.69949534243,
+                "upper_max_theoretical_angle": 0.4324928055125232,
+                "upper_min_theoretical_angle": 0.33643825277847095
+            },
+            {
+                "angle": 0.34173546011844586,
+                "angle_ci": [
+                    0.34173545903228664,
+                    0.3417354612046051
+                ],
+                "count": 1662,
+                "dependencies": [],
+                "hash": 11295211158044826485,
+                "hough_votes": 16546.97353272609,
+                "id": 121,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.4375346543538325,
+                "lower_min_theoretical_angle": 0.3420216848594781,
+                "offset": 0.02879260268332153,
+                "offset_ci": [
+                    0.02879259035303438,
+                    0.028792615013608677
+                ],
+                "uncertainty": -55449.96996919856,
+                "upper_max_theoretical_angle": 0.43753473882916505,
+                "upper_min_theoretical_angle": 0.34202168727694615
+            },
+            {
+                "angle": 0.3473205144074982,
+                "angle_ci": [
+                    0.3473205132748285,
+                    0.34732051554016796
+                ],
+                "count": 1657,
+                "dependencies": [],
+                "hash": 7124397298994006685,
+                "hough_votes": 16283.896911164744,
+                "id": 122,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.4426150704610449,
+                "lower_min_theoretical_angle": 0.3476052359388768,
+                "offset": 0.028641393827824387,
+                "offset_ci": [
+                    0.028641381219091794,
+                    0.02864140643655698
+                ],
+                "uncertainty": -55264.25629520582,
+                "upper_max_theoretical_angle": 0.4426151568839143,
+                "upper_min_theoretical_angle": 0.34760523845490193
+            },
+            {
+                "angle": 0.3525565054999616,
+                "angle_ci": [
+                    0.35255650430371804,
+                    0.35255650669620514
+                ],
+                "count": 1588,
+                "dependencies": [],
+                "hash": 2283748807549257276,
+                "hough_votes": 15703.696530689924,
+                "id": 123,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.44741870956960444,
+                "lower_min_theoretical_angle": 0.352839939065532,
+                "offset": 0.028511839372495767,
+                "offset_ci": [
+                    0.028511826032466343,
+                    0.028511852712525192
+                ],
+                "uncertainty": -52929.158162064974,
+                "upper_max_theoretical_angle": 0.4474188009970226,
+                "upper_min_theoretical_angle": 0.35283994172324434
+            },
+            {
+                "angle": 0.3577924910803046,
+                "angle_ci": [
+                    0.35779248988274587,
+                    0.3577924922778633
+                ],
+                "count": 1581,
+                "dependencies": [],
+                "hash": 6545224468506924388,
+                "hough_votes": 15323.797610503636,
+                "id": 124,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.4521754820773161,
+                "lower_min_theoretical_angle": 0.35807449708909583,
+                "offset": 0.028368235534554694,
+                "offset_ci": [
+                    0.028368222574304474,
+                    0.028368248494804914
+                ],
+                "uncertainty": -52875.983922308165,
+                "upper_max_theoretical_angle": 0.45217557096868244,
+                "upper_min_theoretical_angle": 0.35807449974188776
+            },
+            {
+                "angle": 0.36320300945969625,
+                "angle_ci": [
+                    0.3632030082136219,
+                    0.3632030107057706
+                ],
+                "count": 1605,
+                "dependencies": [],
+                "hash": 16753607708063658495,
+                "hough_votes": 15525.710482826322,
+                "id": 125,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.45704503088072107,
+                "lower_min_theoretical_angle": 0.3634834038168373,
+                "offset": 0.02820611853776737,
+                "offset_ci": [
+                    0.02820610503194849,
+                    0.02820613204358625
+                ],
+                "uncertainty": -53458.64389626351,
+                "upper_max_theoretical_angle": 0.45704512350562193,
+                "upper_min_theoretical_angle": 0.3634834065775075
+            },
+            {
+                "angle": 0.3686135293223592,
+                "angle_ci": [
+                    0.3686135281557607,
+                    0.3686135304889577
+                ],
+                "count": 1571,
+                "dependencies": [],
+                "hash": 18439320584420274127,
+                "hough_votes": 15222.840995866809,
+                "id": 126,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.46195591005970277,
+                "lower_min_theoretical_angle": 0.3688924352055224,
+                "offset": 0.028056378272327355,
+                "offset_ci": [
+                    0.028056365544280145,
+                    0.028056391000374565
+                ],
+                "uncertainty": -52482.08722694122,
+                "upper_max_theoretical_angle": 0.4619559973311128,
+                "upper_min_theoretical_angle": 0.3688924377917772
+            },
+            {
+                "angle": 0.37384952094495266,
+                "angle_ci": [
+                    0.37384951961503093,
+                    0.3738495222748744
+                ],
+                "count": 1455,
+                "dependencies": [],
+                "hash": 11926703806413362112,
+                "hough_votes": 13887.506434957764,
+                "id": 127,
+                "last_scanline_assignment": false,
+                "lower_max_theoretical_angle": 0.4667515842202087,
+                "lower_min_theoretical_angle": 0.37412711479288835,
+                "offset": 0.027924413396760953,
+                "offset_ci": [
+                    0.027924399153408552,
+                    0.027924427640113353
+                ],
+                "uncertainty": -48393.83397231052,
+                "upper_max_theoretical_angle": 0.4667516819264589,
+                "upper_min_theoretical_angle": 0.37412711773591684
+            }
+        ],
+        "scanlines_count": 128,
+        "unassigned_points": 0
+    }
+}

@@ -83,10 +83,10 @@ int main(int argc, char **argv) {
     const auto readIntrinsics = accurate_ri::readFromJson("out.json");
     accurate_ri::writeToJson(readIntrinsics, "out2.json");
 
-    double finalZ = points.z[12];
+    if (outputPath) {
+        accurate_ri::writeToJson(result, *outputPath);
+    }
 
-    std::cout << "Initial Z: " << initialZ << std::endl;
-    std::cout << "Final Z: " << finalZ << std::endl;
     accurate_ri::projectToRangeImage(result, cloud);
 
     return 0;

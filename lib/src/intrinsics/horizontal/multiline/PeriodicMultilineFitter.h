@@ -28,9 +28,7 @@ namespace accurate_ri {
         );
 
     private:
-        double refineFit(
-            const Eigen::ArrayXd &x, const Eigen::ArrayXd &y
-        );
+        double refineFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y);
 
         double computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, double k);
     };
