@@ -10,27 +10,22 @@ namespace accurate_ri {
             std::vector<std::vector<double>> yBlocks;
             std::vector<int32_t> blockSizes;
 
-            void reserveBlocks(int32_t count);
-            void appendNewBlock(int32_t reservePerBlock);
+            void reserveBlocks(uint64_t count);
+            void appendNewBlock(uint64_t reservePerBlock);
             void appendToLastBlock(double x, double y);
 
-            double computeSlope(int32_t blockIdx) const;
+            [[nodiscard]] double computeSlope(int32_t blockIdx) const;
 
-            int32_t count() const;
-        };
-
-        struct SlopeWeight {
-            double slope;
-            int32_t weight;
+            [[nodiscard]] uint64_t count() const;
         };
 
         struct SlopesWeights {
-            std::vector<SlopeWeight> data;
-            int32_t totalWeight = 0;
+            std::vector<double> slopes;
+            std::vector<int32_t> weights;
 
-            void reserve(int32_t count);
+            void reserve(uint64_t count);
             void append(double slope, int32_t weight);
-            int32_t count() const;
+            [[nodiscard]] uint64_t count() const;
         };
 
         const double segmentThreshold;
@@ -40,13 +35,11 @@ namespace accurate_ri {
         SegmentedMedianSlopeEstimator(const double segmentThreshold, const double maxSlope)
             : segmentThreshold(segmentThreshold), maxSlope(maxSlope) {}
 
-        SlopesWeights computeBlocksSlopesWeights(const SegmentedMedianSlopeEstimator::Blocks &blocks) const;
+        [[nodiscard]] SlopesWeights computeBlocksSlopesWeights(const Blocks &blocks) const;
 
-        static double computeWeightedMedian(SegmentedMedianSlopeEstimator::SlopesWeights &slopeWeights);
-
-        double estimateSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
+        [[nodiscard]] double estimateSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
 
     private:
-        Blocks segmentIntoBlocks(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
+        [[nodiscard]] Blocks segmentIntoBlocks(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
     };
 } // accurate_ri

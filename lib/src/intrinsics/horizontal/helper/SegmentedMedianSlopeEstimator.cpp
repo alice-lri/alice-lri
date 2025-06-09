@@ -14,7 +14,7 @@ namespace accurate_ri {
             return 0;
         }
 
-        return computeWeightedMedian(slopeWeights);
+        return Stats::weightedMedian(slopeWeights.slopes, slopeWeights.weights);
     }
 
     SegmentedMedianSlopeEstimator::SlopesWeights SegmentedMedianSlopeEstimator::computeBlocksSlopesWeights(
@@ -48,10 +48,10 @@ namespace accurate_ri {
         constexpr int expectedBlocks = 8;
         result.reserveBlocks(expectedBlocks);
 
-        const Eigen::ArrayX<bool> nonJumpMask = Utils::diff(x).abs() < segmentThreshold;
+        const Eigen::ArrayX<bool> continuityMask = Utils::diff(x).abs() < segmentThreshold;
 
         for (int i = 0; i < x.size(); ++i) {
-            if (i == 0 || !nonJumpMask[i - 1]) {
+            if (i == 0 || !continuityMask[i - 1]) {
                 result.appendNewBlock(x.size() / expectedBlocks);
             } else {
                 result.appendToLastBlock(x[i], y[i]);
@@ -61,36 +61,13 @@ namespace accurate_ri {
         return result;
     }
 
-    // TODO probably does not belong here
-    double SegmentedMedianSlopeEstimator::computeWeightedMedian(
-        SegmentedMedianSlopeEstimator::SlopesWeights &slopeWeights
-    ) {
-        std::ranges::sort(
-            slopeWeights.data, [](const SlopeWeight &a, const SlopeWeight &b) {
-                return a.weight < b.weight;
-            }
-        );
-
-        double cumulativeWeight = 0;
-        double weightedMedianSlope = 0;
-        for (const auto &[slope, weight]: slopeWeights.data) {
-            cumulativeWeight += weight;
-            if (cumulativeWeight >= slopeWeights.totalWeight / 2.0) {
-                weightedMedianSlope = slope;
-                break;
-            }
-        }
-
-        return weightedMedianSlope;
-    }
-
-    void SegmentedMedianSlopeEstimator::Blocks::reserveBlocks(const int32_t count) {
+    void SegmentedMedianSlopeEstimator::Blocks::reserveBlocks(const uint64_t count) {
         xBlocks.reserve(count);
         yBlocks.reserve(count);
         blockSizes.reserve(count);
     }
 
-    void SegmentedMedianSlopeEstimator::Blocks::appendNewBlock(const int32_t reservePerBlock) {
+    void SegmentedMedianSlopeEstimator::Blocks::appendNewBlock(const uint64_t reservePerBlock) {
         yBlocks.emplace_back();
         xBlocks.emplace_back();
         blockSizes.emplace_back();
@@ -109,29 +86,30 @@ namespace accurate_ri {
 
     double SegmentedMedianSlopeEstimator::Blocks::computeSlope(const int32_t blockIdx) const {
         const Eigen::ArrayXd fitX = Eigen::Map<const Eigen::ArrayXd>(
-            xBlocks[blockIdx].data(), xBlocks[blockIdx].size()
+            xBlocks[blockIdx].data(), static_cast<Eigen::Index>(xBlocks[blockIdx].size())
         );
         const Eigen::ArrayXd fitY = Eigen::Map<const Eigen::ArrayXd>(
-            yBlocks[blockIdx].data(), yBlocks[blockIdx].size()
+            yBlocks[blockIdx].data(), static_cast<Eigen::Index>(yBlocks[blockIdx].size())
         );
 
         return Stats::simpleLinearRegression(fitX, fitY).slope;
     }
 
-    int32_t SegmentedMedianSlopeEstimator::Blocks::count() const {
+    uint64_t SegmentedMedianSlopeEstimator::Blocks::count() const {
         return blockSizes.size();
     }
 
-    void SegmentedMedianSlopeEstimator::SlopesWeights::reserve(const int32_t count) {
-        data.reserve(count);
+    void SegmentedMedianSlopeEstimator::SlopesWeights::reserve(const uint64_t count) {
+        slopes.reserve(count);
+        weights.reserve(count);
     }
 
     void SegmentedMedianSlopeEstimator::SlopesWeights::append(const double slope, const int32_t weight) {
-        data.emplace_back(slope, weight);
-        totalWeight += weight;
+        slopes.emplace_back(slope);
+        weights.emplace_back(weight);
     }
 
-    int32_t SegmentedMedianSlopeEstimator::SlopesWeights::count() const {
-        return data.size();
+    uint64_t SegmentedMedianSlopeEstimator::SlopesWeights::count() const {
+        return slopes.size();
     }
 } // accurate_ri

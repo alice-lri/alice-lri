@@ -2,7 +2,6 @@
 set(CMAKE_CXX_STANDARD 20)
 option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
 
-# Convert human-readable log level to numeric values
 if (LOG_LEVEL STREQUAL "DEBUG")
     add_definitions(-DLOG_LEVEL=1)
 elseif (LOG_LEVEL STREQUAL "INFO")
@@ -11,7 +10,7 @@ elseif (LOG_LEVEL STREQUAL "WARN")
     add_definitions(-DLOG_LEVEL=3)
 elseif (LOG_LEVEL STREQUAL "ERROR")
     add_definitions(-DLOG_LEVEL=4)
-elseif (LOG_LEVEL STREQUAL "NONE") # Completely remove all logs
+elseif (LOG_LEVEL STREQUAL "NONE")
     add_definitions(-DLOG_LEVEL=5)
 else ()
     message(FATAL_ERROR "Invalid LOG_LEVEL: Choose DEBUG, INFO, WARN, ERROR, or NONE")
@@ -32,7 +31,6 @@ include(${CMAKE_BINARY_DIR}/lib/conan_toolchain.cmake)
 find_package(Eigen3 REQUIRED)
 include_directories(Eigen3_INCLUDE_DIRS)
 
-#print out the EIGEN3_INCLUDE_DIR
 message(STATUS "EIGEN3_INCLUDE_DIR: ${Eigen3_INCLUDE_DIRS}")
 
 find_package(nlohmann_json REQUIRED)
@@ -96,14 +94,12 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.h
 )
 
-# Include dirs base
 set(_accurate_ri_private_include_dirs
         src
         ${nlohmann_json_INCLUDE_DIRS}
         ${Eigen3_INCLUDE_DIRS}
 )
 
-# Link libraries base
 set(_accurate_ri_private_libraries
         nlohmann_json::nlohmann_json
 )
