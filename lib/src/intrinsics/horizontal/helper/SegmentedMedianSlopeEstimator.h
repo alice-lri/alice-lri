@@ -5,7 +5,7 @@
 namespace accurate_ri {
     class SegmentedMedianSlopeEstimator {
     private:
-        struct Blocks {
+        struct Blocks { // TODO maybe refactor to single std::vector
             std::vector<std::vector<double>> xBlocks;
             std::vector<std::vector<double>> yBlocks;
             std::vector<int32_t> blockSizes;
@@ -35,11 +35,11 @@ namespace accurate_ri {
         SegmentedMedianSlopeEstimator(const double segmentThreshold, const double maxSlope)
             : segmentThreshold(segmentThreshold), maxSlope(maxSlope) {}
 
-        [[nodiscard]] SlopesWeights computeBlocksSlopesWeights(const Blocks &blocks) const;
-
         [[nodiscard]] double estimateSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
 
     private:
         [[nodiscard]] Blocks segmentIntoBlocks(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
+
+        [[nodiscard]] SlopesWeights computeBlocksSlopesWeights(const Blocks &blocks) const;
     };
 } // accurate_ri

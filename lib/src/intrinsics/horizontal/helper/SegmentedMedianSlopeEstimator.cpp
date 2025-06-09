@@ -17,6 +17,26 @@ namespace accurate_ri {
         return Stats::weightedMedian(slopeWeights.slopes, slopeWeights.weights);
     }
 
+    SegmentedMedianSlopeEstimator::Blocks SegmentedMedianSlopeEstimator::segmentIntoBlocks(
+        const Eigen::ArrayXd &x, const Eigen::ArrayXd &y
+    ) const {
+        Blocks result;
+        constexpr int expectedBlocks = 8;
+        result.reserveBlocks(expectedBlocks);
+
+        const Eigen::ArrayX<bool> continuityMask = Utils::diff(x).abs() < segmentThreshold;
+
+        for (int i = 0; i < x.size(); ++i) {
+            if (i == 0 || !continuityMask[i - 1]) {
+                result.appendNewBlock(x.size() / expectedBlocks);
+            } else {
+                result.appendToLastBlock(x[i], y[i]); // TODO Review this, e.g. first element not added
+            }
+        }
+
+        return result;
+    }
+
     SegmentedMedianSlopeEstimator::SlopesWeights SegmentedMedianSlopeEstimator::computeBlocksSlopesWeights(
         const Blocks &blocks
     ) const {
@@ -39,26 +59,6 @@ namespace accurate_ri {
         }
 
         return slopeWeights;
-    }
-
-    SegmentedMedianSlopeEstimator::Blocks SegmentedMedianSlopeEstimator::segmentIntoBlocks(
-        const Eigen::ArrayXd &x, const Eigen::ArrayXd &y
-    ) const {
-        Blocks result;
-        constexpr int expectedBlocks = 8;
-        result.reserveBlocks(expectedBlocks);
-
-        const Eigen::ArrayX<bool> continuityMask = Utils::diff(x).abs() < segmentThreshold;
-
-        for (int i = 0; i < x.size(); ++i) {
-            if (i == 0 || !continuityMask[i - 1]) {
-                result.appendNewBlock(x.size() / expectedBlocks);
-            } else {
-                result.appendToLastBlock(x[i], y[i]);
-            }
-        }
-
-        return result;
     }
 
     void SegmentedMedianSlopeEstimator::Blocks::reserveBlocks(const uint64_t count) {

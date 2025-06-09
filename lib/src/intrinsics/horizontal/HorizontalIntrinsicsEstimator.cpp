@@ -31,7 +31,7 @@ namespace accurate_ri {
 
         std::unordered_set<int32_t> heuristicScanlines;
         for (int32_t scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
-            std::optional<ScanlineHorizontalInfo> info = estimateScanline(scanlineArray, scanlineIdx);
+            const std::optional<ScanlineHorizontalInfo> info = estimateScanline(scanlineArray, scanlineIdx);
 
             if (info) {
                 result.scanlines[scanlineIdx] = *info;
@@ -136,7 +136,7 @@ namespace accurate_ri {
 
         const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
         const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
-            scanlineArray.getThetas(scanlineIdx), resolution, true
+            scanlineArray.getThetas(scanlineIdx), resolution, true // TODO try not reconstructing
         );
 
         const SegmentedMedianSlopeEstimator slopeEstimator(Constant::INV_RANGES_BREAK_THRESHOLD, 0.5);
@@ -244,18 +244,15 @@ namespace accurate_ri {
     }
 
     double HorizontalIntrinsicsEstimator::computePreciseLoss(
-        const Eigen::ArrayXd &thetas,
-        const Eigen::ArrayXd &ranges,
-        const double offset,
-        const double resolution
+        const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, const double offset, const double thetaStep
     ) {
         Eigen::ArrayXd corrected = thetas - offset / ranges;
         corrected -= corrected.minCoeff();
         std::ranges::sort(corrected);
 
-        const Eigen::ArrayXd aligned = (corrected / resolution).round() * resolution;
+        const Eigen::ArrayXd aligned = (corrected / thetaStep).round() * thetaStep;
 
-        return (corrected - aligned).abs().mean() / resolution;
+        return (corrected - aligned).abs().mean() / thetaStep;
     }
 
     int32_t HorizontalIntrinsicsEstimator::madOptimalResolution(

@@ -36,7 +36,7 @@ namespace accurate_ri {
         );
 
         double computePreciseLoss(
-            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, double offset, double resolution
+            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, double offset, double thetaStep
         );
 
         void updateHeuristicScanlines(
