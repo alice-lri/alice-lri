@@ -28,8 +28,7 @@ public:
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration = end - start;
         getTotalTimeMap()[std::string(name)] += duration.count();
-        std::cout << "[TIMER] " << std::string(name) << " took " << std::to_string(duration.count()) << " seconds" <<
-                std::endl;
+        LOG_DEBUG("[TIMER] ", std::string(name), " took ", duration.count(), " seconds");
     }
 
     static void printSortedReport() {
@@ -38,9 +37,9 @@ public:
             return a.second > b.second;
         });
 
-        std::cout << "Profiling Report:" << std::endl;
+        LOG_INFO("Profiling Report:");
         for (const auto &entry : sortedTimes) {
-            std::cout << entry.first << ": " << entry.second << " seconds" << std::endl;
+            LOG_INFO(entry.first, ": ", entry.second, " seconds");
         }
     }
 

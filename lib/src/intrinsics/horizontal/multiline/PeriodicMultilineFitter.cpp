@@ -4,7 +4,6 @@
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "utils/Logger.h"
 #include <vector>
-#include "OsqpEigen/Solver.hpp"
 #include "plotty/matplotlibcpp.hpp"
 
 namespace accurate_ri {

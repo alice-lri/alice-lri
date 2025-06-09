@@ -6,14 +6,12 @@
 #include <sstream>
 #include <iomanip>
 
-// ANSI Escape Codes for Colors
 #define COLOR_RESET  "\033[0m"
-#define COLOR_DEBUG  "\033[36m"  // Cyan
-#define COLOR_INFO   "\033[32m"  // Green
-#define COLOR_WARN   "\033[33m"  // Yellow
-#define COLOR_ERROR  "\033[31m"  // Red
+#define COLOR_DEBUG  "\033[36m"
+#define COLOR_INFO   "\033[32m"
+#define COLOR_WARN   "\033[33m"
+#define COLOR_ERROR  "\033[31m"
 
-// Define logging levels
 #define LOG_LEVEL_DEBUG 1
 #define LOG_LEVEL_INFO  2
 #define LOG_LEVEL_WARN  3
@@ -29,7 +27,6 @@ namespace accurate_ri {
         None = LOG_LEVEL_NONE
     };
 
-    // Default log level (can be overridden at compile-time)
 #ifndef LOG_LEVEL
 #define LOG_LEVEL LOG_LEVEL_INFO
 #endif
@@ -37,7 +34,6 @@ namespace accurate_ri {
     class Logger {
     public:
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
-        // Core logging function using variadic template for `<<` support
         template<typename... Args>
         static void log(LogLevel level, const char *file, int line, Args &&... args) {
             std::ostringstream logStream;

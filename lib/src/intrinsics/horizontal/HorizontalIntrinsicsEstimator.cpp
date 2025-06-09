@@ -57,26 +57,26 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
-        int32_t bestResInt = madOptimalResolution(scanlineArray, scanlineIdx);
-        const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResInt);
+        int32_t bestResolution = madOptimalResolution(scanlineArray, scanlineIdx);
+        const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResolution);
 
         if (!optimizeResult) {
             LOG_ERROR("Horizontal optimization failed for scanline ", scanlineIdx);
             return std::nullopt;
         }
 
-        bestResInt = optimizeResult->resolution;
+        bestResolution = optimizeResult->resolution;
         const double bestOffset = optimizeResult->offset;
         const double bestLoss = optimizeResult->loss;
 
         LOG_INFO(
-            "Scanline ID: ", scanlineIdx, "\tRes: ", bestResInt, "\tOffset: ", bestOffset, "\tPoints: ",
+            "Scanline ID: ", scanlineIdx, "\tRes: ", bestResolution, "\tOffset: ", bestOffset, "\tPoints: ",
             scanlineArray.getSize(scanlineIdx), "\tLoss: ", bestLoss
         );
 
         return std::make_optional<ScanlineHorizontalInfo>(
             {
-                .resolution = bestResInt,
+                .resolution = bestResolution,
                 .offset = bestOffset,
                 .heuristic = false
             }
@@ -261,7 +261,6 @@ namespace accurate_ri {
     int32_t HorizontalIntrinsicsEstimator::madOptimalResolution(
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
     ) {
-        // TODO do not hardcode these
         const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
         const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
         const int32_t minResolution = invRangesXy.innerSize();

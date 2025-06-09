@@ -1,10 +1,6 @@
 [requires]
 nlohmann_json/3.11.3
 eigen/3.4.0
-osqp/0.6.3
-
-[options]
-osqp/*:shared=False
 
 [generators]
 CMakeDeps

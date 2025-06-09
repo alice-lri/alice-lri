@@ -38,13 +38,6 @@ message(STATUS "EIGEN3_INCLUDE_DIR: ${Eigen3_INCLUDE_DIRS}")
 find_package(nlohmann_json REQUIRED)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
-find_package(osqp REQUIRED)
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "Build static libs for dependencies" FORCE)
-add_subdirectory(external/osqp-eigen EXCLUDE_FROM_ALL)
-set_target_properties(OsqpEigen PROPERTIES POSITION_INDEPENDENT_CODE ON)
-target_include_directories(OsqpEigen PUBLIC ${osqp_INCLUDE_DIRS}/osqp)
-target_link_libraries(OsqpEigen PUBLIC osqp::osqp)
-
 message(STATUS "osqp_INCLUDE_DIRS: ${osqp_INCLUDE_DIRS}")
 
 if (ENABLE_PYTHON_DEBUG)
@@ -113,8 +106,6 @@ set(_accurate_ri_private_include_dirs
 # Link libraries base
 set(_accurate_ri_private_libraries
         nlohmann_json::nlohmann_json
-        osqp::osqp
-        OsqpEigen::OsqpEigen
 )
 
 if (ENABLE_PYTHON_DEBUG)
