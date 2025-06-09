@@ -1,0 +1,6 @@
+- indepently for each scanline
+- we start by estimating an candidate resolution using the mad method. normally it will yield the correct rsult, but sometimes off by a few units or it can return a multiple. all values iterated and the minimum loss is chosen to be the number of points in the scanline of course. the max value is chosen to be 50k just in case
+- once we have the candidaate resoltuion we perform joint optimization
+- joint optimization generates candidate resolutions, which are those a few units off and divisors.
+- joint optimization works by estimating a slope first for each candidate resolution. For the slope estimation we grab the inv ranges xy values and diff to ideal and perform a per-block linear regression. The obtained slopes are aggreated using a weighted median, where the weights are the number of points on each block. This is the slope estimation.
+  - then the periodic multiline fitter, which is more accurate since it reconstructs the whole thing, but more expensive as well. Plus it needs an initial offset guess.

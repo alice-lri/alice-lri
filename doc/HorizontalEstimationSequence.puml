@@ -1,0 +1,55 @@
+@startuml
+actor Caller
+participant HorizontalIntrinsicsEstimator
+participant HorizontalScanlineArray
+participant SegmentedMedianSlopeEstimator
+participant PeriodicMultilineFitter
+participant MadResolutionLoss
+
+Caller -> HorizontalIntrinsicsEstimator : estimate(points, vertical)
+activate HorizontalIntrinsicsEstimator
+
+HorizontalIntrinsicsEstimator -> HorizontalScanlineArray : construct from points and vertical
+
+loop for each scanlineIdx
+    HorizontalIntrinsicsEstimator -> HorizontalScanlineArray : getSize(scanlineIdx)
+    alt size >= 16
+        HorizontalIntrinsicsEstimator -> HorizontalIntrinsicsEstimator : madOptimalResolution()
+        activate MadResolutionLoss
+        loop resolution in range
+            HorizontalIntrinsicsEstimator -> MadResolutionLoss : computeResolutionLoss()
+        end
+        deactivate MadResolutionLoss
+
+        HorizontalIntrinsicsEstimator -> HorizontalIntrinsicsEstimator : optimizeJoint()
+        loop resolution candidates
+            HorizontalIntrinsicsEstimator -> HorizontalIntrinsicsEstimator : optimizeJointCandidateResolution()
+
+            HorizontalIntrinsicsEstimator -> HorizontalScanlineArray : getInvRangesXy()
+            HorizontalIntrinsicsEstimator -> HorizontalScanlineArray : getThetas()
+            HorizontalIntrinsicsEstimator -> HorizontalIntrinsicsEstimator : HorizontalMath::computeDiffToIdeal()
+
+            HorizontalIntrinsicsEstimator -> SegmentedMedianSlopeEstimator : estimateSlope()
+
+            HorizontalIntrinsicsEstimator -> PeriodicMultilineFitter : fit(scanlineArray, scanlineIdx, offsetGuess)
+        end
+    else
+        HorizontalIntrinsicsEstimator -> HorizontalIntrinsicsEstimator : mark for heuristic
+    end
+end
+
+alt any heuristic scanlines
+    HorizontalIntrinsicsEstimator -> HorizontalIntrinsicsEstimator : updateHeuristicScanlines()
+    loop over heuristicScanlines
+        HorizontalIntrinsicsEstimator -> HorizontalScanlineArray : getThetas()
+        HorizontalIntrinsicsEstimator -> HorizontalScanlineArray : getRangesXy()
+        HorizontalIntrinsicsEstimator -> HorizontalIntrinsicsEstimator : optimizeFromCandidatesPrecise()
+        loop offsets and resolutions
+            HorizontalIntrinsicsEstimator -> HorizontalIntrinsicsEstimator : computePreciseLoss()
+        end
+    end
+end
+
+HorizontalIntrinsicsEstimator --> Caller : return HorizontalIntrinsicsResult
+deactivate HorizontalIntrinsicsEstimator
+@enduml
