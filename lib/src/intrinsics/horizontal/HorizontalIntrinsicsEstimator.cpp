@@ -52,15 +52,15 @@ namespace accurate_ri {
     ) {
         LOG_DEBUG("Processing horizontal scanline: ", scanlineIdx);
 
-        if (scanlineArray.getSize(scanlineIdx) < 16) {
-            LOG_WARN("Warning: Scanline ", scanlineIdx, " has less than 16 points, queueing for heuristics");
+        if (scanlineArray.getSize(scanlineIdx) < Constant::HORIZONTAL_MIN_POINTS_PER_SCANLINE) {
+            LOG_WARN("Warning: Scanline ", scanlineIdx, " has less than the minimum points, queueing for heuristics");
             return std::nullopt;
         }
 
         int32_t bestResolution = madOptimalResolution(scanlineArray, scanlineIdx);
         const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResolution);
 
-        if (!optimizeResult) {
+        if (!optimizeResult) { // TODO this does not happen anymore
             LOG_ERROR("Horizontal optimization failed for scanline ", scanlineIdx);
             return std::nullopt;
         }
@@ -83,6 +83,7 @@ namespace accurate_ri {
         );
     }
 
+    // TODO this is not optional anymore
     std::optional<ResolutionOffsetLoss> HorizontalIntrinsicsEstimator::optimizeJoint(
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t initialResolution
     ) {

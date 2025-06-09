@@ -9,4 +9,6 @@ namespace accurate_ri::Constant {
 
     // TODO derive this more elegantly, assuming a max offset or something
     constexpr double INV_RANGES_BREAK_THRESHOLD = 1e-2;
+
+    constexpr int32_t HORIZONTAL_MIN_POINTS_PER_SCANLINE = 16;
 }
