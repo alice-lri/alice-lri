@@ -1,6 +1,9 @@
-- indepently for each scanline
-- we start by estimating an candidate resolution using the mad method. normally it will yield the correct rsult, but sometimes off by a few units or it can return a multiple. all values iterated and the minimum loss is chosen to be the number of points in the scanline of course. the max value is chosen to be 50k just in case
-- once we have the candidaate resoltuion we perform joint optimization
+- independently for each scanline
+- we start by estimating a candidate resolution using the mad method. normally it will yield the correct result, but sometimes off by a few units or it can return a multiple. all values iterated and the minimum loss is chosen to be the number of points in the scanline of course. the max value is chosen to be 50k just in case. at the correct resolution the diff to ideal vs inv ranges xy will follow a piecewise linear thingy. therfore we compute the derivative and we want a robust metric that tells us how constant it is. we use the median absolute deviation for this, and therefore this is our loss, picking the resolution that minimizes it.
+- once we have the candidate resolution we perform joint optimization
 - joint optimization generates candidate resolutions, which are those a few units off and divisors.
-- joint optimization works by estimating a slope first for each candidate resolution. For the slope estimation we grab the inv ranges xy values and diff to ideal and perform a per-block linear regression. The obtained slopes are aggreated using a weighted median, where the weights are the number of points on each block. This is the slope estimation.
-  - then the periodic multiline fitter, which is more accurate since it reconstructs the whole thing, but more expensive as well. Plus it needs an initial offset guess.
+- joint optimization works by estimating a slope first for each candidate resolution. For the slope estimation we grab the inv ranges xy values and diff to ideal and perform a per-block linear regression. The obtained slopes are aggregated using a weighted median, where the weights are the number of points on each block. This is the slope estimation.
+  - then the periodic multiline fitter, which is more accurate since it reconstructs the whole thing, but more expensive as well. Plus it needs an initial offset guess. it starts by also computing an intercept guess based on the circular mean
+  - these two serve as an initial hopefully good enough overall line fit. what we do is compute the residuals from this guessed line, then assume infinite parallel lines separated vertically by thetastep, and compute for each point the line id, integer from minus inf to inf, where the line id determines the closest line (possible intercepts are line id times theta step).
+    - given this line ids it is possible to put all the points in the same intercept, and therefore perfrom linear regression for the refined slope and intercept.
+  - 
