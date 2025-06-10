@@ -96,7 +96,9 @@ namespace accurate_ri {
                 .top = RealMargin{j.at("upper_min_theoretical_angle"), j.at("upper_max_theoretical_angle")}
             },
             .dependencies = j.at("dependencies").get<std::vector<uint32_t>>(),
-            .uncertainty = j.at("uncertainty"),
+            .uncertainty = j.at("uncertainty").is_null()
+                               ? std::numeric_limits<double>::infinity()
+                               : j.at("uncertainty").get<double>(),
             .houghVotes = j.at("hough_votes"),
             .houghHash = j.at("hash")
         };
@@ -113,7 +115,7 @@ namespace accurate_ri {
 
     HashToConflictValue hashToConflictValueFromJson(const nlohmann::json &j) {
         std::unordered_set<uint32_t> scanlines;
-        for (const auto &el : j.at("conflictingScanlines")) {
+        for (const auto &el: j.at("conflictingScanlines")) {
             scanlines.insert(el.get<uint32_t>());
         }
 
@@ -210,7 +212,9 @@ namespace accurate_ri {
     VerticalBounds verticalBoundsFromJson(const nlohmann::json &j) {
         return VerticalBounds{
             Eigen::Map<const Eigen::ArrayXd>(j.at("phis").get<std::vector<double>>().data(), j.at("phis").size()),
-            Eigen::Map<const Eigen::ArrayXd>(j.at("correction").get<std::vector<double>>().data(), j.at("correction").size()),
+            Eigen::Map<const Eigen::ArrayXd>(
+                j.at("correction").get<std::vector<double>>().data(), j.at("correction").size()
+            ),
             Eigen::Map<const Eigen::ArrayXd>(j.at("final").get<std::vector<double>>().data(), j.at("final").size())
         };
     }
@@ -242,7 +246,7 @@ namespace accurate_ri {
 
     HorizontalIntrinsicsResult horizontalIntrinsicsFromJson(const nlohmann::json &j) {
         HorizontalIntrinsicsResult hir;
-        for (const auto &scanline : j.at("scanlines_attributes")) {
+        for (const auto &scanline: j.at("scanlines_attributes")) {
             hir.scanlines.push_back(horizontalScanlineInfoFromJson(scanline));
         }
         return hir;
