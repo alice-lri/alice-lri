@@ -97,8 +97,13 @@ namespace accurate_ri {
                 scanlineArray, scanlineIdx, resolution
             );
 
+            LOG_DEBUG("Candidate resolution: ", candidate.resolution, ", offset: ", candidate.offset,
+                ", loss: ", candidate.loss);
+
             if (!bestCandidate || candidate.loss < bestCandidate->loss) {
                 bestCandidate = candidate;
+                LOG_DEBUG("New best resolution: ", candidate.resolution, ", offset: ", candidate.offset,
+                    ", loss: ", candidate.loss);
             }
         }
 

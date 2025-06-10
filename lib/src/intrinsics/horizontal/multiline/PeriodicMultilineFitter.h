@@ -15,7 +15,7 @@ namespace accurate_ri {
 
     class PeriodicMultilineFitter {
     private:
-        const int32_t resolution;
+        const int32_t resolution; // TODO probably name differently (algorithm is business independent)
 
         CustomEstimator estimator;
         std::optional<Stats::LRResult> model = std::nullopt;

@@ -39,7 +39,7 @@ namespace accurate_ri {
             std::ostringstream logStream;
 
             logStream << getTimestamp() << " [" << getLogLevelString(level) << "] ";
-            (logStream << ... << formatValue(std::forward<Args>(args))); // Fold expression for variadic logging
+            (logStream << ... << std::forward<Args>(args));
             logStream << " (" << file << ":" << line << ")" << std::endl;
 
             std::lock_guard lock(getInstance().logMutex);
@@ -91,17 +91,6 @@ namespace accurate_ri {
                 case Warn: return COLOR_WARN;
                 case Error: return COLOR_ERROR;
                 default: return COLOR_RESET;
-            }
-        }
-
-        template<typename T>
-        static auto formatValue(const T& value) {
-            if constexpr (std::is_floating_point_v<T>) {
-                std::stringstream ss;
-                ss << std::fixed << std::setprecision(5) << value;
-                return ss.str();
-            } else {
-                return value;
             }
         }
 #endif
