@@ -254,7 +254,6 @@ namespace accurate_ri {
     ) {
         Eigen::ArrayXd corrected = thetas - offset / ranges;
         corrected -= corrected.minCoeff();
-        std::ranges::sort(corrected);
 
         const Eigen::ArrayXd aligned = (corrected / thetaStep).round() * thetaStep;
 
