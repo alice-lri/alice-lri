@@ -152,7 +152,7 @@ namespace accurate_ri {
         PeriodicMultilineFitter fitter(resolution);
         const PeriodicMultilineFitResult fitResult = fitter.fit(scanlineArray, scanlineIdx, offsetGuess);
 
-        return ResolutionOffsetLoss(resolution, fitResult.model.slope, fitResult.loss);
+        return ResolutionOffsetLoss(resolution, fitResult.model.slope, fitResult.loss * resolution);
     }
 
     void HorizontalIntrinsicsEstimator::updateHeuristicScanlines(
