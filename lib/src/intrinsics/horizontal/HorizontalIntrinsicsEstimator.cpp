@@ -37,6 +37,7 @@ namespace accurate_ri {
                 result.scanlines[scanlineIdx] = *info;
             } else {
                 heuristicScanlines.insert(scanlineIdx);
+                LOG_INFO("Scanline ", scanlineIdx, " will be estimated heuristically");
             }
         }
 
@@ -53,15 +54,15 @@ namespace accurate_ri {
         LOG_DEBUG("Processing horizontal scanline: ", scanlineIdx);
 
         if (scanlineArray.getSize(scanlineIdx) < Constant::HORIZONTAL_MIN_POINTS_PER_SCANLINE) {
-            LOG_WARN("Warning: Scanline ", scanlineIdx, " has less than the minimum points, queueing for heuristics");
+            LOG_WARN("Warning: Scanline ", scanlineIdx, " has less than the minimum points");
             return std::nullopt;
         }
 
         int32_t bestResolution = madOptimalResolution(scanlineArray, scanlineIdx);
         const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResolution);
 
-        if (!optimizeResult) { // TODO this does not happen anymore
-            LOG_ERROR("Horizontal optimization failed for scanline ", scanlineIdx);
+        if (!optimizeResult) {
+            LOG_WARN("Horizontal optimization failed for scanline ", scanlineIdx);
             return std::nullopt;
         }
 
@@ -90,7 +91,7 @@ namespace accurate_ri {
         const int32_t scanlineSize = scanlineArray.getSize(scanlineIdx);
         const std::vector<int32_t> resolutions = generateCandidateResolutions(initialResolution, scanlineSize);
 
-        std::optional<ResolutionOffsetLoss> bestCandidate;
+        std::optional<ResolutionOffsetLoss> bestCandidate = std::nullopt;
 
         for (const int32_t resolution: resolutions) {
             const ResolutionOffsetLoss candidate = optimizeJointCandidateResolution(
@@ -99,6 +100,10 @@ namespace accurate_ri {
 
             LOG_DEBUG("Candidate resolution: ", candidate.resolution, ", offset: ", candidate.offset,
                 ", loss: ", candidate.loss);
+
+            if (std::abs(candidate.offset) > Constant::MAX_OFFSET) {
+                continue;
+            }
 
             if (!bestCandidate || candidate.loss < bestCandidate->loss) {
                 bestCandidate = candidate;
@@ -145,7 +150,7 @@ namespace accurate_ri {
             scanlineArray.getThetas(scanlineIdx), resolution, true // TODO try not reconstructing
         );
 
-        const SegmentedMedianSlopeEstimator slopeEstimator(Constant::INV_RANGES_BREAK_THRESHOLD, 0.5);
+        const SegmentedMedianSlopeEstimator slopeEstimator(Constant::INV_RANGES_BREAK_THRESHOLD, Constant::MAX_OFFSET);
         const double offsetGuess = slopeEstimator.estimateSlope(invRangesXy, diffToIdeal);
         LOG_DEBUG("Offset guess: ", offsetGuess);
 
