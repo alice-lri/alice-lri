@@ -44,7 +44,7 @@ namespace accurate_ri {
 
         LOG_DEBUG("Two-point slope: ", model->slope);
         const double loss = refineFit(x, y);
-        LOG_DEBUG("Refined slope: ", model->slope);
+        LOG_DEBUG("Refined slope: ", model->slope, " and intercept: ", model->intercept);
         return PeriodicMultilineFitResult {.model = *model, .loss = loss};
     }
 

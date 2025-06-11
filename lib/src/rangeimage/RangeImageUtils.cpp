@@ -42,7 +42,8 @@ namespace accurate_ri::RangeImageUtils {
 
             minIndices(pointIdx) = bestLaserIdx;
             const double hOffset = intrinsics.horizontal.scanlines[bestLaserIdx].offset;
-            correctedThetas(pointIdx) = thetas(pointIdx) - std::asin(hOffset / rangesXy(pointIdx));
+            const double thetaOffset = intrinsics.horizontal.scanlines[bestLaserIdx].intercept;
+            correctedThetas(pointIdx) = thetas(pointIdx) - std::asin(hOffset / rangesXy(pointIdx)) - thetaOffset;
             correctedThetas(pointIdx) = correctedThetas(pointIdx) < 0 ? 2 * M_PI + correctedThetas(pointIdx) : correctedThetas(pointIdx); // TODO this should wrap around on both sides
         }
 
@@ -62,6 +63,11 @@ namespace accurate_ri::RangeImageUtils {
             ));
             col = col < 0 ? maxHorizontalResolution - col : col;
             col = col >= maxHorizontalResolution ? col - maxHorizontalResolution : col;
+
+            if (pixels[row * maxHorizontalResolution + col] != 0) {
+                LOG_WARN("Overwriting pixel at (", row, ", ", col, ") with range ", ranges(pointIdx),
+                         " (previously: ", pixels[row * maxHorizontalResolution + col], ")");
+            }
 
             pixels[row * maxHorizontalResolution + col] = ranges(pointIdx);
         }
@@ -91,8 +97,9 @@ namespace accurate_ri::RangeImageUtils {
 
                 const double originalPhi = verticalValues.angle + std::asin(verticalValues.offset / range);
                 const double rangeXy = range * std::cos(originalPhi);
+                const double thetaOffset = horizontalValues.intercept;
                 double originalTheta = col * 2 * M_PI / horizontalValues.resolution - M_PI; // TODO handle different resolutions per scanline
-                originalTheta += std::asin(horizontalValues.offset / rangeXy); // TODO wrap around on both sides
+                originalTheta += std::asin(horizontalValues.offset / rangeXy) + thetaOffset; // TODO wrap around on both sides
 
                 xs.emplace_back(rangeXy * std::cos(originalTheta));
                 ys.emplace_back(rangeXy * std::sin(originalTheta));

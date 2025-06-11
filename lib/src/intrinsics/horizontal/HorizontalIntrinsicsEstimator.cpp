@@ -71,14 +71,16 @@ namespace accurate_ri {
         const double bestLoss = optimizeResult->loss;
 
         LOG_INFO(
-            "Scanline ID: ", scanlineIdx, "\tRes: ", bestResolution, "\tOffset: ", bestOffset, "\tPoints: ",
-            scanlineArray.getSize(scanlineIdx), "\tLoss: ", bestLoss
+            "Scanline ID: ", scanlineIdx, "\tRes: ", bestResolution, "\tOffset: ", bestOffset,
+            "\tIntercept: ", optimizeResult->intercept, "\tPoints: ", scanlineArray.getSize(scanlineIdx),
+            "\tLoss: ", bestLoss
         );
 
         return std::make_optional<ScanlineHorizontalInfo>(
             {
                 .resolution = bestResolution,
                 .offset = bestOffset,
+                .intercept = optimizeResult->intercept,
                 .heuristic = false
             }
         );
@@ -99,7 +101,7 @@ namespace accurate_ri {
             );
 
             LOG_DEBUG("Candidate resolution: ", candidate.resolution, ", offset: ", candidate.offset,
-                ", loss: ", candidate.loss);
+                "intercept: ", candidate.intercept, ", loss: ", candidate.loss);
 
             if (std::abs(candidate.offset) > Constant::MAX_OFFSET) {
                 continue;
@@ -108,7 +110,7 @@ namespace accurate_ri {
             if (!bestCandidate || candidate.loss < bestCandidate->loss) {
                 bestCandidate = candidate;
                 LOG_DEBUG("New best resolution: ", candidate.resolution, ", offset: ", candidate.offset,
-                    ", loss: ", candidate.loss);
+                    "intercept: ", candidate.intercept, ", loss: ", candidate.loss);
             }
         }
 
@@ -157,7 +159,7 @@ namespace accurate_ri {
         PeriodicMultilineFitter fitter(resolution);
         const PeriodicMultilineFitResult fitResult = fitter.fit(scanlineArray, scanlineIdx, offsetGuess);
 
-        return ResolutionOffsetLoss(resolution, fitResult.model.slope, fitResult.loss * resolution);
+        return ResolutionOffsetLoss(resolution, fitResult.model.slope, fitResult.model.intercept, fitResult.loss * resolution);
     }
 
     void HorizontalIntrinsicsEstimator::updateHeuristicScanlines(
@@ -235,7 +237,7 @@ namespace accurate_ri {
         const std::unordered_set<int32_t> &candidateResolutions,
         const std::unordered_set<double> &candidateOffsets
     ) {
-        ResolutionOffsetLoss bestCandidate(0, 0, std::numeric_limits<double>::infinity());
+        ResolutionOffsetLoss bestCandidate(0, 0, 0, std::numeric_limits<double>::infinity());
 
         for (const int32_t resolution: candidateResolutions) {
             const double thetaStep = 2 * M_PI / resolution;
@@ -245,7 +247,7 @@ namespace accurate_ri {
 
                 if (loss < bestCandidate.loss) {
                     bestCandidate.resolution = resolution;
-                    bestCandidate.offset = offset;
+                    bestCandidate.offset = offset; // TODO compute intercept here also (heuristics)
                     bestCandidate.loss = loss;
                 }
             }
@@ -259,6 +261,7 @@ namespace accurate_ri {
     ) {
         Eigen::ArrayXd corrected = thetas - offset / ranges;
         corrected -= corrected.minCoeff();
+        // TODO maybe make sure thetas wrap around 2pi
 
         const Eigen::ArrayXd aligned = (corrected / thetaStep).round() * thetaStep;
 
