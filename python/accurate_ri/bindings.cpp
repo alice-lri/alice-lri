@@ -60,6 +60,7 @@ PYBIND11_MODULE(_accurate_ri, m) {
         .def(py::init<>())
         .def_readwrite("resolution", &ScanlineHorizontalInfo::resolution)
         .def_readwrite("offset", &ScanlineHorizontalInfo::offset)
+        .def_readwrite("intercept", &ScanlineHorizontalInfo::intercept)
         .def_readwrite("heuristic", &ScanlineHorizontalInfo::heuristic);
 
     py::class_<HorizontalIntrinsicsResult>(m, "HorizontalIntrinsicsResult")
@@ -87,12 +88,12 @@ PYBIND11_MODULE(_accurate_ri, m) {
         .def_readwrite("pixels", &RangeImage::pixels);
 
     // Functions with vector inputs
-    m.def("execute", [](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
-        return execute(PointCloud::Float{x, y, z});
+    m.def("train", [](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
+        return train(PointCloud::Float{x, y, z});
     }, "Estimate intrinsics from float vectors");
 
-    m.def("execute", [](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
-        return execute(PointCloud::Double{x, y, z});
+    m.def("train", [](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
+        return train(PointCloud::Double{x, y, z});
     }, "Estimate intrinsics from double vectors");
 
     m.def("project_to_range_image", [](const IntrinsicsResult& intr, const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
