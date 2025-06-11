@@ -40,9 +40,6 @@ namespace accurate_ri {
             thetasByScanline.emplace_back(points.getThetas()(scanlineIndices));
 
             invRangesXyDiffByScanline.emplace_back(Utils::diff(getInvRangesXy(scanlineIdx)));
-
-            // TODO check if this is still necessary
-            thetasByScanline[scanlineIdx] -= thetasByScanline[scanlineIdx].minCoeff();
         }
     }
 
