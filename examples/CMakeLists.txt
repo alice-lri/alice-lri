@@ -19,14 +19,17 @@ target_link_libraries(accurate_ri PRIVATE)
 
 add_executable(examples main.cpp ${SRC_FILES} ${HEADER_FILES})
 add_executable(examples_sql main_sql.cpp ${SRC_FILES} ${HEADER_FILES})
+add_executable(examples_tran_ri main_train_ri.cpp ${SRC_FILES} ${HEADER_FILES})
 add_executable(eigen_loop_vs_select eigen_loop_vs_select.cpp)
 add_executable(eigen_lazy_vs_immediate eigen_lazy_vs_immediate.cpp)
 
 target_link_libraries(examples PRIVATE accurate_ri)
 target_link_libraries(examples_sql PRIVATE accurate_ri SQLiteCpp nlohmann_json::nlohmann_json)
+target_link_libraries(examples_tran_ri PRIVATE accurate_ri)
 
 target_include_directories(examples PRIVATE ${Eigen3_INCLUDE_DIRS})
 target_include_directories(examples_sql PRIVATE ${Eigen3_INCLUDE_DIRS})
+target_include_directories(examples_tran_ri PRIVATE ${Eigen3_INCLUDE_DIRS})
 target_include_directories(eigen_loop_vs_select PRIVATE ${Eigen3_INCLUDE_DIRS})
 target_include_directories(eigen_lazy_vs_immediate PRIVATE ${Eigen3_INCLUDE_DIRS})
 
