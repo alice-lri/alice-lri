@@ -6,5 +6,5 @@ cmake -DLOG_LEVEL=NONE -DCMAKE_BUILD_TYPE=Release -DENABLE_TRACE_FILE=OFF -B bui
 cd build || exit
 ninja
 
-# pip install -e ~/AccurateRI/python
+# pip install -e ~/GitHub/AccurateRI/python
 # on the corresponding project
