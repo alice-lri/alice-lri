@@ -262,6 +262,7 @@ namespace accurate_ri {
         Eigen::ArrayXd corrected = thetas - offset / ranges;
         corrected -= corrected.minCoeff();
         // TODO maybe make sure thetas wrap around 2pi
+        // TODO take into account intercept here as well
 
         const Eigen::ArrayXd aligned = (corrected / thetaStep).round() * thetaStep;
 

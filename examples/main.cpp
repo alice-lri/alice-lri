@@ -20,6 +20,8 @@ std::optional<int> secureStoi(const std::string &str) {
 // TODO define proper classes for Json and so on, right now exporting too much
 // TODO public headers should have NO STL things (vector, string, etc.) https://chatgpt.com/c/683d803b-3f7c-8010-be9d-1ed7dbe70a0c
 // TODO decide what to do with logs and stuff for the library version
+// TODO maybe reserve log warn and error for user relevant logs
+// TODO maybe add additional fit refinement step for offsets (curve fit with arcsin or similar)
 int main(int argc, char **argv) {
     std::string path;
     std::optional<int> accurateDigits = std::nullopt;
@@ -30,10 +32,10 @@ int main(int argc, char **argv) {
             std::cout << "Using default parameters" << std::endl;
             // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000019161.bin";
             // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017276.bin";
-            // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000000000.bin";
+            path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000000000.bin";
             // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000013681.bin";
             // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210716/ouster_points/data/0000041266.bin";
-            path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0002_sync/velodyne_points/data/0000000000.bin";
+            // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0002_sync/velodyne_points/data/0000000000.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000825.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000636.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0046_sync/velodyne_points/data/0000000124.bin";
@@ -89,7 +91,8 @@ int main(int argc, char **argv) {
         accurate_ri::writeToJson(result, *outputPath);
     }
 
-    accurate_ri::projectToRangeImage(result, cloud);
+    const accurate_ri::RangeImage ri = accurate_ri::projectToRangeImage(result, cloud);
+    accurate_ri::unProjectToPointCloud(result, ri);
 
     return 0;
 }

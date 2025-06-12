@@ -8,7 +8,7 @@
 namespace accurate_ri::RangeImageUtils {
     RangeImage computeRangeImage(
         const IntrinsicsResult &intrinsics, const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &z
-    ) {
+    ) { // TODO split method
         PROFILE_SCOPE("RangeImageUtils::computeRangeImage");
         const Eigen::ArrayXd rangesXySquared = x.square() + y.square();
         const Eigen::ArrayXd ranges = (rangesXySquared + z.square()).sqrt();
@@ -31,7 +31,7 @@ namespace accurate_ri::RangeImageUtils {
                 const double vOffset = intrinsics.vertical.fullScanlines.scanlines[laserIdx].values.offset;
                 const double vAngle = intrinsics.vertical.fullScanlines.scanlines[laserIdx].values.angle;
 
-                const double phiCorrection = std::asin(vOffset / ranges(pointIdx));
+                const double phiCorrection = vOffset / ranges(pointIdx);
                 const double phiDiff = std::abs(phis(pointIdx) - phiCorrection - vAngle);
 
                 if (phiDiff < minPhiDiff) {
@@ -43,8 +43,9 @@ namespace accurate_ri::RangeImageUtils {
             minIndices(pointIdx) = bestLaserIdx;
             const double hOffset = intrinsics.horizontal.scanlines[bestLaserIdx].offset;
             const double thetaOffset = intrinsics.horizontal.scanlines[bestLaserIdx].intercept;
-            correctedThetas(pointIdx) = thetas(pointIdx) - std::asin(hOffset / rangesXy(pointIdx)) - thetaOffset;
+            correctedThetas(pointIdx) = thetas(pointIdx) - hOffset / rangesXy(pointIdx) - thetaOffset;
             correctedThetas(pointIdx) = correctedThetas(pointIdx) < 0 ? 2 * M_PI + correctedThetas(pointIdx) : correctedThetas(pointIdx); // TODO this should wrap around on both sides
+            correctedThetas(pointIdx) = correctedThetas(pointIdx) > 2 * M_PI ? correctedThetas(pointIdx) - 2 * M_PI : correctedThetas(pointIdx);
         }
 
         const int32_t maxHorizontalResolution = std::ranges::max_element(
@@ -58,9 +59,9 @@ namespace accurate_ri::RangeImageUtils {
         for (int32_t pointIdx = 0; pointIdx < phis.size(); ++pointIdx) {
             const int32_t row = intrinsics.vertical.scanlinesCount - minIndices(pointIdx) - 1;
             // TODO handle different resolutions per scanline
-            int32_t col = static_cast<int32_t>(std::round(
-                correctedThetas(pointIdx) / (2 * M_PI) * maxHorizontalResolution
-            ));
+            const double thetaStep = 2 * std::numbers::pi / static_cast<double>(maxHorizontalResolution);
+            int32_t col = static_cast<int32_t>(std::round(correctedThetas(pointIdx) / thetaStep));
+
             col = col < 0 ? maxHorizontalResolution - col : col;
             col = col >= maxHorizontalResolution ? col - maxHorizontalResolution : col;
 
@@ -95,11 +96,11 @@ namespace accurate_ri::RangeImageUtils {
                     continue;
                 }
 
-                const double originalPhi = verticalValues.angle + std::asin(verticalValues.offset / range);
+                const double originalPhi = verticalValues.angle + verticalValues.offset / range;
                 const double rangeXy = range * std::cos(originalPhi);
                 const double thetaOffset = horizontalValues.intercept;
                 double originalTheta = col * 2 * M_PI / horizontalValues.resolution - M_PI; // TODO handle different resolutions per scanline
-                originalTheta += std::asin(horizontalValues.offset / rangeXy) + thetaOffset; // TODO wrap around on both sides
+                originalTheta += horizontalValues.offset / rangeXy + thetaOffset; // TODO wrap around on both sides
 
                 xs.emplace_back(rangeXy * std::cos(originalTheta));
                 ys.emplace_back(rangeXy * std::sin(originalTheta));
