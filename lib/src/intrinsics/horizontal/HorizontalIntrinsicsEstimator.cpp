@@ -16,7 +16,6 @@
 #include "utils/Logger.h"
 #include "utils/Timer.h"
 
-// TODO fix inconsistent naming for resolution
 namespace accurate_ri {
     HorizontalIntrinsicsResult HorizontalIntrinsicsEstimator::estimate(
         const PointArray &points, const VerticalIntrinsicsResult &vertical

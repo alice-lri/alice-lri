@@ -51,9 +51,7 @@ namespace accurate_ri {
     };
 
     enum class EndReason {
-        ALL_ASSIGNED,
-        MAX_ITERATIONS,
-        NO_MORE_PEAKS
+        ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
     };
 
     struct ScanlineHorizontalInfo { // TODO maybe rename to HorizontalScanlineInfo
@@ -81,11 +79,30 @@ namespace accurate_ri {
         HorizontalIntrinsicsResult horizontal;
     };
 
-    // TODO convencience method for getting and setting pixels
     struct RangeImage {
-        int32_t width;
-        int32_t height;
+        const uint32_t width;
+        const uint32_t height;
+
+    private:
         std::vector<double> pixels;
+
+    public:
+        RangeImage(const uint32_t width, const uint32_t height) : width(width), height(height) {
+            pixels.resize(width * height);
+        }
+
+        RangeImage(const uint32_t width, const uint32_t height, const double initialValue)
+            : width(width), height(height) {
+            pixels.resize(width * height, initialValue);
+        }
+
+        double &operator()(const uint32_t row, const uint32_t col) {
+            return pixels[row * width + col];
+        }
+
+        const double &operator()(const uint32_t row, const uint32_t col) const {
+            return pixels[row * width + col];
+        }
     };
 
     namespace PointCloud {

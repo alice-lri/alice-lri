@@ -54,10 +54,10 @@ namespace accurate_ri::RangeImageUtils {
             }
         )->resolution;
 
-        std::vector<double> pixels(maxHorizontalResolution * intrinsics.vertical.scanlinesCount, 0);
+        RangeImage rangeImage(maxHorizontalResolution, intrinsics.vertical.scanlinesCount, 0);
 
         for (int32_t pointIdx = 0; pointIdx < phis.size(); ++pointIdx) {
-            const int32_t row = intrinsics.vertical.scanlinesCount - minIndices(pointIdx) - 1;
+            const uint32_t row = intrinsics.vertical.scanlinesCount - minIndices(pointIdx) - 1;
             // TODO handle different resolutions per scanline
             const double thetaStep = 2 * std::numbers::pi / static_cast<double>(maxHorizontalResolution);
             int32_t col = static_cast<int32_t>(std::round(correctedThetas(pointIdx) / thetaStep));
@@ -65,32 +65,27 @@ namespace accurate_ri::RangeImageUtils {
             col = col < 0 ? maxHorizontalResolution - col : col;
             col = col >= maxHorizontalResolution ? col - maxHorizontalResolution : col;
 
-            if (pixels[row * maxHorizontalResolution + col] != 0) {
+            if (rangeImage(row, col) != 0) {
                 LOG_WARN("Overwriting pixel at (", row, ", ", col, ") with range ", ranges(pointIdx),
-                         " (previously: ", pixels[row * maxHorizontalResolution + col], ")");
+                         " (previously: ", rangeImage(row, col), ")");
             }
 
-            pixels[row * maxHorizontalResolution + col] = ranges(pointIdx);
+            rangeImage(row, col) = ranges(pointIdx);
         }
 
-        return RangeImage{
-            .width = maxHorizontalResolution,
-            // TODO avoid cast
-            .height = static_cast<int32_t>(intrinsics.vertical.scanlinesCount),
-            .pixels = std::move(pixels)
-        };
+        return rangeImage;
     }
 
     PointCloud::Double unProjectRangeImage(const IntrinsicsResult &intrinsics, const RangeImage &image) {
         std::vector<double> xs, ys, zs;
 
         for (int32_t row = 0; row < image.height; ++row) {
-            const int32_t scanlineIdx = image.height - row - 1;
+            const uint32_t scanlineIdx = image.height - row - 1;
             const auto verticalValues = intrinsics.vertical.fullScanlines.scanlines[scanlineIdx].values;
             const auto horizontalValues = intrinsics.horizontal.scanlines[scanlineIdx];
 
             for (int32_t col = 0; col < image.width; ++col) {
-                const double range = image.pixels[row * image.width + col];
+                const double range = image(row, col);
 
                 if (range <= 0) {
                     continue;
