@@ -158,7 +158,7 @@ def compute_ground_truth(points, v_angles, v_offsets, h_offsets, h_resolutions, 
         theta_step = 2 * np.pi / h_resolutions[laser_idx]
         corrected_thetas = thetas[idx] - np.arcsin(h / ranges_xy[idx])
         ideal_thetas = np.floor(corrected_thetas / theta_step) * theta_step
-        theta_offsets[laser_idx] = np.mean(corrected_thetas - ideal_thetas)
+        theta_offsets[laser_idx] = float(np.mean(corrected_thetas - ideal_thetas))
 
         laser_idx += 1
 
@@ -212,7 +212,7 @@ def compute_ground_truth_from_file(input_path, dataset_name):
 
 def store_ground_truth(ground_truth, frame_id, db_cursor):
     db_cursor.execute('''
-        INSERT INTO dataset_frame_empirical(dataset_frame_id, points_count, scanlines_count)
+        INSERT OR IGNORE INTO dataset_frame_empirical(dataset_frame_id, points_count, scanlines_count)
         VALUES (?, ?, ?)
     ''', (frame_id, ground_truth['points_count'], ground_truth['scanlines_count']))
 
@@ -301,11 +301,14 @@ if __name__ == "__main__":
         # Build the full path to the file
         full_path = os.path.join(dataset_roots[frame['dataset_name']], frame['relative_path'])
 
+        print(f"Processing {frame['relative_path']}")
+
         # Process the file
         ground_truth = compute_ground_truth_from_file(full_path, frame['dataset_name'])
         store_ground_truth(ground_truth, frame['id'], cur)
 
         print(f"Process {process_id}/{total_processes} - Processed {i + 1}/{len(frames)} frames")
+        conn.commit()
 
     # Only commit at the end
     conn.commit()
