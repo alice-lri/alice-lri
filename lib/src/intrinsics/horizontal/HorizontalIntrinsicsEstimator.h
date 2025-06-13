@@ -10,11 +10,11 @@ namespace accurate_ri {
     struct ResolutionOffsetLoss {
         int32_t resolution;
         double offset;
-        double intercept;
+        double thetaOffset;
         double loss;
 
-        ResolutionOffsetLoss(const int32_t resolution, const double offset, const double intercept, const double loss)
-            : resolution(resolution), offset(offset), intercept(intercept), loss(loss) {}
+        ResolutionOffsetLoss(const int32_t resolution, const double offset, const double thetaOffset, const double loss)
+            : resolution(resolution), offset(offset), thetaOffset(thetaOffset), loss(loss) {}
     };
 
     class HorizontalIntrinsicsEstimator {

@@ -82,8 +82,8 @@ void storeResult(
                                                         vertical_theoretical_angle_top_lower, vertical_theoretical_angle_top_upper,
                                                         vertical_uncertainty, vertical_last_scanline, vertical_hough_votes,
                                                         vertical_hough_hash, horizontal_offset, horizontal_resolution,
-                                                        horizontal_heuristic)
-            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                                                        horizontal_angle_offset, horizontal_heuristic)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             )"
         );
 
@@ -109,7 +109,8 @@ void storeResult(
         scanlineQuery.bind(17, std::to_string(verticalScanline.houghHash));
         scanlineQuery.bind(18, horizontalScanline.offset);
         scanlineQuery.bind(19, horizontalScanline.resolution);
-        scanlineQuery.bind(20, horizontalScanline.heuristic);
+        scanlineQuery.bind(20, horizontalScanline.thetaOffset);
+        scanlineQuery.bind(21, horizontalScanline.heuristic);
 
         scanlineQuery.exec();
     }

@@ -59,7 +59,7 @@ namespace accurate_ri {
     struct ScanlineHorizontalInfo { // TODO maybe rename to HorizontalScanlineInfo
         int32_t resolution;
         double offset;
-        double intercept;
+        double thetaOffset;
         bool heuristic;
     };
 

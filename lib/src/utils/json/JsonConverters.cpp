@@ -223,7 +223,7 @@ namespace accurate_ri {
         nlohmann::json j;
         j["resolution"] = shi.resolution;
         j["offset"] = shi.offset;
-        j["intercept"] = shi.intercept;
+        j["thetaOffset"] = shi.thetaOffset;
         j["heuristic"] = shi.heuristic;
         return j;
     }
@@ -232,7 +232,7 @@ namespace accurate_ri {
         return ScanlineHorizontalInfo{
             .resolution = j.at("resolution"),
             .offset = j.at("offset"),
-            .intercept = j.at("intercept"),
+            .thetaOffset = j.at("thetaOffset"),
             .heuristic = j.at("heuristic")
         };
     }

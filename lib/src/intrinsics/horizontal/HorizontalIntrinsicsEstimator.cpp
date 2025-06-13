@@ -72,7 +72,7 @@ namespace accurate_ri {
 
         LOG_INFO(
             "Scanline ID: ", scanlineIdx, "\tRes: ", bestResolution, "\tOffset: ", bestOffset,
-            "\tIntercept: ", optimizeResult->intercept, "\tPoints: ", scanlineArray.getSize(scanlineIdx),
+            "\tTheta Offset: ", optimizeResult->thetaOffset, "\tPoints: ", scanlineArray.getSize(scanlineIdx),
             "\tLoss: ", bestLoss
         );
 
@@ -80,7 +80,7 @@ namespace accurate_ri {
             {
                 .resolution = bestResolution,
                 .offset = bestOffset,
-                .intercept = optimizeResult->intercept,
+                .thetaOffset = optimizeResult->thetaOffset,
                 .heuristic = false
             }
         );
@@ -101,7 +101,7 @@ namespace accurate_ri {
             );
 
             LOG_DEBUG("Candidate resolution: ", candidate.resolution, ", offset: ", candidate.offset,
-                "intercept: ", candidate.intercept, ", loss: ", candidate.loss);
+                "theta offset: ", candidate.thetaOffset, ", loss: ", candidate.loss);
 
             if (std::abs(candidate.offset) > Constant::MAX_OFFSET) {
                 continue;
@@ -110,7 +110,7 @@ namespace accurate_ri {
             if (!bestCandidate || candidate.loss < bestCandidate->loss) {
                 bestCandidate = candidate;
                 LOG_DEBUG("New best resolution: ", candidate.resolution, ", offset: ", candidate.offset,
-                    "intercept: ", candidate.intercept, ", loss: ", candidate.loss);
+                    "theta offset: ", candidate.thetaOffset, ", loss: ", candidate.loss);
             }
         }
 

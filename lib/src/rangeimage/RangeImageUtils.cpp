@@ -42,7 +42,7 @@ namespace accurate_ri::RangeImageUtils {
 
             minIndices(pointIdx) = bestLaserIdx;
             const double hOffset = intrinsics.horizontal.scanlines[bestLaserIdx].offset;
-            const double thetaOffset = intrinsics.horizontal.scanlines[bestLaserIdx].intercept;
+            const double thetaOffset = intrinsics.horizontal.scanlines[bestLaserIdx].thetaOffset;
             correctedThetas(pointIdx) = thetas(pointIdx) - hOffset / rangesXy(pointIdx) - thetaOffset;
             correctedThetas(pointIdx) = correctedThetas(pointIdx) < 0 ? 2 * M_PI + correctedThetas(pointIdx) : correctedThetas(pointIdx); // TODO this should wrap around on both sides
             correctedThetas(pointIdx) = correctedThetas(pointIdx) > 2 * M_PI ? correctedThetas(pointIdx) - 2 * M_PI : correctedThetas(pointIdx);
@@ -98,7 +98,7 @@ namespace accurate_ri::RangeImageUtils {
 
                 const double originalPhi = verticalValues.angle + verticalValues.offset / range;
                 const double rangeXy = range * std::cos(originalPhi);
-                const double thetaOffset = horizontalValues.intercept;
+                const double thetaOffset = horizontalValues.thetaOffset;
                 double originalTheta = col * 2 * M_PI / horizontalValues.resolution - M_PI; // TODO handle different resolutions per scanline
                 originalTheta += horizontalValues.offset / rangeXy + thetaOffset; // TODO wrap around on both sides
 
