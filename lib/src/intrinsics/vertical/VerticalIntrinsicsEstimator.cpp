@@ -13,7 +13,6 @@
 #include <nlohmann/json.hpp>
 #include "math/Stats.h"
 
-// TODO review that I am using .at() instead of [] for the maps
 namespace accurate_ri {
     // TODO extract these constants somewhere
     constexpr uint64_t MAX_ITERATIONS = 10000;

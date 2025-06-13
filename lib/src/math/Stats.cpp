@@ -99,7 +99,7 @@ namespace accurate_ri::Stats {
         std::unordered_map<T, int64_t> frequencies;
 
         for (const auto &value : values) {
-            frequencies[value]++;
+            ++frequencies[value];
         }
 
         T mode = values[0];

@@ -30,7 +30,7 @@ namespace accurate_ri {
                 return false;
             }
 
-            HashToConflictValue &hashToConflictValue = hashesToConflictsMap[houghMax.hash];
+            HashToConflictValue &hashToConflictValue = hashesToConflictsMap.at(houghMax.hash);
 
             hashToConflictValue.conflictingScanlines.insert(
                 conflicts.conflictingScanlines.begin(), conflicts.conflictingScanlines.end()
