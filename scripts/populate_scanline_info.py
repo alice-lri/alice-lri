@@ -1,6 +1,6 @@
 import glob
 import sqlite3
-from cesga.ground_truth.populate_ground_truth_db import get_sensor_properties
+from populate_ground_truth_db import get_sensor_properties
 
 db_path = "../large/master.sqlite"
 datasets = ["durlar", "kitti"]

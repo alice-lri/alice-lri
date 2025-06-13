@@ -18,8 +18,17 @@ def calculate_phi(points):
     return np.arctan2(points[:, 2], distances_xy)
 
 
+def calculate_theta(points):
+    points = np.array(points)
+    return np.arctan2(points[:, 1], points[:, 0])
+
+
 def calculate_range(points):
     return np.sqrt(points[:, 0] ** 2 + points[:, 1] ** 2 + points[:, 2] ** 2)
+
+
+def calculate_range_xy(points):
+    return np.sqrt(points[:, 0] ** 2 + points[:, 1] ** 2)
 
 
 def get_kitti_constants():
@@ -121,8 +130,11 @@ def compute_ground_truth(points, v_angles, v_offsets, h_offsets, h_resolutions, 
     assert len(v_offsets) == len(v_angles), "v_offsets and v_angles have different lengths"
 
     phis = calculate_phi(points)
+    thetas = calculate_theta(points)
     ranges = calculate_range(points)
+    ranges_xy = calculate_range_xy(points)
     scanlines_ids = np.full(len(points), -1, dtype=int)
+    theta_offsets = {}
 
     laser_idx = 0
     while laser_idx < len(v_offsets):
@@ -140,6 +152,14 @@ def compute_ground_truth(points, v_angles, v_offsets, h_offsets, h_resolutions, 
 
         # assign scanline id to the corresponding indices
         scanlines_ids[idx] = laser_idx
+
+        # compute diff to ideal and theta offset
+        h = h_offsets[laser_idx]
+        theta_step = 2 * np.pi / h_resolutions[laser_idx]
+        corrected_thetas = thetas[idx] - np.arcsin(h / ranges_xy[idx])
+        ideal_thetas = np.floor(corrected_thetas / theta_step) * theta_step
+        theta_offsets[laser_idx] = np.mean(corrected_thetas - ideal_thetas)
+
         laser_idx += 1
 
     assert np.all(scanlines_ids != -1), "Some points were not assigned to any scanline"
@@ -164,6 +184,7 @@ def compute_ground_truth(points, v_angles, v_offsets, h_offsets, h_resolutions, 
             'v_angle': v_angle,
             'h_offset': h_offset,
             'h_resolution': h_resolution,
+            'theta_offset': theta_offsets[laser_idx],
             'points_count': points_count
         })
 
@@ -191,17 +212,28 @@ def compute_ground_truth_from_file(input_path, dataset_name):
 
 def store_ground_truth(ground_truth, frame_id, db_cursor):
     db_cursor.execute('''
-        INSERT OR IGNORE INTO dataset_frame_empirical(dataset_frame_id, points_count, scanlines_count)
+        INSERT INTO dataset_frame_empirical(dataset_frame_id, points_count, scanlines_count)
         VALUES (?, ?, ?)
     ''', (frame_id, ground_truth['points_count'], ground_truth['scanlines_count']))
 
-    db_cursor.executemany('''
-        INSERT OR IGNORE INTO dataset_frame_scanline_info_empirical(dataset_frame_id, scanline_idx, laser_idx, points_count,
-                                                                    vertical_offset, vertical_angle, horizontal_offset,
-                                                                    horizontal_resolution)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    ''', [(frame_id, idx, scanline['laser_idx'], scanline['points_count'], scanline['v_offset'], scanline['v_angle'],
-           scanline['h_offset'], scanline['h_resolution']) for idx, scanline in enumerate(ground_truth['scanlines'])])
+    for idx, s in enumerate(ground_truth['scanlines']):
+        try:
+            db_cursor.execute('''
+                              INSERT INTO dataset_frame_scanline_info_empirical(
+                                  dataset_frame_id, scanline_idx, laser_idx, points_count,
+                                  vertical_offset, vertical_angle, horizontal_offset,
+                                  horizontal_resolution, horizontal_angle_offset
+                              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+                              ''', (frame_id, idx, s['laser_idx'], s['points_count'], s['v_offset'], s['v_angle'],
+                                    s['h_offset'], s['h_resolution'], s['theta_offset']))
+        except sqlite3.IntegrityError:
+            db_cursor.execute('''
+                            UPDATE dataset_frame_scanline_info_empirical 
+                            SET points_count = ?, vertical_offset = ?, vertical_angle = ?,
+                                horizontal_offset = ?, horizontal_resolution = ?, horizontal_angle_offset = ?
+                            WHERE dataset_frame_id = ? AND scanline_idx = ?;
+                            ''', (s['points_count'], s['v_offset'], s['v_angle'],
+                                  s['h_offset'], s['h_resolution'], s['theta_offset'], frame_id, idx))
 
 
 def get_frames_for_process(db_path, process_id, total_processes):
