@@ -308,7 +308,6 @@ if __name__ == "__main__":
         store_ground_truth(ground_truth, frame['id'], cur)
 
         print(f"Process {process_id}/{total_processes} - Processed {i + 1}/{len(frames)} frames")
-        conn.commit()
 
     # Only commit at the end
     conn.commit()
