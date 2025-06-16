@@ -1,7 +1,7 @@
 #include "RangeImageUtils.h"
-#include "accurate_ri/public_structs.hpp"
+#include <numbers>
 #include <Eigen/Core>
-
+#include "accurate_ri/public_structs.hpp"
 #include "utils/Logger.h"
 #include "utils/Timer.h"
 
