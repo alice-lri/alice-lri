@@ -11,15 +11,11 @@
 #include "utils/TestUtils.h"
 #include "utils/Timer.h"
 #include <nlohmann/json.hpp>
+
+#include "Constants.h"
 #include "math/Stats.h"
 
 namespace accurate_ri {
-    // TODO extract these constants somewhere
-    constexpr uint64_t MAX_ITERATIONS = 10000;
-    constexpr double MAX_OFFSET = 0.5;
-    constexpr double OFFSET_STEP = 1e-3;
-    constexpr double ANGLE_STEP = 1e-4;
-    constexpr uint64_t MAX_FIT_ATTEMPTS = 10;
 
     enum class FitConvergenceState {
         INITIAL = 0, CONVERGED = 1, CONFIRMED = 2,
@@ -38,7 +34,7 @@ namespace accurate_ri {
 
         while (scanlinePool->anyUnassigned()) {
             iteration++;
-            if (iteration > MAX_ITERATIONS) {
+            if (iteration > Constant::VERTICAL_MAX_ITERATIONS) {
                 endReason = EndReason::MAX_ITERATIONS;
                 LOG_WARN("Warning: Maximum iterations reached");
                 break;
@@ -138,7 +134,7 @@ namespace accurate_ri {
                 .pointsCount = static_cast<uint64_t>(scanlineEstimation.limits.indices.size()),
                 .values = maxValues,
                 .ci = scanlineEstimation.ci,
-                .theoreticalAngleBounds = std::move(angleBounds),
+                .theoreticalAngleBounds = angleBounds,
                 .dependencies = std::move(scanlineEstimation.dependencies),
                 .uncertainty = scanlineEstimation.uncertainty,
                 .houghVotes = houghMax.votes,
@@ -191,14 +187,14 @@ namespace accurate_ri {
     }
 
     void VerticalIntrinsicsEstimator::initScanlinePool(const PointArray &points) {
-        double offsetMax = std::min(std::ranges::min(points.getRanges()), MAX_OFFSET) - OFFSET_STEP;
+        double offsetMax = std::min(std::ranges::min(points.getRanges()), Constant::MAX_OFFSET) - Constant::OFFSET_STEP;
         double offsetMin = -offsetMax;
 
-        double angleMax = M_PI / 2 - ANGLE_STEP;
+        double angleMax = M_PI / 2 - Constant::ANGLE_STEP;
         double angleMin = -angleMax;
 
         scanlinePool = std::make_unique<VerticalScanlinePool>(
-            offsetMin, offsetMax, OFFSET_STEP, angleMin, angleMax, ANGLE_STEP
+            offsetMin, offsetMax, Constant::OFFSET_STEP, angleMin, angleMax, Constant::ANGLE_STEP
         );
     }
 
@@ -254,6 +250,7 @@ namespace accurate_ri {
         const auto lowerArcsinArgShifted =
                 ((offset - margin.offset.lower) * (invRanges.array() - invRangesShift)).min(1).max(-1);
 
+        // TODO what happenned here, before arcsin now copies?
         const auto upperArcsin = upperArcsinArg;
         const auto lowerArcsin = lowerArcsinArg;
 
@@ -408,7 +405,7 @@ namespace accurate_ri {
         FitConvergenceState state = FitConvergenceState::INITIAL;
         bool ciTooWide = false;
 
-        for (uint64_t attempt = 0; attempt < MAX_FIT_ATTEMPTS; ++attempt) {
+        for (uint64_t attempt = 0; attempt < Constant::VERTICAL_MAX_FIT_ATTEMPTS; ++attempt) {
             const Eigen::ArrayXi &currentScanlineIndices = currentScanlineLimits.indices;
 
             if (currentScanlineIndices.size() <= 2) {
@@ -441,7 +438,6 @@ namespace accurate_ri {
             const Eigen::ArrayXd &invRanges = points.getInvRanges();
             const Eigen::ArrayXd &phis = points.getPhis();
 
-            // TODO, careful, maybe this does not work. But: https://eigen.tuxfamily.org/dox/group__TutorialSlicingIndexing.html#title5
             // TODO check if we can avoid these copies by lazy evaluating inside the performFit function
             const Eigen::ArrayXd &invRangesFiltered = invRanges(pointsToFitIndices);
             const Eigen::ArrayXd &phisFiltered = phis(pointsToFitIndices);

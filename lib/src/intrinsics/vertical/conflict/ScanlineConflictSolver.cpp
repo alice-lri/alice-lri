@@ -195,7 +195,6 @@ namespace accurate_ri {
                 };
             }
 
-            // TODO thoroughly test this case both in python and C++
             LOG_INFO(
                 "New uncertainty is higher than conflicting scanlines uncertainties. Rejecting current scanline"
             );
