@@ -176,7 +176,8 @@ namespace accurate_ri {
                 thetas, rangesXy, otherResolutions, otherOffsets
             );
 
-            scanlines[scanlineIdx] = ScanlineHorizontalInfo{bestParams.resolution, bestParams.offset, true};
+            // TODO compute theta offset here as well
+            scanlines[scanlineIdx] = ScanlineHorizontalInfo{bestParams.resolution, bestParams.offset, 1.0, true};
 
             LOG_INFO(
                 "Scanline ID: ", scanlineIdx, "\tRes: ", bestParams.resolution, "\tOffset: ", bestParams.offset,
