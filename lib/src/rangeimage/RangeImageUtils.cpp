@@ -4,6 +4,7 @@
 #include "accurate_ri/public_structs.hpp"
 #include "utils/Logger.h"
 #include "utils/Timer.h"
+#include "utils/Utils.h"
 
 namespace accurate_ri::RangeImageUtils {
     RangeImage computeRangeImage(
@@ -44,9 +45,9 @@ namespace accurate_ri::RangeImageUtils {
             const double hOffset = intrinsics.horizontal.scanlines[bestLaserIdx].offset;
             const double thetaOffset = intrinsics.horizontal.scanlines[bestLaserIdx].thetaOffset;
             correctedThetas(pointIdx) = thetas(pointIdx) - hOffset / rangesXy(pointIdx) - thetaOffset;
-            correctedThetas(pointIdx) = correctedThetas(pointIdx) < 0 ? 2 * M_PI + correctedThetas(pointIdx) : correctedThetas(pointIdx); // TODO this should wrap around on both sides
-            correctedThetas(pointIdx) = correctedThetas(pointIdx) > 2 * M_PI ? correctedThetas(pointIdx) - 2 * M_PI : correctedThetas(pointIdx);
         }
+
+        Utils::positiveFmodInplace(correctedThetas, 2 * M_PI);
 
         const int32_t maxHorizontalResolution = std::ranges::max_element(
             intrinsics.horizontal.scanlines, {}, [](const auto &scanline) {
@@ -95,7 +96,8 @@ namespace accurate_ri::RangeImageUtils {
                 const double rangeXy = range * std::cos(originalPhi);
                 const double thetaOffset = horizontalValues.thetaOffset;
                 double originalTheta = col * 2 * M_PI / horizontalValues.resolution - M_PI; // TODO handle different resolutions per scanline
-                originalTheta += horizontalValues.offset / rangeXy + thetaOffset; // TODO wrap around on both sides
+                originalTheta += horizontalValues.offset / rangeXy + thetaOffset;
+                originalTheta = Utils::positiveFmod(originalTheta, 2 * M_PI);
 
                 xs.emplace_back(rangeXy * std::cos(originalTheta));
                 ys.emplace_back(rangeXy * std::sin(originalTheta));

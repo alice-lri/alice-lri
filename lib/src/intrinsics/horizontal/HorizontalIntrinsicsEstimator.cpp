@@ -267,7 +267,7 @@ namespace accurate_ri {
     ) {
         const double thetaStep = 2 * M_PI / resolution;
         Eigen::ArrayXd correctedThetas = thetas - offset / ranges;
-        // TODO maybe make sure thetas wrap around 2pi
+        Utils::positiveFmodInplace(correctedThetas, 2 * M_PI);
 
         const Eigen::ArrayXd idealThetas = (correctedThetas / thetaStep).floor() * thetaStep;
         const Eigen::ArrayXd diffToIdeal = correctedThetas - idealThetas;
