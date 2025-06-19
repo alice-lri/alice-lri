@@ -1,4 +1,5 @@
 import json
+import argparse
 import multiprocessing
 import sqlite3
 import subprocess
@@ -125,29 +126,58 @@ def check_frame(indexed_item):
             assert abs(vert["angle"] - gt[2]) < 1e-3, f"[{i}] Angle mismatch: expected {gt[2]}, got {vert['angle']}"
             assert abs(vert["offset"] - gt[3]) < 1e-2, f"[{i}] Offset mismatch: expected {gt[3]}, got {vert['offset']}"
             assert hor["resolution"] == gt[4], f"[{i}] Resolution mismatch: expected {gt[4]}, got {hor['resolution']}"
-            if not hor["heuristic"]: # TODO temp while heuristics not improved
-                assert abs(hor["offset"] - gt[5]) < 1e-2, f"[{i}] Horizontal offset mismatch: expected {gt[5]}, got {hor['offset']}"
-                assert abs(hor["thetaOffset"] - gt[6]) < 1e-3, f"[{i}] Theta offset mismatch: expected {gt[6]}, got {hor['thetaOffset']}"
+            assert abs(hor["offset"] - gt[5]) < 1e-2, f"[{i}] Horizontal offset mismatch: expected {gt[5]}, got {hor['offset']}"
+            assert abs(hor["thetaOffset"] - gt[6]) < 1e-3, f"[{i}] Theta offset mismatch: expected {gt[6]}, got {hor['thetaOffset']}"
     except AssertionError as e:
         print(f"ERROR: {path}: {e}")
         sys.exit()
 
 
-def main():
+def get_all_test_items():
     with sqlite3.connect(db_path) as conn:
         cur = conn.cursor()
         cur.execute(test_suite_query)
         test_suite_result = cur.fetchall()
-        test_suite_paths = [kitti_path + row[1] if row[0] == "kitti" else durlar_path + row[1] for row in test_suite_result]
+        test_suite_paths = [kitti_path + row[1] if row[0] == "kitti" else durlar_path + row[1] for row in
+                            test_suite_result]
         cur.close()
 
         print(f"Fetched {len(test_suite_paths)} items.")
-
     indexed_items = list(enumerate(zip(test_suite_paths, test_suite_result)))
+    return indexed_items
+
+
+def get_specific_test_item(args):
+    dataset_name = args.dataset_name
+    relative_path = args.relative_path
+    with sqlite3.connect(db_path) as conn:
+        cur = conn.cursor()
+        cur.execute(frame_gt_query, (dataset_name, relative_path))
+        if not cur.fetchone():
+            print(f"No entry found for dataset '{dataset_name}' and path '{relative_path}'")
+            sys.exit(1)
+        cur.close()
+    if dataset_name == "kitti":
+        full_path = kitti_path + relative_path
+    else:
+        full_path = durlar_path + relative_path
+    indexed_items = [(0, (full_path, (dataset_name, relative_path)))]
+    return indexed_items
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Run scanline algorithm test.")
+    parser.add_argument("dataset_name", nargs="?", help="Dataset name (kitti or durlar)")
+    parser.add_argument("relative_path", nargs="?", help="Relative path to a specific frame")
+    args = parser.parse_args()
+
+    if args.dataset_name and args.relative_path:
+        indexed_items = get_specific_test_item(args)
+    else:
+        indexed_items = get_all_test_items()
 
     with multiprocessing.Pool(16) as pool:
         pool.map(check_frame, indexed_items)
-
 
 if __name__ == "__main__":
     main()
