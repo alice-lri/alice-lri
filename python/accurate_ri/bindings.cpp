@@ -60,7 +60,7 @@ PYBIND11_MODULE(_accurate_ri, m) {
         .def(py::init<>())
         .def_readwrite("resolution", &ScanlineHorizontalInfo::resolution)
         .def_readwrite("offset", &ScanlineHorizontalInfo::offset)
-        .def_readwrite("intercept", &ScanlineHorizontalInfo::intercept)
+        .def_readwrite("thetaOffset", &ScanlineHorizontalInfo::thetaOffset)
         .def_readwrite("heuristic", &ScanlineHorizontalInfo::heuristic);
 
     py::class_<HorizontalIntrinsicsResult>(m, "HorizontalIntrinsicsResult")
@@ -81,11 +81,31 @@ PYBIND11_MODULE(_accurate_ri, m) {
         .def_readwrite("vertical", &IntrinsicsResult::vertical)
         .def_readwrite("horizontal", &IntrinsicsResult::horizontal);
 
+
     py::class_<RangeImage>(m, "RangeImage")
-        .def(py::init<>())
-        .def_readwrite("width", &RangeImage::width)
-        .def_readwrite("height", &RangeImage::height)
-        .def_readwrite("pixels", &RangeImage::pixels);
+        .def(py::init<uint32_t, uint32_t>(), py::arg("width"), py::arg("height"))
+        .def(py::init<uint32_t, uint32_t, double>(), py::arg("width"), py::arg("height"), py::arg("initialValue"))
+        .def_readonly("width", &RangeImage::width)
+        .def_readonly("height", &RangeImage::height)
+        .def("__getitem__", [](const RangeImage &ri, py::tuple idx) -> double {
+            if (idx.size() != 2)
+                throw py::index_error("Need 2 indices");
+            size_t row = idx[0].cast<size_t>();
+            size_t col = idx[1].cast<size_t>();
+            if (row >= ri.height || col >= ri.width)
+                throw py::index_error("Index out of bounds");
+            return ri(row, col);
+        }, py::is_operator())
+
+        .def("__setitem__", [](RangeImage &ri, py::tuple idx, double value) {
+            if (idx.size() != 2)
+                throw py::index_error("Need 2 indices");
+            size_t row = idx[0].cast<size_t>();
+            size_t col = idx[1].cast<size_t>();
+            if (row >= ri.height || col >= ri.width)
+                throw py::index_error("Index out of bounds");
+            ri(row, col) = value;
+        }, py::is_operator());
 
     // Functions with vector inputs
     m.def("train", [](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
