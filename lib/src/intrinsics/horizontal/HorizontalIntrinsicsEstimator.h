@@ -36,8 +36,8 @@ namespace accurate_ri {
             const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t resolution
         );
 
-        double computePreciseLoss(
-            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, double offset, double thetaStep
+        ResolutionOffsetLoss computeHeuristicValues(
+            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, int32_t resolution, double offset
         );
 
         void updateHeuristicScanlines(
@@ -53,7 +53,7 @@ namespace accurate_ri {
             std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
         );
 
-        ResolutionOffsetLoss optimizeFromCandidatesPrecise(
+        ResolutionOffsetLoss optimizeFromCandidatesHeuristic(
             const Eigen::ArrayXd &thetas,
             const Eigen::ArrayXd &ranges,
             const std::unordered_set<int32_t> &candidateResolutions,

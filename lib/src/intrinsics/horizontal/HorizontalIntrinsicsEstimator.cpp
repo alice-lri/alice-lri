@@ -178,16 +178,20 @@ namespace accurate_ri {
             const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
             const Eigen::ArrayXd &rangesXy = scanlineArray.getRangesXy(scanlineIdx);
 
-            const ResolutionOffsetLoss bestParams = optimizeFromCandidatesPrecise(
+            const ResolutionOffsetLoss bestParams = optimizeFromCandidatesHeuristic(
                 thetas, rangesXy, otherResolutions, otherOffsets
             );
 
-            // TODO compute theta offset here as well
-            scanlines[scanlineIdx] = ScanlineHorizontalInfo{bestParams.resolution, bestParams.offset, 1.0, true};
+            scanlines[scanlineIdx] = ScanlineHorizontalInfo{
+                .resolution = bestParams.resolution,
+                .offset = bestParams.offset,
+                .thetaOffset = bestParams.thetaOffset,
+                .heuristic = true
+            };
 
             LOG_INFO(
                 "Scanline ID: ", scanlineIdx, "\tRes: ", bestParams.resolution, "\tOffset: ", bestParams.offset,
-                "\tPoints: ", thetas.size()
+                "\tTheta Offset: ", bestParams.thetaOffset, "\tPoints: ", thetas.size()
             );
         }
     }
@@ -237,7 +241,7 @@ namespace accurate_ri {
         return otherOffsets;
     }
 
-    ResolutionOffsetLoss HorizontalIntrinsicsEstimator::optimizeFromCandidatesPrecise(
+    ResolutionOffsetLoss HorizontalIntrinsicsEstimator::optimizeFromCandidatesHeuristic(
         const Eigen::ArrayXd &thetas,
         const Eigen::ArrayXd &ranges,
         const std::unordered_set<int32_t> &candidateResolutions,
@@ -246,15 +250,11 @@ namespace accurate_ri {
         ResolutionOffsetLoss bestCandidate(0, 0, 0, std::numeric_limits<double>::infinity());
 
         for (const int32_t resolution: candidateResolutions) {
-            const double thetaStep = 2 * M_PI / resolution;
-
             for (const double offset: candidateOffsets) {
-                const double loss = computePreciseLoss(thetas, ranges, offset, thetaStep);
+                const ResolutionOffsetLoss candidate = computeHeuristicValues(thetas, ranges, resolution, offset);
 
-                if (loss < bestCandidate.loss) {
-                    bestCandidate.resolution = resolution;
-                    bestCandidate.offset = offset; // TODO compute intercept here also (heuristics)
-                    bestCandidate.loss = loss;
+                if (candidate.loss < bestCandidate.loss) {
+                    bestCandidate = candidate;
                 }
             }
         }
@@ -262,17 +262,19 @@ namespace accurate_ri {
         return bestCandidate;
     }
 
-    double HorizontalIntrinsicsEstimator::computePreciseLoss(
-        const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, const double offset, const double thetaStep
+    ResolutionOffsetLoss HorizontalIntrinsicsEstimator::computeHeuristicValues(
+        const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, const int32_t resolution, const double offset
     ) {
-        Eigen::ArrayXd corrected = thetas - offset / ranges;
-        corrected -= corrected.minCoeff();
+        const double thetaStep = 2 * M_PI / resolution;
+        Eigen::ArrayXd correctedThetas = thetas - offset / ranges;
         // TODO maybe make sure thetas wrap around 2pi
-        // TODO take into account intercept here as well
 
-        const Eigen::ArrayXd aligned = (corrected / thetaStep).round() * thetaStep;
+        const Eigen::ArrayXd idealThetas = (correctedThetas / thetaStep).floor() * thetaStep;
+        const Eigen::ArrayXd diffToIdeal = correctedThetas - idealThetas;
+        const double thetaOffset = diffToIdeal.mean();
+        const double loss = (diffToIdeal - thetaOffset).abs().mean();
 
-        return (corrected - aligned).abs().mean() / thetaStep;
+        return ResolutionOffsetLoss(resolution, offset, thetaOffset, loss);
     }
 
     int32_t HorizontalIntrinsicsEstimator::madOptimalResolution(
