@@ -15,6 +15,7 @@
 #include "math/Stats.h"
 #include "utils/Logger.h"
 #include "utils/Timer.h"
+#include "utils/Utils.h"
 
 namespace accurate_ri {
     HorizontalIntrinsicsResult HorizontalIntrinsicsEstimator::estimate(
@@ -158,7 +159,12 @@ namespace accurate_ri {
         PeriodicMultilineFitter fitter(resolution);
         const PeriodicMultilineFitResult fitResult = fitter.fit(scanlineArray, scanlineIdx, offsetGuess);
 
-        return ResolutionOffsetLoss(resolution, fitResult.model.slope, fitResult.model.intercept, fitResult.loss * resolution);
+        return ResolutionOffsetLoss(
+            resolution,
+            fitResult.model.slope,
+            Utils::positiveFmod(fitResult.model.intercept, 2 * M_PI / resolution),
+            fitResult.loss * resolution
+        );
     }
 
     void HorizontalIntrinsicsEstimator::updateHeuristicScanlines(

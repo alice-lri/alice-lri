@@ -18,6 +18,10 @@ namespace accurate_ri::Utils {
         return arr.tail(arr.size() - 1) - arr.head(arr.size() - 1);
     }
 
+    inline double positiveFmod(const double x, const double y) {
+        return std::fmod(std::fmod(x, y) + y, y);
+    }
+
     /**
      * \brief Computes the median of the input array in-place.
      *
