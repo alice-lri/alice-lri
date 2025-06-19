@@ -18,8 +18,12 @@ namespace accurate_ri::Utils {
         return arr.tail(arr.size() - 1) - arr.head(arr.size() - 1);
     }
 
-    inline double positiveFmod(const double x, const double y) {
-        return std::fmod(std::fmod(x, y) + y, y);
+    inline double positiveFmod(double x, double y) {
+        return x - y * std::floor(x / y);
+    }
+
+    inline void positiveFmodInplace(Eigen::ArrayXd& x, double y) {
+        x = x - y * (x / y).floor();
     }
 
     /**
