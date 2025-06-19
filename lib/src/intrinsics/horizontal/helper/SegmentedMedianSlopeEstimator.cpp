@@ -50,7 +50,7 @@ namespace accurate_ri {
 
             const double slope = blocks.computeSlope(i);
 
-            if (std::abs(slope) > maxSlope) {
+            if (!std::isfinite(slope) || std::abs(slope) > maxSlope) {
                 continue;
             }
 

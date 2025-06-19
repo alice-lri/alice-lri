@@ -26,6 +26,10 @@ endif ()
 
 option(ENABLE_PYTHON_DEBUG "Build with Python support for debug/plotting" ON)
 
+if (ENABLE_PYTHON_DEBUG)
+    add_definitions(-DENABLE_PYTHON_DEBUG)
+endif ()
+
 include(${CMAKE_BINARY_DIR}/lib/conan_toolchain.cmake)
 
 find_package(Eigen3 REQUIRED)
