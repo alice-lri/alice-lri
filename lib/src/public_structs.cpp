@@ -1,5 +1,6 @@
-#include <accurate_ri/public_structs.hpp>
+#include <algorithm>
 #include <vector>
+#include <accurate_ri/public_structs.hpp>
 
 namespace accurate_ri {
     struct RangeImage::Impl {
