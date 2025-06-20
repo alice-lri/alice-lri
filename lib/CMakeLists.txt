@@ -96,6 +96,7 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/Constants.h
         src/intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.cpp
         src/intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.h
+        src/public_structs.cpp
 )
 
 set(_accurate_ri_private_include_dirs

@@ -87,7 +87,7 @@ int main(int argc, char **argv) {
     std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
 
     if (outputPath) {
-        accurate_ri::writeToJson(result, *outputPath);
+        accurate_ri::writeToJson(result, outputPath->data());
     }
 
     const accurate_ri::RangeImage ri = accurate_ri::projectToRangeImage(result, cloud);

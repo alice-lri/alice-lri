@@ -1,6 +1,4 @@
 #pragma once
-#include <string>
-#include <vector>
 #include "accurate_ri/public_structs.hpp"
 
 namespace accurate_ri {
@@ -8,9 +6,9 @@ namespace accurate_ri {
 
     IntrinsicsResult train(const PointCloud::Double &points);
 
-    IntrinsicsResult readFromJson(const std::string &path);
+    IntrinsicsResult readFromJson(const char *path);
 
-    void writeToJson(const IntrinsicsResult &result, const std::string &outputPath);
+    void writeToJson(const IntrinsicsResult &result, const char *outputPath);
 
     RangeImage projectToRangeImage(const IntrinsicsResult &intrinsics, const PointCloud::Float &points);
 

@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdint>
 #include <vector>
-#include <algorithm>
 
 namespace accurate_ri {
     struct RealMargin {
@@ -12,10 +11,7 @@ namespace accurate_ri {
             return upper - lower;
         }
 
-        inline void clampBoth(const double minValue, const double maxValue) {
-            lower = std::clamp(lower, minValue, maxValue);
-            upper = std::clamp(upper, minValue, maxValue);
-        }
+        void clampBoth(double minValue, double maxValue);
     };
 
     struct ScanlineAngleBounds {
@@ -84,25 +80,15 @@ namespace accurate_ri {
         const uint32_t height;
 
     private:
-        std::vector<double> pixels;
+        struct Impl;
+        Impl* impl;
 
     public:
-        RangeImage(const uint32_t width, const uint32_t height) : width(width), height(height) {
-            pixels.resize(width * height);
-        }
-
-        RangeImage(const uint32_t width, const uint32_t height, const double initialValue)
-            : width(width), height(height) {
-            pixels.resize(width * height, initialValue);
-        }
-
-        double &operator()(const uint32_t row, const uint32_t col) {
-            return pixels[row * width + col];
-        }
-
-        const double &operator()(const uint32_t row, const uint32_t col) const {
-            return pixels[row * width + col];
-        }
+        RangeImage(uint32_t width, uint32_t height);
+        RangeImage(uint32_t width, uint32_t height, double initialValue);
+        double &operator()(uint32_t row, uint32_t col);
+        const double &operator()(uint32_t row, uint32_t col) const;
+        ~RangeImage();
     };
 
     namespace PointCloud {

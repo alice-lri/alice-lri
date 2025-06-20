@@ -46,14 +46,14 @@ namespace accurate_ri {
         return result;
     }
 
-    IntrinsicsResult readFromJson(const std::string &path) {
+    IntrinsicsResult readFromJson(const char *path) {
         std::ifstream inFile(path);
         nlohmann::json json;
         inFile >> json;
         return intrinsicsResultFromJson(json);
     }
 
-    void writeToJson(const IntrinsicsResult &result, const std::string &outputPath) {
+    void writeToJson(const IntrinsicsResult &result, const char *outputPath) {
         nlohmann::json json = intrinsicsResultToJson(result);
         std::ofstream outFile(outputPath);
         outFile << json.dump(4);
