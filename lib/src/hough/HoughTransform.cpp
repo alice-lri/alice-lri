@@ -30,38 +30,38 @@ namespace accurate_ri {
             if (i % 10000 == 0) {
                 LOG_DEBUG("Processing point ", i, " of ", points.size());
             }
-            updateAccumulatorForPoint(i, points, VoteType::RANGE);
+            updateAccumulatorForPoint(i, points, 1);
         }
 
         LOG_DEBUG("Accumulator computation completed.");
     }
 
     inline void HoughTransform::updateAccumulatorForPoint(
-        const uint64_t pointIndex, const PointArray &points, const VoteType &voteType
+        uint64_t pointIndex, const PointArray &points, int8_t voteMultiplier
     ) {
         int32_t previousY = -1;
 
         for (size_t x = 0; x < xCount; x++) {
             const double rangeVal = points.getRange(pointIndex);
-            const double yVal = points.getPhi(pointIndex) - asin(getXValue(x) / rangeVal);
+            const double yVal = points.getPhi(pointIndex) - getXValue(x) / rangeVal;
             const auto y = static_cast<int32_t>(std::round((yVal - yMin) / yStep));
 
             if (y < 0 || y >= yCount) {
                 continue;
             }
 
-            const double voteVal = voteType == VoteType::RANGE ? rangeVal : 0;
+            const double voteVal = voteMultiplier * rangeVal;
 
             if (previousY != -1) {
                 // TODO this is inside the if for consistency with Python, but maybe is not the right thing to do
-                if (voteType != VoteType::ZERO) {
+                if (voteMultiplier != 0) {
                     accumulator(y, x) += voteVal;
                     hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
                 } else {
                     accumulator(y, x) = 0;
                 }
 
-                voteForDiscontinuities(pointIndex, x, y, voteVal, previousY, voteType);
+                voteForDiscontinuities(pointIndex, x, y, voteVal, previousY, voteMultiplier);
             }
 
             previousY = y;
@@ -70,7 +70,7 @@ namespace accurate_ri {
 
     inline void HoughTransform::voteForDiscontinuities(
         const uint64_t pointIndex, const size_t x, const int32_t y, const double voteVal, const int32_t previousY,
-        const VoteType &voteType
+        const int8_t voteMultiplier
     ) {
         assert(x > 0);
 
@@ -82,7 +82,7 @@ namespace accurate_ri {
         }
 
         auto &&accumulatorBlock = accumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array();
-        if (voteType != VoteType::ZERO) {
+        if (voteMultiplier != 0) {
             accumulatorBlock += voteVal;
             hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() =
                     hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).unaryExpr(
@@ -149,7 +149,7 @@ namespace accurate_ri {
     void HoughTransform::eraseByPoints(const PointArray &points, const Eigen::ArrayXi &indices) {
         PROFILE_SCOPE("HoughTransform::eraseByPoints");
         for (const int32_t index: indices) {
-            updateAccumulatorForPoint(index, points, VoteType::ZERO);
+            updateAccumulatorForPoint(index, points, 0);
         }
     }
 

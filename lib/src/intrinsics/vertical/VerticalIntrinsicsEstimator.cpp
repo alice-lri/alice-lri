@@ -122,8 +122,7 @@ namespace accurate_ri {
                 continue;
             }
 
-            // TODO this is a bit hacky wacky
-            if (scanlineEstimation.uncertainty < -500) {
+            if (scanlineEstimation.uncertainty < Constant::FULL_CERTAINTY_THRESHOLD) {
                 scanlinePool->invalidateByPoints(points, scanlineEstimation.limits.indices);
             } else {
                 scanlinePool->invalidateByHash(houghMax.hash);

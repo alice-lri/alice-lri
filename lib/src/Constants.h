@@ -7,6 +7,7 @@ namespace accurate_ri::Constant {
     constexpr double OFFSET_STEP = 1e-3;
     constexpr double ANGLE_STEP = 1e-4;
     constexpr uint64_t VERTICAL_MAX_FIT_ATTEMPTS = 10;
+    constexpr double FULL_CERTAINTY_THRESHOLD = -500;
 
     constexpr int32_t MAX_RESOLUTION = 10000;
 

@@ -7,8 +7,6 @@
 #include "point/PointArray.h"
 
 namespace accurate_ri {
-    enum class VoteType { RANGE, ZERO };
-
     /**
      * @class HoughTransform
      * @brief A class to perform the Hough Transform for detecting lines in a 2D space.
@@ -68,31 +66,47 @@ namespace accurate_ri {
          */
         [[nodiscard]] double getYValue(size_t index) const;
 
-        [[nodiscard]] double getXMin() const { return xMin; }
+        [[nodiscard]] double getXMin() const {
+            return xMin;
+        }
 
-        [[nodiscard]] double getXMax() const { return xMax; }
+        [[nodiscard]] double getXMax() const {
+            return xMax;
+        }
 
-        [[nodiscard]] double getXStep() const { return xStep; }
+        [[nodiscard]] double getXStep() const {
+            return xStep;
+        }
 
-        [[nodiscard]] double getYMin() const { return yMin; }
+        [[nodiscard]] double getYMin() const {
+            return yMin;
+        }
 
-        [[nodiscard]] double getYMax() const { return yMax; }
+        [[nodiscard]] double getYMax() const {
+            return yMax;
+        }
 
-        [[nodiscard]] double getYStep() const { return yStep; }
+        [[nodiscard]] double getYStep() const {
+            return yStep;
+        }
 
-        [[nodiscard]] uint32_t getXCount() const { return xCount; }
+        [[nodiscard]] uint32_t getXCount() const {
+            return xCount;
+        }
 
-        [[nodiscard]] uint32_t getYCount() const { return yCount; }
+        [[nodiscard]] uint32_t getYCount() const {
+            return yCount;
+        }
 
         void eraseByHash(uint64_t hash);
 
-        void restoreVotes(const uint64_t hash, const double votes);
+        void restoreVotes(uint64_t hash, double votes);
 
         void ensureHashEquals(Eigen::Matrix<unsigned long, -1, -1> &matrix);
 
         void ensureAccEquals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &matrix);
 
-        void eraseByPoints(const PointArray & points, const Eigen::ArrayXi& indices);
+        void eraseByPoints(const PointArray &points, const Eigen::ArrayXi &indices);
 
     private:
         /**
@@ -101,7 +115,7 @@ namespace accurate_ri {
          * @param points Vector of phi values.
          * @param voteType
          */
-        inline void updateAccumulatorForPoint(uint64_t pointIndex, const PointArray &points, const VoteType& voteType);
+        inline void updateAccumulatorForPoint(uint64_t pointIndex, const PointArray &points, int8_t voteMultiplier);
 
         /**
          * @brief Votes for discontinuities in the accumulator to avoid gaps.
@@ -119,9 +133,11 @@ namespace accurate_ri {
          * @param y The current y value in the accumulator.
          * @param voteVal The value to be added to the accumulator for the current point.
          * @param previousY The y value of the previous point.
-         * @param voteType
+         * @param voteMultiplier
          */
-        inline void voteForDiscontinuities(uint64_t pointIndex, size_t x, int32_t y, double voteVal, int32_t previousY, const VoteType &voteType);
+        inline void voteForDiscontinuities(
+            uint64_t pointIndex, size_t x, int32_t y, double voteVal, int32_t previousY, int8_t voteMultiplier
+        );
 
         HoughCell indicesToCell(const std::pair<size_t, size_t> &indices);
     };
