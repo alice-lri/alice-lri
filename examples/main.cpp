@@ -86,10 +86,6 @@ int main(int argc, char **argv) {
     std::chrono::duration<double> duration = end - start;
     std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
 
-    accurate_ri::writeToJson(result, "out.json");
-    const auto readIntrinsics = accurate_ri::readFromJson("out.json");
-    accurate_ri::writeToJson(readIntrinsics, "out2.json");
-
     if (outputPath) {
         accurate_ri::writeToJson(result, *outputPath);
     }
