@@ -1,5 +1,7 @@
 # TODO define release mode where we disable eigen debug and optimize the code for the native platform and so on
 set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
 
 if (LOG_LEVEL STREQUAL "DEBUG")

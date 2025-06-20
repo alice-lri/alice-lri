@@ -2,8 +2,11 @@
 #include <cstdint>
 #include <vector>
 
+#define ACCURATE_RI_API __attribute__((visibility("default")))
+
+
 namespace accurate_ri {
-    struct RealMargin {
+    struct ACCURATE_RI_API RealMargin {
         double lower;
         double upper;
 
@@ -14,22 +17,22 @@ namespace accurate_ri {
         void clampBoth(double minValue, double maxValue);
     };
 
-    struct ScanlineAngleBounds {
+    struct ACCURATE_RI_API ScanlineAngleBounds {
         RealMargin bottom;
         RealMargin top;
     };
 
-    struct OffsetAngleMargin {
+    struct ACCURATE_RI_API OffsetAngleMargin {
         RealMargin offset;
         RealMargin angle;
     };
 
-    struct OffsetAngle {
+    struct ACCURATE_RI_API OffsetAngle {
         double offset;
         double angle;
     };
 
-    struct ScanlineInfo {
+    struct ACCURATE_RI_API ScanlineInfo {
         uint32_t id;
         uint64_t pointsCount;
         OffsetAngle values;
@@ -41,27 +44,27 @@ namespace accurate_ri {
         uint64_t houghHash;
     };
 
-    struct FullScanlines {
+    struct ACCURATE_RI_API FullScanlines {
         std::vector<ScanlineInfo> scanlines;
         std::vector<int> pointsScanlinesIds;
     };
 
-    enum class EndReason {
+    enum class ACCURATE_RI_API EndReason {
         ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
     };
 
-    struct ScanlineHorizontalInfo { // TODO maybe rename to HorizontalScanlineInfo
+    struct ACCURATE_RI_API ScanlineHorizontalInfo { // TODO maybe rename to HorizontalScanlineInfo
         int32_t resolution;
         double offset;
         double thetaOffset;
         bool heuristic;
     };
 
-    struct HorizontalIntrinsicsResult {
+    struct ACCURATE_RI_API HorizontalIntrinsicsResult {
         std::vector<ScanlineHorizontalInfo> scanlines;
     };
 
-    struct VerticalIntrinsicsResult {
+    struct ACCURATE_RI_API VerticalIntrinsicsResult {
         uint32_t iterations = 0;
         uint32_t scanlinesCount = 0;
         uint32_t unassignedPoints = 0;
@@ -70,12 +73,12 @@ namespace accurate_ri {
         FullScanlines fullScanlines;
     };
 
-    struct IntrinsicsResult {
+    struct ACCURATE_RI_API IntrinsicsResult {
         VerticalIntrinsicsResult vertical;
         HorizontalIntrinsicsResult horizontal;
     };
 
-    struct RangeImage {
+    struct ACCURATE_RI_API RangeImage {
         const uint32_t width;
         const uint32_t height;
 
@@ -92,13 +95,13 @@ namespace accurate_ri {
     };
 
     namespace PointCloud {
-        struct Float {
+        struct ACCURATE_RI_API Float {
             std::vector<float> x;
             std::vector<float> y;
             std::vector<float> z;
         };
 
-        struct Double {
+        struct ACCURATE_RI_API Double {
             std::vector<double> x;
             std::vector<double> y;
             std::vector<double> z;
