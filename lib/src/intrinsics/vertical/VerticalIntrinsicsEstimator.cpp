@@ -228,63 +228,33 @@ namespace accurate_ri {
     }
 
     // TODO split this function
-    // TODO margins need to be arguments
+    // TODO this could be a generic line thing. Take a look at conceptually section in scanlimie limits notebook
     ScanlineLimits VerticalIntrinsicsEstimator::computeScanlineLimits(
         const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
         const OffsetAngleMargin &margin, const double invRangesShift
     ) const {
         PROFILE_SCOPE("VerticalIntrinsicsEstimator::computeScanlineLimits");
-        const auto &invRanges = points.getInvRanges();
-        const auto &phis = points.getPhis();
-        const auto offset = scanlineAttributes.offset;
-        const auto angle = scanlineAttributes.angle;
+        const auto &inv = points.getInvRanges();
+        const auto &phi = points.getPhis();
+        const double offset = scanlineAttributes.offset;
+        const double angle = scanlineAttributes.angle;
 
-        const auto upperArcsinArg = ((offset + margin.offset.upper) * invRanges.array()).min(1).max(-1);
-        const auto lowerArcsinArg = ((offset - margin.offset.lower) * invRanges.array()).min(1).max(-1);
+        const auto sinUpper = ((offset + margin.offset.upper) * inv.array()).min(1).max(-1);
+        const auto sinLower = ((offset - margin.offset.lower) * inv.array()).min(1).max(-1);
 
-        const auto upperArcsinArgShifted =
-                ((offset + margin.offset.upper) * (invRanges.array() - invRangesShift)).min(1).max(-1);
-        const auto lowerArcsinArgShifted =
-                ((offset - margin.offset.lower) * (invRanges.array() - invRangesShift)).min(1).max(-1);
+        Eigen::ArrayXd upper = angle + sinUpper + margin.angle.upper + errorBounds.array();
+        Eigen::ArrayXd lower = angle + sinLower - margin.angle.lower - errorBounds.array();
+        Eigen::ArrayX<bool> mask = (lower <= phi) && (phi <= upper);
+        Eigen::ArrayXi idx(mask.count());
 
-        // TODO what happenned here, before arcsin now copies?
-        const auto upperArcsin = upperArcsinArg;
-        const auto lowerArcsin = lowerArcsinArg;
-
-        const auto upperArcsinShifted = upperArcsinArgShifted;
-        const auto lowerArcsinShifted = lowerArcsinArgShifted;
-
-        const auto deltaUpper = upperArcsin - upperArcsinShifted;
-        const auto deltaLower = lowerArcsin - lowerArcsinShifted;
-
-        const auto scanlineUpperLimitTmp = upperArcsinShifted + angle;
-        const auto scanlineLowerLimitTmp = lowerArcsinShifted + angle;
-
-        Eigen::ArrayXd scanlineUpperLimit = scanlineUpperLimitTmp.array().max(scanlineLowerLimitTmp.array());
-        Eigen::ArrayXd scanlineLowerLimit = scanlineLowerLimitTmp.array().min(scanlineUpperLimitTmp.array());
-
-        scanlineUpperLimit += deltaUpper + margin.angle.upper + errorBounds.array();
-        scanlineLowerLimit += deltaLower - margin.angle.lower - errorBounds.array();
-
-        Eigen::ArrayXi scanlineIndices = Eigen::ArrayXi(points.size());
-        Eigen::ArrayX<bool> mask = scanlineLowerLimit.array() <= phis.array()
-                                   && phis.array() <= scanlineUpperLimit.array();
-
-        int32_t count = 0;
-        for (int32_t i = 0; i < points.size(); ++i) {
+        int k = 0;
+        for (Eigen::Index i = 0; i < mask.size(); ++i) {
             if (mask[i]) {
-                scanlineIndices[count++] = i;
+                idx[k++] = static_cast<int>(i);
             }
         }
 
-        scanlineIndices.conservativeResize(count);
-
-        return {
-            std::move(scanlineIndices),
-            std::move(mask),
-            std::move(scanlineLowerLimit),
-            std::move(scanlineUpperLimit)
-        };
+        return { std::move(idx), std::move(mask), std::move(lower), std::move(upper) };
     }
 
     std::optional<ScanlineEstimationResult> VerticalIntrinsicsEstimator::estimateScanline(

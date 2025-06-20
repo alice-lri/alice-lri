@@ -16,121 +16,121 @@ Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_p
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014521.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000015616.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000016041.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000111.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000044.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000149.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000231.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000397.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014238.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000012948.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000013928.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014111.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000013952.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000120.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000016220.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000048.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000115.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000044.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000149.bin
 ERROR: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000015616.bin: Scanlines count mismatch: expected 126, got 127
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000016412.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000231.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000457.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000111.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014111.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014238.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000016220.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000012948.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014535.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000123.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000397.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000157.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000048.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000013956.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000321.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000016548.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000013928.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014115.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000016312.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014490.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000253.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000013936.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000430.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000457.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014115.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000012981.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017538.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014743.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017718.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000013956.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000430.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000016553.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000115.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000012981.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000013936.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000463.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000018216.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000004.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000337.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000025.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000016312.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000016548.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000123.bin
 ERROR: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014115.bin: [127] Theta offset mismatch: expected 0.0028718512039631605, got 2.4970929858018447e-05
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000025.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000037.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014535.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000463.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017614.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000000337.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000047.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000052.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000011.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000071.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000018220.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000081.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000016553.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000038.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000091.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000030.bin
 Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017818.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000048.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000055.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000083.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000014743.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000071.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017614.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000081.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000091.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000107.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000046.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000030.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000018220.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0014_sync/velodyne_points/data/0000000313.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000011.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000038.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000055.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000072.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000096.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0018_sync/velodyne_points/data/0000000269.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0005_sync/velodyne_points/data/0000000153.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000096.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000048.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000083.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0023_sync/velodyne_points/data/0000000473.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000014.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000003.bin
-Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017684.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000031.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000049.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0027_sync/velodyne_points/data/0000000187.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0015_sync/velodyne_points/data/0000000296.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0032_sync/velodyne_points/data/0000000389.bin
+ERROR: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017818.bin: Scanlines count mismatch: expected 127, got 124
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0039_sync/velodyne_points/data/0000000394.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0017_sync/velodyne_points/data/0000000113.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000065.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0020_sync/velodyne_points/data/0000000085.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000074.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0005_sync/velodyne_points/data/0000000153.bin
-ERROR: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017818.bin: Scanlines count mismatch: expected 127, got 124
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0032_sync/velodyne_points/data/0000000389.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0017_sync/velodyne_points/data/0000000113.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000089.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0039_sync/velodyne_points/data/0000000394.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0056_sync/velodyne_points/data/0000000292.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000031.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0013_sync/velodyne_points/data/0000000143.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000003.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000098.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000089.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000049.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000014.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0027_sync/velodyne_points/data/0000000187.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000046.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000074.bin
+Starting: ../../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017684.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0046_sync/velodyne_points/data/0000000124.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0035_sync/velodyne_points/data/0000000130.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0056_sync/velodyne_points/data/0000000292.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0059_sync/velodyne_points/data/0000000372.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0064_sync/velodyne_points/data/0000000568.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000343.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000465.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0028_sync/velodyne_points/data/0000000429.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000480.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0022_sync/velodyne_points/data/0000000799.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0013_sync/velodyne_points/data/0000000143.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0046_sync/velodyne_points/data/0000000124.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0056_sync/velodyne_points/data/0000000293.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0035_sync/velodyne_points/data/0000000130.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000489.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0022_sync/velodyne_points/data/0000000799.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000504.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000820.bin
-ERROR: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0028_sync/velodyne_points/data/0000000429.bin: [0] Theta offset mismatch: expected 0.001245084684342146, got 0.0001815403649517585
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0052_sync/velodyne_points/data/0000000077.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000829.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000834.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0060_sync/velodyne_points/data/0000000077.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000467.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000336.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000463.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0052_sync/velodyne_points/data/0000000077.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000481.bin
-ERROR: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0056_sync/velodyne_points/data/0000000293.bin: [0] Resolution mismatch: expected 4000, got 4002
-Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000496.bin
-ERROR: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000820.bin: [62] Horizontal offset mismatch: expected 0.026, got -0.026064356312893704
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0056_sync/velodyne_points/data/0000000293.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0036_sync/velodyne_points/data/0000000802.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0061_sync/velodyne_points/data/0000000702.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000463.bin
+ERROR: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0028_sync/velodyne_points/data/0000000429.bin: [0] Theta offset mismatch: expected 0.001245084684342146, got 0.0001815403649517585
+Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000467.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0060_sync/velodyne_points/data/0000000077.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000481.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000336.bin
+ERROR: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000820.bin: [62] Horizontal offset mismatch: expected 0.026, got -0.026064356312893704
+Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000496.bin
+ERROR: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0056_sync/velodyne_points/data/0000000293.bin: [0] Resolution mismatch: expected 4000, got 4002
 Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000811.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000340.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0061_sync/velodyne_points/data/0000000702.bin
 ERROR: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000481.bin: [62] Horizontal offset mismatch: expected 0.026, got -0.026307817966484945
-ERROR: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000467.bin: [61] Horizontal offset mismatch: expected -0.026, got 0.026075683101509838
-ERROR: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000463.bin: [61] Scanline point count mismatch: expected 5, got 6
-ERROR: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000829.bin: [63] Horizontal offset mismatch: expected -0.026, got 0.026567001057730313
+Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000340.bin
 Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000836.bin
-Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000502.bin
+ERROR: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000829.bin: [63] Horizontal offset mismatch: expected -0.026, got 0.026567001057730313
+ERROR: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000463.bin: [61] Scanline point count mismatch: expected 5, got 6
 Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000816.bin
+Starting: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000502.bin
+ERROR: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000467.bin: [61] Horizontal offset mismatch: expected -0.026, got 0.026075683101509838
 ERROR: ../../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000816.bin: [61] Horizontal offset mismatch: expected -0.026, got 0.025830831829722175
