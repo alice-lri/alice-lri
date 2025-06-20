@@ -198,7 +198,6 @@ namespace accurate_ri {
     }
 
     // TODO precompute on PointArray
-    // TODO review equation and make code cleaner
     VerticalBounds VerticalIntrinsicsEstimator::computeErrorBounds(
         const PointArray &points, const double offset
     ) {
@@ -210,21 +209,20 @@ namespace accurate_ri {
 
         const auto &rangeXySquared = rangesXy.square();
         const auto &rangeSquared = ranges.square();
-        const auto &zsOverRangesXy = zs / rangesXy;
-        const auto &sqrtFactor = 1 + zsOverRangesXy.square();
+
+        const double rangesBound = coordsEps * std::sqrt(3);
+        const double rangesXyBound = coordsEps * std::sqrt(2);
 
         VerticalBounds result;
 
+        const auto phisBoundNumerator = rangesXyBound * zs.cwiseAbs() + coordsEps * rangesXy;
+        const auto phisBoundDenominator = rangeXySquared - rangesXyBound * rangesXy;
+        const auto correctionBoundNumerator = std::abs(offset) * rangesBound;
+        const auto correctionBoundDenominator = rangeSquared - rangesBound * ranges;
 
-        result.phis = (coordsEps * std::sqrt(2) * zs.cwiseAbs() + coordsEps * rangesXy).array()
-                                     / (rangeXySquared.array() * sqrtFactor.array());
-
-        result.correction = offset * coordsEps * std::sqrt(3)
-                                           / (rangeSquared.array() * (1 - (offset / ranges.array()).square()).
-                                              sqrt());
-
+        result.phis = phisBoundNumerator / phisBoundDenominator;
+        result.correction = correctionBoundNumerator / correctionBoundDenominator;
         result.final = result.phis + result.correction;
-
 
         return result;
     }
