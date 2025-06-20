@@ -1,7 +1,5 @@
 # TODO define release mode where we disable eigen debug and optimize the code for the native platform and so on
 set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
 
 if (LOG_LEVEL STREQUAL "DEBUG")
@@ -26,9 +24,12 @@ if (ENABLE_TRACE_FILE)
     add_definitions(-DENABLE_TRACE_FILE)
 endif ()
 
-option(ENABLE_PYTHON_DEBUG "Build with Python support for debug/plotting" ON)
+option(LIB_MODE "Build in lib mode, hiding unnecessary symbols for ABI compatibility" OFF)
 
-if (ENABLE_PYTHON_DEBUG)
+if (LIB_MODE)
+    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+    set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
+else()
     add_definitions(-DENABLE_PYTHON_DEBUG)
 endif ()
 

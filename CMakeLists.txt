@@ -9,7 +9,10 @@ add_subdirectory(lib)
 add_subdirectory(examples)
 
 enable_testing()
-add_subdirectory(tests)
+
+if(NOT LIB_MODE)
+    add_subdirectory(tests)
+endif ()
 
 #option(ENABLE_PYTHON "Enable Python Bindings" ON)
 #if(ENABLE_PYTHON)
