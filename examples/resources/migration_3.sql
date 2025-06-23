@@ -22,8 +22,10 @@ CREATE TABLE compression_frame_result
     naive_size_bytes integer NOT NULL,
     accurate_size_bytes integer NOT NULL,
     accurate_points_count integer NOT NULL,
-    naive_mean_squared_error real NOT NULL,
-    accurate_mean_squared_error real NOT NULL
+    naive_to_original_mse real NOT NULL,
+    original_to_naive_mse real NOT NULL,
+    accurate_to_original_mse real NOT NULL,
+    original_to_accurate_mse real NOT NULL
 );
 CREATE INDEX compression_frame_result_experiment_id_idx ON compression_frame_result (experiment_id);
 CREATE INDEX compression_frame_result_experiment_id_dataset_frame_id_idx ON compression_frame_result (experiment_id, dataset_frame_id);
