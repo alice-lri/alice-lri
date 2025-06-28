@@ -4,7 +4,6 @@
 #include <algorithm>
 #include <queue>
 #include <ranges>
-#include <boost/math/distributions/students_t.hpp>
 #include "helper/VerticalLogging.h"
 #include "utils/Utils.h"
 #include "VerticalStructs.h"
