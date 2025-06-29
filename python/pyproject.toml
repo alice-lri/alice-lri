@@ -24,4 +24,8 @@ build-dir = "build"
 wheel.packages = ["accurate_ri"]
 
 [tool.scikit-build.cmake.define]
+CMAKE_BUILD_TYPE="Release"
 LOG_LEVEL = "NONE"
+ENABLE_TRACE_FILE="OFF"
+ENABLE_PROFILING="OFF"
+LIB_MODE="ON"
