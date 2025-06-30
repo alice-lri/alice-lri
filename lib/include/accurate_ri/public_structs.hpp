@@ -79,8 +79,8 @@ namespace accurate_ri {
     };
 
     struct ACCURATE_RI_API RangeImage {
-        const uint32_t width;
-        const uint32_t height;
+        uint32_t width;
+        uint32_t height;
 
     private:
         struct Impl;
@@ -89,9 +89,17 @@ namespace accurate_ri {
     public:
         RangeImage(uint32_t width, uint32_t height);
         RangeImage(uint32_t width, uint32_t height, double initialValue);
-        double &operator()(uint32_t row, uint32_t col);
-        const double &operator()(uint32_t row, uint32_t col) const;
+
+        RangeImage(const RangeImage& other);
+        RangeImage& operator=(const RangeImage& other);
+
+        RangeImage(RangeImage&& other) noexcept;
+        RangeImage& operator=(RangeImage&& other) noexcept;
+
         ~RangeImage();
+
+        double& operator()(uint32_t row, uint32_t col);
+        const double& operator()(uint32_t row, uint32_t col) const;
     };
 
     namespace PointCloud {
