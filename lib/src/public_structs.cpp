@@ -58,7 +58,6 @@ namespace accurate_ri {
     }
 
     RangeImage::~RangeImage() {
-        std::cout << "Freeing impl." << std::endl;
         delete impl;
     }
 
