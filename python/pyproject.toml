@@ -29,3 +29,4 @@ LOG_LEVEL = "NONE"
 ENABLE_TRACE_FILE="OFF"
 ENABLE_PROFILING="OFF"
 LIB_MODE="ON"
+#TODO add python stubs and stuff like that, figure out how the things work low level and what scikit is solving
