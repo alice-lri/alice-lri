@@ -130,4 +130,6 @@ PYBIND11_MODULE(_accurate_ri, m) {
     }, "Unproject range image to 3D point cloud");
 
     m.def("write_to_json", &writeToJson, "Write intrinsics result to JSON");
+
+    m.def("read_from_json", &readFromJson, "Read intrinsics result from JSON");
 }
