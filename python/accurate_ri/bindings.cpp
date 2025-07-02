@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/numpy.h>
 #include <accurate_ri/public_structs.hpp>
 #include <accurate_ri/accurate_ri.hpp>
 
@@ -96,7 +97,6 @@ PYBIND11_MODULE(_accurate_ri, m) {
                 throw py::index_error("Index out of bounds");
             return ri(row, col);
         }, py::is_operator())
-
         .def("__setitem__", [](RangeImage &ri, py::tuple idx, double value) {
             if (idx.size() != 2)
                 throw py::index_error("Need 2 indices");
@@ -105,7 +105,17 @@ PYBIND11_MODULE(_accurate_ri, m) {
             if (row >= ri.height || col >= ri.width)
                 throw py::index_error("Index out of bounds");
             ri(row, col) = value;
-        }, py::is_operator());
+        }, py::is_operator())
+        .def("__array__", [](py::object self) {
+            auto& ri = self.cast<const RangeImage&>();
+            // pybind11::array expects shape, strides, and pointer
+            return py::array_t<double>(
+                {ri.height, ri.width},                            // shape
+                {sizeof(double) * ri.width, sizeof(double)},      // C-order strides
+                &ri(0, 0),                                         // pointer to data
+                self                                              // keep alive
+            );
+        });
 
     // Functions with vector inputs
     m.def("train", [](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
