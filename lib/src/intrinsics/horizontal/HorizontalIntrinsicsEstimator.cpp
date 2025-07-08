@@ -58,7 +58,8 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
-        int32_t bestResolution = madOptimalResolution(scanlineArray, scanlineIdx);
+        //int32_t bestResolution = madOptimalResolution(scanlineArray, scanlineIdx);
+        int32_t bestResolution = 0;
         const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResolution);
 
         if (!optimizeResult) {
@@ -91,7 +92,12 @@ namespace accurate_ri {
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t initialResolution
     ) {
         const int32_t scanlineSize = scanlineArray.getSize(scanlineIdx);
-        const std::vector<int32_t> resolutions = generateCandidateResolutions(initialResolution, scanlineSize);
+        std::vector<int32_t> resolutions;
+        if (initialResolution != 0) {
+            resolutions = generateCandidateResolutions(initialResolution, scanlineSize);
+        } else {
+            resolutions = generateCandidateResolutionsCircular(scanlineArray, scanlineIdx);
+        }
 
         std::optional<ResolutionOffsetLoss> bestCandidate = std::nullopt;
 
@@ -136,6 +142,35 @@ namespace accurate_ri {
                 if (candidateResolutionMult % divisor == 0) {
                     resolutions.emplace_back(candidateResolutionMult / divisor);
                 }
+            }
+        }
+
+        return resolutions;
+    }
+
+    std::vector<int32_t> HorizontalIntrinsicsEstimator::generateCandidateResolutionsCircular(
+        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
+    ) {
+        const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
+        const int32_t minResolution = invRangesXy.size();
+        Eigen::ArrayXd pearsonValues(Constant::MAX_RESOLUTION - minResolution + 1);
+
+        for (int32_t resolution = minResolution; resolution < Constant::MAX_RESOLUTION; ++resolution) {
+            const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
+                scanlineArray.getThetas(scanlineIdx), resolution, false
+            );
+            const double thetaStep = 2 * M_PI / resolution;
+
+            pearsonValues(resolution - minResolution) = Stats::circularLinearCorr(invRangesXy, diffToIdeal, thetaStep);
+        }
+
+        pearsonValues = pearsonValues / pearsonValues.maxCoeff();
+
+        std::vector<int32_t> resolutions;
+        resolutions.reserve(250);
+        for (int32_t resolution = minResolution; resolution < Constant::MAX_RESOLUTION; ++resolution) {
+            if (pearsonValues(resolution - minResolution) > 0.25) { // TODO extract constant
+                resolutions.emplace_back(resolution);
             }
         }
 

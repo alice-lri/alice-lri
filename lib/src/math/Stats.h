@@ -29,4 +29,6 @@ namespace accurate_ri::Stats {
     int32_t intMode(const std::vector<int32_t> &values);
 
     double weightedMedian(std::span<const double> values, std::span<const int32_t> weights);
+
+    double circularLinearCorr(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, double period = 2 * M_PI);
 }

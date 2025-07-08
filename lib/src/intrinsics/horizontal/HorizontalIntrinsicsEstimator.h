@@ -32,6 +32,8 @@ namespace accurate_ri {
 
         std::vector<int32_t> generateCandidateResolutions(int32_t initialResolution, int32_t scanlineSize);
 
+        std::vector<int32_t> generateCandidateResolutionsCircular(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx);
+
         ResolutionOffsetLoss optimizeJointCandidateResolution(
             const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t resolution
         );
