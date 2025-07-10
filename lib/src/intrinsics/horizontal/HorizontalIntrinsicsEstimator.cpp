@@ -106,8 +106,10 @@ namespace accurate_ri {
                 scanlineArray, scanlineIdx, resolution
             );
 
-            LOG_DEBUG("Candidate resolution: ", candidate.resolution, ", offset: ", candidate.offset,
-                "theta offset: ", candidate.thetaOffset, ", loss: ", candidate.loss);
+            LOG_DEBUG(
+                "Candidate resolution: ", candidate.resolution, ", offset: ", candidate.offset,
+                "theta offset: ", candidate.thetaOffset, ", loss: ", candidate.loss
+            );
 
             if (std::abs(candidate.offset) > Constant::MAX_OFFSET) {
                 continue;
@@ -115,8 +117,10 @@ namespace accurate_ri {
 
             if (!bestCandidate || candidate.loss < bestCandidate->loss) {
                 bestCandidate = candidate;
-                LOG_DEBUG("New best resolution: ", candidate.resolution, ", offset: ", candidate.offset,
-                    "theta offset: ", candidate.thetaOffset, ", loss: ", candidate.loss);
+                LOG_DEBUG(
+                    "New best resolution: ", candidate.resolution, ", offset: ", candidate.offset,
+                    "theta offset: ", candidate.thetaOffset, ", loss: ", candidate.loss
+                );
             }
         }
 
@@ -153,23 +157,24 @@ namespace accurate_ri {
     ) {
         const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
         const int32_t minResolution = invRangesXy.size();
-        Eigen::ArrayXd pearsonValues(Constant::MAX_RESOLUTION - minResolution + 1);
+        const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
+
+        Eigen::ArrayXd squareNorms(Constant::MAX_RESOLUTION - minResolution + 1);
 
         for (int32_t resolution = minResolution; resolution < Constant::MAX_RESOLUTION; ++resolution) {
-            const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
-                scanlineArray.getThetas(scanlineIdx), resolution, false
-            );
-            const double thetaStep = 2 * M_PI / resolution;
+            const Eigen::ArrayXd thetasNormalized = thetas * resolution;
+            const double thetasX = thetasNormalized.cos().mean();
+            const double thetasY = thetasNormalized.sin().mean();
 
-            pearsonValues(resolution - minResolution) = Stats::circularLinearCorr(invRangesXy, diffToIdeal, thetaStep);
+            squareNorms(resolution - minResolution) = thetasX * thetasX + thetasY * thetasY;
         }
 
-        pearsonValues = pearsonValues / pearsonValues.maxCoeff();
+        squareNorms = squareNorms / squareNorms.maxCoeff();
 
         std::vector<int32_t> resolutions;
         resolutions.reserve(250);
         for (int32_t resolution = minResolution; resolution < Constant::MAX_RESOLUTION; ++resolution) {
-            if (pearsonValues(resolution - minResolution) > 0.25) { // TODO extract constant
+            if (squareNorms(resolution - minResolution) > 0.25) { // TODO extract constant
                 resolutions.emplace_back(resolution);
             }
         }
