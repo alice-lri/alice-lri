@@ -13,6 +13,7 @@
 #include "intrinsics/horizontal/multiline/PeriodicMultilineFitter.h"
 #include "intrinsics/horizontal/resolution/MadResolutionLoss.h"
 #include "math/Stats.h"
+#include "plotty/matplotlibcpp.hpp"
 #include "utils/Logger.h"
 #include "utils/Timer.h"
 #include "utils/Utils.h"
@@ -96,7 +97,7 @@ namespace accurate_ri {
         if (initialResolution != 0) {
             resolutions = generateCandidateResolutions(initialResolution, scanlineSize);
         } else {
-            resolutions = generateCandidateResolutionsCircular(scanlineArray, scanlineIdx);
+            resolutions = generateCandidateResolutionsMad(scanlineArray, scanlineIdx);
         }
 
         std::optional<ResolutionOffsetLoss> bestCandidate = std::nullopt;
@@ -152,29 +153,26 @@ namespace accurate_ri {
         return resolutions;
     }
 
-    std::vector<int32_t> HorizontalIntrinsicsEstimator::generateCandidateResolutionsCircular(
+    std::vector<int32_t> HorizontalIntrinsicsEstimator::generateCandidateResolutionsMad(
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
     ) {
         const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
-        const int32_t minResolution = invRangesXy.size();
         const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
+        const int32_t minResolution = invRangesXy.innerSize();
 
-        Eigen::ArrayXd squareNorms(Constant::MAX_RESOLUTION - minResolution + 1);
+        Eigen::ArrayXd mads(Constant::MAX_RESOLUTION - minResolution + 1);
 
         for (int32_t resolution = minResolution; resolution < Constant::MAX_RESOLUTION; ++resolution) {
-            const Eigen::ArrayXd thetasNormalized = thetas * resolution;
-            const double thetasX = thetasNormalized.cos().mean();
-            const double thetasY = thetasNormalized.sin().mean();
-
-            squareNorms(resolution - minResolution) = thetasX * thetasX + thetasY * thetasY;
+            const double loss = MadResolutionLoss::computeResolutionLoss(invRangesXy, thetas, resolution);
+            mads(resolution - minResolution) = loss;
         }
 
-        squareNorms = squareNorms / squareNorms.maxCoeff();
+        mads /= mads.maxCoeff();
 
         std::vector<int32_t> resolutions;
         resolutions.reserve(250);
         for (int32_t resolution = minResolution; resolution < Constant::MAX_RESOLUTION; ++resolution) {
-            if (squareNorms(resolution - minResolution) > 0.25) { // TODO extract constant
+            if (mads(resolution - minResolution) < 0.5) { // TODO extract constant
                 resolutions.emplace_back(resolution);
             }
         }
