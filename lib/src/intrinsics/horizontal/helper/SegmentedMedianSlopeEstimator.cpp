@@ -24,7 +24,8 @@ namespace accurate_ri {
         constexpr int expectedBlocks = 8;
         result.reserveBlocks(expectedBlocks);
 
-        const Eigen::ArrayX<bool> continuityMask = Utils::diff(x).abs() < segmentThreshold;
+        const Eigen::ArrayX<bool> continuityMask =
+                Utils::diff(x).abs() < segmentThresholdX && Utils::diff(y).abs() < segmentThresholdY;
 
         for (int i = 0; i < x.size(); ++i) {
             if (i == 0 || !continuityMask[i - 1]) {

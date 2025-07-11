@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
             //path = "../../Datasets/LiDAR/kitti/2011_09_28/2011_09_28_drive_0205_sync/velodyne_points/data/0000000000.bin";
             //path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000319.bin";
             //path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000352.bin";
-            path = "../../Datasets/LiDAR/kitti/2011_09_30/2011_09_30_drive_0018_sync/velodyne_points/data/0000000884.bin";
+            path = "../../Datasets/LiDAR/kitti/2011_09_30/2011_09_30_drive_0018_sync/velodyne_points/data/0000000378.bin";
             accurateDigits = std::nullopt;
             outputPath = "../../Datasets/output/accurate_ri_cpp/";
             break;

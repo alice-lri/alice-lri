@@ -162,7 +162,7 @@ namespace accurate_ri {
 
         Eigen::ArrayXd mads(Constant::MAX_RESOLUTION - minResolution + 1);
 
-        for (int32_t resolution = minResolution; resolution < Constant::MAX_RESOLUTION; ++resolution) {
+        for (int32_t resolution = minResolution; resolution <= Constant::MAX_RESOLUTION; ++resolution) {
             const double loss = MadResolutionLoss::computeResolutionLoss(invRangesXy, thetas, resolution);
             mads(resolution - minResolution) = loss;
         }
@@ -185,13 +185,18 @@ namespace accurate_ri {
     ) {
         LOG_DEBUG("Candidate resolution: ", resolution);
 
+        const double thetaStep = 2 * M_PI / resolution;
         const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
         const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
-            scanlineArray.getThetas(scanlineIdx), resolution, true // TODO try not reconstructing
+            scanlineArray.getThetas(scanlineIdx), resolution, false
         );
 
-        const SegmentedMedianSlopeEstimator slopeEstimator(Constant::INV_RANGES_BREAK_THRESHOLD, Constant::MAX_OFFSET);
+        const SegmentedMedianSlopeEstimator slopeEstimator(
+            Constant::INV_RANGES_BREAK_THRESHOLD, thetaStep / 4, Constant::MAX_OFFSET
+        );
+
         const double offsetGuess = slopeEstimator.estimateSlope(invRangesXy, diffToIdeal);
+
         LOG_DEBUG("Offset guess: ", offsetGuess);
 
         PeriodicMultilineFitter fitter(resolution);
@@ -200,7 +205,7 @@ namespace accurate_ri {
         return ResolutionOffsetLoss(
             resolution,
             fitResult.model.slope,
-            Utils::positiveFmod(fitResult.model.intercept, 2 * M_PI / resolution),
+            Utils::positiveFmod(fitResult.model.intercept, thetaStep),
             fitResult.loss * resolution
         );
     }

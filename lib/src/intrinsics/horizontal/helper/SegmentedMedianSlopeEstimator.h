@@ -28,12 +28,14 @@ namespace accurate_ri {
             [[nodiscard]] uint64_t count() const;
         };
 
-        const double segmentThreshold;
+        const double segmentThresholdX;
+        const double segmentThresholdY;
         const double maxSlope;
 
     public:
-        SegmentedMedianSlopeEstimator(const double segmentThreshold, const double maxSlope)
-            : segmentThreshold(segmentThreshold), maxSlope(maxSlope) {}
+        SegmentedMedianSlopeEstimator(
+            const double segmentThresholdX, const double segmentThresholdY, const double maxSlope
+        ) : segmentThresholdX(segmentThresholdX), segmentThresholdY(segmentThresholdY), maxSlope(maxSlope) {}
 
         [[nodiscard]] double estimateSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
 

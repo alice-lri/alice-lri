@@ -30,6 +30,7 @@ if (LIB_MODE)
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 else()
+    set(ENABLE_PYTHON_DEBUG ON)
     add_definitions(-DENABLE_PYTHON_DEBUG)
 endif ()
 
