@@ -5,99 +5,53 @@
 #include "utils/Utils.h"
 
 namespace accurate_ri {
-    double SegmentedMedianSlopeEstimator::estimateSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const {
-        const Blocks blocks = segmentIntoBlocks(x, y);
+    Stats::LRResult SegmentedMedianSlopeEstimator::estimateSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const {
+        SlopesWeights slopeWeights;
+        const int32_t n = static_cast<int32_t>(x.size());
+        const Eigen::ArrayX<bool> continuityMask =
+                Utils::diff(x).abs() < segmentThresholdX && (Utils::diff(y).abs() < segmentThresholdY);
 
-        SlopesWeights slopeWeights = computeBlocksSlopesWeights(blocks);
+        int blockStart = 0;
+        for (int i = 1; i < n; ++i) {
+            if (!continuityMask[i - 1]) {
+                processBlock(x, y, blockStart, i, slopeWeights);
+                blockStart = i;
+            }
+        }
+
+        processBlock(x, y, blockStart, n, slopeWeights);
 
         if (slopeWeights.count() == 0) {
-            return 0;
+            return Stats::LRResult(0,0);
         }
 
-        return Stats::weightedMedian(slopeWeights.slopes, slopeWeights.weights);
-    }
-
-    SegmentedMedianSlopeEstimator::Blocks SegmentedMedianSlopeEstimator::segmentIntoBlocks(
-        const Eigen::ArrayXd &x, const Eigen::ArrayXd &y
-    ) const {
-        Blocks result;
-        constexpr int expectedBlocks = 8;
-        result.reserveBlocks(expectedBlocks);
-
-        const Eigen::ArrayX<bool> continuityMask =
-                Utils::diff(x).abs() < segmentThresholdX && Utils::diff(y).abs() < segmentThresholdY;
-
-        for (int i = 0; i < x.size(); ++i) {
-            if (i == 0 || !continuityMask[i - 1]) {
-                result.appendNewBlock(x.size() / expectedBlocks);
-            } else {
-                result.appendToLastBlock(x[i], y[i]); // TODO Review this, e.g. first element not added
-            }
-        }
-
-        return result;
-    }
-
-    SegmentedMedianSlopeEstimator::SlopesWeights SegmentedMedianSlopeEstimator::computeBlocksSlopesWeights(
-        const Blocks &blocks
-    ) const {
-        SlopesWeights slopeWeights;
-
-        slopeWeights.reserve(blocks.count());
-        for (int i = 0; i < blocks.count(); ++i) {
-            if (blocks.blockSizes[i] < 2) {
-                continue;
-            }
-
-            const double slope = blocks.computeSlope(i);
-
-            if (!std::isfinite(slope) || std::abs(slope) > maxSlope) {
-                continue;
-            }
-
-            slopeWeights.append(slope, blocks.blockSizes[i]);
-            LOG_DEBUG("Using slope ", slope, " for block ", i, " with size ", blocks.blockSizes[i]);
-        }
-
-        return slopeWeights;
-    }
-
-    void SegmentedMedianSlopeEstimator::Blocks::reserveBlocks(const uint64_t count) {
-        xBlocks.reserve(count);
-        yBlocks.reserve(count);
-        blockSizes.reserve(count);
-    }
-
-    void SegmentedMedianSlopeEstimator::Blocks::appendNewBlock(const uint64_t reservePerBlock) {
-        yBlocks.emplace_back();
-        xBlocks.emplace_back();
-        blockSizes.emplace_back();
-
-        if (reservePerBlock > 0) {
-            xBlocks.back().reserve(reservePerBlock);
-            yBlocks.back().reserve(reservePerBlock);
-        }
-    }
-
-    void SegmentedMedianSlopeEstimator::Blocks::appendToLastBlock(const double x, const double y) {
-        xBlocks.back().emplace_back(x);
-        yBlocks.back().emplace_back(y);
-        blockSizes.back()++;
-    }
-
-    double SegmentedMedianSlopeEstimator::Blocks::computeSlope(const int32_t blockIdx) const {
-        const Eigen::ArrayXd fitX = Eigen::Map<const Eigen::ArrayXd>(
-            xBlocks[blockIdx].data(), static_cast<Eigen::Index>(xBlocks[blockIdx].size())
+        return Stats::LRResult(
+            Stats::weightedMedian(slopeWeights.slopes, slopeWeights.weights),
+            Stats::weightedMedian(slopeWeights.intercepts, slopeWeights.weights)
         );
-        const Eigen::ArrayXd fitY = Eigen::Map<const Eigen::ArrayXd>(
-            yBlocks[blockIdx].data(), static_cast<Eigen::Index>(yBlocks[blockIdx].size())
-        );
-
-        return Stats::simpleLinearRegression(fitX, fitY).slope;
     }
 
-    uint64_t SegmentedMedianSlopeEstimator::Blocks::count() const {
-        return blockSizes.size();
+    void SegmentedMedianSlopeEstimator::processBlock(
+        const Eigen::ArrayXd& x, const Eigen::ArrayXd& y, const int32_t startIdx, const int32_t endIdx, SlopesWeights& slopeWeights
+    ) const {
+        const int size = endIdx - startIdx;
+        if (size < 2) {
+            return;
+        }
+
+        const Eigen::Map<const Eigen::ArrayXd> fitX(x.data() + startIdx, size);
+        const Eigen::Map<const Eigen::ArrayXd> fitY(y.data() + startIdx, size);
+
+        const auto lrResult = Stats::simpleLinearRegression(fitX, fitY);
+        const double slope = lrResult.slope;
+        const double intercept = Utils::positiveFmod(lrResult.intercept, interceptMod);
+
+        if (!std::isfinite(slope) || std::abs(slope) > maxSlope) {
+            return;
+        }
+
+        slopeWeights.append(slope, intercept, size);
+        LOG_DEBUG("Using slope ", slope, " for block [", startIdx, ", ", endIdx, ") with size ", size);
     }
 
     void SegmentedMedianSlopeEstimator::SlopesWeights::reserve(const uint64_t count) {
@@ -105,8 +59,9 @@ namespace accurate_ri {
         weights.reserve(count);
     }
 
-    void SegmentedMedianSlopeEstimator::SlopesWeights::append(const double slope, const int32_t weight) {
+    void SegmentedMedianSlopeEstimator::SlopesWeights::append(const double slope, const double intercept, const int32_t weight) {
         slopes.emplace_back(slope);
+        intercepts.emplace_back(intercept);
         weights.emplace_back(weight);
     }
 

@@ -93,16 +93,16 @@ namespace accurate_ri {
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t initialResolution
     ) {
         const int32_t scanlineSize = scanlineArray.getSize(scanlineIdx);
-        std::vector<int32_t> resolutions;
-        if (initialResolution != 0) {
-            resolutions = generateCandidateResolutions(initialResolution, scanlineSize);
-        } else {
-            resolutions = generateCandidateResolutionsMad(scanlineArray, scanlineIdx);
-        }
+        // std::vector<int32_t> resolutions;
+        // if (initialResolution != 0) {
+        //     resolutions = generateCandidateResolutions(initialResolution, scanlineSize);
+        // } else {
+        //     resolutions = generateCandidateResolutionsMad(scanlineArray, scanlineIdx);
+        // }
 
         std::optional<ResolutionOffsetLoss> bestCandidate = std::nullopt;
 
-        for (const int32_t resolution: resolutions) {
+        for (int32_t resolution = scanlineSize; resolution <= Constant::MAX_RESOLUTION; ++resolution) {
             const ResolutionOffsetLoss candidate = optimizeJointCandidateResolution(
                 scanlineArray, scanlineIdx, resolution
             );
@@ -192,15 +192,15 @@ namespace accurate_ri {
         );
 
         const SegmentedMedianSlopeEstimator slopeEstimator(
-            Constant::INV_RANGES_BREAK_THRESHOLD, thetaStep / 4, Constant::MAX_OFFSET
+            Constant::INV_RANGES_BREAK_THRESHOLD, thetaStep / 4, Constant::MAX_OFFSET, thetaStep
         );
 
-        const double offsetGuess = slopeEstimator.estimateSlope(invRangesXy, diffToIdeal);
+        const Stats::LRResult lrGuess = slopeEstimator.estimateSlope(invRangesXy, diffToIdeal);
 
         LOG_DEBUG("Offset guess: ", offsetGuess);
 
         PeriodicMultilineFitter fitter(resolution);
-        const PeriodicMultilineFitResult fitResult = fitter.fit(scanlineArray, scanlineIdx, offsetGuess);
+        const PeriodicMultilineFitResult fitResult = fitter.fit(scanlineArray, scanlineIdx, lrGuess);
 
         return ResolutionOffsetLoss(
             resolution,

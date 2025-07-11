@@ -24,7 +24,7 @@ namespace accurate_ri {
         explicit PeriodicMultilineFitter(const int32_t resolution) : resolution(resolution), estimator(2 * M_PI / resolution) {}
 
         PeriodicMultilineFitResult fit(
-            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, double offsetGuess
+            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, const Stats::LRResult &lrGuess
         );
 
     private:

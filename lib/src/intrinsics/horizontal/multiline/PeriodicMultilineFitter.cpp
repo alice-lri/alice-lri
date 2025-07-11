@@ -28,19 +28,19 @@ namespace accurate_ri {
     };
 
     PeriodicMultilineFitResult PeriodicMultilineFitter::fit(
-        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const double offsetGuess
+        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const Stats::LRResult &lrGuess
     ) {
         const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
         const Eigen::ArrayXd &x = scanlineArray.getInvRangesXy(scanlineIdx);
         const Eigen::ArrayXd y = HorizontalMath::computeDiffToIdeal(thetas, resolution, false); // TODO we are now recomputing this multiple times
 
-        model->slope = offsetGuess;
-        model->intercept = 0;
+        model->slope = lrGuess.slope;
+        model->intercept = lrGuess.intercept;
         estimator.setModel(*model);
 
-        // TODO refactor this set model thing
-        model->intercept = computeCircularMeanIntercept(estimator.computeResiduals(x, y), 2 * M_PI / resolution);
-        estimator.setModel(*model);
+        // // TODO refactor this set model thing
+        // model->intercept = computeCircularMeanIntercept(estimator.computeResiduals(x, y), 2 * M_PI / resolution);
+        // estimator.setModel(*model);
 
         LOG_DEBUG("Two-point slope: ", model->slope);
         const double loss = refineFit(x, y);

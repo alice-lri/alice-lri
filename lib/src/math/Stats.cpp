@@ -83,11 +83,7 @@ namespace accurate_ri::Stats {
             mse = residuals.square().mean();
         }
 
-        return {
-            .slope = slope,
-            .intercept = intercept,
-            .mse = mse
-        };
+        return LRResult(slope, intercept, mse);
     }
 
     template<typename T>
