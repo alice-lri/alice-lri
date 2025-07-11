@@ -10,11 +10,12 @@ namespace accurate_ri {
         struct SlopesWeights {
             std::vector<double> slopes;
             std::vector<double> intercepts;
+            std::vector<double> rmses;
             std::vector<int32_t> weights;
 
             void reserve(uint64_t count);
 
-            void append(double slope, double intercept, int32_t weight);
+            void append(double slope, double intercept, double mse, int32_t weight);
 
             [[nodiscard]] uint64_t count() const;
         };

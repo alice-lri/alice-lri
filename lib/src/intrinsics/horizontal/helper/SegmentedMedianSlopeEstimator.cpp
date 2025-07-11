@@ -27,7 +27,8 @@ namespace accurate_ri {
 
         return Stats::LRResult(
             Stats::weightedMedian(slopeWeights.slopes, slopeWeights.weights),
-            Stats::weightedMedian(slopeWeights.intercepts, slopeWeights.weights)
+            Stats::weightedMedian(slopeWeights.intercepts, slopeWeights.weights),
+            Stats::mean(slopeWeights.rmses) // TODO maybe only slope needed
         );
     }
 
@@ -42,7 +43,7 @@ namespace accurate_ri {
         const Eigen::Map<const Eigen::ArrayXd> fitX(x.data() + startIdx, size);
         const Eigen::Map<const Eigen::ArrayXd> fitY(y.data() + startIdx, size);
 
-        const auto lrResult = Stats::simpleLinearRegression(fitX, fitY);
+        const auto lrResult = Stats::simpleLinearRegression(fitX, fitY, true);
         const double slope = lrResult.slope;
         const double intercept = Utils::positiveFmod(lrResult.intercept, interceptMod);
 
@@ -50,8 +51,8 @@ namespace accurate_ri {
             return;
         }
 
-        slopeWeights.append(slope, intercept, size);
-        LOG_DEBUG("Using slope ", slope, " for block [", startIdx, ", ", endIdx, ") with size ", size);
+        slopeWeights.append(slope, intercept, *lrResult.mse, size);
+        LOG_DEBUG("Using slope ", slope, " and intercept ", intercept, " for block [", startIdx, ", ", endIdx, ") with size ", size);
     }
 
     void SegmentedMedianSlopeEstimator::SlopesWeights::reserve(const uint64_t count) {
@@ -59,9 +60,10 @@ namespace accurate_ri {
         weights.reserve(count);
     }
 
-    void SegmentedMedianSlopeEstimator::SlopesWeights::append(const double slope, const double intercept, const int32_t weight) {
+    void SegmentedMedianSlopeEstimator::SlopesWeights::append(const double slope, const double intercept, const double mse, const int32_t weight) {
         slopes.emplace_back(slope);
         intercepts.emplace_back(intercept);
+        rmses.emplace_back(std::sqrt(mse));
         weights.emplace_back(weight);
     }
 

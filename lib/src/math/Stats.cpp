@@ -119,6 +119,10 @@ namespace accurate_ri::Stats {
         return intModeImpl(values);
     }
 
+    double mean(const std::vector<double> &values) {
+        return std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
+    }
+
     double weightedMedian(const std::span<const double> values, const std::span<const int32_t> weights) {
         const std::size_t n = values.size();
         if (n == 0 || weights.size() != n) {

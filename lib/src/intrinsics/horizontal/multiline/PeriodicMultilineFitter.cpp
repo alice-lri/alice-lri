@@ -5,6 +5,7 @@
 #include "utils/Logger.h"
 #include <vector>
 #include "plotty/matplotlibcpp.hpp"
+#include "utils/Utils.h"
 
 namespace accurate_ri {
     struct MultiLineItem {
@@ -35,14 +36,14 @@ namespace accurate_ri {
         const Eigen::ArrayXd y = HorizontalMath::computeDiffToIdeal(thetas, resolution, false); // TODO we are now recomputing this multiple times
 
         model->slope = lrGuess.slope;
-        model->intercept = lrGuess.intercept;
+        model->intercept = 0; //lrGuess.intercept;
         estimator.setModel(*model);
 
         // // TODO refactor this set model thing
-        // model->intercept = computeCircularMeanIntercept(estimator.computeResiduals(x, y), 2 * M_PI / resolution);
-        // estimator.setModel(*model);
+        model->intercept = computeCircularMeanIntercept(estimator.computeResiduals(x, y), 2 * M_PI / resolution);
+        estimator.setModel(*model);
 
-        LOG_DEBUG("Two-point slope: ", model->slope);
+        LOG_DEBUG("Circular intercept: ", model->intercept);
         const double loss = refineFit(x, y);
         LOG_DEBUG("Refined slope: ", model->slope, " and intercept: ", model->intercept);
         return PeriodicMultilineFitResult {.model = *model, .loss = loss};

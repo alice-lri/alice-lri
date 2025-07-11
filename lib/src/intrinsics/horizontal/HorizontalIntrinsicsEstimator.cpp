@@ -93,16 +93,16 @@ namespace accurate_ri {
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t initialResolution
     ) {
         const int32_t scanlineSize = scanlineArray.getSize(scanlineIdx);
-        // std::vector<int32_t> resolutions;
-        // if (initialResolution != 0) {
-        //     resolutions = generateCandidateResolutions(initialResolution, scanlineSize);
-        // } else {
-        //     resolutions = generateCandidateResolutionsMad(scanlineArray, scanlineIdx);
-        // }
+        std::vector<int32_t> resolutions;
+        if (initialResolution != 0) {
+            resolutions = generateCandidateResolutions(initialResolution, scanlineSize);
+        } else {
+            resolutions = generateCandidateResolutionsMad(scanlineArray, scanlineIdx);
+        }
 
         std::optional<ResolutionOffsetLoss> bestCandidate = std::nullopt;
 
-        for (int32_t resolution = scanlineSize; resolution <= Constant::MAX_RESOLUTION; ++resolution) {
+        for (const int32_t resolution: resolutions) {
             const ResolutionOffsetLoss candidate = optimizeJointCandidateResolution(
                 scanlineArray, scanlineIdx, resolution
             );
@@ -197,7 +197,7 @@ namespace accurate_ri {
 
         const Stats::LRResult lrGuess = slopeEstimator.estimateSlope(invRangesXy, diffToIdeal);
 
-        LOG_DEBUG("Offset guess: ", offsetGuess);
+        LOG_DEBUG("Slope guess: ", lrGuess.slope, ", Intercept guess: ", lrGuess.intercept);
 
         PeriodicMultilineFitter fitter(resolution);
         const PeriodicMultilineFitResult fitResult = fitter.fit(scanlineArray, scanlineIdx, lrGuess);
