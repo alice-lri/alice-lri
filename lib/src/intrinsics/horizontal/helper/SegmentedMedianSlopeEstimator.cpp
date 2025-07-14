@@ -9,7 +9,7 @@ namespace accurate_ri {
         SlopesWeights slopeWeights;
         const int32_t n = static_cast<int32_t>(x.size());
         const Eigen::ArrayX<bool> continuityMask =
-                Utils::diff(x).abs() < segmentThresholdX && (Utils::diff(y).abs() < segmentThresholdY);
+               (Utils::diff(x).abs() < segmentThresholdX) && (Utils::diff(y).abs() < segmentThresholdY);
 
         int blockStart = 0;
         for (int i = 1; i < n; ++i) {

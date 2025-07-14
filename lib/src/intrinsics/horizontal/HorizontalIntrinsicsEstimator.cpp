@@ -188,7 +188,7 @@ namespace accurate_ri {
         const double thetaStep = 2 * M_PI / resolution;
         const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
         const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
-            scanlineArray.getThetas(scanlineIdx), resolution, false
+            scanlineArray.getThetas(scanlineIdx), resolution, true
         );
 
         const SegmentedMedianSlopeEstimator slopeEstimator(

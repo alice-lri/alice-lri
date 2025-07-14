@@ -9,7 +9,7 @@ db_path = "../large/master.sqlite"
 kitti_path = "../../../Datasets/LiDAR/kitti/"
 durlar_path = "../../../Datasets/LiDAR/durlar/dataset/DurLAR/"
 
-test_suite_query = """
+conflicting_test_suite_query = """
 WITH frame_diagnostics AS (
    SELECT df.relative_path, df.id, d.name AS dataset_name,
           frame_empirical.scanlines_count, d.laser_count,
@@ -62,6 +62,24 @@ SELECT * FROM (
                  ORDER BY id LIMIT 25
              );
 """
+
+comparative_test_suite_query = """
+SELECT d.name, df.relative_path
+FROM dataset_frame df
+        JOIN dataset d ON df.dataset_id = d.id
+        JOIN intrinsics_frame_result ifr_base ON ifr_base.dataset_frame_id = df.id AND ifr_base.experiment_id = 18
+        JOIN intrinsics_result_scanline_info scanline_base ON scanline_base.intrinsics_result_id = ifr_base.id
+        JOIN dataset_frame_scanline_info_empirical dfsie
+             ON df.id = dfsie.dataset_frame_id AND dfsie.scanline_idx = scanline_base.scanline_idx = dfsie.scanline_idx
+        JOIN intrinsics_frame_result ifr_new ON ifr_new.dataset_frame_id = df.id AND ifr_new.experiment_id = 21
+        JOIN intrinsics_result_scanline_info scanline_new
+             ON scanline_new.intrinsics_result_id = ifr_new.id AND
+                scanline_new.scanline_idx = scanline_base.scanline_idx
+WHERE scanline_base.horizontal_resolution != scanline_new.horizontal_resolution
+ORDER BY scanline_base.points_count DESC;
+"""
+
+test_suite_query = conflicting_test_suite_query
 
 frame_gt_query = """
  SELECT gt.scanlines_count, gt.points_count
