@@ -59,8 +59,8 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
-        //int32_t bestResolution = madOptimalResolution(scanlineArray, scanlineIdx);
-        int32_t bestResolution = 0;
+        int32_t bestResolution = madOptimalResolution(scanlineArray, scanlineIdx);
+        //int32_t bestResolution = 0;
         const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResolution);
 
         if (!optimizeResult) {

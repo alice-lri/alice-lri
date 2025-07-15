@@ -14,12 +14,12 @@ namespace accurate_ri {
         int blockStart = 0;
         for (int i = 1; i < n; ++i) {
             if (!continuityMask[i - 1]) {
-                processBlock(x, y, blockStart, i, slopeWeights);
+                processBlock(x, y, blockStart + 1, i, slopeWeights);
                 blockStart = i;
             }
         }
 
-        processBlock(x, y, blockStart, n, slopeWeights);
+        processBlock(x, y, blockStart + 1, n, slopeWeights);
 
         if (slopeWeights.count() == 0) {
             return Stats::LRResult(0,0);
@@ -36,7 +36,7 @@ namespace accurate_ri {
         const Eigen::ArrayXd& x, const Eigen::ArrayXd& y, const int32_t startIdx, const int32_t endIdx, SlopesWeights& slopeWeights
     ) const {
         const int size = endIdx - startIdx;
-        if (size < 2) {
+        if (size <= 2) {
             return;
         }
 
