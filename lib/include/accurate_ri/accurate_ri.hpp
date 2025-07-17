@@ -1,6 +1,7 @@
 #pragma once
 #include "accurate_ri/public_structs.hpp"
 
+// TODO as json str methods
 namespace accurate_ri {
     ACCURATE_RI_API IntrinsicsResult train(const PointCloud::Float &points);
 
