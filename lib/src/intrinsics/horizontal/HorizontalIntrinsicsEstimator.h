@@ -56,12 +56,15 @@ namespace accurate_ri {
         );
 
         ResolutionOffsetLoss optimizeFromCandidatesHeuristic(
-            const Eigen::ArrayXd &thetas,
-            const Eigen::ArrayXd &ranges,
-            const std::unordered_set<int32_t> &candidateResolutions,
-            const std::unordered_set<double> &candidateOffsets
+            const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges,
+            const std::unordered_set<int32_t> &candidateResolutions, const std::unordered_set<double> &candidateOffsets
         );
 
-        int32_t madOptimalResolution(const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx);
+        int32_t madOptimalResolution(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx);
+
+        void updateBasicScanlines(
+            std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
+            const HorizontalScanlineArray &scanlineArray
+        );
     };
 } // accurate_ri

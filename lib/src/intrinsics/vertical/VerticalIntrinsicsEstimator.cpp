@@ -12,6 +12,7 @@
 #include <nlohmann/json.hpp>
 
 #include "Constants.h"
+#include "BuildOptions.h"
 #include "math/Stats.h"
 
 namespace accurate_ri {
@@ -77,9 +78,7 @@ namespace accurate_ri {
             const auto &estimationResultOpt = estimateScanline(points, errorBounds, scanlineLimits);
 
             if (!estimationResultOpt) {
-                LOG_INFO(
-                    "Fit failed: True, Points in scanline: ", scanlineLimits.indices.size()
-                );
+                LOG_INFO("Fit failed: True, Points in scanline: ", scanlineLimits.indices.size());
                 LOG_INFO("");
 
                 scanlinePool->invalidateByHash(houghMax.hash);
@@ -113,12 +112,14 @@ namespace accurate_ri {
                 }
             };
 
-            bool keepScanline = conflictSolver.performScanlineConflictResolution(
-                *scanlinePool, angleBounds, scanlineEstimation, currentScanlineId, houghMax
-            );
+            if constexpr (BuildOptions::USE_SCANLINE_CONFLICT_SOLVER) {
+                bool keepScanline = conflictSolver.performScanlineConflictResolution(
+                    *scanlinePool, angleBounds, scanlineEstimation, currentScanlineId, houghMax
+                );
 
-            if (!keepScanline) {
-                continue;
+                if (!keepScanline) {
+                    continue;
+                }
             }
 
             if (scanlineEstimation.uncertainty < Constant::FULL_CERTAINTY_THRESHOLD) {
@@ -226,7 +227,6 @@ namespace accurate_ri {
         return result;
     }
 
-    // TODO split this function
     // TODO this could be a generic line thing. Take a look at conceptually section in scanlimie limits notebook
     ScanlineLimits VerticalIntrinsicsEstimator::computeScanlineLimits(
         const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
@@ -256,6 +256,7 @@ namespace accurate_ri {
         return { std::move(idx), std::move(mask), std::move(lower), std::move(upper) };
     }
 
+    // TODO split this function
     std::optional<ScanlineEstimationResult> VerticalIntrinsicsEstimator::estimateScanline(
         const PointArray &points, const VerticalBounds &errorBounds, const ScanlineLimits &scanlineLimits
     ) {
@@ -269,7 +270,7 @@ namespace accurate_ri {
             ScanlineFitResult scanlineFit = tryFitScanline(points, errorBounds, scanlineLimits);
             requiresHeuristicFitting = scanlineFit.ciTooWide;
 
-            if (scanlineFit.success and !requiresHeuristicFitting) {
+            if (scanlineFit.success && !requiresHeuristicFitting) {
                 const OffsetAngle values = {
                     .offset = scanlineFit.fit->slope,
                     .angle = scanlineFit.fit->intercept
@@ -291,6 +292,10 @@ namespace accurate_ri {
                     .dependencies = std::vector<uint32_t>()
                 };
             }
+        }
+
+        if constexpr (!BuildOptions::USE_VERTICAL_HEURISTICS) {
+            return std::nullopt;
         }
 
         if (requiresHeuristicFitting) {
@@ -362,7 +367,7 @@ namespace accurate_ri {
         const ScanlineLimits &scanlineLimits
     ) const {
         PROFILE_SCOPE("VerticalIntrinsicsEstimator::tryFitScanline");
-        const Eigen::ArrayXd &ranges = points.getRanges().array();
+        const Eigen::ArrayXd &ranges = points.getRanges();
         VerticalBounds currentErrorBounds = errorBounds;
         ScanlineLimits currentScanlineLimits = scanlineLimits;
 
@@ -485,7 +490,7 @@ namespace accurate_ri {
     }
 
     HeuristicScanline VerticalIntrinsicsEstimator::computeHeuristicScanline(
-        double invRangesMean, double phisMean
+        const double invRangesMean, const double phisMean
     ) const {
         std::optional<uint32_t> closestScanlineIdTop = std::nullopt;
         std::optional<uint32_t> closestScanlineIdBottom = std::nullopt;

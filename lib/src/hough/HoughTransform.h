@@ -113,7 +113,7 @@ namespace accurate_ri {
          * @brief Updates the accumulator for a specific point.
          * @param pointIndex Index of the point.
          * @param points Vector of phi values.
-         * @param voteType
+         * @param voteMultiplier Multiplier for the vote value.
          */
         inline void updateAccumulatorForPoint(uint64_t pointIndex, const PointArray &points, int8_t voteMultiplier);
 

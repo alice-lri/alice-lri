@@ -33,8 +33,8 @@ namespace accurate_ri {
         };
 
         return HoughScanlineEstimation{
-            .cell = std::move(houghMax),
-            .margin = std::move(margin)
+            .cell = houghMax,
+            .margin = margin
         };
     }
 

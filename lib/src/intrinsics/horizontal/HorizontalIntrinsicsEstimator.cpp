@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Constants.h"
+#include "BuildOptions.h"
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.h"
@@ -42,8 +43,14 @@ namespace accurate_ri {
             }
         }
 
-        if (!heuristicScanlines.empty()) {
+        if (heuristicScanlines.empty()) {
+            return result;
+        }
+
+        if (BuildOptions::USE_HORIZONTAL_HEURISTICS) {
             updateHeuristicScanlines(result.scanlines, heuristicScanlines, scanlineArray);
+        } else {
+            updateBasicScanlines(result.scanlines, heuristicScanlines, scanlineArray);
         }
 
         return result;
@@ -56,11 +63,17 @@ namespace accurate_ri {
 
         if (scanlineArray.getSize(scanlineIdx) < Constant::HORIZONTAL_MIN_POINTS_PER_SCANLINE) {
             LOG_WARN("Warning: Scanline ", scanlineIdx, " has less than the minimum points");
-            return std::nullopt;
+
+            if constexpr (BuildOptions::USE_HORIZONTAL_HEURISTICS) {
+                return std::nullopt;
+            }
+
+            if (scanlineArray.getSize(scanlineIdx) < 3) {
+                return std::nullopt;
+            }
         }
 
         int32_t bestResolution = madOptimalResolution(scanlineArray, scanlineIdx);
-        //int32_t bestResolution = 0;
         const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResolution);
 
         if (!optimizeResult) {
@@ -340,5 +353,24 @@ namespace accurate_ri {
         }
 
         return optimalResolution;
+    }
+
+    void HorizontalIntrinsicsEstimator::updateBasicScanlines(
+        std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
+        const HorizontalScanlineArray &scanlineArray
+    ) {
+        for (const int32_t scanlineIdx: heuristicScanlines) {
+            scanlines[scanlineIdx] = ScanlineHorizontalInfo{
+                .resolution = scanlineArray.getSize(scanlineIdx),
+                .offset = 0,
+                .thetaOffset = 0,
+                .heuristic = false
+            };
+
+            LOG_INFO(
+                "Scanline ID: ", scanlineIdx, "\tRes: ", scanlines[scanlineIdx].resolution, "\tOffset: ", 0,
+                "\tTheta Offset: ", 0, "\tPoints: ", scanlineArray.getSize(scanlineIdx)
+            );
+        }
     }
 } // namespace accurate_ri

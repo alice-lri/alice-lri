@@ -36,7 +36,7 @@ namespace accurate_ri {
         const Eigen::ArrayXd y = HorizontalMath::computeDiffToIdeal(thetas, resolution, false); // TODO we are now recomputing this multiple times
 
         model->slope = lrGuess.slope;
-        model->intercept = 0; //lrGuess.intercept;
+        model->intercept = 0;
         estimator.setModel(*model);
 
         // // TODO refactor this set model thing
@@ -66,27 +66,23 @@ namespace accurate_ri {
         return *fitResult.mse;
     }
 
-    double PeriodicMultilineFitter::computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, const double k) {
+    double PeriodicMultilineFitter::computeCircularMeanIntercept(
+        const Eigen::ArrayXd& residuals, const double thetaStep
+    ) {
         constexpr double twoPi = 2.0 * M_PI;
 
-        // Step 1: Map residuals mod k into [0, k)
-        Eigen::ArrayXd mod = residuals.unaryExpr([k](double r) {
-            double m = std::fmod(r, k);
-            return m < 0 ? m + k : m;
+        Eigen::ArrayXd residualsMod = residuals.unaryExpr([thetaStep](const double residual) {
+            const double residualMod = std::fmod(residual, thetaStep);
+            return residualMod < 0 ? residualMod + thetaStep : residualMod;
         });
 
-        // Step 2: Convert to angles in [0, 2π)
-        Eigen::ArrayXd theta = (twoPi / k) * mod;
+        residualsMod = (twoPi / thetaStep) * residualsMod;
+        double circularMean = std::atan2(residualsMod.sin().mean(), residualsMod.cos().mean());
 
-        // Step 3: Compute mean of cos and sin
-        double x_sum = theta.cos().mean();
-        double y_sum = theta.sin().mean();
+        if (circularMean < 0) {
+            circularMean += twoPi;
+        }
 
-        // Step 4: Compute circular mean angle
-        double theta_bar = std::atan2(y_sum, x_sum);
-        if (theta_bar < 0) theta_bar += twoPi;
-
-        // Step 5: Convert back to b in [0, k)
-        return (k * theta_bar) / twoPi;
+        return (thetaStep * circularMean) / twoPi;
     }
 } // accurate_ri

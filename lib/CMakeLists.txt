@@ -16,6 +16,13 @@ else ()
     message(FATAL_ERROR "Invalid LOG_LEVEL: Choose DEBUG, INFO, WARN, ERROR, or NONE")
 endif ()
 
+option(FLAG_USE_HOUGH_CONTINUITY "Set BuildOption USE_HOUGH_CONTINUITY" ON)
+option(FLAG_USE_SCANLINE_CONFLICT_SOLVER "Set BuildOption USE_SCANLINE_CONFLICT_SOLVER" ON)
+option(FLAG_USE_VERTICAL_HEURISTICS "Set BuildOption USE_VERTICAL_HEURISTICS" ON)
+option(FLAG_USE_HORIZONTAL_HEURISTICS "Set BuildOption USE_HORIZONTAL_HEURISTICS" ON)
+
+configure_file("src/BuildOptions.h.in" "src/BuildOptions.h")
+
 if (ENABLE_PROFILING)
     add_definitions(-DENABLE_PROFILING)
 endif ()
@@ -105,6 +112,7 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
 
 set(_accurate_ri_private_include_dirs
         src
+        "${CMAKE_CURRENT_BINARY_DIR}/src"
         ${nlohmann_json_INCLUDE_DIRS}
         ${Eigen3_INCLUDE_DIRS}
 )

@@ -1,6 +1,7 @@
 #include "HoughTransform.h"
 
 #include <algorithm>
+#include <BuildOptions.h>
 #include <cmath>
 
 #include "hash/HashUtils.h"
@@ -42,7 +43,7 @@ namespace accurate_ri {
         int32_t previousY = -1;
 
         for (size_t x = 0; x < xCount; x++) {
-            const double rangeVal = points.getRange(pointIndex);
+            constexpr double rangeVal = 1;
             const double yVal = points.getPhi(pointIndex) - getXValue(x) / rangeVal;
             const auto y = static_cast<int32_t>(std::round((yVal - yMin) / yStep));
 
@@ -61,7 +62,9 @@ namespace accurate_ri {
                     accumulator(y, x) = 0;
                 }
 
-                voteForDiscontinuities(pointIndex, x, y, voteVal, previousY, voteMultiplier);
+                if constexpr (BuildOptions::USE_HOUGH_CONTINUITY) {
+                    voteForDiscontinuities(pointIndex, x, y, voteVal, previousY, voteMultiplier);
+                }
             }
 
             previousY = y;

@@ -7,6 +7,8 @@
 #include "utils/Timer.h"
 
 namespace accurate_ri::Stats {
+
+    // TODO remove AIC and compute meaningful certainty metric (probably log-likelihood)
     WLSResult wlsBoundsFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &bounds) {
         PROFILE_SCOPE("Stats::wlsBoundsFit");
         const Eigen::ArrayXd &weights = 1 / bounds.square();
@@ -25,7 +27,7 @@ namespace accurate_ri::Stats {
         const Eigen::VectorXd residuals = y.array() - (slope * x.array() + intercept);
         const double sigma2 = (weights.array() * residuals.array().square()).sum() / (y.size() - 2);
 
-        // Optionally, compute the covariance matrix explicitly
+        // Compute the covariance matrix
         const double slopeVariance = sigma2 * S / Delta;
         const double interceptVariance = sigma2 * Sxx / Delta;
         const double ssr = (weights.array() * residuals.array().square()).sum();
@@ -147,31 +149,5 @@ namespace accurate_ri::Stats {
         }
 
         return values[indices.back()];
-    }
-
-    // Computes the circular-linear correlation coefficient between X and Y (Y is circular, period T)
-    double circularLinearCorr(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const double period) {
-        const Eigen::ArrayXd xCentered = x - x.mean();
-        const Eigen::ArrayXd theta = 2 * M_PI * y / period;
-        Eigen::ArrayXd c = theta.cos();
-        Eigen::ArrayXd s = theta.sin();
-
-        // Center c and s
-        c -= c.mean();
-        s -= s.mean();
-
-        // Fast Pearson correlation
-        auto pearsonLambda = [](const Eigen::ArrayXd &a, const Eigen::ArrayXd &b) {
-            return (a * b).sum() / (a.matrix().norm() * b.matrix().norm());
-        };
-
-        double r_xc = pearsonLambda(xCentered, c);
-        double r_xs = pearsonLambda(xCentered, s);
-        double r_cs = pearsonLambda(c, s);
-
-        double numerator = r_xc * r_xc + r_xs * r_xs - 2 * r_xc * r_xs * r_cs;
-        double denominator = 1 - r_cs * r_cs;
-
-        return numerator / denominator;
     }
 }
