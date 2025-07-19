@@ -43,7 +43,7 @@ namespace accurate_ri {
         int32_t previousY = -1;
 
         for (size_t x = 0; x < xCount; x++) {
-            constexpr double rangeVal = 1;
+            const double rangeVal = points.getRange(pointIndex);
             const double yVal = points.getPhi(pointIndex) - getXValue(x) / rangeVal;
             const auto y = static_cast<int32_t>(std::round((yVal - yMin) / yStep));
 
