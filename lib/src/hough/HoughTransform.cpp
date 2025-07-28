@@ -38,7 +38,7 @@ namespace accurate_ri {
     }
 
     inline void HoughTransform::updateAccumulatorForPoint(
-        uint64_t pointIndex, const PointArray &points, int8_t voteMultiplier
+        const uint64_t pointIndex, const PointArray &points, const int8_t voteMultiplier
     ) {
         int32_t previousY = -1;
 
@@ -51,7 +51,7 @@ namespace accurate_ri {
                 continue;
             }
 
-            const double voteVal = voteMultiplier * rangeVal;
+            const double voteVal = voteMultiplier;
 
             if (previousY != -1) {
                 // TODO this is inside the if for consistency with Python, but maybe is not the right thing to do
