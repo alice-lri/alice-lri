@@ -12,8 +12,7 @@ namespace accurate_ri {
 
     public:
         VerticalScanlinePool(
-            const double offsetMin, double offsetMax, double offsetStep, double angleMin, double angleMax,
-            double angleStep
+            double offsetMin, double offsetMax, double offsetStep, double angleMin, double angleMax, double angleStep
         );
 
         void performPrecomputations(const PointArray &points);
@@ -58,6 +57,8 @@ namespace accurate_ri {
                 func(scanline.second);
             }
         }
+
+        [[nodiscard]] OffsetAngleMargin getHoughMargin();
 
         [[nodiscard]] double getXMin() const { return hough.getXMin(); }
 

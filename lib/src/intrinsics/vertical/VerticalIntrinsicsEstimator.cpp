@@ -388,7 +388,7 @@ namespace accurate_ri {
             Eigen::ArrayX<bool> newPointsToFitMask;
 
             if (state == FitConvergenceState::INITIAL) {
-                newPointsToFitMask = *pointsToFitMask && (ranges >= 2);
+                newPointsToFitMask = *pointsToFitMask && (ranges >= 2); // TODO tricky
                 pointsToFitMask = &newPointsToFitMask;
 
                 if (pointsToFitMask->count() <= 2) {
@@ -425,7 +425,7 @@ namespace accurate_ri {
 
             // TODO review and justify these constants
             // TODO maybe this is not even necessary, maybe we can just rely on heuristics and conflict resolution
-            if (offsetCiWidth > std::max(0.05 * fitResult->slope, 1e-2)) {
+            if (offsetCiWidth > 1e-2) {
                 LOG_WARN("CI too wide: ", offsetCiWidth);
                 ciTooWide = true;
                 break;
@@ -434,29 +434,8 @@ namespace accurate_ri {
             // TODO we could save memory reallocation here (perhaps by passing buffer by ref to computeErrorBounds)
             currentErrorBounds = computeErrorBounds(points, fitResult->slope);
 
-            // TODO take into account that strict fit was removed here
-            double upperOffsetMargin = fitResult->slopeCi(1) - fitResult->slope;
-            double lowerOffsetMargin = fitResult->slope - fitResult->slopeCi(0);
-            double upperAngleMargin = fitResult->interceptCi(1) - fitResult->intercept;
-            double lowerAngleMargin = fitResult->intercept - fitResult->interceptCi(0);
-
-            // TODO 1e-6 can be justified for numerical stability, but well need to review 5e-4
-            upperOffsetMargin = std::max(upperOffsetMargin, 5e-4);
-            lowerOffsetMargin = std::max(lowerOffsetMargin, 5e-4);
-            upperAngleMargin = std::max(upperAngleMargin, 1e-6);
-            lowerAngleMargin = std::max(lowerAngleMargin, 1e-6);
-
-            const OffsetAngleMargin &margin = {
-                {lowerOffsetMargin, upperOffsetMargin},
-                {lowerAngleMargin, upperAngleMargin}
-            };
+            const OffsetAngleMargin margin = scanlinePool->getHoughMargin();
             const double meanInvRanges = invRangesFiltered.mean();
-
-            LOG_INFO(
-                "Offset increased: ", upperOffsetMargin, ", Offset decreased: ", lowerOffsetMargin,
-                ", Angle increased: ", upperAngleMargin, ", Angle decreased: ", lowerAngleMargin,
-                ", Mean inv ranges: ", meanInvRanges
-            );
 
             const OffsetAngle scanlineAttributes = {.offset = fitResult->slope, .angle = fitResult->intercept};
             const ScanlineLimits newLimits = computeScanlineLimits(

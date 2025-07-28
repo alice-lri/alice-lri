@@ -4,7 +4,8 @@
 
 namespace accurate_ri {
     VerticalScanlinePool::VerticalScanlinePool(
-        const double offsetMin, double offsetMax, double offsetStep, double angleMin, double angleMax, double angleStep
+        const double offsetMin, const double offsetMax, const double offsetStep, const double angleMin,
+        const double angleMax, const double angleStep
     ) : hough(offsetMin, offsetMax, offsetStep, angleMin, angleMax, angleStep) {}
 
     void VerticalScanlinePool::performPrecomputations(const PointArray &points) {
@@ -25,16 +26,9 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
-        const HoughCell &houghMax = *houghMaxOpt;
-
-        const OffsetAngleMargin &margin = {
-            {hough.getXStep(), hough.getXStep()},
-            {hough.getYStep(), hough.getYStep()}
-        };
-
         return HoughScanlineEstimation{
-            .cell = houghMax,
-            .margin = margin
+            .cell = *houghMaxOpt,
+            .margin = getHoughMargin()
         };
     }
 
@@ -100,6 +94,13 @@ namespace accurate_ri {
         return FullScanlines {
             .scanlines = std::move(sortedScanlines),
             .pointsScanlinesIds = std::vector(pointsScanlinesIds.data(), pointsScanlinesIds.data() + pointsScanlinesIds.size()),
+        };
+    }
+
+    OffsetAngleMargin VerticalScanlinePool::getHoughMargin() {
+        return OffsetAngleMargin {
+            {hough.getXStep(), hough.getXStep()},
+            {hough.getYStep(), hough.getYStep()}
         };
     }
 } // accurate_ri

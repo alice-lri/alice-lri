@@ -18,7 +18,7 @@ namespace accurate_ri {
 
         std::vector<Eigen::ArrayXd> invRangesXyDiffByScanline;
 
-        const double coordsEps;
+        const double coordsEps; // TODO unneeded?
 
     public:
         HorizontalScanlineArray(
