@@ -51,13 +51,15 @@ namespace accurate_ri {
                 continue;
             }
 
-            const double voteVal = voteMultiplier;
+            const double voteVal = voteMultiplier != 0? 1 : 0;
 
             if (previousY != -1) {
                 // TODO this is inside the if for consistency with Python, but maybe is not the right thing to do
                 if (voteMultiplier != 0) {
                     accumulator(y, x) += voteVal;
-                    hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
+                    if (voteMultiplier == 1) { // TODO nasty (same in discontinuities)
+                        hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
+                    }
                 } else {
                     accumulator(y, x) = 0;
                 }
@@ -87,12 +89,15 @@ namespace accurate_ri {
         auto &&accumulatorBlock = accumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array();
         if (voteMultiplier != 0) {
             accumulatorBlock += voteVal;
-            hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() =
+
+            if (voteMultiplier == 1) {
+                hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() =
                     hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).unaryExpr(
                         [&](uint64_t val) {
                             return val ^ HashUtils::knuth_uint(pointIndex); // Equivalent to ^= but for Eigen
                         }
                     );
+            }
         } else {
             accumulatorBlock = 0;
         }
@@ -147,6 +152,13 @@ namespace accurate_ri {
 
     void HoughTransform::restoreVotes(const uint64_t hash, const double votes) {
         accumulator = (hashAccumulator.array() == hash).select(votes, accumulator.array());
+    }
+
+    void HoughTransform::restorePoints(const PointArray &points, const Eigen::ArrayXi& indices) {
+        PROFILE_SCOPE("HoughTransform::restorePoints");
+        for (const int32_t index: indices) {
+            updateAccumulatorForPoint(index, points, -1);
+        }
     }
 
     void HoughTransform::eraseByPoints(const PointArray &points, const Eigen::ArrayXi &indices) {

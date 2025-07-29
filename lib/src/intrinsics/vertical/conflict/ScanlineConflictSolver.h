@@ -13,7 +13,7 @@ namespace accurate_ri {
 
     public:
         bool performScanlineConflictResolution(
-            VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
+            VerticalScanlinePool &scanlinePool, const PointArray &points, const ScanlineAngleBounds &angleBounds,
             const ScanlineEstimationResult &scanline, uint32_t scanlineId, const HoughCell &houghMax
         );
 

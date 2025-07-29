@@ -21,7 +21,7 @@ namespace accurate_ri {
 
         void assignScanline(ScanlineInfo&& scanline, const Eigen::ArrayXi& pointsIndices);
 
-        std::optional<ScanlineInfo> removeScanline(uint32_t scanlineId);
+        std::optional<ScanlineInfo> removeScanline(const PointArray &points, uint32_t scanlineId);
 
         FullScanlines extractFullSortedScanlines();
 
@@ -59,6 +59,8 @@ namespace accurate_ri {
         }
 
         [[nodiscard]] OffsetAngleMargin getHoughMargin();
+
+        [[nodiscard]] std::vector<ScanlineInfo> getUnsortedScanlinesCopy();
 
         [[nodiscard]] double getXMin() const { return hough.getXMin(); }
 

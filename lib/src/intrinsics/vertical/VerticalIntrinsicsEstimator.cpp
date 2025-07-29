@@ -68,8 +68,10 @@ namespace accurate_ri {
                 "Minimum limit width (Hough): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff()
             );
 
+            const std::vector<ScanlineInfo> debugScanlines = scanlinePool->getUnsortedScanlinesCopy();
+
             VerticalLogging::plotDebugInfo(
-                points, scanlineLimits, scanlinePool->getPointsScanlinesIds(), iteration, "hough_", houghValues, 0
+                points, debugScanlines, scanlineLimits, scanlinePool->getPointsScanlinesIds(), iteration, "hough_", houghValues, 0
             );
 
             // TODO houghvalues and scanline limits should not be used beyond this point, refactor to avoid
@@ -89,7 +91,7 @@ namespace accurate_ri {
             const OffsetAngle &maxValues = scanlineEstimation.values;
 
             VerticalLogging::plotDebugInfo(
-                points, scanlineEstimation.limits, scanlinePool->getPointsScanlinesIds(), iteration, "fit_", maxValues,
+                points, debugScanlines, scanlineEstimation.limits, scanlinePool->getPointsScanlinesIds(), iteration, "fit_", maxValues,
                 scanlineEstimation.uncertainty
             );
 
@@ -114,7 +116,7 @@ namespace accurate_ri {
 
             if constexpr (BuildOptions::USE_SCANLINE_CONFLICT_SOLVER) {
                 bool keepScanline = conflictSolver.performScanlineConflictResolution(
-                    *scanlinePool, angleBounds, scanlineEstimation, currentScanlineId, houghMax
+                    *scanlinePool, points, angleBounds, scanlineEstimation, currentScanlineId, houghMax
                 );
 
                 if (!keepScanline) {

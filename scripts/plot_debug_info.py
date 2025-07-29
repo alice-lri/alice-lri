@@ -1,3 +1,4 @@
+import json
 import sys
 
 import matplotlib.pyplot as plt
@@ -27,14 +28,15 @@ def plt_show(mode, root_folder, name):
 
 def plot_debug_info(iteration, ranges, phis, scanline_lower_limit, scanline_upper_limit, accumulator,
                     points_in_scanline_mask, unassigned_mask, offsets, angle_uncorrected_range, picked_offset,
-                    picked_angle, scanlines_attributes, uncertainty, step_by_step_debug_info_mode, root_folder,
+                    picked_angle, scanlines_attributes, step_by_step_debug_info_mode, root_folder,
                     files_prefix='', plot_accumulator=True):
     plt_init(step_by_step_debug_info_mode)
     plt.figure(figsize=(6, 24))
 
     ranges_sample = np.linspace(np.min(ranges), np.max(ranges), 1000)
-    for id, scanline in scanlines_attributes.items():
+    for scanline in scanlines_attributes:
         uncertainty = scanline['uncertainty']
+        uncertainty = uncertainty if uncertainty is not None else np.inf
         angle_values = np.arcsin(scanline['offset'] / ranges_sample) + scanline['angle']
         line_color = 'lightcoral' if uncertainty == np.inf else 'lightgreen'
         plt.plot(1 / ranges_sample, angle_values, color=line_color, linewidth=0.5, linestyle='dashed')
@@ -46,7 +48,7 @@ def plot_debug_info(iteration, ranges, phis, scanline_lower_limit, scanline_uppe
 
     plt.scatter(1 / ranges[~unassigned_mask], phis[~unassigned_mask], s=0.4, color='blue')
 
-    scanline_points_color = 'orange' if uncertainty == np.inf else 'green'
+    scanline_points_color = 'green'
     plt.scatter(1 / ranges[points_in_scanline_mask], phis[points_in_scanline_mask], s=0.4, color=scanline_points_color)
     plt.scatter(1 / ranges[unassigned_mask & ~points_in_scanline_mask], phis[unassigned_mask & ~points_in_scanline_mask], s=0.4, color='red')
     plt_show(step_by_step_debug_info_mode, root_folder, f"{files_prefix}scanlines_{iteration}")
@@ -121,12 +123,12 @@ def main(folder, prefix, iteration, offset, angle, uncertainty):
     unassigned_mask = read_binary_file_bool(os.path.join(folder, 'unassigned_mask.bin'))
     picked_offset = offset
     picked_angle = angle
-    scanlines_attributes = {}  # Load or define as needed
+    scanlines_attributes = json.load(open(os.path.join(folder, 'scanlines.json')))
     step_by_step_debug_info_mode = 'files'  # Adjust as needed
 
     plot_debug_info(iteration, ranges, phis, scanline_lower_limit, scanline_upper_limit, None,
                     points_in_scanline_mask, unassigned_mask, None, None, picked_offset,
-                    picked_angle, scanlines_attributes, uncertainty, step_by_step_debug_info_mode, folder,
+                    picked_angle, scanlines_attributes, step_by_step_debug_info_mode, folder,
                     files_prefix=prefix, plot_accumulator=False)
 
 if __name__ == '__main__':

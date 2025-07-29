@@ -9,7 +9,7 @@
 
 namespace accurate_ri {
     bool ScanlineConflictSolver::performScanlineConflictResolution(
-        VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
+        VerticalScanlinePool &scanlinePool, const PointArray &points, const ScanlineAngleBounds &angleBounds,
         const ScanlineEstimationResult &scanline, const uint32_t scanlineId, const HoughCell &houghMax
     ) {
         const ScanlineConflictsResult &conflicts = evaluateScanlineConflicts(
@@ -76,7 +76,7 @@ namespace accurate_ri {
         LOG_INFO("Removing scanlines: ", scanlinesToRemoveSet);
 
         for (const uint32_t otherId: scanlinesToRemoveSet) {
-            std::optional<ScanlineInfo> removedScanline = scanlinePool.removeScanline(otherId);
+            std::optional<ScanlineInfo> removedScanline = scanlinePool.removeScanline(points, otherId);
             reverseScanlinesDependencyMap.erase(otherId);
 
             // Remove entries where scanlineId is in the value

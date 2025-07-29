@@ -4,8 +4,11 @@
 #include <filesystem>
 #include <variant>
 #include <Eigen/Dense>
+#include <nlohmann/json.hpp>
+
 #include "hough/HoughTransform.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
+#include "utils/json/JsonConverters.h"
 
 using EigenDataVariant = std::variant<Eigen::ArrayXd, Eigen::ArrayX<bool>>; // List all possible Eigen types
 
@@ -32,10 +35,15 @@ namespace accurate_ri::VerticalLogging {
     }
 
     inline void plotDebugInfo(
-        const PointArray &points, const ScanlineLimits &limits, const Eigen::ArrayXi &pointsScanlinesIds,
-        const uint32_t iteration, const std::string &prefix, const OffsetAngle &offsetAngle, const double uncertainty
+        const PointArray &points, const std::vector<ScanlineInfo> &scanlines, const ScanlineLimits &limits,
+        const Eigen::ArrayXi &pointsScanlinesIds, const uint32_t iteration, const std::string &prefix,
+        const OffsetAngle &offsetAngle, const double uncertainty
     ) {
         return; // TODO enable disable as required
+
+        if (iteration % 100 != 64) {
+            return;
+        }
 
         const std::string folder = "scripts/buffers/";
         std::filesystem::path folderPath = folder;
@@ -63,6 +71,15 @@ namespace accurate_ri::VerticalLogging {
 
         Eigen::ArrayX<bool> unassignedMask = (pointsScanlinesIds == -1).cast<bool>(); // Explicitly cast to bool Array
         writeBinaryFile(folderPath / "unassigned_mask.bin", unassignedMask, "unassigned_mask");
+
+        nlohmann::json scanlinesJson;
+        for (const ScanlineInfo & scanline : scanlines) {
+            scanlinesJson.push_back(scanlineInfoToJson(scanline));
+        }
+
+        std::ofstream scanlinesFile(folderPath / "scanlines.json");
+        scanlinesFile << scanlinesJson.dump(4);
+        scanlinesFile.flush();
 
         std::string command = "python scripts/plot_debug_info.py " + folder + " " + prefix + " " +
                               std::to_string(iteration) + " " + std::to_string(offsetAngle.offset) + " " +

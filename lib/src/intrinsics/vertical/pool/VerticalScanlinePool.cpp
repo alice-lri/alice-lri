@@ -2,6 +2,9 @@
 #include <optional>
 #include <ranges>
 
+#include "Constants.h"
+#include "utils/Logger.h"
+
 namespace accurate_ri {
     VerticalScanlinePool::VerticalScanlinePool(
         const double offsetMin, const double offsetMax, const double offsetStep, const double angleMin,
@@ -39,17 +42,33 @@ namespace accurate_ri {
         scanlineInfoMap.emplace(scanline.id, std::move(scanline));
     }
 
-    std::optional<ScanlineInfo> VerticalScanlinePool::removeScanline(const uint32_t scanlineId) {
+    std::optional<ScanlineInfo> VerticalScanlinePool::removeScanline(const PointArray &points, const uint32_t scanlineId) {
         const auto node = scanlineInfoMap.extract(scanlineId);
         if (!node) {
             return std::nullopt;
         }
 
         const ScanlineInfo &scanline = node.mapped();
-        const uint64_t conflictingHash = scanline.houghHash;
-        const double conflictingVotes = scanline.houghVotes;
+        const uint64_t hash = scanline.houghHash;
+        const double votes = scanline.houghVotes;
 
-        hough.restoreVotes(conflictingHash, conflictingVotes);
+        LOG_INFO("Removing scanline ", scanlineId, " with hash ", hash, " and votes ", votes);
+        hough.restoreVotes(hash, votes);
+
+        if (scanline.uncertainty < Constant::FULL_CERTAINTY_THRESHOLD) {
+            std::vector<int32_t> indicesVector;
+
+            for (int i = 0; i < pointsScanlinesIds.size(); ++i) {
+                if (pointsScanlinesIds(i) == scanlineId) {
+                    indicesVector.emplace_back(i);
+                }
+            }
+
+            const Eigen::ArrayXi indices = Eigen::Map<Eigen::ArrayXi>(indicesVector.data(), indicesVector.size());
+            hough.restorePoints(points, indices);
+        }
+
+        hough.debugPrintCell();
         unassignedPoints += scanline.pointsCount;
         pointsScanlinesIds = (pointsScanlinesIds == scanlineId).select(-1, pointsScanlinesIds);
 
@@ -102,5 +121,14 @@ namespace accurate_ri {
             {hough.getXStep(), hough.getXStep()},
             {hough.getYStep(), hough.getYStep()}
         };
+    }
+
+    std::vector<ScanlineInfo> VerticalScanlinePool::getUnsortedScanlinesCopy() {
+        std::vector<ScanlineInfo> scanlines;
+        for (ScanlineInfo &scanlineInfo: scanlineInfoMap | std::views::values) {
+            scanlines.emplace_back(scanlineInfo);
+        }
+
+        return scanlines;
     }
 } // accurate_ri
