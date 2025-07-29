@@ -67,8 +67,7 @@ namespace accurate_ri {
             const Eigen::ArrayXi indices = Eigen::Map<Eigen::ArrayXi>(indicesVector.data(), indicesVector.size());
             hough.restorePoints(points, indices);
         }
-
-        hough.debugPrintCell();
+        
         unassignedPoints += scanline.pointsCount;
         pointsScanlinesIds = (pointsScanlinesIds == scanlineId).select(-1, pointsScanlinesIds);
 
