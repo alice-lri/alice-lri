@@ -110,6 +110,10 @@ namespace accurate_ri {
 
         void eraseByPoints(const PointArray &points, const Eigen::ArrayXi &indices);
 
+        void addVotes(const PointArray &points, const Eigen::ArrayXi &indices);
+
+        void removeVotes(const PointArray &points, const Eigen::ArrayXi &indices);
+
     private:
         /**
          * @brief Updates the accumulator for a specific point.

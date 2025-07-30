@@ -8,7 +8,9 @@
 #include "intrinsics/vertical/VerticalStructs.h"
 #include "utils/Logger.h"
 #include "utils/Timer.h"
+#include "utils/Utils.h"
 
+// TODO clean up voting strategy after settling down on strategy
 namespace accurate_ri {
     HoughTransform::HoughTransform(
         const double xMin, const double xMax, const double xStep, const double yMin, const double yMax,
@@ -51,7 +53,7 @@ namespace accurate_ri {
                 continue;
             }
 
-            const double voteVal = voteMultiplier != 0? 1 : 0;
+            const double voteVal = Utils::sign(voteMultiplier);
 
             if (previousY != -1) {
                 // TODO this is inside the if for consistency with Python, but maybe is not the right thing to do
@@ -157,7 +159,7 @@ namespace accurate_ri {
     void HoughTransform::restorePoints(const PointArray &points, const Eigen::ArrayXi& indices) {
         PROFILE_SCOPE("HoughTransform::restorePoints");
         for (const int32_t index: indices) {
-            updateAccumulatorForPoint(index, points, -1);
+            updateAccumulatorForPoint(index, points, 2);
         }
     }
 
@@ -165,6 +167,20 @@ namespace accurate_ri {
         PROFILE_SCOPE("HoughTransform::eraseByPoints");
         for (const int32_t index: indices) {
             updateAccumulatorForPoint(index, points, 0);
+        }
+    }
+
+    void HoughTransform::addVotes(const PointArray &points, const Eigen::ArrayXi &indices) {
+        PROFILE_SCOPE("HoughTransform::addVotes");
+        for (const int32_t index: indices) {
+            updateAccumulatorForPoint(index, points, 2);
+        }
+    }
+
+    void HoughTransform::removeVotes(const PointArray &points, const Eigen::ArrayXi &indices) {
+        PROFILE_SCOPE("HoughTransform::removeVotes");
+        for (const int32_t index: indices) {
+            updateAccumulatorForPoint(index, points, -2);
         }
     }
 

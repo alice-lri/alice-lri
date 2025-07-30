@@ -124,11 +124,7 @@ namespace accurate_ri {
                 }
             }
 
-            if (scanlineEstimation.uncertainty < Constant::FULL_CERTAINTY_THRESHOLD) {
-                scanlinePool->invalidateByPoints(points, scanlineEstimation.limits.indices);
-            } else {
-                scanlinePool->invalidateByHash(houghMax.hash);
-            }
+            scanlinePool->removeVotes(points, scanlineEstimation.limits.indices);
 
             ScanlineInfo scanlineInfo = ScanlineInfo{
                 .id = currentScanlineId,

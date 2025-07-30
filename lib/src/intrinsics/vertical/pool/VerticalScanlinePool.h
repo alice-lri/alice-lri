@@ -41,6 +41,14 @@ namespace accurate_ri {
             hough.eraseByPoints(points, indices);
         }
 
+        inline void removeVotes(const PointArray& points, const Eigen::ArrayXi &indices) {
+            hough.removeVotes(points, indices);
+        }
+
+        inline void addVotes(const PointArray& points, const Eigen::ArrayXi &indices) {
+            hough.addVotes(points, indices);
+        }
+
         inline const ScanlineInfo& getScanlineById(const uint32_t id) const {
             return scanlineInfoMap.at(id);
         }

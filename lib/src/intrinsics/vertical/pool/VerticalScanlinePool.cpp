@@ -49,25 +49,17 @@ namespace accurate_ri {
         }
 
         const ScanlineInfo &scanline = node.mapped();
-        const uint64_t hash = scanline.houghHash;
-        const double votes = scanline.houghVotes;
+        std::vector<int32_t> indicesVector;
 
-        LOG_INFO("Removing scanline ", scanlineId, " with hash ", hash, " and votes ", votes);
-        hough.restoreVotes(hash, votes);
-
-        if (scanline.uncertainty < Constant::FULL_CERTAINTY_THRESHOLD) {
-            std::vector<int32_t> indicesVector;
-
-            for (int i = 0; i < pointsScanlinesIds.size(); ++i) {
-                if (pointsScanlinesIds(i) == scanlineId) {
-                    indicesVector.emplace_back(i);
-                }
+        for (int i = 0; i < pointsScanlinesIds.size(); ++i) {
+            if (pointsScanlinesIds(i) == scanlineId) {
+                indicesVector.emplace_back(i);
             }
-
-            const Eigen::ArrayXi indices = Eigen::Map<Eigen::ArrayXi>(indicesVector.data(), indicesVector.size());
-            hough.restorePoints(points, indices);
         }
-        
+
+        const Eigen::ArrayXi indices = Eigen::Map<Eigen::ArrayXi>(indicesVector.data(), indicesVector.size());
+        hough.addVotes(points, indices);
+
         unassignedPoints += scanline.pointsCount;
         pointsScanlinesIds = (pointsScanlinesIds == scanlineId).select(-1, pointsScanlinesIds);
 
