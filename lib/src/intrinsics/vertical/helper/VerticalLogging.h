@@ -39,7 +39,7 @@ namespace accurate_ri::VerticalLogging {
         const Eigen::ArrayXi &pointsScanlinesIds, const uint32_t iteration, const std::string &prefix,
         const OffsetAngle &offsetAngle, const double uncertainty
     ) {
-        // return; // TODO enable disable as required
+        return; // TODO enable disable as required
 
         if (iteration % 100 != 64) {
             return;
