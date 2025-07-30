@@ -26,11 +26,7 @@ namespace accurate_ri {
                 return false;
             }
 
-            if (!hashesToConflictsMap.contains(houghMax.hash)) {
-                return false;
-            }
-
-            HashToConflictValue &hashToConflictValue = hashesToConflictsMap.at(houghMax.hash);
+            HashToConflictValue &hashToConflictValue = hashesToConflictsMap[houghMax.hash];
 
             hashToConflictValue.conflictingScanlines.insert(
                 conflicts.conflictingScanlines.begin(), conflicts.conflictingScanlines.end()
