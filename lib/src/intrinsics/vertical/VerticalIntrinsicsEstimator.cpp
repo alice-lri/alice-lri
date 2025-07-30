@@ -326,10 +326,11 @@ namespace accurate_ri {
 
             double offsetMargin = heuristic.offsetCi.diff() / 2;
             double angleMargin = heuristicAngleCi.diff() / 2;
+            const OffsetAngleMargin houghMargin = scanlinePool->getHoughMargin();
 
             // Numerical stability
-            offsetMargin = std::max(offsetMargin, 1e-6);
-            angleMargin = std::max(angleMargin, 1e-6);
+            offsetMargin = std::max(offsetMargin, houghMargin.offset.upper);
+            angleMargin = std::max(angleMargin, houghMargin.angle.upper);
 
             const VerticalBounds heuristicBounds = computeErrorBounds(points, heuristic.offset);
             OffsetAngle heuristicOffsetAngle = {heuristic.offset, heuristicAngle};

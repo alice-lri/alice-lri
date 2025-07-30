@@ -80,6 +80,7 @@ namespace accurate_ri::VerticalLogging {
         std::ofstream scanlinesFile(folderPath / "scanlines.json");
         scanlinesFile << scanlinesJson.dump(4);
         scanlinesFile.flush();
+        scanlinesFile.close();
 
         std::string command = "python scripts/plot_debug_info.py " + folder + " " + prefix + " " +
                               std::to_string(iteration) + " " + std::to_string(offsetAngle.offset) + " " +
