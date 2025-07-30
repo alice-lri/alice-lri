@@ -214,6 +214,25 @@ namespace accurate_ri {
         }
     }
 
+    void HoughTransform::debugThing() {
+        for (int i = 0; i < accumulator.rows(); ++i) {
+            for (int j = 0; j < accumulator.cols(); ++j) {
+                if (accumulator(i, j) > 50) {
+                    auto cell = indicesToCell({j, i});
+
+                    LOG_INFO("A[", i, ", ", j, "], Offset: ", cell.maxValues.offset, ", Angle: ", cell.maxValues.angle, ", Votes: ", cell.votes);
+                }
+            }
+        }
+
+        std::exit(EXIT_FAILURE);
+    }
+
+    void HoughTransform::debugPrintCell() {
+        std::pair indices(13638, 537);
+        LOG_INFO("HOUGH DEBUG[", indices.first, ", ", indices.second, "]: ", accumulator(indices.first, indices.second));
+    }
+
     HoughCell HoughTransform::indicesToCell(const std::pair<size_t, size_t> &indices) {
         return {
             indices.first,

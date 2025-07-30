@@ -15,6 +15,7 @@ namespace accurate_ri {
         hough.computeAccumulator(points);
         pointsScanlinesIds = Eigen::ArrayXi::Ones(points.size()) * -1;
         unassignedPoints = points.size();
+        //hough.debugThing();
     }
 
     std::optional<HoughScanlineEstimation> VerticalScanlinePool::performHoughEstimation() {
@@ -24,6 +25,7 @@ namespace accurate_ri {
         }
 
         const std::optional<HoughCell> &houghMaxOpt = hough.findMaximum(averageOffset);
+        hough.debugPrintCell();
 
         if (!houghMaxOpt) {
             return std::nullopt;
