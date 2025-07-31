@@ -373,6 +373,7 @@ namespace accurate_ri {
         std::optional<Stats::WLSResult> fitResult = std::nullopt;
         std::optional<ScanlineLimits> limits = std::nullopt;
         FitConvergenceState state = FitConvergenceState::INITIAL;
+        int8_t ciTooWideState = 0;
         bool ciTooWide = false;
 
         for (uint64_t attempt = 0; attempt < Constant::VERTICAL_MAX_FIT_ATTEMPTS; ++attempt) {
@@ -425,9 +426,15 @@ namespace accurate_ri {
             // TODO review and justify these constants
             // TODO maybe this is not even necessary, maybe we can just rely on heuristics and conflict resolution
             if (offsetCiWidth > 1e-2) {
-                LOG_WARN("CI too wide: ", offsetCiWidth);
-                ciTooWide = true;
-                break;
+                ciTooWideState++;
+
+                if (ciTooWideState >= 2) {
+                    LOG_WARN("CI too wide: ", offsetCiWidth);
+                    ciTooWide = true;
+                    break;
+                }
+            } else {
+                ciTooWideState = 0;
             }
 
             // TODO we could save memory reallocation here (perhaps by passing buffer by ref to computeErrorBounds)
