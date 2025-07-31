@@ -236,8 +236,8 @@ namespace accurate_ri {
         const double offset = scanlineAttributes.offset;
         const double angle = scanlineAttributes.angle;
 
-        const auto sinUpper = ((offset + margin.offset.upper) * inv.array()).min(1).max(-1);
-        const auto sinLower = ((offset - margin.offset.lower) * inv.array()).min(1).max(-1);
+        const auto sinUpper = ((offset + margin.offset.upper) * inv.array()).min(1).max(-1).asin();
+        const auto sinLower = ((offset - margin.offset.lower) * inv.array()).min(1).max(-1).asin();
 
         Eigen::ArrayXd upper = angle + sinUpper + margin.angle.upper + errorBounds.array();
         Eigen::ArrayXd lower = angle + sinLower - margin.angle.lower - errorBounds.array();
