@@ -185,9 +185,11 @@ namespace accurate_ri {
                     intersectionInfo.empiricalIntersection? "True": "False", "."
                 );
 
+                const bool reject = intersectionInfo.empiricalIntersection;
+
                 return {
-                    .shouldReject = intersectionInfo.empiricalIntersection,
-                    .conflictingScanlines = std::move(conflictingScanlines)
+                    .shouldReject = reject,
+                    .conflictingScanlines = reject? std::move(conflictingScanlines) : Eigen::ArrayXi(),
                 };
             }
 
