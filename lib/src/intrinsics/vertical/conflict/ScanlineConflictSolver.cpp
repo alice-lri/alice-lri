@@ -44,10 +44,6 @@ namespace accurate_ri {
             return true;
         }
 
-        if (scanline.limits.indices.size() == scanlinePool.getUnassignedPoints()) {
-            return true;
-        }
-
         std::queue<uint32_t> scanlinesToRemoveQueue;
         std::unordered_set<uint32_t> scanlinesToRemoveSet;
 
@@ -164,16 +160,12 @@ namespace accurate_ri {
             ", Conflicting scanlines uncertainties: ", conflictingScanlinesUncertainties
         );
 
-        if (scanline.limits.indices.size() == scanlinePool.getUnassignedPoints()) {
-            LOG_WARN(
-                "Warning: This is the last scanline, so we will accept it if it is "
-                "not empirically intersecting with other scanlines"
-            );
-            // TODO This is causing problems, for example in durlar_4d_single_upper_bound_.._.._datasets_durlar_dataset_DurLAR_DurLAR_20210716_ouster_points_data_0000035800.bin/output.txt
-            // TODO maybe recover last scanline flag (evaluate whether this case occurs)
+        if (scanline.limits.indices.size() == scanlinePool.getUnassignedPoints() && !intersectionInfo.empiricalIntersection) {
+            LOG_WARN("Warning: This is the last scanline, and it does not intersect others, accepting");
+
             return {
-                .shouldReject = intersectionInfo.empiricalIntersection,
-                .conflictingScanlines = std::move(conflictingScanlines)
+                .shouldReject = false,
+                .conflictingScanlines = Eigen::ArrayXi()
             };
         }
 
