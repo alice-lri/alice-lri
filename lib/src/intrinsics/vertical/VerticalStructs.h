@@ -59,11 +59,11 @@ namespace accurate_ri {
         const bool theoreticalIntersection;
 
         inline bool anyIntersection() const {
-            return empiricalIntersection;
+            return empiricalIntersection || theoreticalIntersection;
         }
 
         inline bool anyIntersection(const uint32_t i) const {
-            return empiricalIntersectionMask[i];
+            return empiricalIntersectionMask[i] || theoreticalIntersectionMask[i];
         }
     };
 
