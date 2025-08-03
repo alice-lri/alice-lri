@@ -354,7 +354,7 @@ namespace accurate_ri {
                     .angle = heuristicAngleCi
                 },
                 .limits = std::move(heuristicLimits),
-                .dependencies = std::vector<uint32_t>()
+                .dependencies = std::move(heuristic.dependencies)
             };
         }
 
