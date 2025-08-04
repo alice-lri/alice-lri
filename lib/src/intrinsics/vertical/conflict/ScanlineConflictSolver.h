@@ -8,7 +8,6 @@
 namespace accurate_ri {
     class ScanlineConflictSolver {
     private:
-        std::unordered_multimap<uint32_t, uint32_t> reverseScanlinesDependencyMap;
         std::unordered_map<uint64_t, HashToConflictValue> hashesToConflictsMap;
 
     public:

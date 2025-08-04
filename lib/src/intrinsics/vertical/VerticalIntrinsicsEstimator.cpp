@@ -132,7 +132,6 @@ namespace accurate_ri {
                 .values = maxValues,
                 .ci = scanlineEstimation.ci,
                 .theoreticalAngleBounds = angleBounds,
-                .dependencies = std::move(scanlineEstimation.dependencies),
                 .uncertainty = scanlineEstimation.uncertainty,
                 .houghVotes = houghMax.votes,
                 .houghHash = houghMax.hash
@@ -286,8 +285,7 @@ namespace accurate_ri {
                     .uncertainty = scanlineFit.fit->aic,
                     .values = values,
                     .ci = ci,
-                    .limits = std::move(*scanlineFit.limits),
-                    .dependencies = std::vector<uint32_t>()
+                    .limits = std::move(*scanlineFit.limits)
                 };
             }
         }
@@ -353,8 +351,7 @@ namespace accurate_ri {
                     .offset = heuristic.offsetCi,
                     .angle = heuristicAngleCi
                 },
-                .limits = std::move(heuristicLimits),
-                .dependencies = std::move(heuristic.dependencies)
+                .limits = std::move(heuristicLimits)
             };
         }
 
@@ -530,8 +527,7 @@ namespace accurate_ri {
 
         return HeuristicScanline{
             .offset = meanOffset,
-            .offsetCi = {meanOffset - maxOffsetDiff / 2, meanOffset + maxOffsetDiff / 2},
-            .dependencies = validScanlineIds
+            .offsetCi = {meanOffset - maxOffsetDiff / 2, meanOffset + maxOffsetDiff / 2}
         };
     }
 } // namespace accurate_ri

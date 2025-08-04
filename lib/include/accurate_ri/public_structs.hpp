@@ -38,7 +38,6 @@ namespace accurate_ri {
         OffsetAngle values;
         OffsetAngleMargin ci;
         ScanlineAngleBounds theoreticalAngleBounds;
-        std::vector<uint32_t> dependencies;
         double uncertainty;
         double houghVotes;
         uint64_t houghHash;

@@ -35,50 +35,15 @@ namespace accurate_ri {
 
             return false;
         }
-        
-        for (const auto &dependency: scanline.dependencies) {
-            reverseScanlinesDependencyMap.emplace(dependency, scanlineId);
-        }
 
         if (conflicts.conflictingScanlines.size() == 0) {
             return true;
         }
 
-        std::queue<uint32_t> scanlinesToRemoveQueue;
-        std::unordered_set<uint32_t> scanlinesToRemoveSet;
+        LOG_INFO("Removing scanlines: ", conflicts.conflictingScanlines);
 
-        for (const auto otherId: conflicts.conflictingScanlines) {
-            if (scanlinesToRemoveSet.insert(otherId).second) {
-                scanlinesToRemoveQueue.push(otherId);
-            }
-        }
-
-        while (!scanlinesToRemoveQueue.empty()) {
-            const uint32_t otherId = scanlinesToRemoveQueue.front();
-            scanlinesToRemoveQueue.pop();
-
-            auto dependencyRange = reverseScanlinesDependencyMap.equal_range(otherId);
-            for (auto it = dependencyRange.first; it != dependencyRange.second; ++it) {
-                if (scanlinesToRemoveSet.insert(it->second).second) {
-                    scanlinesToRemoveQueue.push(it->second);
-                }
-            }
-        }
-
-        LOG_INFO("Removing scanlines: ", scanlinesToRemoveSet);
-
-        for (const uint32_t otherId: scanlinesToRemoveSet) {
+        for (const uint32_t otherId: conflicts.conflictingScanlines) {
             std::optional<ScanlineInfo> removedScanline = scanlinePool.removeScanline(points, otherId);
-            reverseScanlinesDependencyMap.erase(otherId);
-
-            // Remove entries where scanlineId is in the value
-            for (auto it = reverseScanlinesDependencyMap.begin(); it != reverseScanlinesDependencyMap.end();) {
-                if (it->second == otherId) {
-                    it = reverseScanlinesDependencyMap.erase(it);
-                } else {
-                    ++it;
-                }
-            }
 
             // Restore previously rejected scanlines due to this one
             for (auto it = hashesToConflictsMap.begin(); it != hashesToConflictsMap.end();) {

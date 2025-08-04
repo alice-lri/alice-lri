@@ -39,15 +39,13 @@ namespace accurate_ri {
         nlohmann::json j;
         j["offset"] = hsl.offset;
         j["offsetCi"] = realMarginToJson(hsl.offsetCi);
-        j["dependencies"] = hsl.dependencies;
         return j;
     }
 
     HeuristicScanline heuristicScanlineFromJson(const nlohmann::json &j) {
         return HeuristicScanline{
             j.at("offset"),
-            realMarginFromJson(j.at("offsetCi")),
-            j.at("dependencies").get<std::vector<uint32_t>>()
+            realMarginFromJson(j.at("offsetCi"))
         };
     }
 
@@ -77,7 +75,6 @@ namespace accurate_ri {
         j["uncertainty"] = si.uncertainty;
         j["angle_ci"] = {si.ci.angle.lower, si.ci.angle.upper};
         j["offset_ci"] = {si.ci.offset.lower, si.ci.offset.upper};
-        j["dependencies"] = si.dependencies;
         j["last_scanline_assignment"] = false;
         return j;
     }
@@ -95,7 +92,6 @@ namespace accurate_ri {
                 .bottom = RealMargin{j.at("lower_min_theoretical_angle"), j.at("lower_max_theoretical_angle")},
                 .top = RealMargin{j.at("upper_min_theoretical_angle"), j.at("upper_max_theoretical_angle")}
             },
-            .dependencies = j.at("dependencies").get<std::vector<uint32_t>>(),
             .uncertainty = j.at("uncertainty").is_null()
                                ? std::numeric_limits<double>::infinity()
                                : j.at("uncertainty").get<double>(),

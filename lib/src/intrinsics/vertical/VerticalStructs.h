@@ -49,7 +49,6 @@ namespace accurate_ri {
         OffsetAngle values;
         OffsetAngleMargin ci;
         ScanlineLimits limits;
-        std::vector<uint32_t> dependencies;
     };
 
     struct ScanlineIntersectionInfo {
@@ -70,7 +69,6 @@ namespace accurate_ri {
     struct HeuristicScanline {
         double offset;
         RealMargin offsetCi;
-        std::vector<uint32_t> dependencies;
     };
 
     struct HashToConflictValue {

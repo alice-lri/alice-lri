@@ -88,11 +88,6 @@ namespace accurate_ri {
 
         for (auto &scanlineInfo: sortedScanlines) {
             scanlineInfo.id = oldIdsToNewIdsMap[scanlineInfo.id];
-            std::ranges::transform(
-                scanlineInfo.dependencies, scanlineInfo.dependencies.begin(), [&oldIdsToNewIdsMap](const uint32_t id) {
-                    return oldIdsToNewIdsMap[id];
-                }
-            );
         }
 
         std::ranges::transform(
