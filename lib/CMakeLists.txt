@@ -78,7 +78,6 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/utils/Utils.h
         src/intrinsics/vertical/helper/VerticalLogging.h
         src/utils/TestUtils.h
-        src/intrinsics/vertical/helper/VerticalLogging.cpp
         src/utils/json/JsonConverters.cpp
         src/utils/json/JsonConverters.h
         src/math/Stats.cpp

@@ -1,29 +1,41 @@
 #pragma once
 #include <memory>
-#include "hough/HoughTransform.h"
 #include "intrinsics/vertical/conflict/ScanlineConflictSolver.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "point/PointArray.h"
 
 namespace accurate_ri {
+    struct Candidate {
+        std::optional<HoughScanlineEstimation> hough = std::nullopt;
+        std::optional<EndReason> endReason = std::nullopt;
+        bool valid = false;
+    };
+
+    struct RefinedCandidate {
+        ScanlineEstimationResult scanline;
+    };
+
     class VerticalIntrinsicsEstimator {
     private:
+        // TODO maybe avoid this
         std::unique_ptr<VerticalScanlinePool> scanlinePool = nullptr;
         ScanlineConflictSolver conflictSolver;
 
     public:
-        void init(const PointArray &points);
-
-        void logHoughInfo(int64_t iteration, const HoughCell &houghMax);
-
-        void logScanlineAssignation(
-            const ScanlineInfo &scanline
-        );
-
         VerticalIntrinsicsResult estimate(const PointArray &points);
 
     private:
-        void initScanlinePool(const PointArray &points);
+        void init(const PointArray &points);
+
+        Candidate findCandidate(int64_t iteration) const;
+
+        std::optional<RefinedCandidate> refineCandidate(
+            int64_t iteration, const PointArray &points, const Candidate& candidate
+        ) const;
+
+        VerticalIntrinsicsResult extractResult(
+            int64_t iteration, const PointArray &points, EndReason endReason
+        ) const;
 
         static VerticalBounds computeErrorBounds(const PointArray &points, double offset);
 
@@ -34,7 +46,7 @@ namespace accurate_ri {
 
         std::optional<ScanlineEstimationResult> estimateScanline(
             const PointArray &points, const VerticalBounds &errorBounds, const ScanlineLimits &scanlineLimits
-        );
+        ) const;
 
         [[nodiscard]] ScanlineFitResult tryFitScanline(
             const PointArray &points, const VerticalBounds &errorBounds,

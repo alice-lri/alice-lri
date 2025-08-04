@@ -14,11 +14,47 @@ using EigenDataVariant = std::variant<Eigen::ArrayXd, Eigen::ArrayX<bool>>; // L
 
 // TODO remove this whole file after debugging
 namespace accurate_ri::VerticalLogging {
-#if LOG_LEVEL <= LOG_LEVEL_INFO
-    void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough);
-#else
-    void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough);
-#endif
+
+    inline void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough) {
+        LOG_INFO("==| Parameters |==");
+        LOG_INFO("Number of points: ", points.size());
+        LOG_INFO("Coord distortion compensation strategy: ", "upper_bound");
+        LOG_INFO("Hough model: ", "arcsin");
+        LOG_INFO("Voting strategy: ", "single");
+        LOG_INFO("Noise radius use square: ", "False");
+        LOG_INFO("Fit type: ", "linear");
+        LOG_INFO(
+            "Offset min: ", hough.getXMin(), ", Offset max: ", hough.getXMax(), ", Offset res: ", hough.getXStep()
+        );
+        LOG_INFO("Angle min: ", hough.getYMin(), ", Angle max: ", hough.getYMax(), ", Angle res: ", hough.getYStep());
+        LOG_INFO("Coords eps: ", points.getCoordsEps());
+        LOG_INFO("");
+        LOG_INFO("==| Execution |==");
+    }
+
+    inline void logHoughInfo(const int64_t iteration, const HoughCell &houghMax) {
+        const OffsetAngle &houghValues = houghMax.maxValues;
+
+        LOG_INFO("ITERATION ", iteration);
+        LOG_INFO(
+            "Offset: ", houghValues.offset, ", Angle: ", houghValues.angle, ", Votes: ", houghMax.votes,
+            ", Hash: ", houghMax.hash, ", Hough indices: [", houghMax.maxAngleIndex, "   ", houghMax.maxOffsetIndex,
+            "]"
+        );
+    }
+
+    inline void logScanlineAssignation(const ScanlineInfo& scanline) {
+        LOG_INFO("Scanline ", scanline.id, " assigned with ", scanline.pointsCount, " points");
+        LOG_INFO(
+            "Scanline parameters: Offset: ", scanline.values.offset, ", Angle: ", scanline.values.angle,
+            ", Votes: ", scanline.houghVotes, ", Count: ", scanline.pointsCount,
+            ", Lower min theoretical angle: ", scanline.theoreticalAngleBounds.bottom.lower,
+            ", Lower max theoretical angle: ", scanline.theoreticalAngleBounds.bottom.upper,
+            ", Upper min theoretical angle: ", scanline.theoreticalAngleBounds.top.lower,
+            ", Upper max theoretical angle: ", scanline.theoreticalAngleBounds.top.upper,
+            ", Uncertainty: ", scanline.uncertainty
+        );
+    }
 
     template<typename T>
     bool writeBinaryFile(const std::filesystem::path &filePath, const T &data, const std::string &dataName) {

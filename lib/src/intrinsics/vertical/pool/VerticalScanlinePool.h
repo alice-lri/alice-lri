@@ -68,7 +68,7 @@ namespace accurate_ri {
 
         [[nodiscard]] OffsetAngleMargin getHoughMargin();
 
-        [[nodiscard]] std::vector<ScanlineInfo> getUnsortedScanlinesCopy();
+        [[nodiscard]] std::vector<ScanlineInfo> getUnsortedScanlinesCopy() const;
 
         [[nodiscard]] double getXMin() const { return hough.getXMin(); }
 

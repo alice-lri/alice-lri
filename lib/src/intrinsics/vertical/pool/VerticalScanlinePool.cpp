@@ -109,9 +109,9 @@ namespace accurate_ri {
         };
     }
 
-    std::vector<ScanlineInfo> VerticalScanlinePool::getUnsortedScanlinesCopy() {
+    std::vector<ScanlineInfo> VerticalScanlinePool::getUnsortedScanlinesCopy() const {
         std::vector<ScanlineInfo> scanlines;
-        for (ScanlineInfo &scanlineInfo: scanlineInfoMap | std::views::values) {
+        for (const ScanlineInfo &scanlineInfo: scanlineInfoMap | std::views::values) {
             scanlines.emplace_back(scanlineInfo);
         }
 
