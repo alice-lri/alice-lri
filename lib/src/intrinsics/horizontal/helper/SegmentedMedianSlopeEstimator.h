@@ -36,10 +36,19 @@ namespace accurate_ri {
 
         [[nodiscard]] Stats::LRResult estimateSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
 
+        [[nodiscard]] double computeResolutionLoss(
+            const Eigen::ArrayXd &x, const Eigen::ArrayXd &thetas, uint32_t resolution
+        ) const;
+
     private:
         void processBlock(
             const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, int32_t startIdx, int32_t endIdx,
             SlopesWeights &slopeWeights
+        ) const;
+
+        void processBlockResolution(
+            const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, int32_t startIdx, int32_t endIdx, Eigen::ArrayXd &out,
+            int32_t &writeCount
         ) const;
     };
 } // accurate_ri

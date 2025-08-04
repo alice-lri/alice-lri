@@ -344,7 +344,13 @@ namespace accurate_ri {
         int32_t optimalResolution = -1;
 
         for (int32_t resolution = minResolution; resolution < Constant::MAX_RESOLUTION; ++resolution) {
-            const double loss = MadResolutionLoss::computeResolutionLoss(invRangesXy, thetas, resolution);
+            const double thetaStep = 2 * M_PI / resolution;
+
+            const SegmentedMedianSlopeEstimator slopeEstimator(
+                Constant::INV_RANGES_BREAK_THRESHOLD, thetaStep / 4, Constant::MAX_OFFSET, thetaStep
+            );
+
+            const double loss = slopeEstimator.computeResolutionLoss(invRangesXy, thetas, resolution);
 
             if (loss < minLoss) {
                 minLoss = loss;

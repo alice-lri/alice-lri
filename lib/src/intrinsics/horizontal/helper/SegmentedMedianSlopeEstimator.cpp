@@ -1,5 +1,6 @@
 #include "SegmentedMedianSlopeEstimator.h"
 
+#include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "math/Stats.h"
 #include "utils/Logger.h"
 #include "utils/Utils.h"
@@ -32,6 +33,34 @@ namespace accurate_ri {
         );
     }
 
+    double SegmentedMedianSlopeEstimator::computeResolutionLoss(
+        const Eigen::ArrayXd &x, const Eigen::ArrayXd &thetas, const uint32_t resolution
+    ) const {
+        const Eigen::ArrayXd y = HorizontalMath::computeDiffToIdeal(thetas, resolution, true);
+        const int32_t n = static_cast<int32_t>(x.size());
+        const Eigen::ArrayX<bool> continuityMask =
+               (Utils::diff(x).abs() < segmentThresholdX) && (Utils::diff(y).abs() < segmentThresholdY);
+
+        Eigen::ArrayXd dfBuffer(x.size());
+        int blockStart = 0;
+        int writeCount = 0;
+        for (int i = 1; i < n; ++i) {
+            if (!continuityMask[i - 1]) {
+                processBlockResolution(x, y, blockStart + 1, i, dfBuffer, writeCount);
+                blockStart = i;
+            }
+        }
+
+        processBlockResolution(x, y, blockStart + 1, n, dfBuffer, writeCount);
+
+        auto df = dfBuffer.head(writeCount);
+        const double median = Utils::medianInPlace(df);
+        const double mad = (df - median).abs().mean() * resolution;
+
+        return mad;
+    }
+
+
     void SegmentedMedianSlopeEstimator::processBlock(
         const Eigen::ArrayXd& x, const Eigen::ArrayXd& y, const int32_t startIdx, const int32_t endIdx, SlopesWeights& slopeWeights
     ) const {
@@ -53,6 +82,22 @@ namespace accurate_ri {
 
         slopeWeights.append(slope, intercept, *lrResult.mse, size);
         LOG_DEBUG("Using slope ", slope, " and intercept ", intercept, " for block [", startIdx, ", ", endIdx, ") with size ", size);
+    }
+
+    void SegmentedMedianSlopeEstimator::processBlockResolution(
+        const Eigen::ArrayXd& x, const Eigen::ArrayXd& y, const int32_t startIdx, const int32_t endIdx, Eigen::ArrayXd &out,
+        int32_t& writeCount
+    ) const {
+            const int size = endIdx - startIdx;
+            if (size <= 2) {
+                return;
+            }
+
+            const Eigen::Map<const Eigen::ArrayXd> fitX(x.data() + startIdx, size);
+            const Eigen::Map<const Eigen::ArrayXd> fitY(y.data() + startIdx, size);
+
+            out.segment(writeCount, size) = Utils::diff(fitY) / Utils::diff(fitX);
+            writeCount += size;
     }
 
     void SegmentedMedianSlopeEstimator::SlopesWeights::reserve(const uint64_t count) {
