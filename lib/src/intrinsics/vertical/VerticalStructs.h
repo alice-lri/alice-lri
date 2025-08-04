@@ -7,7 +7,6 @@
 #include "accurate_ri/public_structs.hpp"
 
 namespace accurate_ri {
-
     struct HoughCell {
         uint64_t maxOffsetIndex;
         uint64_t maxAngleIndex;
@@ -49,6 +48,21 @@ namespace accurate_ri {
         OffsetAngle values;
         OffsetAngleMargin ci;
         ScanlineLimits limits;
+
+        [[nodiscard]] ScanlineAngleBounds toAngleBounds(
+            const double minRange, const double maxRange
+        ) const {
+            return {
+                .bottom = {
+                    .lower = ci.angle.lower + asin(ci.offset.lower / maxRange),
+                    .upper = ci.angle.lower + asin(ci.offset.lower / minRange)
+                },
+                .top = {
+                    .lower = ci.angle.upper + asin(ci.offset.upper / maxRange),
+                    .upper = ci.angle.upper + asin(ci.offset.upper / minRange)
+                }
+            };
+        }
     };
 
     struct ScanlineIntersectionInfo {

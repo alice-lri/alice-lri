@@ -35,11 +35,11 @@ namespace accurate_ri {
         };
     }
 
-    void VerticalScanlinePool::assignScanline(ScanlineInfo&& scanline, const Eigen::ArrayXi& pointsIndices) {
+    void VerticalScanlinePool::assignScanline(const ScanlineInfo &scanline, const Eigen::ArrayXi& pointsIndices) {
         pointsScanlinesIds(pointsIndices) = scanline.id;
         unassignedPoints -= pointsIndices.size();
 
-        scanlineInfoMap.emplace(scanline.id, std::move(scanline));
+        scanlineInfoMap.emplace(scanline.id, scanline);
     }
 
     std::optional<ScanlineInfo> VerticalScanlinePool::removeScanline(const PointArray &points, const uint32_t scanlineId) {

@@ -8,6 +8,7 @@
 #include "utils/Utils.h"
 
 namespace accurate_ri {
+    // TODO merge bounds and scanlineid into single object.
     bool ScanlineConflictSolver::performScanlineConflictResolution(
         VerticalScanlinePool &scanlinePool, const PointArray &points, const ScanlineAngleBounds &angleBounds,
         const ScanlineEstimationResult &scanline, const uint32_t scanlineId, const HoughCell &houghMax

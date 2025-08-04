@@ -21,12 +21,40 @@ namespace accurate_ri {
         INITIAL = 0, CONVERGED = 1, CONFIRMED = 2,
     };
 
-    // TODO probably make dedicated structs for all the tuples
-    VerticalIntrinsicsResult VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
+    void VerticalIntrinsicsEstimator::init(const PointArray &points) {
         initScanlinePool(points);
         VerticalLogging::printHeaderDebugInfo(points, *scanlinePool);
 
         scanlinePool->performPrecomputations(points);
+    }
+
+    void VerticalIntrinsicsEstimator::logHoughInfo(const int64_t iteration, const HoughCell &houghMax) {
+        const OffsetAngle &houghValues = houghMax.maxValues;
+
+        LOG_INFO("ITERATION ", iteration);
+        LOG_INFO(
+            "Offset: ", houghValues.offset, ", Angle: ", houghValues.angle, ", Votes: ", houghMax.votes,
+            ", Hash: ", houghMax.hash, ", Hough indices: [", houghMax.maxAngleIndex, "   ", houghMax.maxOffsetIndex,
+            "]"
+        );
+    }
+
+    void VerticalIntrinsicsEstimator::logScanlineAssignation(const ScanlineInfo& scanline) {
+        LOG_INFO("Scanline ", scanline.id, " assigned with ", scanline.pointsCount, " points");
+        LOG_INFO(
+            "Scanline parameters: Offset: ", scanline.values.offset, ", Angle: ", scanline.values.angle,
+            ", Votes: ", scanline.houghVotes, ", Count: ", scanline.pointsCount,
+            ", Lower min theoretical angle: ", scanline.theoreticalAngleBounds.bottom.lower,
+            ", Lower max theoretical angle: ", scanline.theoreticalAngleBounds.bottom.upper,
+            ", Upper min theoretical angle: ", scanline.theoreticalAngleBounds.top.lower,
+            ", Upper max theoretical angle: ", scanline.theoreticalAngleBounds.top.upper,
+            ", Uncertainty: ", scanline.uncertainty
+        );
+    }
+
+    // TODO probably make dedicated structs for all the tuples
+    VerticalIntrinsicsResult VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
+        init(points);
 
         int64_t iteration = -1;
         uint32_t currentScanlineId = 0;
@@ -40,7 +68,7 @@ namespace accurate_ri {
                 break;
             }
 
-            const auto &houghEstimationOpt = scanlinePool->performHoughEstimation();
+            const std::optional<HoughScanlineEstimation> houghEstimationOpt = scanlinePool->performHoughEstimation();
 
             if (!houghEstimationOpt) {
                 endReason = EndReason::NO_MORE_PEAKS;
@@ -49,35 +77,29 @@ namespace accurate_ri {
             }
 
             const HoughCell &houghMax = houghEstimationOpt->cell;
-            const OffsetAngle &houghValues = houghMax.maxValues;
+            logHoughInfo(iteration, houghMax);
+
             const OffsetAngleMargin &margin = houghEstimationOpt->margin;
-
-            LOG_INFO("ITERATION ", iteration);
-            LOG_INFO(
-                "Offset: ", houghValues.offset, ", Angle: ", houghValues.angle, ", Votes: ", houghMax.votes,
-                ", Hash: ", houghMax.hash, ", Hough indices: [", houghMax.maxAngleIndex, "   ", houghMax.maxOffsetIndex,
-                "]"
-            );
-
-            VerticalBounds errorBounds = computeErrorBounds(points, houghValues.offset);
+            VerticalBounds errorBounds = computeErrorBounds(points, houghMax.maxValues.offset);
             ScanlineLimits scanlineLimits = computeScanlineLimits(
-                points, errorBounds.final, houghValues, margin, 0
+                points, errorBounds.final, houghMax.maxValues, margin, 0
             );
 
             LOG_INFO(
                 "Minimum limit width (Hough): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff()
             );
 
+            // TODO remove
             const std::vector<ScanlineInfo> debugScanlines = scanlinePool->getUnsortedScanlinesCopy();
 
             VerticalLogging::plotDebugInfo(
-                points, debugScanlines, scanlineLimits, scanlinePool->getPointsScanlinesIds(), iteration, "hough_", houghValues, 0
+                points, debugScanlines, scanlineLimits, scanlinePool->getPointsScanlinesIds(), iteration, "hough_",
+                houghMax.maxValues, 0
             );
 
-            // TODO houghvalues and scanline limits should not be used beyond this point, refactor to avoid
-
-
-            const auto &estimationResultOpt = estimateScanline(points, errorBounds, scanlineLimits);
+            const std::optional<ScanlineEstimationResult> estimationResultOpt = estimateScanline(
+                points, errorBounds, scanlineLimits
+            );
 
             if (!estimationResultOpt) {
                 LOG_INFO("Fit failed: True, Points in scanline: ", scanlineLimits.indices.size());
@@ -95,24 +117,7 @@ namespace accurate_ri {
                 scanlineEstimation.uncertainty
             );
 
-            ScanlineAngleBounds angleBounds = {
-                .bottom = {
-                    .lower = scanlineEstimation.ci.angle.lower + asin(
-                                 scanlineEstimation.ci.offset.lower / points.getMaxRange()
-                             ),
-                    .upper = scanlineEstimation.ci.angle.lower + asin(
-                                 scanlineEstimation.ci.offset.lower / points.getMinRange()
-                             )
-                },
-                .top = {
-                    .lower = scanlineEstimation.ci.angle.upper + asin(
-                                 scanlineEstimation.ci.offset.upper / points.getMaxRange()
-                             ),
-                    .upper = scanlineEstimation.ci.angle.upper + asin(
-                                 scanlineEstimation.ci.offset.upper / points.getMinRange()
-                             )
-                }
-            };
+            ScanlineAngleBounds angleBounds = scanlineEstimation.toAngleBounds(points.getMinRange(), points.getMaxRange());
 
             if constexpr (BuildOptions::USE_SCANLINE_CONFLICT_SOLVER) {
                 bool keepScanline = conflictSolver.performScanlineConflictResolution(
@@ -126,7 +131,7 @@ namespace accurate_ri {
 
             scanlinePool->removeVotes(points, scanlineEstimation.limits.indices);
 
-            ScanlineInfo scanlineInfo = ScanlineInfo{
+            const ScanlineInfo scanlineInfo = ScanlineInfo{
                 .id = currentScanlineId,
                 .pointsCount = static_cast<uint64_t>(scanlineEstimation.limits.indices.size()),
                 .values = maxValues,
@@ -137,21 +142,9 @@ namespace accurate_ri {
                 .houghHash = houghMax.hash
             };
 
-            scanlinePool->assignScanline(std::move(scanlineInfo), scanlineEstimation.limits.indices);
+            scanlinePool->assignScanline(scanlineInfo, scanlineEstimation.limits.indices);
 
-            LOG_INFO(
-                "Scanline ", currentScanlineId, " assigned with ", scanlineEstimation.limits.indices.size(), " points"
-            );
-            LOG_INFO(
-                "Scanline parameters: Offset: ", maxValues.offset, ", Angle: ", maxValues.angle, ", Votes: ",
-                houghMax.votes,
-                ", Count: ", scanlineEstimation.limits.indices.size(),
-                ", Lower min theoretical angle: ", angleBounds.bottom.lower, ", Lower max theoretical angle: ",
-                angleBounds.bottom.upper,
-                ", Upper min theoretical angle: ", angleBounds.top.lower, ", Upper max theoretical angle: ",
-                angleBounds.top.upper,
-                ", Uncertainty: ", scanlineEstimation.uncertainty
-            );
+            logScanlineAssignation(scanlineInfo);
             LOG_INFO("Number of unassigned points: ", scanlinePool->getUnassignedPoints());
             LOG_INFO("");
 
@@ -160,7 +153,6 @@ namespace accurate_ri {
 
         int64_t unassignedPoints = scanlinePool->getUnassignedPoints();
 
-        // TODO last resort assignment is disabled, maybe implement?
         if (scanlinePool->anyUnassigned()) {
             LOG_WARN("Warning: Found ", unassignedPoints, " spurious points");
         }

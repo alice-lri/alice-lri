@@ -72,7 +72,7 @@ namespace accurate_ri {
         FullScanlines fullScanlines;
     };
 
-    struct ACCURATE_RI_API IntrinsicsResult {
+    struct ACCURATE_RI_API IntrinsicsResult { // TODO refactor this (should be per scanline)
         VerticalIntrinsicsResult vertical;
         HorizontalIntrinsicsResult horizontal;
     };

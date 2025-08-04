@@ -12,6 +12,14 @@ namespace accurate_ri {
         ScanlineConflictSolver conflictSolver;
 
     public:
+        void init(const PointArray &points);
+
+        void logHoughInfo(int64_t iteration, const HoughCell &houghMax);
+
+        void logScanlineAssignation(
+            const ScanlineInfo &scanline
+        );
+
         VerticalIntrinsicsResult estimate(const PointArray &points);
 
     private:

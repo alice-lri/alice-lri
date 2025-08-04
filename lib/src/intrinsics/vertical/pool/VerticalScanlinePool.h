@@ -19,7 +19,7 @@ namespace accurate_ri {
 
         std::optional<HoughScanlineEstimation> performHoughEstimation();
 
-        void assignScanline(ScanlineInfo&& scanline, const Eigen::ArrayXi& pointsIndices);
+        void assignScanline(const ScanlineInfo &scanline, const Eigen::ArrayXi &pointsIndices);
 
         std::optional<ScanlineInfo> removeScanline(const PointArray &points, uint32_t scanlineId);
 
