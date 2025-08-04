@@ -38,5 +38,7 @@ namespace accurate_ri::Stats {
 
     double mean(const std::vector<double> &values);
 
+    double weightedMean(const Eigen::ArrayXd& values, std::span<const int32_t> weights);
+
     double weightedMedian(std::span<const double> values, std::span<const int32_t> weights);
 }

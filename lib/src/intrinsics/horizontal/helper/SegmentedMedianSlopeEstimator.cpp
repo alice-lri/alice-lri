@@ -37,27 +37,30 @@ namespace accurate_ri {
         const Eigen::ArrayXd &x, const Eigen::ArrayXd &thetas, const uint32_t resolution
     ) const {
         const Eigen::ArrayXd y = HorizontalMath::computeDiffToIdeal(thetas, resolution, true);
+        SlopesWeights slopeWeights;
         const int32_t n = static_cast<int32_t>(x.size());
         const Eigen::ArrayX<bool> continuityMask =
                (Utils::diff(x).abs() < segmentThresholdX) && (Utils::diff(y).abs() < segmentThresholdY);
 
-        Eigen::ArrayXd dfBuffer(x.size());
         int blockStart = 0;
-        int writeCount = 0;
         for (int i = 1; i < n; ++i) {
             if (!continuityMask[i - 1]) {
-                processBlockResolution(x, y, blockStart + 1, i, dfBuffer, writeCount);
+                processBlock(x, y, blockStart + 1, i, slopeWeights);
                 blockStart = i;
             }
         }
 
-        processBlockResolution(x, y, blockStart + 1, n, dfBuffer, writeCount);
+        processBlock(x, y, blockStart + 1, n, slopeWeights);
 
-        auto df = dfBuffer.head(writeCount);
-        const double median = Utils::medianInPlace(df);
-        const double mad = (df - median).abs().mean() * resolution;
+        if (slopeWeights.count() == 0) {
+            return std::numeric_limits<double>::infinity();
+        }
 
-        return mad;
+        const double median = Stats::weightedMedian(slopeWeights.slopes, slopeWeights.weights);
+        const Eigen::Map<const Eigen::ArrayXd> slopes(slopeWeights.slopes.data(), slopeWeights.slopes.size());
+        const double loss = Stats::weightedMean((slopes - median).abs(), slopeWeights.weights);
+
+        return loss;
     }
 
 

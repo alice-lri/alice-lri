@@ -125,6 +125,27 @@ namespace accurate_ri::Stats {
         return std::accumulate(values.begin(), values.end(), 0.0) / static_cast<double>(values.size());
     }
 
+    double weightedMean(const Eigen::ArrayXd& values, const std::span<const int32_t> weights) {
+        const std::size_t n = values.size();
+        if (n == 0 || weights.size() != n) {
+            throw std::invalid_argument("Mismatched sizes or empty input in computeWeightedMeanSpan");
+        }
+
+        double weightedSum = 0.0;
+        int32_t totalWeight = 0;
+
+        for (std::size_t i = 0; i < n; ++i) {
+            weightedSum += values[i] * weights[i];
+            totalWeight += weights[i];
+        }
+
+        if (totalWeight == 0) {
+            throw std::invalid_argument("Total weight cannot be zero in computeWeightedMeanSpan");
+        }
+
+        return weightedSum / totalWeight;
+    }
+
     double weightedMedian(const std::span<const double> values, const std::span<const int32_t> weights) {
         const std::size_t n = values.size();
         if (n == 0 || weights.size() != n) {
