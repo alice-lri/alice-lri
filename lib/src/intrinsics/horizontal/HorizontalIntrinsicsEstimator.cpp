@@ -73,7 +73,7 @@ namespace accurate_ri {
             }
         }
 
-        int32_t bestResolution = madOptimalResolution(scanlineArray, scanlineIdx);
+        int32_t bestResolution = 0;
         const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResolution);
 
         if (!optimizeResult) {
@@ -107,15 +107,15 @@ namespace accurate_ri {
     ) {
         const int32_t scanlineSize = scanlineArray.getSize(scanlineIdx);
         std::vector<int32_t> resolutions;
-        if (initialResolution != 0) {
-            resolutions = generateCandidateResolutions(initialResolution, scanlineSize);
-        } else {
-            resolutions = generateCandidateResolutionsMad(scanlineArray, scanlineIdx);
-        }
+        // if (initialResolution != 0) {
+        //     resolutions = generateCandidateResolutions(initialResolution, scanlineSize);
+        // } else {
+        //     resolutions = generateCandidateResolutionsMad(scanlineArray, scanlineIdx);
+        // }
 
         std::optional<ResolutionOffsetLoss> bestCandidate = std::nullopt;
 
-        for (const int32_t resolution: resolutions) {
+        for (int32_t resolution = scanlineSize; resolution <= Constant::MAX_RESOLUTION; ++resolution) {
             const ResolutionOffsetLoss candidate = optimizeJointCandidateResolution(
                 scanlineArray, scanlineIdx, resolution
             );
