@@ -30,7 +30,7 @@ namespace accurate_ri::Stats {
 
     WLSResult wlsBoundsFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &bounds);
 
-    LRResult simpleLinearRegression(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, bool computeMse = false);
+    LRResult linearRegression(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, bool computeMse = false);
 
     int64_t intMode(const std::vector<int64_t> &values);
 

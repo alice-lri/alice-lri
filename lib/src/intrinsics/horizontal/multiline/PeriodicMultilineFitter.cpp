@@ -59,7 +59,7 @@ namespace accurate_ri {
 
         // TODO now here we could use the wls fit method and the uncertainty maybe
         // TODO maybe we are over-complicating, and we can infer this straight from the modulo residuals
-        const Stats::LRResult fitResult = Stats::simpleLinearRegression(x, shiftedY, true);
+        const Stats::LRResult fitResult = Stats::linearRegression(x, shiftedY, true);
         model = fitResult;
         estimator.setModel(*model);
 

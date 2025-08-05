@@ -25,7 +25,7 @@ protected:
 
 TEST_F(StatsTest, SimpleLinearRegression) {
     // Test simple linear regression on perfect linear data
-    Stats::LRResult result = Stats::simpleLinearRegression(x, y);
+    Stats::LRResult result = Stats::linearRegression(x, y);
     
     // For y = 2x, slope should be 2 and intercept should be 0
     EXPECT_NEAR(result.slope, 2.0, 1e-10);

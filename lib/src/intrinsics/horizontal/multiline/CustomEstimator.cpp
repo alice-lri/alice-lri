@@ -4,7 +4,7 @@
 
 namespace accurate_ri {
     const Stats::LRResult &CustomEstimator::fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) {
-        lrResult = Stats::simpleLinearRegression(x, y);
+        lrResult = Stats::linearRegression(x, y);
         return lrResult;
     }
 

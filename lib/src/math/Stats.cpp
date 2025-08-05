@@ -67,7 +67,7 @@ namespace accurate_ri::Stats {
         };
     }
 
-    LRResult simpleLinearRegression(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const bool computeMse) {
+    LRResult linearRegression(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const bool computeMse) {
         const double n = static_cast<double>(x.size());
         const double Sx = x.sum();
         const double Sy = y.sum();

@@ -111,6 +111,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/vertical/estimation/VerticalScanlineLimits.h
         src/intrinsics/vertical/estimation/VerticalScanlineEstimation.cpp
         src/intrinsics/vertical/estimation/VerticalScanlineEstimation.h
+        src/intrinsics/horizontal/newmultiline/PeriodicFit.cpp
+        src/intrinsics/horizontal/newmultiline/PeriodicFit.h
 )
 
 set(_accurate_ri_private_include_dirs

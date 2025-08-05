@@ -12,6 +12,7 @@
 #include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.h"
 #include "intrinsics/horizontal/multiline/PeriodicMultilineFitter.h"
+#include "intrinsics/horizontal/newmultiline/PeriodicFit.h"
 #include "intrinsics/horizontal/resolution/MadResolutionLoss.h"
 #include "math/Stats.h"
 #include "plotty/matplotlibcpp.hpp"
@@ -200,7 +201,12 @@ namespace accurate_ri {
 
         const double thetaStep = 2 * M_PI / resolution;
         const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
-        const auto diffToIdeal = HorizontalMath::computeDiffToIdeal(
+
+        // TODO call twice first reconstruct and then unreconstructed
+        const Eigen::ArrayXd diffToIdeal = HorizontalMath::computeDiffToIdeal(
+            scanlineArray.getThetas(scanlineIdx), resolution, false
+        );
+        const Eigen::ArrayXd diffToIdealReconstructed = HorizontalMath::computeDiffToIdeal(
             scanlineArray.getThetas(scanlineIdx), resolution, true
         );
 
@@ -208,18 +214,16 @@ namespace accurate_ri {
             Constant::INV_RANGES_BREAK_THRESHOLD, thetaStep / 4, Constant::MAX_OFFSET, thetaStep
         );
 
-        const Stats::LRResult lrGuess = slopeEstimator.estimateSlope(invRangesXy, diffToIdeal);
+        const Stats::LRResult lrGuess = slopeEstimator.estimateSlope(invRangesXy, diffToIdealReconstructed);
 
         LOG_DEBUG("Slope guess: ", lrGuess.slope, ", Intercept guess: ", lrGuess.intercept);
-
-        PeriodicMultilineFitter fitter(resolution);
-        const PeriodicMultilineFitResult fitResult = fitter.fit(scanlineArray, scanlineIdx, lrGuess);
+        const Stats::LRResult fitResult = PeriodicFit::fit(invRangesXy, diffToIdeal, thetaStep, lrGuess.slope);
 
         return ResolutionOffsetLoss(
             resolution,
-            fitResult.model.slope,
-            Utils::positiveFmod(fitResult.model.intercept, thetaStep),
-            fitResult.loss * resolution
+            fitResult.slope,
+            Utils::positiveFmod(fitResult.intercept, thetaStep),
+            *fitResult.mse * resolution
         );
     }
 

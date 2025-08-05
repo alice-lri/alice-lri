@@ -75,7 +75,7 @@ namespace accurate_ri {
         const Eigen::Map<const Eigen::ArrayXd> fitX(x.data() + startIdx, size);
         const Eigen::Map<const Eigen::ArrayXd> fitY(y.data() + startIdx, size);
 
-        const auto lrResult = Stats::simpleLinearRegression(fitX, fitY, true);
+        const auto lrResult = Stats::linearRegression(fitX, fitY, true);
         const double slope = lrResult.slope;
         const double intercept = Utils::positiveFmod(lrResult.intercept, interceptMod);
 
