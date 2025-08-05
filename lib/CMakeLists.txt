@@ -107,6 +107,10 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.cpp
         src/intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.h
         src/public_structs.cpp
+        src/intrinsics/vertical/estimation/VerticalScanlineLimits.cpp
+        src/intrinsics/vertical/estimation/VerticalScanlineLimits.h
+        src/intrinsics/vertical/estimation/VerticalScanlineEstimation.cpp
+        src/intrinsics/vertical/estimation/VerticalScanlineEstimation.h
 )
 
 set(_accurate_ri_private_include_dirs

@@ -18,6 +18,7 @@ namespace accurate_ri {
     class VerticalIntrinsicsEstimator {
     private:
         // TODO maybe avoid this
+        // TODO consider removing these and making it stateless
         std::unique_ptr<VerticalScanlinePool> scanlinePool = nullptr;
         ScanlineConflictSolver conflictSolver;
 
@@ -36,23 +37,5 @@ namespace accurate_ri {
         VerticalIntrinsicsResult extractResult(
             int64_t iteration, const PointArray &points, EndReason endReason
         ) const;
-
-        static VerticalBounds computeErrorBounds(const PointArray &points, double offset);
-
-        [[nodiscard]] ScanlineLimits computeScanlineLimits(
-            const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
-            const OffsetAngleMargin &margin, double invRangesShift
-        ) const;
-
-        std::optional<ScanlineEstimationResult> estimateScanline(
-            const PointArray &points, const VerticalBounds &errorBounds, const ScanlineLimits &scanlineLimits
-        ) const;
-
-        [[nodiscard]] ScanlineFitResult tryFitScanline(
-            const PointArray &points, const VerticalBounds &errorBounds,
-            const ScanlineLimits &scanlineLimits
-        ) const;
-
-        HeuristicScanline computeHeuristicScanline(double invRangesMean, double phisMean) const;
     };
 } // namespace accurate_ri

@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <Eigen/Core>
+#include <type_traits>
+#include <utility>
 
 namespace accurate_ri::Utils {
     template<typename T>
@@ -63,5 +65,17 @@ namespace accurate_ri::Utils {
         }
 
         return indices;
+    }
+
+    // TODO maybe check this and use everywhere
+    template<typename T>
+    decltype(auto) force_move(T&& t) {
+        using RawT = std::remove_reference_t<T>;
+
+        static_assert(!std::is_const_v<RawT>, "Cannot force-move from const-qualified type");
+        static_assert(std::is_move_constructible_v<RawT>, "Type must be move-constructible");
+        static_assert(std::is_move_assignable_v<RawT>, "Type must be move-assignable");
+
+        return std::move(t);
     }
 }

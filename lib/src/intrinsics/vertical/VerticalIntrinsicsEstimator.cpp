@@ -10,17 +10,12 @@
 #include "utils/TestUtils.h"
 #include "utils/Timer.h"
 #include <nlohmann/json.hpp>
-
 #include "Constants.h"
 #include "BuildOptions.h"
-#include "math/Stats.h"
+#include "intrinsics/vertical/estimation/VerticalScanlineEstimation.h"
+#include "intrinsics/vertical/estimation/VerticalScanlineLimits.h"
 
 namespace accurate_ri {
-
-    enum class FitConvergenceState {
-        INITIAL = 0, CONVERGED = 1, CONFIRMED = 2,
-    };
-
     void VerticalIntrinsicsEstimator::init(const PointArray &points) {
         double offsetMax = std::min(std::ranges::min(points.getRanges()), Constant::MAX_OFFSET) - Constant::OFFSET_STEP;
         double offsetMin = -offsetMax;
@@ -36,6 +31,7 @@ namespace accurate_ri {
         scanlinePool->performPrecomputations(points);
     }
 
+    // TODO perhaps further split this function
     VerticalIntrinsicsResult VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
         init(points);
 
@@ -63,7 +59,8 @@ namespace accurate_ri {
 
             if constexpr (BuildOptions::USE_SCANLINE_CONFLICT_SOLVER) {
                 bool keepScanline = conflictSolver.performScanlineConflictResolution(
-                    *scanlinePool, points, angleBounds, refinedCandidate->scanline, currentScanlineId, candidate.hough->cell
+                    *scanlinePool, points, angleBounds, refinedCandidate->scanline, currentScanlineId,
+                    candidate.hough->cell
                 );
 
                 if (!keepScanline) {
@@ -121,13 +118,15 @@ namespace accurate_ri {
     }
 
     std::optional<RefinedCandidate> VerticalIntrinsicsEstimator::refineCandidate(
-        const int64_t iteration, const PointArray &points, const Candidate& candidate
+        const int64_t iteration, const PointArray &points, const Candidate &candidate
     ) const {
         const OffsetAngleMargin &margin = candidate.hough->margin;
         const HoughCell &houghMax = candidate.hough->cell;
 
-        VerticalBounds errorBounds = computeErrorBounds(points, houghMax.maxValues.offset);
-        ScanlineLimits scanlineLimits = computeScanlineLimits(points, errorBounds.final, houghMax.maxValues, margin, 0);
+        VerticalBounds errorBounds = VerticalScanlineLimits::computeErrorBounds(points, houghMax.maxValues.offset);
+        ScanlineLimits scanlineLimits = VerticalScanlineLimits::computeScanlineLimits(
+            points, errorBounds.final, houghMax.maxValues, margin, 0
+        );
 
         LOG_INFO("Minimum limit width (Hough): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff());
 
@@ -139,8 +138,8 @@ namespace accurate_ri {
             houghMax.maxValues, 0
         );
 
-        const std::optional<ScanlineEstimationResult> estimationResultOpt = estimateScanline(
-            points, errorBounds, scanlineLimits
+        std::optional<ScanlineEstimationResult> estimationResultOpt = VerticalScanlineEstimation::estimateScanline(
+            points, *scanlinePool, errorBounds, scanlineLimits
         );
 
         if (!estimationResultOpt) {
@@ -151,7 +150,7 @@ namespace accurate_ri {
         }
 
         RefinedCandidate result;
-        result.scanline = std::move(*estimationResultOpt);
+        result.scanline = Utils::force_move(*estimationResultOpt);
 
         VerticalLogging::plotDebugInfo(
             points, debugScanlines, result.scanline.limits, scanlinePool->getPointsScanlinesIds(), iteration, "fit_",
@@ -175,350 +174,13 @@ namespace accurate_ri {
         LOG_INFO("Number of scanlines: ", fullScanlines.scanlines.size());
         LOG_INFO("Number of unassigned points: ", unassignedPoints);
 
-        return VerticalIntrinsicsResult {
+        return VerticalIntrinsicsResult{
             .iterations = static_cast<uint32_t>(iteration),
             .scanlinesCount = static_cast<uint32_t>(fullScanlines.scanlines.size()),
             .unassignedPoints = static_cast<uint32_t>(unassignedPoints),
             .pointsCount = static_cast<uint32_t>(points.size()),
             .endReason = endReason,
             .fullScanlines = std::move(fullScanlines)
-        };
-    }
-
-    // TODO precompute on PointArray
-    VerticalBounds VerticalIntrinsicsEstimator::computeErrorBounds(
-        const PointArray &points, const double offset
-    ) {
-        PROFILE_SCOPE("VerticalIntrinsicsEstimator::computeErrorBounds");
-        double coordsEps = points.getCoordsEps();
-        const auto &zs = points.getZ();
-        const auto &rangesXy = points.getRangesXy();
-        const auto &ranges = points.getRanges();
-
-        const auto &rangeXySquared = rangesXy.square();
-        const auto &rangeSquared = ranges.square();
-
-        const double rangesBound = coordsEps * std::sqrt(3);
-        const double rangesXyBound = coordsEps * std::sqrt(2);
-
-        VerticalBounds result;
-
-        const auto phisBoundNumerator = rangesXyBound * zs.cwiseAbs() + coordsEps * rangesXy;
-        const auto phisBoundDenominator = rangeXySquared - rangesXyBound * rangesXy;
-        const auto correctionBoundNumerator = std::abs(offset) * rangesBound;
-        const auto correctionBoundDenominator = rangeSquared - rangesBound * ranges;
-
-        result.phis = phisBoundNumerator / phisBoundDenominator;
-        result.correction = correctionBoundNumerator / correctionBoundDenominator;
-        result.final = result.phis + result.correction;
-
-        return result;
-    }
-
-    // TODO this could be a generic line thing. Take a look at conceptually section in scanlimie limits notebook
-    ScanlineLimits VerticalIntrinsicsEstimator::computeScanlineLimits(
-        const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
-        const OffsetAngleMargin &margin, const double invRangesShift
-    ) const {
-        PROFILE_SCOPE("VerticalIntrinsicsEstimator::computeScanlineLimits");
-        const auto &inv = points.getInvRanges();
-        const auto &phi = points.getPhis();
-        const double offset = scanlineAttributes.offset;
-        const double angle = scanlineAttributes.angle;
-
-        const auto sinUpper = ((offset + margin.offset.upper) * inv.array()).min(1).max(-1).asin();
-        const auto sinLower = ((offset - margin.offset.lower) * inv.array()).min(1).max(-1).asin();
-
-        Eigen::ArrayXd upper = angle + sinUpper + margin.angle.upper + errorBounds.array();
-        Eigen::ArrayXd lower = angle + sinLower - margin.angle.lower - errorBounds.array();
-        Eigen::ArrayX<bool> mask = (lower <= phi) && (phi <= upper);
-        Eigen::ArrayXi idx(mask.count());
-
-        int k = 0;
-        for (Eigen::Index i = 0; i < mask.size(); ++i) {
-            if (mask[i]) {
-                idx[k++] = static_cast<int>(i);
-            }
-        }
-
-        return { std::move(idx), std::move(mask), std::move(lower), std::move(upper) };
-    }
-
-    // TODO split this function
-    std::optional<ScanlineEstimationResult> VerticalIntrinsicsEstimator::estimateScanline(
-        const PointArray &points, const VerticalBounds &errorBounds, const ScanlineLimits &scanlineLimits
-    ) const {
-        bool requiresHeuristicFitting = true;
-
-        if (scanlineLimits.indices.size() == 0) {
-            return std::nullopt;
-        }
-
-        if (scanlineLimits.indices.size() > 2) {
-            ScanlineFitResult scanlineFit = tryFitScanline(points, errorBounds, scanlineLimits);
-            requiresHeuristicFitting = scanlineFit.ciTooWide;
-
-            if (scanlineFit.success && !requiresHeuristicFitting) {
-                const OffsetAngle values = {
-                    .offset = scanlineFit.fit->slope,
-                    .angle = scanlineFit.fit->intercept
-                };
-
-                OffsetAngleMargin ci = {
-                    .offset = {.lower = scanlineFit.fit->slopeCi[0], .upper = scanlineFit.fit->slopeCi[1]},
-                    .angle = {.lower = scanlineFit.fit->interceptCi[0], .upper = scanlineFit.fit->interceptCi[1]}
-                };
-
-                ci.offset.clampBoth(-points.getMinRange(), points.getMinRange());
-
-                return ScanlineEstimationResult{
-                    .heuristic = false,
-                    .uncertainty = scanlineFit.fit->aic,
-                    .values = values,
-                    .ci = ci,
-                    .limits = std::move(*scanlineFit.limits)
-                };
-            }
-        }
-
-        if constexpr (!BuildOptions::USE_VERTICAL_HEURISTICS) {
-            return std::nullopt;
-        }
-
-        if (requiresHeuristicFitting) {
-            LOG_WARN("Heuristic fitting");
-            const Eigen::ArrayXd &invRanges = points.getInvRanges()(scanlineLimits.indices);
-            const Eigen::ArrayXd &phis = points.getPhis()(scanlineLimits.indices);
-
-            const double invRangesMean = invRanges.mean();
-            const double phisMean = phis.mean();
-
-            HeuristicScanline heuristic = computeHeuristicScanline(invRangesMean, phisMean);
-            heuristic.offsetCi.clampBoth(-points.getMinRange(), points.getMinRange());
-
-            const double heuristicAngle = (phis - (heuristic.offset * invRanges).asin()).mean();
-
-            const RealMargin &angleMarginTmp = {
-                .lower = (phis - (heuristic.offsetCi.lower * invRanges).asin()).mean(),
-                .upper = (phis - (heuristic.offsetCi.upper * invRanges).asin()).mean()
-            };
-
-            const RealMargin &heuristicAngleCi = {
-                .lower = std::min(angleMarginTmp.lower, angleMarginTmp.upper),
-                .upper = std::max(angleMarginTmp.lower, angleMarginTmp.upper)
-            };
-
-            LOG_INFO(
-                "Offset confidence interval: ", heuristic.offsetCi, ", Angle confidence interval: ",
-                heuristicAngleCi, ", Offset: ", heuristic.offset, ", Angle: ", heuristicAngle
-            );
-
-            double offsetMargin = heuristic.offsetCi.diff() / 2;
-            double angleMargin = heuristicAngleCi.diff() / 2;
-            const OffsetAngleMargin houghMargin = scanlinePool->getHoughMargin();
-
-            // Numerical stability
-            offsetMargin = std::max(offsetMargin, houghMargin.offset.upper);
-            angleMargin = std::max(angleMargin, houghMargin.angle.upper);
-
-            const VerticalBounds heuristicBounds = computeErrorBounds(points, heuristic.offset);
-            OffsetAngle heuristicOffsetAngle = {heuristic.offset, heuristicAngle};
-
-            const OffsetAngleMargin heuristicMargin = {offsetMargin, offsetMargin, angleMargin, angleMargin};
-            ScanlineLimits heuristicLimits = computeScanlineLimits(
-                points, heuristicBounds.final, heuristicOffsetAngle, heuristicMargin, invRangesMean
-            );
-            LOG_INFO("Offset: ", heuristicOffsetAngle.offset, ", Angle: ", heuristicOffsetAngle.angle);
-
-            if (heuristicLimits.indices.size() == 0) {
-                return std::nullopt;
-            }
-
-            return ScanlineEstimationResult{
-                .heuristic = true,
-                .uncertainty = std::numeric_limits<double>::infinity(),
-                .values = heuristicOffsetAngle,
-                .ci = OffsetAngleMargin {
-                    .offset = heuristic.offsetCi,
-                    .angle = heuristicAngleCi
-                },
-                .limits = std::move(heuristicLimits)
-            };
-        }
-
-        return std::nullopt;
-    }
-
-    ScanlineFitResult VerticalIntrinsicsEstimator::tryFitScanline(
-        const PointArray &points, const VerticalBounds &errorBounds,
-        const ScanlineLimits &scanlineLimits
-    ) const {
-        PROFILE_SCOPE("VerticalIntrinsicsEstimator::tryFitScanline");
-        const Eigen::ArrayXd &ranges = points.getRanges();
-        VerticalBounds currentErrorBounds = errorBounds;
-        ScanlineLimits currentScanlineLimits = scanlineLimits;
-
-        std::optional<Stats::WLSResult> fitResult = std::nullopt;
-        std::optional<ScanlineLimits> limits = std::nullopt;
-        FitConvergenceState state = FitConvergenceState::INITIAL;
-        int8_t ciTooWideState = 0;
-        bool ciTooWide = false;
-
-        for (uint64_t attempt = 0; attempt < Constant::VERTICAL_MAX_FIT_ATTEMPTS; ++attempt) {
-            const Eigen::ArrayXi &currentScanlineIndices = currentScanlineLimits.indices;
-
-            if (currentScanlineIndices.size() <= 2) {
-                break;
-            }
-
-            // TODO maybe avoid using pointers here through move semantics
-            Eigen::ArrayX<bool> const *pointsToFitMask = &currentScanlineLimits.mask;
-            Eigen::ArrayX<bool> newPointsToFitMask;
-
-            if (state == FitConvergenceState::INITIAL) {
-                newPointsToFitMask = *pointsToFitMask && (ranges >= 2); // TODO tricky
-                pointsToFitMask = &newPointsToFitMask;
-
-                if (pointsToFitMask->count() <= 2) {
-                    pointsToFitMask = &currentScanlineLimits.mask;
-                }
-            }
-
-            std::vector<int32_t> pointsToFitIndicesVector;
-            for (int32_t i = 0; i < pointsToFitMask->size(); ++i) {
-                if ((*pointsToFitMask)[i]) {
-                    pointsToFitIndicesVector.emplace_back(i);
-                }
-            }
-
-            const Eigen::ArrayXi &pointsToFitIndices = Eigen::ArrayXi::Map(
-                pointsToFitIndicesVector.data(), pointsToFitIndicesVector.size()
-            );
-            const Eigen::ArrayXd &invRanges = points.getInvRanges();
-            const Eigen::ArrayXd &phis = points.getPhis();
-
-            // TODO check if we can avoid these copies by lazy evaluating inside the performFit function
-            const Eigen::ArrayXd &invRangesFiltered = invRanges(pointsToFitIndices);
-            const Eigen::ArrayXd &phisFiltered = phis(pointsToFitIndices);
-            const Eigen::ArrayXd &boundsFiltered = currentErrorBounds.final(pointsToFitIndices);
-
-            fitResult = Stats::wlsBoundsFit(invRangesFiltered, phisFiltered, boundsFiltered);
-            double offsetCiWidth = fitResult->slopeCi(1) - fitResult->slopeCi(0);
-            int32_t pointFitCount = pointsToFitIndices.size();
-
-            LOG_INFO(
-                "Model fit iteration; Offset: ", fitResult->slope, ", Angle: ", fitResult->intercept,
-                " using ", pointFitCount, " points, Convergence state: ", static_cast<int>(state), ","
-            );
-
-            // TODO review and justify these constants
-            // TODO maybe this is not even necessary, maybe we can just rely on heuristics and conflict resolution
-            if (offsetCiWidth > 1e-2) {
-                ciTooWideState++;
-
-                if (ciTooWideState >= 2) {
-                    LOG_WARN("CI too wide: ", offsetCiWidth);
-                    ciTooWide = true;
-                    break;
-                }
-            } else {
-                ciTooWideState = 0;
-            }
-
-            // TODO we could save memory reallocation here (perhaps by passing buffer by ref to computeErrorBounds)
-            currentErrorBounds = computeErrorBounds(points, fitResult->slope);
-
-            const OffsetAngleMargin margin = scanlinePool->getHoughMargin();
-            const double meanInvRanges = invRangesFiltered.mean();
-
-            const OffsetAngle scanlineAttributes = {.offset = fitResult->slope, .angle = fitResult->intercept};
-            const ScanlineLimits newLimits = computeScanlineLimits(
-                points, currentErrorBounds.final, scanlineAttributes, margin, meanInvRanges
-            );
-
-            LOG_INFO(
-                "Minimum limit width (fit): ", (newLimits.upperLimit - newLimits.lowerLimit).minCoeff()
-            );
-
-            if ((newLimits.mask == currentScanlineLimits.mask).all()) {
-                if (state == FitConvergenceState::CONVERGED) {
-                    state = FitConvergenceState::CONFIRMED;
-                    break;
-                }
-
-                state = FitConvergenceState::CONVERGED;
-            }
-
-            currentScanlineLimits = newLimits;
-        }
-
-        return {
-            .fit = state == FitConvergenceState::CONFIRMED ? fitResult : std::nullopt,
-            .limits = state == FitConvergenceState::CONFIRMED
-                          ? std::make_optional(currentScanlineLimits)
-                          : std::nullopt,
-            .success = state == FitConvergenceState::CONFIRMED,
-            .ciTooWide = ciTooWide,
-        };
-    }
-
-    HeuristicScanline VerticalIntrinsicsEstimator::computeHeuristicScanline(
-        const double invRangesMean, const double phisMean
-    ) const {
-        std::optional<uint32_t> closestScanlineIdTop = std::nullopt;
-        std::optional<uint32_t> closestScanlineIdBottom = std::nullopt;
-        double closestScanlineTopDistance = std::numeric_limits<double>::infinity();
-        double closestScanlineBottomDistance = std::numeric_limits<double>::infinity();
-
-        scanlinePool->forEachScanline(
-            [&](const ScanlineInfo &scanline) {
-                uint32_t scanlineId = scanline.id;
-
-                const double scanlinePhi = std::asin(scanline.values.offset * invRangesMean) + scanline.values.angle;
-                if (scanlinePhi > phisMean) {
-                    const double distance = scanlinePhi - phisMean;
-                    if (distance < closestScanlineTopDistance) {
-                        closestScanlineIdTop = scanlineId;
-                        closestScanlineTopDistance = distance;
-                    }
-                }
-                if (scanlinePhi < phisMean) {
-                    const double distance = phisMean - scanlinePhi;
-                    if (distance < closestScanlineBottomDistance) {
-                        closestScanlineIdBottom = scanlineId;
-                        closestScanlineBottomDistance = distance;
-                    }
-                }
-            }
-        );
-
-        std::vector<uint32_t> validScanlineIds;
-        if (closestScanlineIdTop) {
-            validScanlineIds.emplace_back(*closestScanlineIdTop);
-        }
-        if (closestScanlineIdBottom) {
-            validScanlineIds.emplace_back(*closestScanlineIdBottom);
-        }
-
-        assert(!validScanlineIds.empty() && "No valid scanlines found");
-
-        std::vector<double> offsetDiffs;
-        for (const auto &scanlineId: validScanlineIds) {
-            const auto &scanline = scanlinePool->getScanlineById(scanlineId);
-            double offsetDiff = scanline.ci.offset.upper - scanline.ci.offset.lower;
-            offsetDiffs.emplace_back(offsetDiff);
-        }
-
-        const double maxOffsetDiff = std::ranges::max(offsetDiffs);
-        double meanOffset = 0;
-        for (const auto &scanlineId: validScanlineIds) {
-            const auto &scanline = scanlinePool->getScanlineById(scanlineId);
-            meanOffset += scanline.values.offset / static_cast<double>(validScanlineIds.size());
-        }
-
-        return HeuristicScanline{
-            .offset = meanOffset,
-            .offsetCi = {meanOffset - maxOffsetDiff / 2, meanOffset + maxOffsetDiff / 2}
         };
     }
 } // namespace accurate_ri

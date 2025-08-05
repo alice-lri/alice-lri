@@ -102,7 +102,7 @@ namespace accurate_ri {
         };
     }
 
-    OffsetAngleMargin VerticalScanlinePool::getHoughMargin() {
+    OffsetAngleMargin VerticalScanlinePool::getHoughMargin() const {
         return OffsetAngleMargin {
             {hough.getXStep(), hough.getXStep()},
             {hough.getYStep(), hough.getYStep()}

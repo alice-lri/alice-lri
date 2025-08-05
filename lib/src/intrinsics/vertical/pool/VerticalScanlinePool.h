@@ -66,7 +66,7 @@ namespace accurate_ri {
             }
         }
 
-        [[nodiscard]] OffsetAngleMargin getHoughMargin();
+        [[nodiscard]] OffsetAngleMargin getHoughMargin() const;
 
         [[nodiscard]] std::vector<ScanlineInfo> getUnsortedScanlinesCopy() const;
 
