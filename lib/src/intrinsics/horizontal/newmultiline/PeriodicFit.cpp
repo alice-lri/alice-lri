@@ -9,16 +9,51 @@ namespace accurate_ri {
         Eigen::ArrayXi linesIdx;
     };
 
+    constexpr int TRIG_TABLE_SIZE = 65536;
+
+    const std::array<double, TRIG_TABLE_SIZE>& getSinTable() {
+        static const std::array<double, TRIG_TABLE_SIZE> lut = [] {
+            std::array<double, TRIG_TABLE_SIZE> table{};
+            for (int i = 0; i < TRIG_TABLE_SIZE; ++i) {
+                double angle = (2.0 * M_PI * i) / TRIG_TABLE_SIZE;
+                table[i] = std::sin(angle);
+            }
+            return table;
+        }();
+        return lut;
+    }
+
+    const std::array<double, TRIG_TABLE_SIZE>& getCosTable() {
+        static const std::array<double, TRIG_TABLE_SIZE> lut = [] {
+            std::array<double, TRIG_TABLE_SIZE> table{};
+            for (int i = 0; i < TRIG_TABLE_SIZE; ++i) {
+                double angle = (2.0 * M_PI * i) / TRIG_TABLE_SIZE;
+                table[i] = std::cos(angle);
+            }
+            return table;
+        }();
+        return lut;
+    }
+
     double computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, const double thetaStep) {
         constexpr double twoPi = 2.0 * M_PI;
 
-        Eigen::ArrayXd residualsMod = residuals.unaryExpr([thetaStep](const double residual) {
-            const double residualMod = std::fmod(residual, thetaStep);
-            return residualMod < 0 ? residualMod + thetaStep : residualMod;
-        });
+        const auto& sinLUT = getSinTable();
+        const auto& cosLUT = getCosTable();
 
-        residualsMod = (twoPi / thetaStep) * residualsMod;
-        double circularMean = std::atan2(residualsMod.sin().mean(), residualsMod.cos().mean());
+        Eigen::ArrayXd residualsMod = residuals - thetaStep * (residuals / thetaStep).floor();
+
+        residualsMod *= (TRIG_TABLE_SIZE / thetaStep);
+        residualsMod = residualsMod.min(TRIG_TABLE_SIZE - 1);
+
+        double sinSum = 0.0, cosSum = 0.0;
+        for (const double residual : residualsMod) {
+            const int idx = static_cast<int>(residual);
+            sinSum += sinLUT[idx];
+            cosSum += cosLUT[idx];
+        }
+
+        double circularMean = std::atan2(sinSum / residualsMod.size(), cosSum / residualsMod.size());
 
         if (circularMean < 0) {
             circularMean += twoPi;
