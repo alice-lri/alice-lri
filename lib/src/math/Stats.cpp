@@ -80,8 +80,8 @@ namespace accurate_ri::Stats {
 
         std::optional<double> mse;
         if (computeMse) {
-            const Eigen::ArrayXd yPred = slope * x + intercept;
-            const Eigen::ArrayXd residuals = y - yPred;
+            const auto yPred = slope * x + intercept;
+            const auto residuals = y - yPred;
             mse = residuals.square().mean();
         }
 
