@@ -5,6 +5,7 @@
 
 #include "intrinsics/vertical/VerticalStructs.h"
 #include "point/PointArray.h"
+#include "utils/Logger.h"
 
 namespace accurate_ri {
     /**
@@ -113,6 +114,11 @@ namespace accurate_ri {
         void addVotes(const PointArray &points, const Eigen::ArrayXi &indices);
 
         void removeVotes(const PointArray &points, const Eigen::ArrayXi &indices);
+
+        // TODO remove
+        void debugHough() {
+            LOG_INFO("Hough [9654   860]: ", accumulator(9654, 860));
+        }
 
     private:
         /**

@@ -1,5 +1,6 @@
 #pragma once
 #include "hough/HoughTransform.h"
+#include "utils/Logger.h"
 
 namespace accurate_ri {
     class VerticalScanlinePool {
@@ -85,5 +86,10 @@ namespace accurate_ri {
         [[nodiscard]] uint32_t getXCount() const { return hough.getXCount(); }
 
         [[nodiscard]] uint32_t getYCount() const { return hough.getYCount(); }
+
+        // TODO remove
+        void debugHough() {
+            hough.debugHough();
+        }
     };
 } // accurate_ri

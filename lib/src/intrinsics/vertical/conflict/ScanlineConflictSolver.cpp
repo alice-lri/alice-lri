@@ -42,7 +42,9 @@ namespace accurate_ri {
         }
 
         LOG_INFO("Removing scanlines: ", conflicts.conflictingScanlines);
+        std::vector<std::pair<uint64_t, double>> hashesToRestore;
 
+        // TODO this is trash, especially the restore by hash thing. Do properly and make sure no negative values in accumulator.
         for (const uint32_t otherId: conflicts.conflictingScanlines) {
             std::optional<ScanlineInfo> removedScanline = scanlinePool.removeScanline(points, otherId);
 
@@ -54,9 +56,10 @@ namespace accurate_ri {
                 hashToConflictValue.conflictingScanlines.erase(otherId);
 
                 if (hashToConflictValue.conflictingScanlines.empty()) {
-                    LOG_INFO("Restored hash: ", hash);
+                    // LOG_INFO("Restored hash: ", hash);
 
-                    scanlinePool.restoreByHash(hash, hashToConflictValue.votes);
+                    //scanlinePool.restoreByHash(hash, hashToConflictValue.votes);
+                    hashesToRestore.emplace_back(hash, hashToConflictValue.votes);
                     it = hashesToConflictsMap.erase(it);
                 } else {
                     ++it;
@@ -76,6 +79,11 @@ namespace accurate_ri {
             );
 
             LOG_INFO("Added hash ", removedScanline->houghHash, " to the map");
+        }
+
+        for (const auto &[hash, votes] : hashesToRestore) {
+            LOG_INFO("Restored hash: ", hash);
+            scanlinePool.restoreByHash(hash, votes);
         }
 
         return true;
