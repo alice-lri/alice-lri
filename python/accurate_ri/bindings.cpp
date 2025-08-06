@@ -47,7 +47,6 @@ PYBIND11_MODULE(_accurate_ri, m) {
         .def_readwrite("values", &ScanlineInfo::values)
         .def_readwrite("ci", &ScanlineInfo::ci)
         .def_readwrite("theoretical_angle_bounds", &ScanlineInfo::theoreticalAngleBounds)
-        .def_readwrite("dependencies", &ScanlineInfo::dependencies)
         .def_readwrite("uncertainty", &ScanlineInfo::uncertainty)
         .def_readwrite("hough_votes", &ScanlineInfo::houghVotes)
         .def_readwrite("hough_hash", &ScanlineInfo::houghHash);
