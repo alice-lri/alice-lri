@@ -58,7 +58,7 @@ namespace accurate_ri {
 
                 return ScanlineEstimationResult{
                     .heuristic = false,
-                    .uncertainty = scanlineFit.fit->aic,
+                    .uncertainty = -scanlineFit.fit->logLikelihood,
                     .values = values,
                     .ci = ci,
                     .limits = std::move(*scanlineFit.limits)

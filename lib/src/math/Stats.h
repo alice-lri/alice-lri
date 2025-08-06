@@ -9,7 +9,7 @@ namespace accurate_ri::Stats {
         double intercept;
         double slopeVariance;
         double interceptVariance;
-        double aic;
+        double logLikelihood;
         Eigen::Array2d slopeCi;
         Eigen::Array2d interceptCi;
     };

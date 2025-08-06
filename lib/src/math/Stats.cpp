@@ -36,7 +36,6 @@ namespace accurate_ri::Stats {
         double logLikelihood = -std::log(ssr) * sizeOverTwo;
         logLikelihood -= (1 + std::log(M_PI / sizeOverTwo)) * sizeOverTwo;
         logLikelihood += 0.5 * weights.log().sum();
-        const double aic = -2 * logLikelihood + 2 * 2; // 2 parameters
 
         const int df = y.size() - 2; // Degrees of freedom = n - k (k=2 for intercept & slope)
         boost::math::students_t dist(df);
@@ -61,7 +60,7 @@ namespace accurate_ri::Stats {
             .intercept = intercept,
             .slopeVariance = slopeVariance,
             .interceptVariance = interceptVariance,
-            .aic = aic,
+            .logLikelihood = logLikelihood,
             .slopeCi = std::move(slopeCi),
             .interceptCi = std::move(interceptCi)
         };
