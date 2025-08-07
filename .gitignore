@@ -25,3 +25,5 @@ scripts/cesga/helper/__pycache__/
 *.pyc
 
 cmake-build-release-install/
+
+cmake-build-release-debug/

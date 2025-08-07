@@ -1,5 +1,6 @@
 #include "PeriodicFit.h"
 
+#include "plotty/matplotlibcpp.hpp"
 #include "utils/Logger.h"
 
 // TODO reuse buffers and check performance
@@ -35,15 +36,15 @@ namespace accurate_ri {
         return lut;
     }
 
-    double computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, const double thetaStep) {
+    double computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, const double period) {
         constexpr double twoPi = 2.0 * M_PI;
 
         const auto& sinLUT = getSinTable();
         const auto& cosLUT = getCosTable();
 
-        Eigen::ArrayXd residualsMod = residuals - thetaStep * (residuals / thetaStep).floor();
+        Eigen::ArrayXd residualsMod = residuals - period * (residuals / period).floor();
 
-        residualsMod *= (TRIG_TABLE_SIZE / thetaStep);
+        residualsMod *= (TRIG_TABLE_SIZE / period);
         residualsMod = residualsMod.min(TRIG_TABLE_SIZE - 1);
 
         double sinSum = 0.0, cosSum = 0.0;
@@ -59,16 +60,7 @@ namespace accurate_ri {
             circularMean += twoPi;
         }
 
-        return (thetaStep * circularMean) / twoPi;
-    }
-
-    Stats::LRResult refineFit(
-        const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const NewMultiLineResult &multiLineResult, const double period
-    ) {
-        const Eigen::ArrayXd shiftedY = y - multiLineResult.linesIdx.cast<double>() * period;
-        const Stats::LRResult fitResult = Stats::linearRegression(x, shiftedY, true);
-
-        return fitResult;
+        return (period * circularMean) / twoPi;
     }
 
     void computePeriodicResiduals(
@@ -78,6 +70,24 @@ namespace accurate_ri {
         outResult.residuals = y - (slope * x + intercept);
         outResult.linesIdx = (outResult.residuals / period).round().cast<int>();
         outResult.residuals = outResult.residuals - outResult.linesIdx.cast<double>() * period;
+    }
+
+    Stats::LRResult refineFit(
+        const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, NewMultiLineResult &multiLineResult, const double period
+    ) {
+        const int32_t halfSize = x.size() / 2;
+        Eigen::ArrayXd shiftedY = y - multiLineResult.linesIdx.cast<double>() * period;
+
+        const Stats::LRResult fitResultFirst = Stats::linearRegression(x.head(halfSize), shiftedY.head(halfSize), true);
+        const Stats::LRResult fitResultLast = Stats::linearRegression(x.tail(halfSize), shiftedY.tail(halfSize), true);
+        const Stats::LRResult fitResultAll = Stats::linearRegression(x, shiftedY, true);
+        const Stats::LRResult& optFit = (fitResultFirst.mse < fitResultLast.mse) ? fitResultFirst : fitResultLast;
+
+        computePeriodicResiduals(x, y, period, optFit.slope, optFit.intercept, multiLineResult);
+        shiftedY = y - multiLineResult.linesIdx.cast<double>() * period;
+        const Stats::LRResult fitResultFinal = Stats::linearRegression(x, shiftedY, true);
+
+        return fitResultAll.mse < fitResultFinal.mse ? fitResultAll : fitResultFinal;
     }
 
     Stats::LRResult PeriodicFit::fit(

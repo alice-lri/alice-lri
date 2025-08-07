@@ -43,7 +43,7 @@ TEST_F(StatsTest, WeightedLinearRegression) {
     // Check that results include variance and AIC
     EXPECT_GE(result.slopeVariance, 0.0);
     EXPECT_GE(result.interceptVariance, 0.0);
-    EXPECT_FALSE(std::isnan(result.aic));
+    EXPECT_FALSE(std::isnan(result.logLikelihood));
 }
 
 TEST_F(StatsTest, WeightedBoundsRegression) {
