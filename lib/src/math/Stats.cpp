@@ -8,7 +8,6 @@
 
 namespace accurate_ri::Stats {
 
-    // TODO remove AIC and compute meaningful certainty metric (probably log-likelihood)
     WLSResult wlsBoundsFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &bounds) {
         PROFILE_SCOPE("Stats::wlsBoundsFit");
         const Eigen::ArrayXd &weights = 1 / bounds.square();

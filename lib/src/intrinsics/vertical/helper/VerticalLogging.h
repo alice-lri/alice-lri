@@ -77,7 +77,7 @@ namespace accurate_ri::VerticalLogging {
     ) {
         return; // TODO enable disable as required
 
-        if (iteration < 139) {
+        if (iteration < 335) {
             return;
         }
 

@@ -56,7 +56,6 @@ def get_kitti_constants():
     return v_offsets, v_angles, h_offsets, h_resolutions
 
 
-# TODO these values are based off emprical medians, not actual constants, change when constants are available
 def get_durlar_constants():
     v_offsets = [0.03948696519285808, 0.039488849176797305, 0.03947743833311064, 0.03944817174837266,
                  0.039434128520796766, 0.03943182893416684, 0.03941507314308524, 0.03938160327556467,
