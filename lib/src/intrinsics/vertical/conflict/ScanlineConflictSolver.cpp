@@ -134,14 +134,14 @@ namespace accurate_ri {
             ", Conflicting scanlines uncertainties: ", conflictingScanlinesUncertainties
         );
 
-        if (scanline.limits.indices.size() == scanlinePool.getUnassignedPoints() && !intersectionInfo.empiricalIntersection) {
-            LOG_WARN("Warning: This is the last scanline, and it does not intersect others, accepting");
-
-            return {
-                .shouldReject = false,
-                .conflictingScanlines = Eigen::ArrayXi()
-            };
-        }
+        // if (scanline.limits.indices.size() == scanlinePool.getUnassignedPoints() && !intersectionInfo.empiricalIntersection) {
+        //     LOG_WARN("Warning: This is the last scanline, and it does not intersect others, accepting");
+        //
+        //     return {
+        //         .shouldReject = false,
+        //         .conflictingScanlines = Eigen::ArrayXi()
+        //     };
+        // }
 
         const double minConflictingUncertainty = conflictingScanlinesUncertainties.minCoeff() - 1e-6;
         if (scanline.uncertainty >= minConflictingUncertainty) {
