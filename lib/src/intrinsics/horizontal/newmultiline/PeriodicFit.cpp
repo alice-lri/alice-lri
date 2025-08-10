@@ -75,22 +75,12 @@ namespace accurate_ri {
     Stats::LRResult refineFit(
         const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, NewMultiLineResult &multiLineResult, const double period
     ) {
+        const int32_t halfSize = x.size() / 2;
         Eigen::ArrayXd shiftedY = y - multiLineResult.linesIdx.cast<double>() * period;
+
+        const Stats::LRResult fitResultFirst = Stats::linearRegression(x.head(halfSize), shiftedY.head(halfSize), true);
+        const Stats::LRResult fitResultLast = Stats::linearRegression(x.tail(halfSize), shiftedY.tail(halfSize), true);
         const Stats::LRResult fitResultAll = Stats::linearRegression(x, shiftedY, true);
-
-        const double midX = (x(0) + x(x.size() - 1)) / 2;
-        const auto cutPointIt = std::ranges::upper_bound(x, midX, [](const double a, const double b) {
-            return a > b;
-        });
-        const size_t head = std::distance(x.begin(), cutPointIt);
-        const int32_t tail = x.size() - head - 1;
-
-        if (head < 4 || tail < 4) {
-            return fitResultAll;
-        }
-
-        const Stats::LRResult fitResultFirst = Stats::linearRegression(x.head(head), shiftedY.head(head), true);
-        const Stats::LRResult fitResultLast = Stats::linearRegression(x.tail(tail), shiftedY.tail(tail), true);
         const Stats::LRResult& optFit = (fitResultFirst.mse < fitResultLast.mse) ? fitResultFirst : fitResultLast;
 
         computePeriodicResiduals(x, y, period, optFit.slope, optFit.intercept, multiLineResult);
