@@ -16,6 +16,11 @@ namespace accurate_ri {
             const ScanlineEstimationResult &scanline, uint32_t scanlineId, const HoughCell &houghMax
         );
 
+        bool simpleShouldKeep(
+            VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
+            const ScanlineEstimationResult &scanline, uint32_t scanlineId, const HoughCell &houghMax
+        );
+
     private:
         ScanlineConflictsResult evaluateScanlineConflicts(
             const VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,

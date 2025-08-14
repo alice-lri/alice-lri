@@ -134,15 +134,6 @@ namespace accurate_ri {
             ", Conflicting scanlines uncertainties: ", conflictingScanlinesUncertainties
         );
 
-        // if (scanline.limits.indices.size() == scanlinePool.getUnassignedPoints() && !intersectionInfo.empiricalIntersection) {
-        //     LOG_WARN("Warning: This is the last scanline, and it does not intersect others, accepting");
-        //
-        //     return {
-        //         .shouldReject = false,
-        //         .conflictingScanlines = Eigen::ArrayXi()
-        //     };
-        // }
-
         const double minConflictingUncertainty = conflictingScanlinesUncertainties.minCoeff() - 1e-6;
         if (scanline.uncertainty >= minConflictingUncertainty) {
             if (minConflictingUncertainty == std::numeric_limits<double>::infinity()) {
@@ -238,5 +229,19 @@ namespace accurate_ri {
             .empiricalIntersection = empiricalIntersection,
             .theoreticalIntersection = theoreticalIntersection
         };
+    }
+
+    bool ScanlineConflictSolver::simpleShouldKeep(
+        VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
+        const ScanlineEstimationResult &scanline, const uint32_t scanlineId, const HoughCell &houghMax
+    ) {
+        const auto intersectionInfo = computeScanlineIntersectionInfo(scanlinePool, angleBounds, scanline, scanlineId);
+        const bool conflicting = intersectionInfo.empiricalIntersection;
+
+        if (conflicting) {
+            scanlinePool.invalidateByHash(houghMax.hash);
+        }
+
+        return !conflicting;
     }
 } // accurate_ri

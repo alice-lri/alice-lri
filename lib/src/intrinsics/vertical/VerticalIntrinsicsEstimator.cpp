@@ -57,15 +57,20 @@ namespace accurate_ri {
             const ScanlineAngleBounds angleBounds = refinedCandidate->scanline
                     .toAngleBounds(points.getMinRange(), points.getMaxRange());
 
+            bool keepScanline;
             if constexpr (BuildOptions::USE_SCANLINE_CONFLICT_SOLVER) {
-                bool keepScanline = conflictSolver.performScanlineConflictResolution(
+                keepScanline = conflictSolver.performScanlineConflictResolution(
                     *scanlinePool, points, angleBounds, refinedCandidate->scanline, currentScanlineId,
                     candidate.hough->cell
                 );
+            } else {
+                keepScanline = conflictSolver.simpleShouldKeep(
+                    *scanlinePool, angleBounds, refinedCandidate->scanline, currentScanlineId, candidate.hough->cell
+                );
+            }
 
-                if (!keepScanline) {
-                    continue;
-                }
+            if (!keepScanline) {
+                continue;
             }
 
             scanlinePool->removeVotes(points, refinedCandidate->scanline.limits.indices);
