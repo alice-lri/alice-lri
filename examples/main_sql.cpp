@@ -171,6 +171,8 @@ int main(const int argc, const char **argv) {
         std::filesystem::path framePath = config.datasetRootPath.at(frame.datasetName);
         framePath /= frame.relativePath;
 
+        std::cout << "Processing frame: " << framePath << std::endl;
+
         FileUtils::Points points = FileUtils::loadBinaryFile(framePath.string(), std::nullopt);
 
         const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
