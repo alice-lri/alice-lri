@@ -126,7 +126,7 @@ namespace accurate_ri {
                 "theta offset: ", candidate.thetaOffset, ", loss: ", candidate.loss
             );
 
-            if (std::abs(candidate.offset) > Constant::MAX_OFFSET) {
+            if (std::abs(candidate.offset) > Constant::MAX_OFFSET || !std::isfinite(candidate.offset)) {
                 continue;
             }
 
