@@ -88,14 +88,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/vertical/pool/VerticalScanlinePool.h
         src/intrinsics/horizontal/helper/HorizontalScanlineArray.cpp
         src/intrinsics/horizontal/helper/HorizontalScanlineArray.h
-        src/intrinsics/horizontal/resolution/MadResolutionLoss.cpp
-        src/intrinsics/horizontal/resolution/MadResolutionLoss.h
         src/intrinsics/horizontal/helper/HorizontalMath.cpp
         src/intrinsics/horizontal/helper/HorizontalMath.h
-        src/intrinsics/horizontal/multiline/PeriodicMultilineFitter.cpp
-        src/intrinsics/horizontal/multiline/PeriodicMultilineFitter.h
-        src/intrinsics/horizontal/multiline/CustomEstimator.cpp
-        src/intrinsics/horizontal/multiline/CustomEstimator.h
         include/accurate_ri/public_structs.hpp
         src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.cpp
         src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.h
@@ -111,8 +105,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/vertical/estimation/VerticalScanlineLimits.h
         src/intrinsics/vertical/estimation/VerticalScanlineEstimation.cpp
         src/intrinsics/vertical/estimation/VerticalScanlineEstimation.h
-        src/intrinsics/horizontal/newmultiline/PeriodicFit.cpp
-        src/intrinsics/horizontal/newmultiline/PeriodicFit.h
+        src/intrinsics/horizontal/helper/PeriodicFit.cpp
+        src/intrinsics/horizontal/helper/PeriodicFit.h
 )
 
 set(_accurate_ri_private_include_dirs

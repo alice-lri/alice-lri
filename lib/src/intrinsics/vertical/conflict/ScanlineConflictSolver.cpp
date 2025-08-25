@@ -56,9 +56,6 @@ namespace accurate_ri {
                 hashToConflictValue.conflictingScanlines.erase(otherId);
 
                 if (hashToConflictValue.conflictingScanlines.empty()) {
-                    // LOG_INFO("Restored hash: ", hash);
-
-                    //scanlinePool.restoreByHash(hash, hashToConflictValue.votes);
                     hashesToRestore.emplace_back(hash, hashToConflictValue.votes);
                     it = hashesToConflictsMap.erase(it);
                 } else {

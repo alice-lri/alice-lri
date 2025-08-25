@@ -1,7 +1,6 @@
 #include "PeriodicFit.h"
 
 #include "plotty/matplotlibcpp.hpp"
-#include "utils/Logger.h"
 
 // TODO reuse buffers and check performance
 namespace accurate_ri {

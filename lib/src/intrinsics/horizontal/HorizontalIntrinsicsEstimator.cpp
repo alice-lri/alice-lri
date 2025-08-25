@@ -2,7 +2,6 @@
 #include <Eigen/Dense>
 #include <cmath>
 #include <limits>
-#include <algorithm>
 #include <unordered_set>
 #include <vector>
 
@@ -11,9 +10,7 @@
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.h"
-#include "intrinsics/horizontal/multiline/PeriodicMultilineFitter.h"
-#include "intrinsics/horizontal/newmultiline/PeriodicFit.h"
-#include "intrinsics/horizontal/resolution/MadResolutionLoss.h"
+#include "helper/PeriodicFit.h"
 #include "math/Stats.h"
 #include "plotty/matplotlibcpp.hpp"
 #include "utils/Logger.h"
@@ -74,15 +71,14 @@ namespace accurate_ri {
             }
         }
 
-        int32_t bestResolution = 0;
-        const auto optimizeResult = optimizeJoint(scanlineArray, scanlineIdx, bestResolution);
+        const auto optimizeResult = findOptimalHorizontalParameters(scanlineArray, scanlineIdx);
 
         if (!optimizeResult) {
             LOG_WARN("Horizontal optimization failed for scanline ", scanlineIdx);
             return std::nullopt;
         }
 
-        bestResolution = optimizeResult->resolution;
+        int32_t bestResolution = optimizeResult->resolution;
         const double bestOffset = optimizeResult->offset;
         const double bestLoss = optimizeResult->loss;
 
@@ -102,18 +98,10 @@ namespace accurate_ri {
         );
     }
 
-    // TODO this is not optional anymore
-    std::optional<ResolutionOffsetLoss> HorizontalIntrinsicsEstimator::optimizeJoint(
-        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx, const int32_t initialResolution
+    std::optional<ResolutionOffsetLoss> HorizontalIntrinsicsEstimator::findOptimalHorizontalParameters(
+        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
     ) {
         const int32_t scanlineSize = scanlineArray.getSize(scanlineIdx);
-        std::vector<int32_t> resolutions;
-        // if (initialResolution != 0) {
-        //     resolutions = generateCandidateResolutions(initialResolution, scanlineSize);
-        // } else {
-        //     resolutions = generateCandidateResolutionsMad(scanlineArray, scanlineIdx);
-        // }
-
         std::optional<ResolutionOffsetLoss> bestCandidate = std::nullopt;
 
         for (int32_t resolution = scanlineSize; resolution <= Constant::MAX_RESOLUTION; ++resolution) {
@@ -140,58 +128,6 @@ namespace accurate_ri {
         }
 
         return bestCandidate;
-    }
-
-    std::vector<int32_t> HorizontalIntrinsicsEstimator::generateCandidateResolutions(
-        const int32_t initialResolution, const int32_t scanlineSize
-    ) {
-        std::vector<int32_t> resolutions;
-
-        for (int32_t i = 0; i < 2 * Constant::MAX_RESOLUTION_DELTA + 1; ++i) {
-            const int32_t delta = i % 2 == 0 ? -i / 2 : (i + 1) / 2;
-            const int32_t candidateResolutionMult = initialResolution + delta;
-
-            if (candidateResolutionMult < 0) {
-                continue;
-            }
-
-            const int32_t maxDiv = candidateResolutionMult / scanlineSize;
-
-            for (int32_t divisor = 1; divisor <= maxDiv; ++divisor) {
-                if (candidateResolutionMult % divisor == 0) {
-                    resolutions.emplace_back(candidateResolutionMult / divisor);
-                }
-            }
-        }
-
-        return resolutions;
-    }
-
-    std::vector<int32_t> HorizontalIntrinsicsEstimator::generateCandidateResolutionsMad(
-        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
-    ) {
-        const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
-        const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
-        const int32_t minResolution = invRangesXy.innerSize();
-
-        Eigen::ArrayXd mads(Constant::MAX_RESOLUTION - minResolution + 1);
-
-        for (int32_t resolution = minResolution; resolution <= Constant::MAX_RESOLUTION; ++resolution) {
-            const double loss = MadResolutionLoss::computeResolutionLoss(invRangesXy, thetas, resolution);
-            mads(resolution - minResolution) = loss;
-        }
-
-        mads /= mads.maxCoeff();
-
-        std::vector<int32_t> resolutions;
-        resolutions.reserve(250);
-        for (int32_t resolution = minResolution; resolution < Constant::MAX_RESOLUTION; ++resolution) {
-            if (mads(resolution - minResolution) < 0.5) { // TODO extract constant
-                resolutions.emplace_back(resolution);
-            }
-        }
-
-        return resolutions;
     }
 
     ResolutionOffsetLoss HorizontalIntrinsicsEstimator::optimizeJointCandidateResolution(
@@ -231,8 +167,8 @@ namespace accurate_ri {
         std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
         const HorizontalScanlineArray &scanlineArray
     ) {
-        const std::unordered_set<double> otherOffsets = getUniqueOffsets(scanlines, heuristicScanlines);
         const std::unordered_set<int32_t> otherResolutions = getUniqueResolutions(scanlines, heuristicScanlines);
+        const std::unordered_set<double> otherOffsets = getUniqueOffsets(scanlines, heuristicScanlines);
 
         for (const int32_t scanlineIdx: heuristicScanlines) {
             const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
@@ -335,34 +271,6 @@ namespace accurate_ri {
         const double loss = (diffToIdeal - thetaOffset).abs().mean();
 
         return ResolutionOffsetLoss(resolution, offset, thetaOffset, loss);
-    }
-
-    int32_t HorizontalIntrinsicsEstimator::madOptimalResolution(
-        const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
-    ) {
-        const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
-        const Eigen::ArrayXd &thetas = scanlineArray.getThetas(scanlineIdx);
-        const int32_t minResolution = invRangesXy.innerSize();
-
-        double minLoss = std::numeric_limits<double>::infinity();
-        int32_t optimalResolution = -1;
-
-        for (int32_t resolution = minResolution; resolution < Constant::MAX_RESOLUTION; ++resolution) {
-            const double thetaStep = 2 * M_PI / resolution;
-
-            const SegmentedMedianSlopeEstimator slopeEstimator(
-                Constant::INV_RANGES_BREAK_THRESHOLD, thetaStep / 4, Constant::MAX_OFFSET, thetaStep
-            );
-
-            const double loss = slopeEstimator.computeResolutionLoss(invRangesXy, thetas, resolution);
-
-            if (loss < minLoss) {
-                minLoss = loss;
-                optimalResolution = resolution;
-            }
-        }
-
-        return optimalResolution;
     }
 
     void HorizontalIntrinsicsEstimator::updateBasicScanlines(

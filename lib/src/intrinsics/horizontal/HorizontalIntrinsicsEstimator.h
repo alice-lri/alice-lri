@@ -23,22 +23,18 @@ namespace accurate_ri {
 
     private:
         std::optional<ScanlineHorizontalInfo> estimateScanline(
-            const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
+            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx
         );
 
-        std::optional<ResolutionOffsetLoss> optimizeJoint(
-            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t initialResolution
+        std::optional<ResolutionOffsetLoss> findOptimalHorizontalParameters(
+            const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx
         );
 
-        std::vector<int32_t> generateCandidateResolutions(int32_t initialResolution, int32_t scanlineSize);
-
-        std::vector<int32_t> generateCandidateResolutionsMad(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx);
-
-        ResolutionOffsetLoss optimizeJointCandidateResolution(
+        [[nodiscard]] static ResolutionOffsetLoss optimizeJointCandidateResolution(
             const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx, int32_t resolution
         );
 
-        ResolutionOffsetLoss computeHeuristicValues(
+        static ResolutionOffsetLoss computeHeuristicValues(
             const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, int32_t resolution, double offset
         );
 
@@ -47,11 +43,11 @@ namespace accurate_ri {
             const HorizontalScanlineArray &scanlineArray
         );
 
-        std::unordered_set<int32_t> getUniqueResolutions(
+        static std::unordered_set<int32_t> getUniqueResolutions(
             std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
         );
 
-        std::unordered_set<double> getUniqueOffsets(
+        static std::unordered_set<double> getUniqueOffsets(
             std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
         );
 
@@ -60,9 +56,7 @@ namespace accurate_ri {
             const std::unordered_set<int32_t> &candidateResolutions, const std::unordered_set<double> &candidateOffsets
         );
 
-        int32_t madOptimalResolution(const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx);
-
-        void updateBasicScanlines(
+        static void updateBasicScanlines(
             std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
             const HorizontalScanlineArray &scanlineArray
         );
