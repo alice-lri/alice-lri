@@ -42,7 +42,7 @@ namespace accurate_ri {
         }
 
         LOG_INFO("Removing scanlines: ", conflicts.conflictingScanlines);
-        std::vector<std::pair<uint64_t, double>> hashesToRestore;
+        std::vector<std::pair<uint64_t, int64_t>> hashesToRestore;
 
         // TODO this is trash, especially the restore by hash thing. Do properly and make sure no negative values in accumulator.
         for (const uint32_t otherId: conflicts.conflictingScanlines) {

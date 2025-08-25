@@ -30,7 +30,7 @@ namespace accurate_ri {
             return pointsScanlinesIds(pointsIndices);
         }
 
-        inline void restoreByHash(const uint64_t hash, const double votes) {
+        inline void restoreByHash(const uint64_t hash, const int64_t votes) {
             hough.restoreVotes(hash, votes);
         }
 
@@ -38,16 +38,8 @@ namespace accurate_ri {
             hough.eraseByHash(hash);
         }
 
-        inline void invalidateByPoints(const PointArray &points, const Eigen::ArrayXi &indices) {
-            hough.eraseByPoints(points, indices);
-        }
-
         inline void removeVotes(const PointArray& points, const Eigen::ArrayXi &indices) {
             hough.removeVotes(points, indices);
-        }
-
-        inline void addVotes(const PointArray& points, const Eigen::ArrayXi &indices) {
-            hough.addVotes(points, indices);
         }
 
         inline const ScanlineInfo& getScanlineById(const uint32_t id) const {

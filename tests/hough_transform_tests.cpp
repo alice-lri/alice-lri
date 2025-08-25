@@ -92,7 +92,7 @@ TEST_F(HoughTransformTest, EraseByHash) {
         uint64_t hash = peak->hash;
 
         // Record votes before erasing
-        double votesBeforeErase = peak->votes;
+        int64_t votesBeforeErase = peak->votes;
         
         // Erase by hash
         hough.eraseByHash(hash);
@@ -119,7 +119,7 @@ TEST_F(HoughTransformTest, RestoreVotes) {
     
     if (peaks) {
         uint64_t hash = peaks->hash;
-        double votes = peaks->votes;
+        int64_t votes = peaks->votes;
         
         // Erase by hash
         hough.eraseByHash(hash);

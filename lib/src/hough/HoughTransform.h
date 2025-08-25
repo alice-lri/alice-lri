@@ -8,6 +8,14 @@
 #include "utils/Logger.h"
 
 namespace accurate_ri {
+    enum class HoughOperation {
+        ADD, SUBTRACT
+    };
+
+    enum class HoughMode {
+        VOTES_ONLY, VOTES_AND_HASHES
+    };
+
     /**
      * @class HoughTransform
      * @brief A class to perform the Hough Transform for detecting lines in a 2D space.
@@ -15,7 +23,7 @@ namespace accurate_ri {
      */
     class HoughTransform {
     private:
-        Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> accumulator;
+        Eigen::Matrix<int64_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> accumulator;
         Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> hashAccumulator;
 
         double xMin;
@@ -101,7 +109,7 @@ namespace accurate_ri {
 
         void eraseByHash(uint64_t hash);
 
-        void restoreVotes(uint64_t hash, double votes);
+        void restoreVotes(uint64_t hash, int64_t votes);
 
         void ensureHashEquals(Eigen::Matrix<unsigned long, -1, -1> &matrix);
 
@@ -125,9 +133,10 @@ namespace accurate_ri {
          * @brief Updates the accumulator for a specific point.
          * @param pointIndex Index of the point.
          * @param points Vector of phi values.
-         * @param voteMultiplier Multiplier for the vote value.
+         * @param operation Multiplier for the vote value.
+         * @param updateHashes
          */
-        inline void updateAccumulatorForPoint(uint64_t pointIndex, const PointArray &points, int8_t voteMultiplier);
+        inline void updateAccumulatorForPoint(uint64_t pointIndex, const PointArray &points, HoughOperation operation, HoughMode mode);
 
         /**
          * @brief Votes for discontinuities in the accumulator to avoid gaps.
@@ -143,12 +152,12 @@ namespace accurate_ri {
          * @param pointIndex Index of the point being processed.
          * @param x The current x index in the accumulator.
          * @param y The current y value in the accumulator.
-         * @param voteVal The value to be added to the accumulator for the current point.
          * @param previousY The y value of the previous point.
-         * @param voteMultiplier
+         * @param operation
+         * @param updateHashes
          */
         inline void voteForDiscontinuities(
-            uint64_t pointIndex, size_t x, int32_t y, double voteVal, int32_t previousY, int8_t voteMultiplier
+            uint64_t pointIndex, size_t x, int32_t y, int32_t previousY, HoughOperation operation, HoughMode mode
         );
 
         HoughCell indicesToCell(const std::pair<size_t, size_t> &indices);

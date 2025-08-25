@@ -39,7 +39,7 @@ namespace accurate_ri {
         OffsetAngleMargin ci;
         ScanlineAngleBounds theoreticalAngleBounds;
         double uncertainty;
-        double houghVotes;
+        int64_t houghVotes;
         uint64_t houghHash;
     };
 

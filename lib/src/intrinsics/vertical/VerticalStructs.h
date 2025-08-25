@@ -11,7 +11,7 @@ namespace accurate_ri {
         uint64_t maxOffsetIndex;
         uint64_t maxAngleIndex;
         OffsetAngle maxValues;
-        double votes;
+        int64_t votes;
         uint64_t hash;
     };
 
@@ -87,7 +87,7 @@ namespace accurate_ri {
 
     struct HashToConflictValue {
         std::unordered_set<uint32_t> conflictingScanlines;
-        double votes;
+        int64_t votes;
     };
 
     struct ScanlineConflictsResult {

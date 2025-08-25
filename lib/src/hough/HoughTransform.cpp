@@ -10,7 +10,6 @@
 #include "utils/Timer.h"
 #include "utils/Utils.h"
 
-// TODO clean up voting strategy after settling down on strategy
 namespace accurate_ri {
     HoughTransform::HoughTransform(
         const double xMin, const double xMax, const double xStep, const double yMin, const double yMax,
@@ -19,7 +18,7 @@ namespace accurate_ri {
         xCount = std::floor((xMax - xMin + xStep) / xStep);
         yCount = std::floor((yMax - yMin + yStep) / yStep);
 
-        accumulator = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(yCount, xCount);
+        accumulator = Eigen::Matrix<int64_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(yCount, xCount);
         hashAccumulator = Eigen::Matrix<uint64_t, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>(yCount, xCount);
 
         LOG_DEBUG("HoughTransform initialized with xCount: ", xCount, " yCount: ", yCount);
@@ -33,14 +32,14 @@ namespace accurate_ri {
             if (i % 10000 == 0) {
                 LOG_DEBUG("Processing point ", i, " of ", points.size());
             }
-            updateAccumulatorForPoint(i, points, 1);
+            updateAccumulatorForPoint(i, points, HoughOperation::ADD, HoughMode::VOTES_AND_HASHES);
         }
 
         LOG_DEBUG("Accumulator computation completed.");
     }
 
     inline void HoughTransform::updateAccumulatorForPoint(
-        const uint64_t pointIndex, const PointArray &points, const int8_t voteMultiplier
+        const uint64_t pointIndex, const PointArray &points, const HoughOperation operation, const HoughMode mode
     ) {
         int32_t previousY = -1;
 
@@ -53,21 +52,14 @@ namespace accurate_ri {
                 continue;
             }
 
-            const double voteVal = Utils::sign(voteMultiplier);
-
             if (previousY != -1) {
-                // TODO this is inside the if for consistency with Python, but maybe is not the right thing to do
-                if (voteMultiplier != 0) {
-                    accumulator(y, x) += voteVal;
-                    if (voteMultiplier == 1) { // TODO nasty (same in discontinuities)
-                        hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
-                    }
-                } else {
-                    accumulator(y, x) = 0;
+                accumulator(y, x) += operation == HoughOperation::ADD? 1 : -1;
+                if (mode == HoughMode::VOTES_AND_HASHES) {
+                    hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
                 }
 
                 if constexpr (BuildOptions::USE_HOUGH_CONTINUITY) {
-                    voteForDiscontinuities(pointIndex, x, y, voteVal, previousY, voteMultiplier);
+                    voteForDiscontinuities(pointIndex, x, y, previousY, operation, mode);
                 }
             }
 
@@ -76,8 +68,8 @@ namespace accurate_ri {
     }
 
     inline void HoughTransform::voteForDiscontinuities(
-        const uint64_t pointIndex, const size_t x, const int32_t y, const double voteVal, const int32_t previousY,
-        const int8_t voteMultiplier
+        const uint64_t pointIndex, const size_t x, const int32_t y, const int32_t previousY,
+        const HoughOperation operation, const HoughMode mode
     ) {
         assert(x > 0);
 
@@ -89,40 +81,36 @@ namespace accurate_ri {
         }
 
         auto &&accumulatorBlock = accumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array();
-        if (voteMultiplier != 0) {
-            accumulatorBlock += voteVal;
+        accumulatorBlock += operation == HoughOperation::ADD? 1 : -1;
 
-            if (voteMultiplier == 1) {
-                hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() =
-                    hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).unaryExpr(
-                        [&](uint64_t val) {
-                            return val ^ HashUtils::knuth_uint(pointIndex); // Equivalent to ^= but for Eigen
-                        }
-                    );
-            }
-        } else {
-            accumulatorBlock = 0;
+        if (mode == HoughMode::VOTES_AND_HASHES) {
+            hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() =
+                hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).unaryExpr(
+                    [&](uint64_t val) {
+                        return val ^ HashUtils::knuth_uint(pointIndex); // Equivalent to ^= but for Eigen
+                    }
+                );
         }
     }
 
     std::optional<HoughCell> HoughTransform::findMaximum(std::optional<double> averageX) {
         PROFILE_SCOPE("HoughTransform::findMaximum");
         std::vector<std::pair<size_t, size_t> > maxIndices;
-        double maxVal = -std::numeric_limits<double>::infinity();
+        int64_t maxVotes = 0;
 
         for (size_t y = 0; y < yCount; y++) {
             for (size_t x = 0; x < xCount; x++) {
-                const double val = accumulator(y, x);
-                if (val > maxVal && val > 1e-6) {
-                    maxVal = val;
+                const int64_t votes = accumulator(y, x);
+                if (votes > maxVotes && votes > 0) {
+                    maxVotes = votes;
                     maxIndices = {{x, y}};
-                } else if (val == maxVal) {
+                } else if (votes == maxVotes) {
                     maxIndices.emplace_back(x, y);
                 }
             }
         }
 
-        if (maxVal <= 1e-6 || maxIndices.empty()) {
+        if (maxVotes <= 0 || maxIndices.empty()) {
             LOG_INFO("No maxima found in the accumulator.");
             return std::nullopt;
         }
@@ -152,81 +140,21 @@ namespace accurate_ri {
         accumulator = (hashAccumulator.array() == hash).select(0, accumulator.array());
     }
 
-    void HoughTransform::restoreVotes(const uint64_t hash, const double votes) {
+    void HoughTransform::restoreVotes(const uint64_t hash, const int64_t votes) {
         accumulator = (hashAccumulator.array() == hash).select(votes, accumulator.array());
-    }
-
-    void HoughTransform::restorePoints(const PointArray &points, const Eigen::ArrayXi& indices) {
-        PROFILE_SCOPE("HoughTransform::restorePoints");
-        for (const int32_t index: indices) {
-            updateAccumulatorForPoint(index, points, 2);
-        }
-    }
-
-    void HoughTransform::eraseByPoints(const PointArray &points, const Eigen::ArrayXi &indices) {
-        PROFILE_SCOPE("HoughTransform::eraseByPoints");
-        for (const int32_t index: indices) {
-            updateAccumulatorForPoint(index, points, 0);
-        }
     }
 
     void HoughTransform::addVotes(const PointArray &points, const Eigen::ArrayXi &indices) {
         PROFILE_SCOPE("HoughTransform::addVotes");
         for (const int32_t index: indices) {
-            updateAccumulatorForPoint(index, points, 2);
+            updateAccumulatorForPoint(index, points, HoughOperation::ADD, HoughMode::VOTES_ONLY);
         }
     }
 
     void HoughTransform::removeVotes(const PointArray &points, const Eigen::ArrayXi &indices) {
         PROFILE_SCOPE("HoughTransform::removeVotes");
         for (const int32_t index: indices) {
-            updateAccumulatorForPoint(index, points, -2);
-        }
-    }
-
-    // TODO this is a debug function, should be removed
-    void HoughTransform::ensureHashEquals(Eigen::Matrix<uint64_t, -1, -1> &matrix) {
-        assert(matrix.rows() == hashAccumulator.rows());
-        assert(matrix.cols() == hashAccumulator.cols());
-
-        bool diffFlag = false;
-        for (int i = 0; i < matrix.rows(); i++) {
-            for (int j = 0; j < matrix.cols(); j++) {
-                if (matrix(i, j) != hashAccumulator(i, j)) {
-                    diffFlag = true;
-                    LOG_INFO("Hashes do not match at ", i, ", ", j);
-                    LOG_INFO("Expected: ", matrix(i, j), ", got: ", hashAccumulator(i, j));
-                }
-            }
-        }
-
-        if (diffFlag) {
-            LOG_INFO("Hashes do not match");
-        } else {
-            LOG_INFO("Hashes match");
-        }
-    }
-
-    // TODO this is also a debug function, should be removed
-    void HoughTransform::ensureAccEquals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &matrix) {
-        assert(matrix.rows() == accumulator.rows());
-        assert(matrix.cols() == accumulator.cols());
-
-        bool diffFlag = false;
-        for (int i = 0; i < matrix.rows(); i++) {
-            for (int j = 0; j < matrix.cols(); j++) {
-                if (matrix(i, j) != accumulator(i, j)) {
-                    diffFlag = true;
-                    LOG_INFO("Accumulators do not match at ", i, ", ", j);
-                    LOG_INFO("Expected: ", matrix(i, j), ", got: ", accumulator(i, j));
-                }
-            }
-        }
-
-        if (diffFlag) {
-            LOG_INFO("Accumulators do not match");
-        } else {
-            LOG_INFO("Accumulators match");
+            updateAccumulatorForPoint(index, points, HoughOperation::SUBTRACT, HoughMode::VOTES_ONLY);
         }
     }
 
