@@ -38,6 +38,7 @@ namespace accurate_ri {
         std::optional<Stats::WLSResult> fit;
         std::optional<ScanlineLimits> limits;
         bool success = false;
+        bool ciTooWide = false;
     };
 
     // TODO objetive: remove this and construct ScanlineInfo through the process
