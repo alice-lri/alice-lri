@@ -1,5 +1,6 @@
 #include "RangeImageUtils.h"
 #include <numbers>
+#include <numeric>
 #include <Eigen/Core>
 #include "accurate_ri/public_structs.hpp"
 #include "utils/Logger.h"
@@ -49,22 +50,25 @@ namespace accurate_ri::RangeImageUtils {
 
         Utils::positiveFmodInplace(correctedThetas, 2 * M_PI);
 
-        const int32_t maxHorizontalResolution = std::ranges::max_element(
-            intrinsics.horizontal.scanlines, {}, [](const auto &scanline) {
-                return scanline.resolution;
+        int32_t lcmHorizontalResolution = 1;
+        for (const auto& scanline : intrinsics.horizontal.scanlines) {
+            if (scanline.resolution == 0) {
+                continue;
             }
-        )->resolution;
+            lcmHorizontalResolution = std::lcm(lcmHorizontalResolution, static_cast<uint32_t>(scanline.resolution));
+        }
 
-        RangeImage rangeImage(maxHorizontalResolution, intrinsics.vertical.scanlinesCount, 0);
+        RangeImage rangeImage(lcmHorizontalResolution, intrinsics.vertical.scanlinesCount, 0);
 
         for (int32_t pointIdx = 0; pointIdx < phis.size(); ++pointIdx) {
             const uint32_t row = intrinsics.vertical.scanlinesCount - minIndices(pointIdx) - 1;
-            // TODO handle different resolutions per scanline
-            const double thetaStep = 2 * std::numbers::pi / static_cast<double>(maxHorizontalResolution);
-            int32_t col = static_cast<int32_t>(std::round(correctedThetas(pointIdx) / thetaStep));
+            const int32_t scanlineResolution = intrinsics.horizontal.scanlines[row].resolution;
+            const double thetaStep = 2 * std::numbers::pi / static_cast<double>(scanlineResolution);
+            auto col = static_cast<int32_t>(std::round(correctedThetas(pointIdx) / thetaStep));
 
-            col = col < 0 ? maxHorizontalResolution - col : col;
-            col = col >= maxHorizontalResolution ? col - maxHorizontalResolution : col;
+            col = col < 0 ? scanlineResolution - col : col;
+            col = col >= scanlineResolution ? col - scanlineResolution : col;
+            col *= lcmHorizontalResolution / scanlineResolution ;
 
             if (rangeImage(row, col) != 0) {
                 LOG_WARN("Overwriting pixel at (", row, ", ", col, ") with range ", ranges(pointIdx),
@@ -95,7 +99,7 @@ namespace accurate_ri::RangeImageUtils {
                 const double originalPhi = verticalValues.angle + verticalValues.offset / range;
                 const double rangeXy = range * std::cos(originalPhi);
                 const double thetaOffset = horizontalValues.thetaOffset;
-                double originalTheta = col * 2 * M_PI / horizontalValues.resolution - M_PI; // TODO handle different resolutions per scanline
+                double originalTheta = col * 2 * M_PI / image.width - M_PI;
                 originalTheta += horizontalValues.offset / rangeXy + thetaOffset;
                 originalTheta = Utils::positiveFmod(originalTheta, 2 * M_PI);
 
