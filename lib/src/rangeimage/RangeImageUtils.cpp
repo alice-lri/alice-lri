@@ -62,13 +62,11 @@ namespace accurate_ri::RangeImageUtils {
 
         for (int32_t pointIdx = 0; pointIdx < phis.size(); ++pointIdx) {
             const uint32_t row = intrinsics.vertical.scanlinesCount - minIndices(pointIdx) - 1;
-            const int32_t scanlineResolution = intrinsics.horizontal.scanlines[row].resolution;
-            const double thetaStep = 2 * std::numbers::pi / static_cast<double>(scanlineResolution);
-            auto col = static_cast<int32_t>(std::round(correctedThetas(pointIdx) / thetaStep));
+            const double normalizedTheta =  correctedThetas(pointIdx) / (2 * std::numbers::pi);
+            auto col = static_cast<int32_t>(std::round(normalizedTheta * lcmHorizontalResolution));
 
-            col = col < 0 ? scanlineResolution - col : col;
-            col = col >= scanlineResolution ? col - scanlineResolution : col;
-            col *= lcmHorizontalResolution / scanlineResolution ;
+            col = col < 0 ? lcmHorizontalResolution - col : col;
+            col = col >= lcmHorizontalResolution ? col - lcmHorizontalResolution : col;
 
             if (rangeImage(row, col) != 0) {
                 LOG_WARN("Overwriting pixel at (", row, ", ", col, ") with range ", ranges(pointIdx),
