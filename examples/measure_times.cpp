@@ -1,0 +1,294 @@
+#include <chrono>
+#include <iostream>
+#include <vector>
+#include <string>
+#include <filesystem>
+#include <fstream>
+#include <numeric>
+#include <algorithm>
+#include <iomanip>
+#include <map>
+#include "accurate_ri/accurate_ri.hpp"
+#include "FileUtils.h"
+
+struct TimingResult {
+    std::string dataset;
+    std::string sequence;
+    std::string filename;
+    double trainTime;
+    double projectTime;
+    double unprojectTime;
+};
+
+struct DatasetConfig {
+    std::string name;
+    std::string basePath;
+    std::vector<std::string> sequences;
+};
+
+class TimeMeasurer {
+private:
+    std::vector<TimingResult> results;
+    
+    // Dataset configurations based on the existing structure
+    std::vector<DatasetConfig> getDatasetConfigs() {
+        return {
+            {
+                "kitti",
+                "../../Datasets/LiDAR/kitti/",
+                {
+                    "2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/",
+                    "2011_09_26/2011_09_26_drive_0002_sync/velodyne_points/data/",
+                    "2011_09_26/2011_09_26_drive_0005_sync/velodyne_points/data/",
+                    "2011_09_26/2011_09_26_drive_0009_sync/velodyne_points/data/",
+                    "2011_09_26/2011_09_26_drive_0011_sync/velodyne_points/data/"
+                }
+            },
+            {
+                "durlar", 
+                "../../Datasets/LiDAR/durlar/dataset/DurLAR/",
+                {
+                    "DurLAR_20210901/ouster_points/data/",
+                    "DurLAR_20210902/ouster_points/data/",
+                    "DurLAR_20210903/ouster_points/data/",
+                    "DurLAR_20210904/ouster_points/data/",
+                    "DurLAR_20211209/ouster_points/data/"
+                }
+            }
+        };
+    }
+    
+    std::string getFirstFrameFile(const std::string& sequencePath) {
+        try {
+            std::filesystem::path dir(sequencePath);
+            if (!std::filesystem::exists(dir)) {
+                std::cerr << "Directory does not exist: " << sequencePath << std::endl;
+                return "";
+            }
+            
+            std::vector<std::string> files;
+            for (const auto& entry : std::filesystem::directory_iterator(dir)) {
+                if (entry.is_regular_file() && entry.path().extension() == ".bin") {
+                    files.push_back(entry.path().filename().string());
+                }
+            }
+            
+            if (files.empty()) {
+                std::cerr << "No .bin files found in: " << sequencePath << std::endl;
+                return "";
+            }
+            
+            // Sort files to get the first one
+            std::sort(files.begin(), files.end());
+            return files[0];
+        } catch (const std::exception& e) {
+            std::cerr << "Error accessing directory " << sequencePath << ": " << e.what() << std::endl;
+            return "";
+        }
+    }
+    
+    TimingResult measureSequence(const std::string& dataset, const std::string& sequence, const std::string& filePath) {
+        TimingResult result;
+        result.dataset = dataset;
+        result.sequence = sequence;
+        result.filename = std::filesystem::path(filePath).filename().string();
+        
+        try {
+            std::cout << "Processing: " << filePath << std::endl;
+            
+            // Load the point cloud
+            FileUtils::Points points = FileUtils::loadBinaryFile(filePath, std::nullopt);
+            const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
+            
+            std::cout << "  Loaded " << cloud.x.size() << " points" << std::endl;
+            
+            // Measure training time
+            auto start = std::chrono::high_resolution_clock::now();
+            accurate_ri::IntrinsicsResult intrinsics = accurate_ri::train(cloud);
+            auto end = std::chrono::high_resolution_clock::now();
+            result.trainTime = std::chrono::duration<double>(end - start).count();
+            
+            std::cout << "  Train time: " << std::fixed << std::setprecision(6) << result.trainTime << "s" << std::endl;
+            
+            // Measure projection time
+            start = std::chrono::high_resolution_clock::now();
+            accurate_ri::RangeImage rangeImage = accurate_ri::projectToRangeImage(intrinsics, cloud);
+            end = std::chrono::high_resolution_clock::now();
+            result.projectTime = std::chrono::duration<double>(end - start).count();
+            
+            std::cout << "  Project time: " << std::fixed << std::setprecision(6) << result.projectTime << "s" << std::endl;
+            
+            // Measure unprojection time
+            start = std::chrono::high_resolution_clock::now();
+            accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(intrinsics, rangeImage);
+            end = std::chrono::high_resolution_clock::now();
+            result.unprojectTime = std::chrono::duration<double>(end - start).count();
+            
+            std::cout << "  Unproject time: " << std::fixed << std::setprecision(6) << result.unprojectTime << "s" << std::endl;
+            std::cout << "  Reconstructed " << reconstructed.x.size() << " points" << std::endl;
+            
+        } catch (const std::exception& e) {
+            std::cerr << "Error processing " << filePath << ": " << e.what() << std::endl;
+            result.trainTime = -1.0;
+            result.projectTime = -1.0;
+            result.unprojectTime = -1.0;
+        }
+        
+        return result;
+    }
+    
+public:
+    void measureAllDatasets() {
+        auto datasets = getDatasetConfigs();
+        
+        for (const auto& dataset : datasets) {
+            std::cout << "\n=== Processing dataset: " << dataset.name << " ===" << std::endl;
+            
+            for (const auto& sequence : dataset.sequences) {
+                std::string sequencePath = dataset.basePath + sequence;
+                std::cout << "\n--- Processing sequence: " << sequence << " ---" << std::endl;
+                
+                std::string firstFrame = getFirstFrameFile(sequencePath);
+                if (firstFrame.empty()) {
+                    std::cerr << "Could not find first frame for sequence: " << sequence << std::endl;
+                    continue;
+                }
+                
+                std::string fullPath = sequencePath + firstFrame;
+                TimingResult result = measureSequence(dataset.name, sequence, fullPath);
+                
+                if (result.trainTime >= 0) {  // Only add valid results
+                    results.push_back(result);
+                }
+            }
+        }
+    }
+    
+    void printResults() {
+        if (results.empty()) {
+            std::cout << "\nNo valid timing results collected." << std::endl;
+            return;
+        }
+        
+        std::cout << "\n" << std::string(100, '=') << std::endl;
+        std::cout << "TIMING RESULTS SUMMARY" << std::endl;
+        std::cout << std::string(100, '=') << std::endl;
+        
+        // Print individual results
+        std::cout << std::left;
+        std::cout << std::setw(10) << "Dataset" 
+                  << std::setw(40) << "Sequence" 
+                  << std::setw(20) << "Filename"
+                  << std::setw(12) << "Train(s)"
+                  << std::setw(12) << "Project(s)"
+                  << std::setw(12) << "Unproject(s)" << std::endl;
+        std::cout << std::string(100, '-') << std::endl;
+        
+        for (const auto& result : results) {
+            std::cout << std::setw(10) << result.dataset
+                      << std::setw(40) << result.sequence
+                      << std::setw(20) << result.filename
+                      << std::setw(12) << std::fixed << std::setprecision(6) << result.trainTime
+                      << std::setw(12) << std::fixed << std::setprecision(6) << result.projectTime
+                      << std::setw(12) << std::fixed << std::setprecision(6) << result.unprojectTime << std::endl;
+        }
+        
+        // Calculate and print aggregated results by dataset
+        std::cout << "\n" << std::string(100, '=') << std::endl;
+        std::cout << "AGGREGATED RESULTS BY DATASET (MEAN)" << std::endl;
+        std::cout << std::string(100, '=') << std::endl;
+        
+        // Group by dataset
+        std::map<std::string, std::vector<TimingResult>> datasetGroups;
+        for (const auto& result : results) {
+            datasetGroups[result.dataset].push_back(result);
+        }
+        
+        std::cout << std::left;
+        std::cout << std::setw(15) << "Dataset"
+                  << std::setw(8) << "Count"
+                  << std::setw(15) << "Mean Train(s)"
+                  << std::setw(15) << "Mean Project(s)"
+                  << std::setw(15) << "Mean Unproject(s)"
+                  << std::setw(15) << "Total Mean(s)" << std::endl;
+        std::cout << std::string(100, '-') << std::endl;
+        
+        for (const auto& [datasetName, datasetResults] : datasetGroups) {
+            double meanTrain = 0.0, meanProject = 0.0, meanUnproject = 0.0;
+            int validCount = 0;
+            
+            for (const auto& result : datasetResults) {
+                if (result.trainTime >= 0) {
+                    meanTrain += result.trainTime;
+                    meanProject += result.projectTime;
+                    meanUnproject += result.unprojectTime;
+                    validCount++;
+                }
+            }
+            
+            if (validCount > 0) {
+                meanTrain /= validCount;
+                meanProject /= validCount;
+                meanUnproject /= validCount;
+                double totalMean = meanTrain + meanProject + meanUnproject;
+                
+                std::cout << std::setw(15) << datasetName
+                          << std::setw(8) << validCount
+                          << std::setw(15) << std::fixed << std::setprecision(6) << meanTrain
+                          << std::setw(15) << std::fixed << std::setprecision(6) << meanProject
+                          << std::setw(15) << std::fixed << std::setprecision(6) << meanUnproject
+                          << std::setw(15) << std::fixed << std::setprecision(6) << totalMean << std::endl;
+            }
+        }
+    }
+    
+    void saveToCSV(const std::string& filename = "timing_results.csv") {
+        std::ofstream file(filename);
+        if (!file.is_open()) {
+            std::cerr << "Error: Could not open file " << filename << " for writing." << std::endl;
+            return;
+        }
+        
+        // Write header
+        file << "dataset,sequence,filename,train_time_s,project_time_s,unproject_time_s,total_time_s\n";
+        
+        // Write data
+        for (const auto& result : results) {
+            if (result.trainTime >= 0) {  // Only write valid results
+                double totalTime = result.trainTime + result.projectTime + result.unprojectTime;
+                file << result.dataset << ","
+                     << result.sequence << ","
+                     << result.filename << ","
+                     << std::fixed << std::setprecision(6) << result.trainTime << ","
+                     << std::fixed << std::setprecision(6) << result.projectTime << ","
+                     << std::fixed << std::setprecision(6) << result.unprojectTime << ","
+                     << std::fixed << std::setprecision(6) << totalTime << "\n";
+            }
+        }
+        
+        file.close();
+        std::cout << "\nResults saved to: " << filename << std::endl;
+    }
+};
+
+int main(int argc, char** argv) {
+    std::cout << "AccurateRI Timing Benchmark" << std::endl;
+    std::cout << "Measuring train, project, and unproject times for first frame of each sequence" << std::endl;
+    std::cout << "Datasets: KITTI and DurLAR" << std::endl;
+    std::cout << std::string(100, '=') << std::endl;
+    
+    TimeMeasurer measurer;
+    
+    // Measure timing for all datasets and sequences
+    measurer.measureAllDatasets();
+    
+    // Print results to console
+    measurer.printResults();
+    
+    // Save results to CSV file
+    measurer.saveToCSV();
+    
+    std::cout << "\nBenchmark completed!" << std::endl;
+    
+    return 0;
+}
