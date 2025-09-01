@@ -270,7 +270,7 @@ namespace accurate_ri {
         const double thetaOffset = diffToIdeal.mean();
         const double loss = (diffToIdeal - thetaOffset).abs().mean();
 
-        return ResolutionOffsetLoss(resolution, offset, thetaOffset, loss);
+        return ResolutionOffsetLoss(resolution, offset, thetaOffset, loss * resolution);
     }
 
     void HorizontalIntrinsicsEstimator::updateBasicScanlines(
