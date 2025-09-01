@@ -159,7 +159,7 @@ namespace accurate_ri {
             resolution,
             fitResult.slope,
             Utils::positiveFmod(fitResult.intercept, thetaStep),
-            *fitResult.mse * resolution
+            *fitResult.mse * resolution * resolution
         );
     }
 
