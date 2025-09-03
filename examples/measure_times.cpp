@@ -4,7 +4,6 @@
 #include <string>
 #include <filesystem>
 #include <fstream>
-#include <numeric>
 #include <algorithm>
 #include <iomanip>
 #include <map>
@@ -13,7 +12,6 @@
 
 struct TimingResult {
     std::string dataset;
-    std::string sequence;
     std::string filename;
     double trainTime;
     double projectTime;
@@ -38,60 +36,63 @@ private:
                 "../../Datasets/LiDAR/kitti/",
                 {
                     "2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/",
-                    "2011_09_26/2011_09_26_drive_0002_sync/velodyne_points/data/",
-                    "2011_09_26/2011_09_26_drive_0005_sync/velodyne_points/data/",
-                    "2011_09_26/2011_09_26_drive_0009_sync/velodyne_points/data/",
-                    "2011_09_26/2011_09_26_drive_0011_sync/velodyne_points/data/"
+                    "2011_09_26/2011_09_26_drive_0117_sync/velodyne_points/data/",
+                    "2011_09_28/2011_09_28_drive_0001_sync/velodyne_points/data/",
+                    "2011_09_28/2011_09_28_drive_0222_sync/velodyne_points/data/",
+                    "2011_09_29/2011_09_29_drive_0004_sync/velodyne_points/data/",
+                    "2011_09_29/2011_09_29_drive_0071_sync/velodyne_points/data/",
+                    "2011_09_30/2011_09_30_drive_0016_sync/velodyne_points/data/",
+                    "2011_09_30/2011_09_30_drive_0034_sync/velodyne_points/data/",
+                    "2011_10_03/2011_10_03_drive_0027_sync/velodyne_points/data/",
+                    "2011_10_03/2011_10_03_drive_0047_sync/velodyne_points/data/",
                 }
             },
             {
                 "durlar", 
                 "../../Datasets/LiDAR/durlar/dataset/DurLAR/",
                 {
+                    "DurLAR_20210716/ouster_points/data/",
                     "DurLAR_20210901/ouster_points/data/",
-                    "DurLAR_20210902/ouster_points/data/",
-                    "DurLAR_20210903/ouster_points/data/",
-                    "DurLAR_20210904/ouster_points/data/",
+                    "DurLAR_20211012/ouster_points/data/",
+                    "DurLAR_20211208/ouster_points/data/",
                     "DurLAR_20211209/ouster_points/data/"
                 }
             }
         };
     }
     
-    std::string getFirstFrameFile(const std::string& sequencePath) {
+    std::pair<std::string, std::string> getFirstAndLastFrameFile(const std::string& sequencePath) {
         try {
             std::filesystem::path dir(sequencePath);
             if (!std::filesystem::exists(dir)) {
                 std::cerr << "Directory does not exist: " << sequencePath << std::endl;
-                return "";
+                return {"", ""};
             }
-            
+
             std::vector<std::string> files;
             for (const auto& entry : std::filesystem::directory_iterator(dir)) {
                 if (entry.is_regular_file() && entry.path().extension() == ".bin") {
                     files.push_back(entry.path().filename().string());
                 }
             }
-            
+
             if (files.empty()) {
                 std::cerr << "No .bin files found in: " << sequencePath << std::endl;
-                return "";
+                return {"", ""};
             }
-            
-            // Sort files to get the first one
+
             std::sort(files.begin(), files.end());
-            return files[0];
+            return {files.front(), files.back()};
         } catch (const std::exception& e) {
             std::cerr << "Error accessing directory " << sequencePath << ": " << e.what() << std::endl;
-            return "";
+            return {"", ""};
         }
     }
     
-    TimingResult measureSequence(const std::string& dataset, const std::string& sequence, const std::string& filePath) {
+    TimingResult measureFrame(const std::string& dataset, const std::string& filePath, const std::string& displayPath) {
         TimingResult result;
         result.dataset = dataset;
-        result.sequence = sequence;
-        result.filename = std::filesystem::path(filePath).filename().string();
+        result.filename = displayPath;
         
         try {
             std::cout << "Processing: " << filePath << std::endl;
@@ -148,17 +149,28 @@ public:
                 std::string sequencePath = dataset.basePath + sequence;
                 std::cout << "\n--- Processing sequence: " << sequence << " ---" << std::endl;
                 
-                std::string firstFrame = getFirstFrameFile(sequencePath);
+                auto [firstFrame, lastFrame] = getFirstAndLastFrameFile(sequencePath);
                 if (firstFrame.empty()) {
                     std::cerr << "Could not find first frame for sequence: " << sequence << std::endl;
                     continue;
                 }
-                
-                std::string fullPath = sequencePath + firstFrame;
-                TimingResult result = measureSequence(dataset.name, sequence, fullPath);
-                
-                if (result.trainTime >= 0) {  // Only add valid results
-                    results.push_back(result);
+
+                std::vector<std::string> frames;
+                frames.push_back(firstFrame);
+                if (dataset.name == "durlar") {
+                    frames.push_back(lastFrame);
+                }
+
+                for (const auto& frame : frames) {
+                    std::string fullPath = sequencePath + frame;
+                    std::string displayPath = sequence + frame;
+                    TimingResult result = measureFrame(dataset.name, fullPath, displayPath);
+
+                    if (result.trainTime >= 0) {  // Only add valid results
+                        results.push_back(result);
+                    } else {
+                        throw std::runtime_error("Problem measuring times for file: " + fullPath);
+                    }
                 }
             }
         }
@@ -177,8 +189,7 @@ public:
         // Print individual results
         std::cout << std::left;
         std::cout << std::setw(10) << "Dataset" 
-                  << std::setw(40) << "Sequence" 
-                  << std::setw(20) << "Filename"
+                  << std::setw(60) << "Filename"
                   << std::setw(12) << "Train(s)"
                   << std::setw(12) << "Project(s)"
                   << std::setw(12) << "Unproject(s)" << std::endl;
@@ -186,8 +197,7 @@ public:
         
         for (const auto& result : results) {
             std::cout << std::setw(10) << result.dataset
-                      << std::setw(40) << result.sequence
-                      << std::setw(20) << result.filename
+                      << std::setw(60) << result.filename
                       << std::setw(12) << std::fixed << std::setprecision(6) << result.trainTime
                       << std::setw(12) << std::fixed << std::setprecision(6) << result.projectTime
                       << std::setw(12) << std::fixed << std::setprecision(6) << result.unprojectTime << std::endl;
@@ -250,14 +260,13 @@ public:
         }
         
         // Write header
-        file << "dataset,sequence,filename,train_time_s,project_time_s,unproject_time_s,total_time_s\n";
+        file << "dataset,filename,train_time_s,project_time_s,unproject_time_s,total_time_s\n";
         
         // Write data
         for (const auto& result : results) {
             if (result.trainTime >= 0) {  // Only write valid results
                 double totalTime = result.trainTime + result.projectTime + result.unprojectTime;
                 file << result.dataset << ","
-                     << result.sequence << ","
                      << result.filename << ","
                      << std::fixed << std::setprecision(6) << result.trainTime << ","
                      << std::fixed << std::setprecision(6) << result.projectTime << ","
@@ -273,13 +282,13 @@ public:
 
 int main(int argc, char** argv) {
     std::cout << "AccurateRI Timing Benchmark" << std::endl;
-    std::cout << "Measuring train, project, and unproject times for first frame of each sequence" << std::endl;
+    std::cout << "Measuring train, project, and unproject times" << std::endl;
     std::cout << "Datasets: KITTI and DurLAR" << std::endl;
     std::cout << std::string(100, '=') << std::endl;
     
     TimeMeasurer measurer;
     
-    // Measure timing for all datasets and sequences
+    // Measure timing for all datasets
     measurer.measureAllDatasets();
     
     // Print results to console
