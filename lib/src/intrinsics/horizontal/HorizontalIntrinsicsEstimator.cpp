@@ -9,7 +9,7 @@
 #include "BuildOptions.h"
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
-#include "intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.h"
+#include "intrinsics/horizontal/helper/SegmentedMedianLinearRegressor.h"
 #include "helper/PeriodicFit.h"
 #include "math/Stats.h"
 #include "plotty/matplotlibcpp.hpp"
@@ -146,11 +146,10 @@ namespace accurate_ri {
             scanlineArray.getThetas(scanlineIdx), resolution, true
         );
 
-        const SegmentedMedianSlopeEstimator slopeEstimator(
-            Constant::INV_RANGES_BREAK_THRESHOLD, thetaStep / 4, Constant::MAX_OFFSET, thetaStep
+        const SegmentedMedianLinearRegressor segmentedRegressor(
+            Constant::INV_RANGES_SEGMENT_THRESHOLD, thetaStep / 4, Constant::MAX_OFFSET, thetaStep
         );
-
-        const Stats::LRResult lrGuess = slopeEstimator.estimateSlope(invRangesXy, diffToIdealReconstructed);
+        const Stats::LRResult lrGuess = segmentedRegressor.fit(invRangesXy, diffToIdealReconstructed);
 
         LOG_DEBUG("Slope guess: ", lrGuess.slope, ", Intercept guess: ", lrGuess.intercept);
         const Stats::LRResult fitResult = PeriodicFit::fit(invRangesXy, diffToIdeal, thetaStep, lrGuess.slope);

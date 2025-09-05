@@ -1,21 +1,18 @@
 # pragma once
 #include <vector>
-#include <Eigen/Dense>
-
 #include "math/Stats.h"
 
 namespace accurate_ri {
-    class SegmentedMedianSlopeEstimator {
+    class SegmentedMedianLinearRegressor {
     private:
-        struct SlopesWeights {
+        struct Segments {
             std::vector<double> slopes;
             std::vector<double> intercepts;
-            std::vector<double> rmses;
             std::vector<int32_t> weights;
 
             void reserve(uint64_t count);
 
-            void append(double slope, double intercept, double mse, int32_t weight);
+            void append(double slope, double intercept, int32_t weight);
 
             [[nodiscard]] uint64_t count() const;
         };
@@ -26,7 +23,7 @@ namespace accurate_ri {
         const double interceptMod;
 
     public:
-        SegmentedMedianSlopeEstimator(
+        SegmentedMedianLinearRegressor(
             const double segmentThresholdX, const double segmentThresholdY, const double maxSlope,
             const double interceptMod
         ) : segmentThresholdX(segmentThresholdX),
@@ -34,21 +31,14 @@ namespace accurate_ri {
             maxSlope(maxSlope),
             interceptMod(interceptMod) {}
 
-        [[nodiscard]] Stats::LRResult estimateSlope(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
-
-        [[nodiscard]] double computeResolutionLoss(
-            const Eigen::ArrayXd &x, const Eigen::ArrayXd &thetas, uint32_t resolution
-        ) const;
+        [[nodiscard]] Stats::LRResult fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
 
     private:
-        void processBlock(
+        void processSegment(
             const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, int32_t startIdx, int32_t endIdx,
-            SlopesWeights &slopeWeights
+            Segments &slopeWeights
         ) const;
 
-        void processBlockResolution(
-            const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, int32_t startIdx, int32_t endIdx, Eigen::ArrayXd &out,
-            int32_t &writeCount
-        ) const;
+        [[nodiscard]] Segments segmentAndFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
     };
 } // accurate_ri
