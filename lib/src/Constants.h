@@ -2,6 +2,8 @@
 #include <cstdint>
 
 namespace accurate_ri::Constant {
+    constexpr double TWO_PI = 2.0 * std::numbers::pi;
+
     constexpr uint64_t VERTICAL_MAX_ITERATIONS = 10000;
     constexpr double MAX_OFFSET = 0.5;
     constexpr double OFFSET_STEP = 1e-3;

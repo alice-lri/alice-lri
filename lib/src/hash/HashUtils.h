@@ -5,7 +5,7 @@ namespace accurate_ri {
 
 class HashUtils {
 public:
-    static uint64_t knuth_uint(uint64_t x);
+    static uint64_t knuthHash(uint64_t x);
 };
 
 } // accurate_ri

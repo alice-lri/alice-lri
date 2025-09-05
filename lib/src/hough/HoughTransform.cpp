@@ -55,7 +55,7 @@ namespace accurate_ri {
             if (previousY != -1) {
                 accumulator(y, x) += operation == HoughOperation::ADD? 1 : -1;
                 if (mode == HoughMode::VOTES_AND_HASHES) {
-                    hashAccumulator(y, x) ^= HashUtils::knuth_uint(pointIndex);
+                    hashAccumulator(y, x) ^= HashUtils::knuthHash(pointIndex);
                 }
 
                 if constexpr (BuildOptions::USE_HOUGH_CONTINUITY) {
@@ -87,7 +87,7 @@ namespace accurate_ri {
             hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() =
                 hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).unaryExpr(
                     [&](uint64_t val) {
-                        return val ^ HashUtils::knuth_uint(pointIndex); // Equivalent to ^= but for Eigen
+                        return val ^ HashUtils::knuthHash(pointIndex); // Equivalent to ^= but for Eigen
                     }
                 );
         }

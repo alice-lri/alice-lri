@@ -1,68 +1,25 @@
 #include "PeriodicFit.h"
 
+#include "Constants.h"
+#include "math/Trigonometry.h"
 #include "plotty/matplotlibcpp.hpp"
 
-// TODO reuse buffers and check performance
+
 namespace accurate_ri {
-    struct NewMultiLineResult {
-        Eigen::ArrayXd residuals;
-        Eigen::ArrayXi linesIdx;
-    };
 
-    constexpr int TRIG_TABLE_SIZE = 65536;
+    Stats::LRResult PeriodicFit::fit(
+        const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const double period, const double slopeGuess
+    ) {
+        NewMultiLineResult multiLineResult;
+        computePeriodicResiduals(x, y, period, slopeGuess, 0, multiLineResult);
 
-    const std::array<double, TRIG_TABLE_SIZE>& getSinTable() {
-        static const std::array<double, TRIG_TABLE_SIZE> lut = [] {
-            std::array<double, TRIG_TABLE_SIZE> table{};
-            for (int i = 0; i < TRIG_TABLE_SIZE; ++i) {
-                double angle = (2.0 * M_PI * i) / TRIG_TABLE_SIZE;
-                table[i] = std::sin(angle);
-            }
-            return table;
-        }();
-        return lut;
+        const double intercept = computeCircularMeanIntercept(multiLineResult.residuals, period);
+        computePeriodicResiduals(x, y, period, slopeGuess, intercept, multiLineResult);
+
+        return refineFit(x, y, multiLineResult, period);
     }
 
-    const std::array<double, TRIG_TABLE_SIZE>& getCosTable() {
-        static const std::array<double, TRIG_TABLE_SIZE> lut = [] {
-            std::array<double, TRIG_TABLE_SIZE> table{};
-            for (int i = 0; i < TRIG_TABLE_SIZE; ++i) {
-                double angle = (2.0 * M_PI * i) / TRIG_TABLE_SIZE;
-                table[i] = std::cos(angle);
-            }
-            return table;
-        }();
-        return lut;
-    }
-
-    double computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, const double period) {
-        constexpr double twoPi = 2.0 * M_PI;
-
-        const auto& sinLUT = getSinTable();
-        const auto& cosLUT = getCosTable();
-
-        Eigen::ArrayXd residualsMod = residuals - period * (residuals / period).floor();
-
-        residualsMod *= (TRIG_TABLE_SIZE / period);
-        residualsMod = residualsMod.min(TRIG_TABLE_SIZE - 1);
-
-        double sinSum = 0.0, cosSum = 0.0;
-        for (const double residual : residualsMod) {
-            const int idx = static_cast<int>(residual);
-            sinSum += sinLUT[idx];
-            cosSum += cosLUT[idx];
-        }
-
-        double circularMean = std::atan2(sinSum / residualsMod.size(), cosSum / residualsMod.size());
-
-        if (circularMean < 0) {
-            circularMean += twoPi;
-        }
-
-        return (period * circularMean) / twoPi;
-    }
-
-    void computePeriodicResiduals(
+    void PeriodicFit::computePeriodicResiduals(
         const Eigen::ArrayXd& x, const Eigen::ArrayXd& y, const double period, const double slope,
         const double intercept, NewMultiLineResult& outResult
     ) {
@@ -71,10 +28,33 @@ namespace accurate_ri {
         outResult.residuals = outResult.residuals - outResult.linesIdx.cast<double>() * period;
     }
 
-    Stats::LRResult refineFit(
+    double PeriodicFit::computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, const double period) {
+        Eigen::ArrayXd residualsMod = residuals - period * (residuals / period).floor();
+        residualsMod *= Trigonometry::TRIG_TABLE_SIZE / period;
+        residualsMod = residualsMod.min(Trigonometry::TRIG_TABLE_SIZE - 1);
+
+        double sinSum = 0.0, cosSum = 0.0;
+        for (const double residual : residualsMod) {
+            const int idx = static_cast<int>(residual);
+            sinSum += Trigonometry::sinIndex(idx);
+            cosSum += Trigonometry::cosIndex(idx);
+        }
+
+        sinSum /= static_cast<double>(residualsMod.size());
+        cosSum /= static_cast<double>(residualsMod.size());
+        double circularMean = std::atan2(sinSum, cosSum);
+
+        if (circularMean < 0) {
+            circularMean += Constant::TWO_PI;
+        }
+
+        return (period * circularMean) / Constant::TWO_PI;
+    }
+
+    Stats::LRResult PeriodicFit::refineFit(
         const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, NewMultiLineResult &multiLineResult, const double period
     ) {
-        const int32_t halfSize = x.size() / 2;
+        const int32_t halfSize = static_cast<int32_t>(x.size()) / 2;
         Eigen::ArrayXd shiftedY = y - multiLineResult.linesIdx.cast<double>() * period;
 
         const Stats::LRResult fitResultFirst = Stats::linearRegression(x.head(halfSize), shiftedY.head(halfSize), true);
@@ -87,17 +67,5 @@ namespace accurate_ri {
         const Stats::LRResult fitResultFinal = Stats::linearRegression(x, shiftedY, true);
 
         return fitResultAll.mse < fitResultFinal.mse ? fitResultAll : fitResultFinal;
-    }
-
-    Stats::LRResult PeriodicFit::fit(
-        const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const double period, const double slopeGuess
-    ) {
-        NewMultiLineResult multiLineResult;
-        computePeriodicResiduals(x, y, period, slopeGuess, 0, multiLineResult);
-
-        const double intercept = computeCircularMeanIntercept(multiLineResult.residuals, period);
-        computePeriodicResiduals(x, y, period, slopeGuess, intercept, multiLineResult);
-
-        return refineFit(x, y, multiLineResult, period);
     }
 }

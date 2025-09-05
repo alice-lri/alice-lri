@@ -1,5 +1,4 @@
 #pragma once
-#include <cstdint>
 #include <Eigen/Core>
 
 namespace accurate_ri::HorizontalMath {
