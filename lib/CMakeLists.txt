@@ -98,8 +98,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/rangeimage/RangeImageUtils.cpp
         src/rangeimage/RangeImageUtils.h
         src/Constants.h
-        src/intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.cpp
-        src/intrinsics/horizontal/helper/SegmentedMedianSlopeEstimator.h
+        src/intrinsics/horizontal/helper/SegmentedMedianLinearRegressor.cpp
+        src/intrinsics/horizontal/helper/SegmentedMedianLinearRegressor.h
         src/public_structs.cpp
         src/intrinsics/vertical/estimation/VerticalScanlineLimits.cpp
         src/intrinsics/vertical/estimation/VerticalScanlineLimits.h
