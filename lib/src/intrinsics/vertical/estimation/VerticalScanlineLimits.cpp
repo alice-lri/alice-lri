@@ -35,7 +35,7 @@ namespace accurate_ri {
     // TODO this could be a generic line thing. Take a look at conceptually section in scanlimie limits notebook
     ScanlineLimits VerticalScanlineLimits::computeScanlineLimits(
         const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
-        const OffsetAngleMargin &margin, const double invRangesShift // TODO unused
+        const OffsetAngleMargin &margin
     ) {
         PROFILE_SCOPE("VerticalScanlineLimits::computeScanlineLimits");
         const auto &inv = points.getInvRanges();

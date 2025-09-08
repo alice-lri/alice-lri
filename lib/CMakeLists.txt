@@ -109,8 +109,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/intrinsics/horizontal/helper/PeriodicFitter.h
         src/math/Trigonometry.h
         src/math/Trigonometry.cpp
-        src/intrinsics/vertical/estimation/VerticalHeuristicEstimator.cpp
-        src/intrinsics/vertical/estimation/VerticalHeuristicEstimator.h
+        src/intrinsics/vertical/estimation/VerticalHeuristicsEstimator.cpp
+        src/intrinsics/vertical/estimation/VerticalHeuristicsEstimator.h
 )
 
 set(_accurate_ri_private_include_dirs

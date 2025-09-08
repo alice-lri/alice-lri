@@ -53,7 +53,6 @@ namespace accurate_ri::Utils {
         return medianValue;
     }
 
-    // TODO make sure to use this function everywhere
     inline Eigen::ArrayXi eigenMaskToIndices(const Eigen::ArrayX<bool> &mask) {
         Eigen::ArrayXi indices(mask.count());
 

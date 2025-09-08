@@ -130,7 +130,7 @@ namespace accurate_ri {
 
         VerticalBounds errorBounds = VerticalScanlineLimits::computeErrorBounds(points, houghMax.maxValues.offset);
         ScanlineLimits scanlineLimits = VerticalScanlineLimits::computeScanlineLimits(
-            points, errorBounds.final, houghMax.maxValues, margin, 0
+            points, errorBounds.final, houghMax.maxValues, margin
         );
 
         LOG_INFO("Minimum limit width (Hough): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff());
@@ -143,7 +143,8 @@ namespace accurate_ri {
             houghMax.maxValues, 0
         );
 
-        std::optional<ScanlineEstimationResult> estimationResultOpt = VerticalScanlineEstimator::estimateScanline(
+        VerticalScanlineEstimator scanlineEstimator;
+        std::optional<ScanlineEstimationResult> estimationResultOpt = scanlineEstimator.estimate(
             points, *scanlinePool, errorBounds, scanlineLimits
         );
 
