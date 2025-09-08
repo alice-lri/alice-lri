@@ -10,7 +10,7 @@
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "intrinsics/horizontal/helper/SegmentedMedianLinearRegressor.h"
-#include "helper/PeriodicFit.h"
+#include "helper/PeriodicFitter.h"
 #include "math/Stats.h"
 #include "plotty/matplotlibcpp.hpp"
 #include "utils/Logger.h"
@@ -21,7 +21,7 @@ namespace accurate_ri {
     HorizontalIntrinsicsResult HorizontalIntrinsicsEstimator::estimate(
         const PointArray &points, const VerticalIntrinsicsResult &vertical
     ) {
-        PROFILE_SCOPE("CoarseToFineHorizontalIntrinsicsEstimator::estimate");
+        PROFILE_SCOPE("HorizontalIntrinsicsEstimator::estimate");
         HorizontalIntrinsicsResult result;
         result.scanlines.resize(vertical.scanlinesCount);
 
@@ -152,7 +152,7 @@ namespace accurate_ri {
         const Stats::LRResult lrGuess = segmentedRegressor.fit(invRangesXy, diffToIdealReconstructed);
 
         LOG_DEBUG("Slope guess: ", lrGuess.slope, ", Intercept guess: ", lrGuess.intercept);
-        const Stats::LRResult fitResult = PeriodicFit::fit(invRangesXy, diffToIdeal, thetaStep, lrGuess.slope);
+        const Stats::LRResult fitResult = PeriodicFitter::fit(invRangesXy, diffToIdeal, thetaStep, lrGuess.slope);
 
         return ResolutionOffsetLoss(
             resolution,
@@ -192,7 +192,7 @@ namespace accurate_ri {
     }
 
     std::unordered_set<int32_t> HorizontalIntrinsicsEstimator::getUniqueResolutions(
-        std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
+        const std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
     ) {
         std::unordered_set<int32_t> otherResolutions;
 
@@ -208,7 +208,7 @@ namespace accurate_ri {
     }
 
     std::unordered_set<double> HorizontalIntrinsicsEstimator::getUniqueOffsets(
-        std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
+        const std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
     ) {
         std::unordered_set<double> otherOffsets;
 

@@ -1,11 +1,8 @@
 #pragma once
-#include <cstdint>
 #include <optional>
 #include <vector>
-
 #include "intrinsics/vertical/VerticalStructs.h"
 #include "point/PointArray.h"
-#include "utils/Logger.h"
 
 namespace accurate_ri {
     enum class HoughOperation {
@@ -111,22 +108,9 @@ namespace accurate_ri {
 
         void restoreVotes(uint64_t hash, int64_t votes);
 
-        void ensureHashEquals(Eigen::Matrix<unsigned long, -1, -1> &matrix);
-
-        void ensureAccEquals(Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic> &matrix);
-
-        void restorePoints(const PointArray &points, const Eigen::ArrayXi &indices);
-
-        void eraseByPoints(const PointArray &points, const Eigen::ArrayXi &indices);
-
         void addVotes(const PointArray &points, const Eigen::ArrayXi &indices);
 
         void removeVotes(const PointArray &points, const Eigen::ArrayXi &indices);
-
-        // TODO remove
-        void debugHough() {
-            LOG_INFO("Hough [9654   860]: ", accumulator(9654, 860));
-        }
 
     private:
         /**
@@ -134,7 +118,7 @@ namespace accurate_ri {
          * @param pointIndex Index of the point.
          * @param points Vector of phi values.
          * @param operation Multiplier for the vote value.
-         * @param updateHashes
+         * @param mode Mode to determine if hashes should be updated.
          */
         inline void updateAccumulatorForPoint(uint64_t pointIndex, const PointArray &points, HoughOperation operation, HoughMode mode);
 
@@ -154,12 +138,12 @@ namespace accurate_ri {
          * @param y The current y value in the accumulator.
          * @param previousY The y value of the previous point.
          * @param operation
-         * @param updateHashes
+         * @param mode Mode to determine if hashes should be updated.
          */
         inline void voteForDiscontinuities(
-            uint64_t pointIndex, size_t x, int32_t y, int32_t previousY, HoughOperation operation, HoughMode mode
+            uint64_t pointIndex, int64_t x, int32_t y, int32_t previousY, HoughOperation operation, HoughMode mode
         );
 
-        HoughCell indicesToCell(const std::pair<size_t, size_t> &indices);
+        HoughCell indicesToCell(const std::pair<int64_t, int64_t> &indices);
     };
 } // accurate_ri

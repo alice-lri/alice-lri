@@ -43,7 +43,7 @@ namespace accurate_ri {
     ) {
         int32_t previousY = -1;
 
-        for (size_t x = 0; x < xCount; x++) {
+        for (int64_t x = 0; x < xCount; x++) {
             const double rangeVal = points.getRange(pointIndex);
             const double yVal = points.getPhi(pointIndex) - getXValue(x) / rangeVal;
             const auto y = static_cast<int32_t>(std::round((yVal - yMin) / yStep));
@@ -68,38 +68,38 @@ namespace accurate_ri {
     }
 
     inline void HoughTransform::voteForDiscontinuities(
-        const uint64_t pointIndex, const size_t x, const int32_t y, const int32_t previousY,
+        const uint64_t pointIndex, const int64_t x, const int32_t y, const int32_t previousY,
         const HoughOperation operation, const HoughMode mode
     ) {
         assert(x > 0);
 
-        const int32_t yMin = std::min(previousY, y);
-        const int32_t yMax = std::max(previousY, y);
+        const int32_t minY = std::min(previousY, y);
+        const int32_t maxY = std::max(previousY, y);
 
-        if (yMin == yMax) {
+        if (minY == maxY) {
             return;
         }
 
-        auto &&accumulatorBlock = accumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array();
+        auto &&accumulatorBlock = accumulator.block(minY + 1, x - 1, maxY - minY - 1, 2).array();
         accumulatorBlock += operation == HoughOperation::ADD? 1 : -1;
 
         if (mode == HoughMode::VOTES_AND_HASHES) {
-            hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).array() =
-                hashAccumulator.block(yMin + 1, x - 1, yMax - yMin - 1, 2).unaryExpr(
-                    [&](uint64_t val) {
+            hashAccumulator.block(minY + 1, x - 1, maxY - minY - 1, 2).array() =
+                hashAccumulator.block(minY + 1, x - 1, maxY - minY - 1, 2).unaryExpr(
+                    [&](const uint64_t val) {
                         return val ^ HashUtils::knuthHash(pointIndex); // Equivalent to ^= but for Eigen
                     }
                 );
         }
     }
 
-    std::optional<HoughCell> HoughTransform::findMaximum(std::optional<double> averageX) {
+    std::optional<HoughCell> HoughTransform::findMaximum(const std::optional<double> averageX) {
         PROFILE_SCOPE("HoughTransform::findMaximum");
         std::vector<std::pair<size_t, size_t> > maxIndices;
         int64_t maxVotes = 0;
 
-        for (size_t y = 0; y < yCount; y++) {
-            for (size_t x = 0; x < xCount; x++) {
+        for (int64_t y = 0; y < yCount; y++) {
+            for (int64_t x = 0; x < xCount; x++) {
                 const int64_t votes = accumulator(y, x);
                 if (votes > maxVotes && votes > 0) {
                     maxVotes = votes;
@@ -158,10 +158,10 @@ namespace accurate_ri {
         }
     }
 
-    HoughCell HoughTransform::indicesToCell(const std::pair<size_t, size_t> &indices) {
+    HoughCell HoughTransform::indicesToCell(const std::pair<int64_t, int64_t> &indices) {
         return {
-            indices.first,
-            indices.second,
+            static_cast<uint64_t>(indices.first),
+            static_cast<uint64_t>(indices.second),
             getXValue(indices.first),
             getYValue(indices.second),
             accumulator(indices.second, indices.first),

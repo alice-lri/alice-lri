@@ -103,12 +103,14 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/public_structs.cpp
         src/intrinsics/vertical/estimation/VerticalScanlineLimits.cpp
         src/intrinsics/vertical/estimation/VerticalScanlineLimits.h
-        src/intrinsics/vertical/estimation/VerticalScanlineEstimation.cpp
-        src/intrinsics/vertical/estimation/VerticalScanlineEstimation.h
-        src/intrinsics/horizontal/helper/PeriodicFit.cpp
-        src/intrinsics/horizontal/helper/PeriodicFit.h
+        src/intrinsics/vertical/estimation/VerticalScanlineEstimator.cpp
+        src/intrinsics/vertical/estimation/VerticalScanlineEstimator.h
+        src/intrinsics/horizontal/helper/PeriodicFitter.cpp
+        src/intrinsics/horizontal/helper/PeriodicFitter.h
         src/math/Trigonometry.h
         src/math/Trigonometry.cpp
+        src/intrinsics/vertical/estimation/VerticalHeuristicEstimator.cpp
+        src/intrinsics/vertical/estimation/VerticalHeuristicEstimator.h
 )
 
 set(_accurate_ri_private_include_dirs

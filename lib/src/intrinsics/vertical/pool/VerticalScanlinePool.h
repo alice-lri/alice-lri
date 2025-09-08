@@ -26,31 +26,31 @@ namespace accurate_ri {
 
         FullScanlines extractFullSortedScanlines();
 
-        inline Eigen::ArrayXi getScanlinesIds(const Eigen::ArrayXi &pointsIndices) const {
+        Eigen::ArrayXi getScanlinesIds(const Eigen::ArrayXi &pointsIndices) const {
             return pointsScanlinesIds(pointsIndices);
         }
 
-        inline void restoreByHash(const uint64_t hash, const int64_t votes) {
+        void restoreByHash(const uint64_t hash, const int64_t votes) {
             hough.restoreVotes(hash, votes);
         }
 
-        inline void invalidateByHash(const uint64_t hash) {
+        void invalidateByHash(const uint64_t hash) {
             hough.eraseByHash(hash);
         }
 
-        inline void removeVotes(const PointArray& points, const Eigen::ArrayXi &indices) {
+        void removeVotes(const PointArray& points, const Eigen::ArrayXi &indices) {
             hough.removeVotes(points, indices);
         }
 
-        inline const ScanlineInfo& getScanlineById(const uint32_t id) const {
+        const ScanlineInfo& getScanlineById(const uint32_t id) const {
             return scanlineInfoMap.at(id);
         }
 
-        inline bool anyUnassigned() const { return unassignedPoints > 0; }
+        bool anyUnassigned() const { return unassignedPoints > 0; }
 
-        inline int64_t getUnassignedPoints() const { return unassignedPoints; }
+        int64_t getUnassignedPoints() const { return unassignedPoints; }
 
-        inline const Eigen::ArrayXi& getPointsScanlinesIds() const { return pointsScanlinesIds; }
+        const Eigen::ArrayXi& getPointsScanlinesIds() const { return pointsScanlinesIds; }
 
         template<typename Func>
         void forEachScanline(Func&& func) const {
@@ -78,10 +78,5 @@ namespace accurate_ri {
         [[nodiscard]] uint32_t getXCount() const { return hough.getXCount(); }
 
         [[nodiscard]] uint32_t getYCount() const { return hough.getYCount(); }
-
-        // TODO remove
-        void debugHough() {
-            hough.debugHough();
-        }
     };
 } // accurate_ri

@@ -64,10 +64,10 @@ namespace accurate_ri {
     };
 
     struct ACCURATE_RI_API VerticalIntrinsicsResult {
-        uint32_t iterations = 0;
-        uint32_t scanlinesCount = 0;
-        uint32_t unassignedPoints = 0;
-        uint32_t pointsCount = 0;
+        int32_t iterations = 0;
+        int32_t scanlinesCount = 0;
+        int32_t unassignedPoints = 0;
+        int32_t pointsCount = 0;
         EndReason endReason = EndReason::MAX_ITERATIONS;
         FullScanlines fullScanlines;
     };

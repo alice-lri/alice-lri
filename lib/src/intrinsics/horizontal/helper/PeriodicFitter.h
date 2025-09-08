@@ -3,7 +3,7 @@
 
 
 namespace accurate_ri {
-    class PeriodicFit {
+    class PeriodicFitter {
     public:
         static Stats::LRResult fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, double period, double slopeGuess);
 

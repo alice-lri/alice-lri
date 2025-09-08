@@ -1,4 +1,4 @@
-#include "PeriodicFit.h"
+#include "PeriodicFitter.h"
 
 #include "Constants.h"
 #include "math/Trigonometry.h"
@@ -7,7 +7,7 @@
 
 namespace accurate_ri {
 
-    Stats::LRResult PeriodicFit::fit(
+    Stats::LRResult PeriodicFitter::fit(
         const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const double period, const double slopeGuess
     ) {
         NewMultiLineResult multiLineResult;
@@ -19,7 +19,7 @@ namespace accurate_ri {
         return refineFit(x, y, multiLineResult, period);
     }
 
-    void PeriodicFit::computePeriodicResiduals(
+    void PeriodicFitter::computePeriodicResiduals(
         const Eigen::ArrayXd& x, const Eigen::ArrayXd& y, const double period, const double slope,
         const double intercept, NewMultiLineResult& outResult
     ) {
@@ -28,7 +28,7 @@ namespace accurate_ri {
         outResult.residuals = outResult.residuals - outResult.linesIdx.cast<double>() * period;
     }
 
-    double PeriodicFit::computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, const double period) {
+    double PeriodicFitter::computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, const double period) {
         Eigen::ArrayXd residualsMod = residuals - period * (residuals / period).floor();
         residualsMod *= Trigonometry::TRIG_TABLE_SIZE / period;
         residualsMod = residualsMod.min(Trigonometry::TRIG_TABLE_SIZE - 1);
@@ -51,7 +51,7 @@ namespace accurate_ri {
         return (period * circularMean) / Constant::TWO_PI;
     }
 
-    Stats::LRResult PeriodicFit::refineFit(
+    Stats::LRResult PeriodicFitter::refineFit(
         const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, NewMultiLineResult &multiLineResult, const double period
     ) {
         const int32_t halfSize = static_cast<int32_t>(x.size()) / 2;

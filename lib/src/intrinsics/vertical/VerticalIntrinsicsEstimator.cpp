@@ -12,7 +12,7 @@
 #include <nlohmann/json.hpp>
 #include "Constants.h"
 #include "BuildOptions.h"
-#include "intrinsics/vertical/estimation/VerticalScanlineEstimation.h"
+#include "intrinsics/vertical/estimation/VerticalScanlineEstimator.h"
 #include "intrinsics/vertical/estimation/VerticalScanlineLimits.h"
 
 namespace accurate_ri {
@@ -143,7 +143,7 @@ namespace accurate_ri {
             houghMax.maxValues, 0
         );
 
-        std::optional<ScanlineEstimationResult> estimationResultOpt = VerticalScanlineEstimation::estimateScanline(
+        std::optional<ScanlineEstimationResult> estimationResultOpt = VerticalScanlineEstimator::estimateScanline(
             points, *scanlinePool, errorBounds, scanlineLimits
         );
 
@@ -180,10 +180,10 @@ namespace accurate_ri {
         LOG_INFO("Number of unassigned points: ", unassignedPoints);
 
         return VerticalIntrinsicsResult{
-            .iterations = static_cast<uint32_t>(iteration),
-            .scanlinesCount = static_cast<uint32_t>(fullScanlines.scanlines.size()),
-            .unassignedPoints = static_cast<uint32_t>(unassignedPoints),
-            .pointsCount = static_cast<uint32_t>(points.size()),
+            .iterations = static_cast<int32_t>(iteration),
+            .scanlinesCount = static_cast<int32_t>(fullScanlines.scanlines.size()),
+            .unassignedPoints = static_cast<int32_t>(unassignedPoints),
+            .pointsCount = static_cast<int32_t>(points.size()),
             .endReason = endReason,
             .fullScanlines = std::move(fullScanlines)
         };
