@@ -35,15 +35,15 @@ namespace accurate_ri {
     }
 
 
-    nlohmann::json heuristicScanlineToJson(const HeuristicScanline &hsl) {
+    nlohmann::json heuristicScanlineToJson(const ValueConfInterval &hsl) {
         nlohmann::json j;
-        j["offset"] = hsl.offset;
-        j["offsetCi"] = realMarginToJson(hsl.offsetCi);
+        j["offset"] = hsl.value;
+        j["offsetCi"] = realMarginToJson(hsl.ci);
         return j;
     }
 
-    HeuristicScanline heuristicScanlineFromJson(const nlohmann::json &j) {
-        return HeuristicScanline{
+    ValueConfInterval heuristicScanlineFromJson(const nlohmann::json &j) {
+        return ValueConfInterval{
             j.at("offset"),
             realMarginFromJson(j.at("offsetCi"))
         };

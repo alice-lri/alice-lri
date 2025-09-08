@@ -48,5 +48,14 @@ namespace accurate_ri {
         static FitConvergenceState computeConvergenceState(
             const Eigen::ArrayX<bool> &oldMask, const Eigen::ArrayX<bool> &newMask, FitConvergenceState oldState
         );
+
+        static ScanlineFitResult makeFitResult(
+            const ScanlineLimits &currentScanlineLimits, const std::optional<Stats::WLSResult> &fitResult,
+            FitConvergenceState convergenceState, bool validCi
+        );
+
+        static std::optional<ScanlineEstimationResult> scanlineFitToEstimation(
+            const PointArray &points, ScanlineFitResult& scanlineFit
+        );
     };
 } // accurate_ri

@@ -12,8 +12,8 @@ namespace accurate_ri {
     nlohmann::json offsetAngleMarginToJson(const OffsetAngleMargin &oam);
     OffsetAngleMargin offsetAngleMarginFromJson(const nlohmann::json &j);
 
-    nlohmann::json heuristicScanlineToJson(const HeuristicScanline &hsl);
-    HeuristicScanline heuristicScanlineFromJson(const nlohmann::json &j);
+    nlohmann::json heuristicScanlineToJson(const ValueConfInterval &hsl);
+    ValueConfInterval heuristicScanlineFromJson(const nlohmann::json &j);
 
     nlohmann::json scanlineAngleBoundsToJson(const ScanlineAngleBounds &sab);
     ScanlineAngleBounds scanlineAngleBoundsFromJson(const nlohmann::json &j);

@@ -6,7 +6,7 @@
 
 
 namespace accurate_ri {
-    struct ACCURATE_RI_API RealMargin {
+    struct ACCURATE_RI_API RealMargin { // TODO refactor to value and ci or something and use also in heuristics
         double lower;
         double upper;
 

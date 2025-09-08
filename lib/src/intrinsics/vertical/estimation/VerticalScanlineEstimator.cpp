@@ -31,7 +31,7 @@ namespace accurate_ri {
         }
 
         if constexpr (BuildOptions::USE_VERTICAL_HEURISTICS) {
-            return VerticalHeuristicsEstimator::performHeuristicFit(points, scanlinePool, scanlineLimits);
+            return VerticalHeuristicsEstimator::estimate(points, scanlinePool, scanlineLimits);
         }
 
         return std::nullopt;
@@ -44,25 +44,7 @@ namespace accurate_ri {
         ScanlineFitResult scanlineFit = tryFitScanline(points, scanlinePool, errorBounds, scanlineLimits);
 
         if (scanlineFit.success && scanlineFit.validCi) {
-            const OffsetAngle values = {
-                .offset = scanlineFit.fit->slope,
-                .angle = scanlineFit.fit->intercept
-            };
-
-            OffsetAngleMargin ci = {
-                .offset = {.lower = scanlineFit.fit->slopeCi[0], .upper = scanlineFit.fit->slopeCi[1]},
-                .angle = {.lower = scanlineFit.fit->interceptCi[0], .upper = scanlineFit.fit->interceptCi[1]}
-            };
-
-            ci.offset.clampBoth(-points.getMinRange(), points.getMinRange());
-
-            return ScanlineEstimationResult{
-                .heuristic = false,
-                .uncertainty = -scanlineFit.fit->logLikelihood,
-                .values = values,
-                .ci = ci,
-                .limits = std::move(*scanlineFit.limits)
-            };
+            return scanlineFitToEstimation(points, scanlineFit);
         }
 
         return std::nullopt;
@@ -103,14 +85,7 @@ namespace accurate_ri {
             currentScanlineLimits = newLimits;
         }
 
-        return {
-            .fit = convergenceState == FitConvergenceState::CONFIRMED ? fitResult : std::nullopt,
-            .limits = convergenceState == FitConvergenceState::CONFIRMED
-                          ? std::make_optional(currentScanlineLimits)
-                          : std::nullopt,
-            .success = convergenceState == FitConvergenceState::CONFIRMED,
-            .validCi = validCi,
-        };
+        return makeFitResult(currentScanlineLimits, fitResult, convergenceState, validCi);
     }
 
     std::optional<Eigen::ArrayXi> VerticalScanlineEstimator::refinePointsToFitIndices(
@@ -201,5 +176,43 @@ namespace accurate_ri {
         }
 
         return oldState;
+    }
+
+    ScanlineFitResult VerticalScanlineEstimator::makeFitResult(
+        const ScanlineLimits &currentScanlineLimits, const std::optional<Stats::WLSResult> &fitResult,
+        const FitConvergenceState convergenceState, bool validCi
+    ) {
+        return {
+            .fit = convergenceState == FitConvergenceState::CONFIRMED ? fitResult : std::nullopt,
+            .limits = convergenceState == FitConvergenceState::CONFIRMED
+                          ? std::make_optional(currentScanlineLimits)
+                          : std::nullopt,
+            .success = convergenceState == FitConvergenceState::CONFIRMED,
+            .validCi = validCi,
+        };
+    }
+
+    std::optional<ScanlineEstimationResult> VerticalScanlineEstimator::scanlineFitToEstimation(
+        const PointArray &points, ScanlineFitResult& scanlineFit
+    ) {
+        const OffsetAngle values = {
+            .offset = scanlineFit.fit->slope,
+            .angle = scanlineFit.fit->intercept
+        };
+
+        OffsetAngleMargin ci = {
+            .offset = {.lower = scanlineFit.fit->slopeCi[0], .upper = scanlineFit.fit->slopeCi[1]},
+            .angle = {.lower = scanlineFit.fit->interceptCi[0], .upper = scanlineFit.fit->interceptCi[1]}
+        };
+
+        ci.offset.clampBoth(-points.getMinRange(), points.getMinRange());
+
+        return ScanlineEstimationResult{
+            .heuristic = false,
+            .uncertainty = -scanlineFit.fit->logLikelihood,
+            .values = values,
+            .ci = ci,
+            .limits = std::move(*scanlineFit.limits)
+        };
     }
 } // accurate_ri

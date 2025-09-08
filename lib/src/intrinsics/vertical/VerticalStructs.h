@@ -6,6 +6,7 @@
 #include "math/Stats.h"
 #include "accurate_ri/public_structs.hpp"
 
+// TODO move structs to their own places (locality of behaviour)
 namespace accurate_ri {
     struct HoughCell {
         uint64_t maxOffsetIndex;
@@ -71,18 +72,33 @@ namespace accurate_ri {
         const bool empiricalIntersection;
         const bool theoreticalIntersection;
 
-        inline bool anyIntersection() const {
+        [[nodiscard]] bool anyIntersection() const {
             return empiricalIntersection || theoreticalIntersection;
         }
 
-        inline bool anyIntersection(const uint32_t i) const {
+        [[nodiscard]] bool anyIntersection(const uint32_t i) const {
             return empiricalIntersectionMask[i] || theoreticalIntersectionMask[i];
         }
     };
 
+    struct ValueConfInterval {
+        double value;
+        RealMargin ci;
+    };
+
     struct HeuristicScanline {
-        double offset;
-        RealMargin offsetCi;
+        ValueConfInterval offset;
+        ValueConfInterval angle;
+    };
+
+    struct HeuristicSupportScanline {
+        uint32_t id;
+        double distance;
+    };
+
+    struct HeuristicSupportScanlinePair {
+        std::optional<HeuristicSupportScanline> top;
+        std::optional<HeuristicSupportScanline> bottom;
     };
 
     struct HashToConflictValue {
