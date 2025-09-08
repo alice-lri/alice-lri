@@ -12,7 +12,6 @@
 
 using EigenDataVariant = std::variant<Eigen::ArrayXd, Eigen::ArrayX<bool>>; // List all possible Eigen types
 
-// TODO remove this whole file after debugging
 namespace accurate_ri::VerticalLogging {
 
     inline void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough) {
@@ -56,6 +55,7 @@ namespace accurate_ri::VerticalLogging {
         );
     }
 
+    // TODO remove these and below after debugging
     template<typename T>
     bool writeBinaryFile(const std::filesystem::path &filePath, const T &data, const std::string &dataName) {
         std::ofstream outFile(filePath, std::ios::binary);

@@ -1,8 +1,6 @@
 #include "VerticalScanlinePool.h"
 #include <optional>
 #include <ranges>
-
-#include "Constants.h"
 #include "utils/Logger.h"
 
 namespace accurate_ri {
@@ -13,8 +11,8 @@ namespace accurate_ri {
 
     void VerticalScanlinePool::performPrecomputations(const PointArray &points) {
         hough.computeAccumulator(points);
-        pointsScanlinesIds = Eigen::ArrayXi::Ones(points.size()) * -1;
-        unassignedPoints = points.size();
+        pointsScanlinesIds = Eigen::ArrayXi::Ones(static_cast<Eigen::Index>(points.size())) * -1;
+        unassignedPoints = static_cast<int64_t>(points.size());
     }
 
     std::optional<HoughScanlineEstimation> VerticalScanlinePool::performHoughEstimation() {
@@ -36,7 +34,7 @@ namespace accurate_ri {
     }
 
     void VerticalScanlinePool::assignScanline(const ScanlineInfo &scanline, const Eigen::ArrayXi& pointsIndices) {
-        pointsScanlinesIds(pointsIndices) = scanline.id;
+        pointsScanlinesIds(pointsIndices) = static_cast<const int>(scanline.id);
         unassignedPoints -= pointsIndices.size();
 
         scanlineInfoMap.emplace(scanline.id, scanline);
@@ -48,7 +46,19 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
+        const Eigen::ArrayXi indices = scanlineIdToPointsIndices(scanlineId);
         const ScanlineInfo &scanline = node.mapped();
+
+        unassignedPoints += static_cast<int64_t>(scanline.pointsCount);
+        pointsScanlinesIds = (pointsScanlinesIds == static_cast<const int>(scanlineId)).select(-1, pointsScanlinesIds);
+
+        hough.addVotes(points, indices);
+        scanlineInfoMap.erase(scanlineId);
+
+        return scanline;
+    }
+
+    Eigen::ArrayXi VerticalScanlinePool::scanlineIdToPointsIndices(const uint32_t scanlineId) const {
         std::vector<int32_t> indicesVector;
 
         for (int i = 0; i < pointsScanlinesIds.size(); ++i) {
@@ -57,44 +67,12 @@ namespace accurate_ri {
             }
         }
 
-        const Eigen::ArrayXi indices = Eigen::Map<Eigen::ArrayXi>(indicesVector.data(), indicesVector.size());
-        hough.addVotes(points, indices);
-
-        unassignedPoints += scanline.pointsCount;
-        pointsScanlinesIds = (pointsScanlinesIds == scanlineId).select(-1, pointsScanlinesIds);
-
-        scanlineInfoMap.erase(scanlineId);
-
-        return scanline;
+        return Eigen::Map<Eigen::ArrayXi>(indicesVector.data(), static_cast<Eigen::Index>(indicesVector.size()));
     }
 
     FullScanlines VerticalScanlinePool::extractFullSortedScanlines() {
-        std::vector<ScanlineInfo> sortedScanlines;
-        for (ScanlineInfo &scanlineInfo: scanlineInfoMap | std::views::values) {
-            sortedScanlines.emplace_back(std::move(scanlineInfo));
-        }
-        scanlineInfoMap.clear();
-
-        std::ranges::sort(
-            sortedScanlines, [](const ScanlineInfo &a, const ScanlineInfo &b) {
-                return a.values.angle < b.values.angle;
-            }
-        );
-
-        std::unordered_map<uint32_t, uint32_t> oldIdsToNewIdsMap;
-        for (uint32_t i = 0; i < sortedScanlines.size(); ++i) {
-            oldIdsToNewIdsMap.emplace(sortedScanlines[i].id, i);
-        }
-
-        for (auto &scanlineInfo: sortedScanlines) {
-            scanlineInfo.id = oldIdsToNewIdsMap[scanlineInfo.id];
-        }
-
-        std::ranges::transform(
-            pointsScanlinesIds, pointsScanlinesIds.begin(), [&oldIdsToNewIdsMap](const int32_t id) {
-                return (id >= 0) ? oldIdsToNewIdsMap[id] : -1;
-            }
-        );
+        std::vector<ScanlineInfo> sortedScanlines = computeSortedScanlines();
+        updateScanlineIds(sortedScanlines);
 
         return FullScanlines {
             .scanlines = std::move(sortedScanlines),
@@ -116,5 +94,37 @@ namespace accurate_ri {
         }
 
         return scanlines;
+    }
+
+    std::vector<ScanlineInfo> VerticalScanlinePool::computeSortedScanlines() const {
+        std::vector<ScanlineInfo> sortedScanlines;
+        for (const ScanlineInfo &scanlineInfo: scanlineInfoMap | std::views::values) {
+            sortedScanlines.emplace_back(scanlineInfo);
+        }
+
+        std::ranges::sort(
+            sortedScanlines, [](const ScanlineInfo &a, const ScanlineInfo &b) {
+                return a.values.angle < b.values.angle;
+            }
+        );
+
+        return sortedScanlines;
+    }
+
+    void VerticalScanlinePool::updateScanlineIds(std::vector<ScanlineInfo> sortedScanlines) {
+        std::unordered_map<uint32_t, uint32_t> oldIdsToNewIdsMap;
+        for (uint32_t i = 0; i < sortedScanlines.size(); ++i) {
+            oldIdsToNewIdsMap.emplace(sortedScanlines[i].id, i);
+        }
+
+        for (auto &scanlineInfo: sortedScanlines) {
+            scanlineInfo.id = oldIdsToNewIdsMap[scanlineInfo.id];
+        }
+
+        std::ranges::transform(
+            pointsScanlinesIds, pointsScanlinesIds.begin(), [&oldIdsToNewIdsMap](const int32_t id) {
+                return (id >= 0) ? oldIdsToNewIdsMap[id] : -1;
+            }
+        );
     }
 } // accurate_ri
