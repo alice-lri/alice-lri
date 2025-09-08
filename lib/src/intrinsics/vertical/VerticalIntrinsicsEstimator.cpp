@@ -31,7 +31,7 @@ namespace accurate_ri {
         scanlinePool->performPrecomputations(points);
     }
 
-    // TODO perhaps further split this function
+    // TODO perhaps further split this function, perhaps when we construct the result iteratively
     VerticalIntrinsicsResult VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
         init(points);
 
@@ -135,14 +135,6 @@ namespace accurate_ri {
 
         LOG_INFO("Minimum limit width (Hough): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff());
 
-        // TODO remove
-        const std::vector<ScanlineInfo> debugScanlines = scanlinePool->getUnsortedScanlinesCopy();
-
-        VerticalLogging::plotDebugInfo(
-            points, debugScanlines, scanlineLimits, scanlinePool->getPointsScanlinesIds(), iteration, "hough_",
-            houghMax.maxValues, 0
-        );
-
         VerticalScanlineEstimator scanlineEstimator;
         std::optional<ScanlineEstimationResult> estimationResultOpt = scanlineEstimator.estimate(
             points, *scanlinePool, errorBounds, scanlineLimits
@@ -156,12 +148,7 @@ namespace accurate_ri {
         }
 
         RefinedCandidate result;
-        result.scanline = Utils::force_move(*estimationResultOpt);
-
-        VerticalLogging::plotDebugInfo(
-            points, debugScanlines, result.scanline.limits, scanlinePool->getPointsScanlinesIds(), iteration, "fit_",
-            result.scanline.values, result.scanline.uncertainty
-        );
+        result.scanline = std::move(*estimationResultOpt);
 
         return result;
     }
