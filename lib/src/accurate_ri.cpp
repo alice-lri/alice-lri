@@ -11,7 +11,7 @@ namespace accurate_ri {
         PROFILE_SCOPE("TOTAL");
 
         if (xArray.size() == 0 || yArray.size() == 0 || zArray.size() == 0) {
-            return {};
+            return Intrinsics(0);
         }
 
         const PointArray points(xArray, yArray, zArray);
@@ -50,11 +50,11 @@ namespace accurate_ri {
         std::ifstream inFile(path);
         nlohmann::json json;
         inFile >> json;
-        return intrinsicsResultFromJson(json);
+        return intrinsicsFromJson(json);
     }
 
     void writeToJson(const Intrinsics &result, const char *outputPath) {
-        nlohmann::json json = intrinsicsResultToJson(result);
+        nlohmann::json json = intrinsicsToJson(result);
         std::ofstream outFile(outputPath);
         outFile << json.dump(4);
     }

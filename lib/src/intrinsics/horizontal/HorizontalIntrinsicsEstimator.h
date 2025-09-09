@@ -2,7 +2,7 @@
 #include <optional>
 #include <unordered_set>
 
-#include "accurate_ri/public_structs.hpp"
+#include "intrinsics/horizontal/HorizontalIntrinsicsStructs.h"
 #include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "intrinsics/vertical/VerticalIntrinsicsStructs.h"
 #include "point/PointArray.h"
@@ -20,10 +20,10 @@ namespace accurate_ri {
 
     class HorizontalIntrinsicsEstimator {
     public:
-        static HorizontalIntrinsicsResult estimate(const PointArray &points, const VerticalIntrinsicsEstimation &vertical);
+        static HorizontalIntrinsicsEstimation estimate(const PointArray &points, const VerticalIntrinsicsEstimation &vertical);
 
     private:
-        static std::optional<ScanlineHorizontalInfo> estimateScanline(
+        static std::optional<HorizontalScanline> estimateScanline(
             const HorizontalScanlineArray &scanlineArray, int32_t scanlineIdx
         );
 
@@ -40,16 +40,16 @@ namespace accurate_ri {
         );
 
         static void updateHeuristicScanlines(
-            std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
+            std::vector<HorizontalScanline> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
             const HorizontalScanlineArray &scanlineArray
         );
 
         static std::unordered_set<int32_t> getUniqueResolutions(
-            const std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
+            const std::vector<HorizontalScanline> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
         );
 
         static std::unordered_set<double> getUniqueOffsets(
-            const std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
+            const std::vector<HorizontalScanline> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
         );
 
         static ResolutionOffsetLoss optimizeFromCandidatesHeuristic(
@@ -58,7 +58,7 @@ namespace accurate_ri {
         );
 
         static void updateBasicScanlines(
-            std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
+            std::vector<HorizontalScanline> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
             const HorizontalScanlineArray &scanlineArray
         );
     };

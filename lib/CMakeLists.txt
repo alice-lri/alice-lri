@@ -115,6 +115,7 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         src/utils/logger/LoggingOverrides.h
         src/intrinsics/vertical/conflict/ScanlineConflictStructs.h
         src/intrinsics/vertical/VerticalIntrinsicsStructs.h
+        src/intrinsics/horizontal/HorizontalIntrinsicsStructs.h
 )
 
 set(_accurate_ri_private_include_dirs

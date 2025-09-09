@@ -1,57 +1,116 @@
 #include <vector>
-#include <iostream>
 #include <algorithm>
 #include <cassert>
 #include <accurate_ri/public_structs.hpp>
 
 namespace accurate_ri {
-
-    struct RangeImage::Impl {
-        std::vector<double> pixels;
+    struct Intrinsics::Impl {
+      std::vector<Scanline> scanlines;
     };
 
-    RangeImage::RangeImage(const uint32_t width, const uint32_t height)
-        : width(width), height(height), impl(new Impl()) {
-        impl->pixels.resize(width * height);
+    Intrinsics::Intrinsics(const int32_t scanlineCount): impl(new Impl()) {
+        impl->scanlines.resize(scanlineCount);
     }
 
-    RangeImage::RangeImage(const uint32_t width, const uint32_t height, const double initialValue)
-        : width(width), height(height), impl(new Impl()) {
-        impl->pixels.resize(width * height, initialValue);
+    Intrinsics::Intrinsics(const Intrinsics &other): impl(new Impl()) {
+        impl->scanlines = other.impl->scanlines;
     }
 
-    RangeImage::RangeImage(const RangeImage& other)
-        : width(other.width), height(other.height), impl(new Impl()) {
-        impl->pixels = other.impl->pixels;
-    }
-
-    RangeImage& RangeImage::operator=(const RangeImage& other) {
+    Intrinsics & Intrinsics::operator=(const Intrinsics &other) {
         if (this != &other) {
-            RangeImage tmp(other);
-            std::swap(width, tmp.width);
-            std::swap(height, tmp.height);
+            Intrinsics tmp(other);
             std::swap(impl, tmp.impl);
         }
 
         return *this;
     }
 
-    RangeImage::RangeImage(RangeImage&& other) noexcept
-        : width(other.width), height(other.height), impl(other.impl) {
+    Intrinsics::Intrinsics(Intrinsics &&other) noexcept : impl(other.impl) {
         other.impl = nullptr;
-        other.width = 0;
-        other.height = 0;
+    }
+
+    Intrinsics& Intrinsics::operator=(Intrinsics&& other) noexcept {
+        if (this != &other) {
+            delete impl;
+            impl = other.impl;
+            other.impl = nullptr;
+        }
+
+        return *this;
+    }
+
+    Intrinsics::~Intrinsics() {
+        delete impl;
+    }
+
+    Scanline& Intrinsics::scanlineAt(const int32_t idx) {
+        if (!impl) {
+            throw std::runtime_error("Intrinsics not initialized");
+        }
+
+        return impl->scanlines.at(idx);
+    }
+
+    const Scanline& Intrinsics::scanlineAt(const int32_t idx) const {
+        if (!impl) {
+            throw std::runtime_error("Intrinsics not initialized");
+        }
+
+        return impl->scanlines.at(idx);
+    }
+
+    int32_t Intrinsics::scanlinesCount() const {
+        if (!impl) {
+            throw std::runtime_error("Intrinsics object is not initialized (maybe moved-from?)");
+        }
+
+        return impl->scanlines.size();
+    }
+
+    struct RangeImage::Impl {
+        std::vector<double> pixels;
+        uint32_t width;
+        uint32_t height;
+    };
+
+    RangeImage::RangeImage(const uint32_t width, const uint32_t height): impl(new Impl()) {
+        const size_t size = width * height;
+        impl->width = width;
+        impl->height = height;
+        impl->pixels.resize(size);
+    }
+
+    RangeImage::RangeImage(const uint32_t width, const uint32_t height, const double initialValue) : impl(new Impl()) {
+        const size_t size = width * height;
+        impl->width = width;
+        impl->height = height;
+        impl->pixels.resize(size, initialValue);
+    }
+
+    RangeImage::RangeImage(const RangeImage& other) : impl(new Impl()) {
+        impl->width = other.impl->width;
+        impl->height = other.impl->height;
+        impl->pixels = other.impl->pixels;
+    }
+
+    RangeImage& RangeImage::operator=(const RangeImage& other) {
+        if (this != &other) {
+            RangeImage tmp(other);
+            std::swap(impl, tmp.impl);
+        }
+
+        return *this;
+    }
+
+    RangeImage::RangeImage(RangeImage&& other) noexcept : impl(other.impl) {
+        other.impl = nullptr;
     }
 
     RangeImage& RangeImage::operator=(RangeImage&& other) noexcept {
         if (this != &other) {
-            width = other.width;
-            height = other.height;
+            delete impl;
             impl = other.impl;
-
             other.impl = nullptr;
-            other.width = 0;
-            other.height = 0;
         }
 
         return *this;
@@ -62,13 +121,52 @@ namespace accurate_ri {
     }
 
     double& RangeImage::operator()(const uint32_t row, const uint32_t col) {
-        assert(row < height && col < width);
-        return impl->pixels[row * width + col];
+        if (!impl) {
+            throw std::runtime_error("RangeImage object is not initialized (maybe moved-from?)");
+        }
+
+        const size_t index = row * impl->width + col;
+        return impl->pixels.at(index);
     }
 
     const double& RangeImage::operator()(const uint32_t row, const uint32_t col) const {
-        assert(row < height && col < width);
-        return impl->pixels[row * width + col];
+        if (!impl) {
+            throw std::runtime_error("RangeImage object is not initialized (maybe moved-from?)");
+        }
+
+        const size_t index = row * impl->width + col;
+        return impl->pixels.at(index);
     }
 
+    uint32_t RangeImage::width() const {
+        if (!impl) {
+            throw std::runtime_error("RangeImage object is not initialized (maybe moved-from?)");
+        }
+
+        return impl->width;
+    }
+
+    uint32_t RangeImage::height() const {
+        if (!impl) {
+            throw std::runtime_error("RangeImage object is not initialized (maybe moved-from?)");
+        }
+
+        return impl->height;
+    }
+
+    const double * RangeImage::data() const {
+        if (!impl) {
+            throw std::runtime_error("RangeImage object is not initialized (maybe moved-from?)");
+        }
+
+        return impl->pixels.data();
+    }
+
+    double * RangeImage::data() {
+        if (!impl) {
+            throw std::runtime_error("RangeImage object is not initialized (maybe moved-from?)");
+        }
+
+        return impl->pixels.data();
+    }
 }

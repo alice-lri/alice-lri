@@ -11,6 +11,7 @@
 #include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
 #include "intrinsics/horizontal/helper/SegmentedMedianLinearRegressor.h"
 #include "helper/PeriodicFitter.h"
+#include "intrinsics/horizontal/HorizontalIntrinsicsStructs.h"
 #include "math/Stats.h"
 #include "plotty/matplotlibcpp.hpp"
 #include "utils/logger/Logger.h"
@@ -18,11 +19,11 @@
 #include "utils/Utils.h"
 
 namespace accurate_ri {
-    HorizontalIntrinsicsResult HorizontalIntrinsicsEstimator::estimate(
+    HorizontalIntrinsicsEstimation HorizontalIntrinsicsEstimator::estimate(
         const PointArray &points, const VerticalIntrinsicsEstimation &vertical
     ) {
         PROFILE_SCOPE("HorizontalIntrinsicsEstimator::estimate");
-        HorizontalIntrinsicsResult result;
+        HorizontalIntrinsicsEstimation result;
         const int32_t scanlinesCount = vertical.scanlinesAssignations.scanlines.size();
         result.scanlines.resize(scanlinesCount);
 
@@ -32,7 +33,7 @@ namespace accurate_ri {
 
         std::unordered_set<int32_t> heuristicScanlines;
         for (int32_t scanlineIdx = 0; scanlineIdx < scanlinesCount; ++scanlineIdx) {
-            const std::optional<ScanlineHorizontalInfo> info = estimateScanline(scanlineArray, scanlineIdx);
+            const std::optional<HorizontalScanline> info = estimateScanline(scanlineArray, scanlineIdx);
 
             if (info) {
                 result.scanlines[scanlineIdx] = *info;
@@ -55,7 +56,7 @@ namespace accurate_ri {
         return result;
     }
 
-    std::optional<ScanlineHorizontalInfo> HorizontalIntrinsicsEstimator::estimateScanline(
+    std::optional<HorizontalScanline> HorizontalIntrinsicsEstimator::estimateScanline(
         const HorizontalScanlineArray &scanlineArray, const int32_t scanlineIdx
     ) {
         LOG_DEBUG("Processing horizontal scanline: ", scanlineIdx);
@@ -89,7 +90,7 @@ namespace accurate_ri {
             "\tLoss: ", bestLoss
         );
 
-        return std::make_optional<ScanlineHorizontalInfo>(
+        return std::make_optional<HorizontalScanline>(
             {
                 .resolution = bestResolution,
                 .offset = bestOffset,
@@ -164,7 +165,7 @@ namespace accurate_ri {
     }
 
     void HorizontalIntrinsicsEstimator::updateHeuristicScanlines(
-        std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
+        std::vector<HorizontalScanline> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
         const HorizontalScanlineArray &scanlineArray
     ) {
         const std::unordered_set<int32_t> otherResolutions = getUniqueResolutions(scanlines, heuristicScanlines);
@@ -178,7 +179,7 @@ namespace accurate_ri {
                 thetas, rangesXy, otherResolutions, otherOffsets
             );
 
-            scanlines[scanlineIdx] = ScanlineHorizontalInfo{
+            scanlines[scanlineIdx] = HorizontalScanline{
                 .resolution = bestParams.resolution,
                 .offset = bestParams.offset,
                 .thetaOffset = bestParams.thetaOffset,
@@ -193,7 +194,7 @@ namespace accurate_ri {
     }
 
     std::unordered_set<int32_t> HorizontalIntrinsicsEstimator::getUniqueResolutions(
-        const std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
+        const std::vector<HorizontalScanline> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
     ) {
         std::unordered_set<int32_t> otherResolutions;
 
@@ -209,7 +210,7 @@ namespace accurate_ri {
     }
 
     std::unordered_set<double> HorizontalIntrinsicsEstimator::getUniqueOffsets(
-        const std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
+        const std::vector<HorizontalScanline> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines
     ) {
         std::unordered_set<double> otherOffsets;
 
@@ -274,11 +275,11 @@ namespace accurate_ri {
     }
 
     void HorizontalIntrinsicsEstimator::updateBasicScanlines(
-        std::vector<ScanlineHorizontalInfo> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
+        std::vector<HorizontalScanline> &scanlines, const std::unordered_set<int32_t> &heuristicScanlines,
         const HorizontalScanlineArray &scanlineArray
     ) {
         for (const int32_t scanlineIdx: heuristicScanlines) {
-            scanlines[scanlineIdx] = ScanlineHorizontalInfo{
+            scanlines[scanlineIdx] = HorizontalScanline{
                 .resolution = scanlineArray.getSize(scanlineIdx),
                 .offset = 0,
                 .thetaOffset = 0,

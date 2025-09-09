@@ -4,28 +4,35 @@
 
 #define ACCURATE_RI_API __attribute__((visibility("default")))
 
-
 namespace accurate_ri {
-
-    struct ACCURATE_RI_API ScanlineHorizontalInfo { // TODO maybe rename to HorizontalScanlineInfo
+    struct ACCURATE_RI_API Scanline {
+        double verticalOffset;
+        double verticalAngle;
+        double horizontalOffset;
+        double azimuthalOffset;
         int32_t resolution;
-        double offset;
-        double thetaOffset;
-        bool heuristic;
     };
 
-    struct ACCURATE_RI_API HorizontalIntrinsicsResult {
-        std::vector<ScanlineHorizontalInfo> scanlines;
-    };
+    struct ACCURATE_RI_API Intrinsics {
+    private:
+        struct Impl;
+        Impl* impl;
 
-    struct ACCURATE_RI_API Intrinsics { // TODO refactor this (should be per scanline)
+    public:
+        explicit Intrinsics(int32_t scanlineCount);
+        Intrinsics(const Intrinsics& other);
+        Intrinsics& operator=(const Intrinsics& other);
+        Intrinsics(Intrinsics&& other) noexcept;
+        Intrinsics& operator=(Intrinsics&& other) noexcept;
 
+        ~Intrinsics();
+
+        Scanline &scanlineAt(int32_t idx); // like vector::at
+        const Scanline &scanlineAt(int32_t idx) const;
+        int32_t scanlinesCount() const;
     };
 
     struct ACCURATE_RI_API RangeImage {
-        uint32_t width;
-        uint32_t height;
-
     private:
         struct Impl;
         Impl* impl;
@@ -44,6 +51,11 @@ namespace accurate_ri {
 
         double& operator()(uint32_t row, uint32_t col);
         const double& operator()(uint32_t row, uint32_t col) const;
+
+        uint32_t width() const;
+        uint32_t height() const;
+        const double* data() const;
+        double* data();
     };
 
     namespace PointCloud {

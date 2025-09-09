@@ -3,6 +3,7 @@
 
 #include "accurate_ri/public_structs.hpp"
 #include "hough/HoughTransform.h"
+#include "intrinsics/horizontal/HorizontalIntrinsicsStructs.h"
 #include "intrinsics/vertical/VerticalStructs.h"
 #include "intrinsics/vertical/conflict/ScanlineConflictStructs.h"
 
@@ -40,12 +41,15 @@ namespace accurate_ri {
     nlohmann::json verticalBoundsToJson(const VerticalBounds &vb);
     VerticalBounds verticalBoundsFromJson(const nlohmann::json &j);
 
-    nlohmann::json horizontalScanlineInfoToJson(const ScanlineHorizontalInfo &shi);
-    ScanlineHorizontalInfo horizontalScanlineInfoFromJson(const nlohmann::json &j);
+    nlohmann::json horizontalScanlineInfoToJson(const HorizontalScanline &shi);
+    HorizontalScanline horizontalScanlineInfoFromJson(const nlohmann::json &j);
 
-    nlohmann::json horizontalIntrinsicsToJson(const HorizontalIntrinsicsResult &hir);
-    HorizontalIntrinsicsResult horizontalIntrinsicsFromJson(const nlohmann::json &j);
+    nlohmann::json horizontalIntrinsicsToJson(const HorizontalIntrinsicsEstimation &hir);
+    HorizontalIntrinsicsEstimation horizontalIntrinsicsFromJson(const nlohmann::json &j);
 
-    nlohmann::json intrinsicsResultToJson(const Intrinsics &i);
-    Intrinsics intrinsicsResultFromJson(const nlohmann::json &j);
+    nlohmann::json scanlineToJson(const Scanline& scanline);
+    Scanline scanlineFromJson(const nlohmann::json &j);
+
+    nlohmann::json intrinsicsToJson(const Intrinsics &i);
+    Intrinsics intrinsicsFromJson(const nlohmann::json &j);
 }

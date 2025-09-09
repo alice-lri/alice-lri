@@ -1,5 +1,7 @@
 #include "JsonConverters.h"
 
+#include <boost/numeric/conversion/detail/int_float_mixture.hpp>
+
 namespace accurate_ri {
     nlohmann::json offsetAngleToJson(const OffsetAngle &oa) {
         nlohmann::json j;
@@ -213,7 +215,7 @@ namespace accurate_ri {
         };
     }
 
-    nlohmann::json horizontalScanlineInfoToJson(const ScanlineHorizontalInfo &shi) {
+    nlohmann::json horizontalScanlineInfoToJson(const HorizontalScanline &shi) {
         nlohmann::json j;
         j["resolution"] = shi.resolution;
         j["offset"] = shi.offset;
@@ -222,8 +224,8 @@ namespace accurate_ri {
         return j;
     }
 
-    ScanlineHorizontalInfo horizontalScanlineInfoFromJson(const nlohmann::json &j) {
-        return ScanlineHorizontalInfo{
+    HorizontalScanline horizontalScanlineInfoFromJson(const nlohmann::json &j) {
+        return HorizontalScanline{
             .resolution = j.at("resolution"),
             .offset = j.at("offset"),
             .thetaOffset = j.at("thetaOffset"),
@@ -231,7 +233,7 @@ namespace accurate_ri {
         };
     }
 
-    nlohmann::json horizontalIntrinsicsToJson(const HorizontalIntrinsicsResult &hir) {
+    nlohmann::json horizontalIntrinsicsToJson(const HorizontalIntrinsicsEstimation &hir) {
         nlohmann::json j;
         j["scanlines_attributes"] = nlohmann::json::array();
         for (const auto &scanline: hir.scanlines) {
@@ -240,26 +242,53 @@ namespace accurate_ri {
         return j;
     }
 
-    HorizontalIntrinsicsResult horizontalIntrinsicsFromJson(const nlohmann::json &j) {
-        HorizontalIntrinsicsResult hir;
+    HorizontalIntrinsicsEstimation horizontalIntrinsicsFromJson(const nlohmann::json &j) {
+        HorizontalIntrinsicsEstimation hir;
         for (const auto &scanline: j.at("scanlines_attributes")) {
             hir.scanlines.push_back(horizontalScanlineInfoFromJson(scanline));
         }
         return hir;
     }
 
-    // TODO MAKE THESE WORK AGAIN
-    nlohmann::json intrinsicsResultToJson(const Intrinsics &i) {
+    nlohmann::json scanlineToJson(const Scanline& scanline) {
         nlohmann::json j;
-        // j["vertical"] = verticalIntrinsicsResultToJson(i.vertical);
-        // j["horizontal"] = horizontalIntrinsicsToJson(i.horizontal);
+        j["verticalOffset"] = scanline.verticalOffset;
+        j["verticalAngle"] = scanline.verticalAngle;
+        j["horizontalOffset"] = scanline.horizontalOffset;
+        j["azimuthalOffset"] = scanline.azimuthalOffset;
+        j["resolution"] = scanline.resolution;
+
         return j;
     }
 
-    Intrinsics intrinsicsResultFromJson(const nlohmann::json &j) {
-        return Intrinsics{
-            // .vertical = verticalIntrinsicsResultFromJson(j.at("vertical")),
-            // .horizontal = horizontalIntrinsicsFromJson(j.at("horizontal"))
+    Scanline scanlineFromJson(const nlohmann::json &j) {
+        return Scanline{
+            .verticalOffset = j["verticalOffset"],
+            .verticalAngle = j["verticalAngle"],
+            .horizontalOffset = j["horizontalOffset"],
+            .azimuthalOffset = j["azimuthalOffset"],
+            .resolution = j["resolution"]
         };
+    }
+
+    nlohmann::json intrinsicsToJson(const Intrinsics &intrinsics) {
+        nlohmann::json j;
+        j["scanlines"] = nlohmann::json::array();
+
+        for (int i = 0; i < intrinsics.scanlinesCount(); ++i) {
+            j["scanlines"].push_back(scanlineToJson(intrinsics.scanlineAt(i)));
+        }
+
+        return j;
+    }
+
+    Intrinsics intrinsicsFromJson(const nlohmann::json &j) {
+        Intrinsics intrinsics(j.at("scanlines").size());
+
+        for (int i = 0; i < intrinsics.scanlinesCount(); ++i) {
+            intrinsics.scanlineAt(i) = scanlineFromJson(j.at("scanlines")[i]);
+        }
+
+        return intrinsics;
     }
 } // accurate_ri
