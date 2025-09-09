@@ -1,6 +1,5 @@
 #include <vector>
 #include <algorithm>
-#include <cassert>
 #include <accurate_ri/public_structs.hpp>
 
 namespace accurate_ri {
@@ -175,4 +174,6 @@ namespace accurate_ri {
 
         return impl->pixels.data();
     }
+
+    template class ACCURATE_RI_API AliceArray<DebugScanline>;
 }

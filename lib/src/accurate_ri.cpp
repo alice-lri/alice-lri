@@ -46,6 +46,45 @@ namespace accurate_ri {
         return result;
     }
 
+    DebugIntrinsics debugTrain(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) {
+        PROFILE_SCOPE("TOTAL");
+
+        if (xArray.size() == 0 || yArray.size() == 0 || zArray.size() == 0) {
+            return DebugIntrinsics(0);
+        }
+
+        const PointArray points(xArray, yArray, zArray);
+        IntrinsicsEstimator estimator{};
+
+        return estimator.debugEstimate(points);
+    }
+
+    DebugIntrinsics debugTrain(const PointCloud::Float &points) {
+        const auto size = static_cast<Eigen::Index>(points.x.size());
+
+        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(points.x.data(), size).cast<double>();
+        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXf>(points.y.data(), size).cast<double>();
+        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(points.z.data(), size).cast<double>();
+
+        const DebugIntrinsics result = debugTrain(xArray, yArray, zArray);
+        PRINT_PROFILE_REPORT();
+
+        return result;
+    }
+
+    DebugIntrinsics debugTrain(const PointCloud::Double &points) {
+        const auto size = static_cast<Eigen::Index>(points.x.size());
+
+        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
+        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
+        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
+
+        const DebugIntrinsics result = debugTrain(xArray, yArray, zArray);
+        PRINT_PROFILE_REPORT();
+
+        return result;
+    }
+
     Intrinsics readFromJson(const char *path) {
         std::ifstream inFile(path);
         nlohmann::json json;

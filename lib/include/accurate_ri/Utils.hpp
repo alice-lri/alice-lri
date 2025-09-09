@@ -1,25 +1,26 @@
 #pragma once
 #include <cstddef>
-#include "accurate_ri/public_structs.hpp"
+
+#define ACCURATE_RI_API __attribute__((visibility("default")))
 
 namespace accurate_ri {
     template<class T>
-    class ACCURATE_RI_API Array {
+    class ACCURATE_RI_API AliceArray {
     private:
         struct Impl;
         Impl* impl = nullptr; // opaque
 
     public:
-        Array();
-        explicit Array(std::size_t n);
+        AliceArray();
+        explicit AliceArray(std::size_t n);
 
-        Array(const Array &);
-        Array &operator=(const Array &);
+        AliceArray(const AliceArray &);
+        AliceArray &operator=(const AliceArray &);
 
-        Array(Array &&) noexcept;
-        Array &operator=(Array &&) noexcept;
+        AliceArray(AliceArray &&) noexcept;
+        AliceArray &operator=(AliceArray &&) noexcept;
 
-        ~Array() noexcept;
+        ~AliceArray() noexcept;
 
         std::size_t size() const noexcept;
         void resize(std::size_t n);
@@ -33,7 +34,6 @@ namespace accurate_ri {
         const T &at(std::size_t i) const;
     };
 
-    extern template class ACCURATE_RI_API Array<float>;
-    extern template class ACCURATE_RI_API Array<double>;
-    extern template class ACCURATE_RI_API Array<Scanline>;
+    extern template class ACCURATE_RI_API AliceArray<float>;
+    extern template class ACCURATE_RI_API AliceArray<double>;
 }

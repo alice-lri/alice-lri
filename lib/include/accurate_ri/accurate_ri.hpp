@@ -7,6 +7,10 @@ namespace accurate_ri {
 
     ACCURATE_RI_API Intrinsics train(const PointCloud::Double &points);
 
+    ACCURATE_RI_API DebugIntrinsics debugTrain(const PointCloud::Float &points);
+
+    ACCURATE_RI_API DebugIntrinsics debugTrain(const PointCloud::Double &points);
+
     ACCURATE_RI_API Intrinsics readFromJson(const char *path);
 
     ACCURATE_RI_API void writeToJson(const Intrinsics &result, const char *outputPath);

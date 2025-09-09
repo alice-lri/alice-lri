@@ -2,25 +2,9 @@
 #include <cstdint>
 #include <vector>
 
-#define ACCURATE_RI_API __attribute__((visibility("default")))
+#include "accurate_ri/Utils.hpp"
 
 namespace accurate_ri {
-    // namespace debug {
-    //     struct ACCURATE_RI_API Scanline {
-    //
-    //     }
-    // }
-
-    struct ACCURATE_RI_API Interval {
-        double lower;
-        double upper;
-
-        [[nodiscard]] double diff() const {
-            return upper - lower;
-        }
-
-        void clampBoth(const double minValue, const double maxValue);
-    };
 
     struct ACCURATE_RI_API Scanline {
         double verticalOffset;
@@ -29,6 +13,7 @@ namespace accurate_ri {
         double azimuthalOffset;
         int32_t resolution;
     };
+    extern template class ACCURATE_RI_API AliceArray<Scanline>;
 
     struct ACCURATE_RI_API Intrinsics {
     private:
@@ -88,4 +73,42 @@ namespace accurate_ri {
             std::vector<double> z;
         };
     }
+
+    struct ACCURATE_RI_API Interval {
+        double lower;
+        double upper;
+
+        [[nodiscard]] double diff() const {
+            return upper - lower;
+        }
+
+        void clampBoth(const double minValue, const double maxValue);
+    };
+
+    struct ACCURATE_RI_API ValueConfInterval {
+        double value;
+        Interval ci;
+    };
+
+    struct ACCURATE_RI_API DebugScanline {
+        ValueConfInterval verticalOffset;
+        ValueConfInterval verticalAngle;
+        double horizontalOffset;
+        double azimuthalOffset;
+        int32_t resolution;
+        bool heuristic;
+        double uncertainty;
+        int64_t houghVotes;
+        uint64_t houghHash;
+        uint64_t pointsCount;
+    };
+    extern template class ACCURATE_RI_API AliceArray<DebugScanline>;
+
+    struct ACCURATE_RI_API DebugIntrinsics {
+        AliceArray<DebugScanline> scanlines;
+
+        explicit DebugIntrinsics(const int32_t scanlineCount) {
+            scanlines.resize(scanlineCount);
+        }
+    };
 }

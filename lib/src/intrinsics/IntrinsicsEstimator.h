@@ -12,8 +12,10 @@ namespace accurate_ri {
 
     public:
         Intrinsics estimate(const PointArray &points);
+        DebugIntrinsics debugEstimate(const PointArray &points);
 
     private:
         static Scanline makeScanline(const VerticalScanline &vertical, const HorizontalScanline &horizontal);
+        static DebugScanline makeDebugScanline(const VerticalScanline &vertical, const HorizontalScanline &horizontal);
     };
 } // accurate_ri
