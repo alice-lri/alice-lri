@@ -71,9 +71,4 @@ namespace accurate_ri {
         return impl->pixels[row * width + col];
     }
 
-    void RealMargin::clampBoth(const double minValue, const double maxValue) {
-        lower = std::clamp(lower, minValue, maxValue);
-        upper = std::clamp(upper, minValue, maxValue);
-    }
-
 }

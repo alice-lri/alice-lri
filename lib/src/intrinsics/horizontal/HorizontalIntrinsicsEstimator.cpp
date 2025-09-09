@@ -19,18 +19,19 @@
 
 namespace accurate_ri {
     HorizontalIntrinsicsResult HorizontalIntrinsicsEstimator::estimate(
-        const PointArray &points, const VerticalIntrinsicsResult &vertical
+        const PointArray &points, const VerticalIntrinsicsEstimation &vertical
     ) {
         PROFILE_SCOPE("HorizontalIntrinsicsEstimator::estimate");
         HorizontalIntrinsicsResult result;
-        result.scanlines.resize(vertical.scanlinesCount);
+        const int32_t scanlinesCount = vertical.scanlinesAssignations.scanlines.size();
+        result.scanlines.resize(scanlinesCount);
 
         const HorizontalScanlineArray scanlineArray(
-            points, vertical.fullScanlines.pointsScanlinesIds, vertical.scanlinesCount, SortingCriteria::RANGES_XY
+            points, vertical.scanlinesAssignations.pointsScanlinesIds, scanlinesCount, SortingCriteria::RANGES_XY
         );
 
         std::unordered_set<int32_t> heuristicScanlines;
-        for (int32_t scanlineIdx = 0; scanlineIdx < vertical.scanlinesCount; ++scanlineIdx) {
+        for (int32_t scanlineIdx = 0; scanlineIdx < scanlinesCount; ++scanlineIdx) {
             const std::optional<ScanlineHorizontalInfo> info = estimateScanline(scanlineArray, scanlineIdx);
 
             if (info) {

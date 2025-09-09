@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
     const accurate_ri::PointCloud::Double trainCloud(std::move(trainPoints.x), std::move(trainPoints.y), std::move(trainPoints.z));
     const accurate_ri::PointCloud::Double targetCloud(std::move(targetPoints.x), std::move(targetPoints.y), std::move(targetPoints.z));
 
-    accurate_ri::IntrinsicsResult result = accurate_ri::train(trainCloud);
+    accurate_ri::Intrinsics result = accurate_ri::train(trainCloud);
 
     const accurate_ri::RangeImage ri = accurate_ri::projectToRangeImage(result, targetCloud);
     const accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(result, ri);

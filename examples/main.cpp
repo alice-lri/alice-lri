@@ -91,17 +91,17 @@ int main(int argc, char **argv) {
 
     const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
 
-    accurate_ri::IntrinsicsResult result = accurate_ri::train(cloud);
+    accurate_ri::Intrinsics intrinsics = accurate_ri::train(cloud);
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
     std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
 
     if (outputPath) {
-        accurate_ri::writeToJson(result, outputPath->data());
+        accurate_ri::writeToJson(intrinsics, outputPath->data());
     }
 
-    const accurate_ri::RangeImage ri = accurate_ri::projectToRangeImage(result, cloud);
-    accurate_ri::unProjectToPointCloud(result, ri);
+    const accurate_ri::RangeImage ri = accurate_ri::projectToRangeImage(intrinsics, cloud);
+    accurate_ri::unProjectToPointCloud(intrinsics, ri);
 
     return 0;
 }

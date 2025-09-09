@@ -4,6 +4,7 @@
 #include <optional>
 #include "math/Stats.h"
 #include "accurate_ri/public_structs.hpp"
+#include "intrinsics/vertical/VerticalIntrinsicsStructs.h"
 
 // TODO move structs to their own places (locality of behaviour)
 namespace accurate_ri {

@@ -6,51 +6,6 @@
 
 
 namespace accurate_ri {
-    struct ACCURATE_RI_API RealMargin { // TODO refactor to value and ci or something and use also in heuristics
-        double lower;
-        double upper;
-
-        [[nodiscard]] double diff() const {
-            return upper - lower;
-        }
-
-        void clampBoth(double minValue, double maxValue);
-    };
-
-    struct ACCURATE_RI_API ScanlineAngleBounds {
-        RealMargin bottom;
-        RealMargin top;
-    };
-
-    struct ACCURATE_RI_API OffsetAngleMargin {
-        RealMargin offset;
-        RealMargin angle;
-    };
-
-    struct ACCURATE_RI_API OffsetAngle {
-        double offset;
-        double angle;
-    };
-
-    struct ACCURATE_RI_API ScanlineInfo {
-        uint32_t id;
-        uint64_t pointsCount;
-        OffsetAngle values;
-        OffsetAngleMargin ci;
-        ScanlineAngleBounds theoreticalAngleBounds;
-        double uncertainty;
-        int64_t houghVotes;
-        uint64_t houghHash;
-    };
-
-    struct ACCURATE_RI_API FullScanlines {
-        std::vector<ScanlineInfo> scanlines;
-        std::vector<int> pointsScanlinesIds;
-    };
-
-    enum class ACCURATE_RI_API EndReason {
-        ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
-    };
 
     struct ACCURATE_RI_API ScanlineHorizontalInfo { // TODO maybe rename to HorizontalScanlineInfo
         int32_t resolution;
@@ -63,18 +18,8 @@ namespace accurate_ri {
         std::vector<ScanlineHorizontalInfo> scanlines;
     };
 
-    struct ACCURATE_RI_API VerticalIntrinsicsResult {
-        int32_t iterations = 0;
-        int32_t scanlinesCount = 0;
-        int32_t unassignedPoints = 0;
-        int32_t pointsCount = 0;
-        EndReason endReason = EndReason::MAX_ITERATIONS;
-        FullScanlines fullScanlines;
-    };
+    struct ACCURATE_RI_API Intrinsics { // TODO refactor this (should be per scanline)
 
-    struct ACCURATE_RI_API IntrinsicsResult { // TODO refactor this (should be per scanline)
-        VerticalIntrinsicsResult vertical;
-        HorizontalIntrinsicsResult horizontal;
     };
 
     struct ACCURATE_RI_API RangeImage {

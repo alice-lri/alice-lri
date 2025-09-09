@@ -4,6 +4,7 @@
 
 #include "accurate_ri/public_structs.hpp"
 #include "intrinsics/horizontal/helper/HorizontalScanlineArray.h"
+#include "intrinsics/vertical/VerticalIntrinsicsStructs.h"
 #include "point/PointArray.h"
 
 namespace accurate_ri {
@@ -19,7 +20,7 @@ namespace accurate_ri {
 
     class HorizontalIntrinsicsEstimator {
     public:
-        static HorizontalIntrinsicsResult estimate(const PointArray &points, const VerticalIntrinsicsResult &vertical);
+        static HorizontalIntrinsicsResult estimate(const PointArray &points, const VerticalIntrinsicsEstimation &vertical);
 
     private:
         static std::optional<ScanlineHorizontalInfo> estimateScanline(

@@ -42,7 +42,7 @@ namespace accurate_ri::VerticalLogging {
         );
     }
 
-    inline void logScanlineAssignation(const ScanlineInfo& scanline) {
+    inline void logScanlineAssignation(const VerticalScanline& scanline) {
         LOG_INFO("Scanline ", scanline.id, " assigned with ", scanline.pointsCount, " points");
         LOG_INFO(
             "Scanline parameters: Offset: ", scanline.values.offset, ", Angle: ", scanline.values.angle,
@@ -71,7 +71,7 @@ namespace accurate_ri::VerticalLogging {
     }
 
     inline void plotDebugInfo(
-        const PointArray &points, const std::vector<ScanlineInfo> &scanlines, const ScanlineLimits &limits,
+        const PointArray &points, const std::vector<VerticalScanline> &scanlines, const ScanlineLimits &limits,
         const Eigen::ArrayXi &pointsScanlinesIds, const uint32_t iteration, const std::string &prefix,
         const OffsetAngle &offsetAngle, const double uncertainty
     ) {
@@ -109,7 +109,7 @@ namespace accurate_ri::VerticalLogging {
         writeBinaryFile(folderPath / "unassigned_mask.bin", unassignedMask, "unassigned_mask");
 
         nlohmann::json scanlinesJson;
-        for (const ScanlineInfo & scanline : scanlines) {
+        for (const VerticalScanline & scanline : scanlines) {
             scanlinesJson.push_back(scanlineInfoToJson(scanline));
         }
 

@@ -82,7 +82,7 @@ namespace accurate_ri {
         HeuristicSupportScanlinePair support;
 
         scanlinePool.forEachScanline(
-            [&](const ScanlineInfo &scanline) {
+            [&](const VerticalScanline &scanline) {
                 const uint32_t scanlineId = scanline.id;
                 const double scanlinePhi = std::asin(scanline.values.offset * invRangesMean) + scanline.values.angle;
 

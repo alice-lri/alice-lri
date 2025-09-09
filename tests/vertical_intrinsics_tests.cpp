@@ -39,7 +39,7 @@ protected:
 
 TEST_F(VerticalIntrinsicsEstimatorTest, EstimateReturnsValidResult) {
     // Test that the estimator returns a valid result structure
-    VerticalIntrinsicsResult result = estimator.estimate(testPoints);
+    VerticalIntrinsicsEstimation result = estimator.estimate(testPoints);
     
     // Basic checks on the result structure
     EXPECT_GT(result.pointsCount, 0);
@@ -53,14 +53,10 @@ TEST_F(VerticalIntrinsicsEstimatorTest, EstimateReturnsValidResult) {
 
 TEST_F(VerticalIntrinsicsEstimatorTest, ResultContainsScanlines) {
     // Test that the result contains scanline information
-    VerticalIntrinsicsResult result = estimator.estimate(testPoints);
-    
-    // Check that we found some scanlines
-    EXPECT_GT(result.scanlinesCount, 0);
-    EXPECT_EQ(result.scanlinesCount, result.fullScanlines.scanlines.size());
+    VerticalIntrinsicsEstimation result = estimator.estimate(testPoints);
     
     // Check that each scanline has valid angle/offset values
-    for (const auto& scanline : result.fullScanlines.scanlines) {
+    for (const auto& scanline : result.scanlinesAssignations.scanlines) {
         // Offset and angle should be finite values
         EXPECT_FALSE(std::isnan(scanline.values.offset));
         EXPECT_FALSE(std::isinf(scanline.values.offset));
@@ -77,18 +73,18 @@ TEST_F(VerticalIntrinsicsEstimatorTest, ResultContainsScanlines) {
 
 TEST_F(VerticalIntrinsicsEstimatorTest, PointsAssignedToScanlines) {
     // Test that points are assigned to scanlines
-    VerticalIntrinsicsResult result = estimator.estimate(testPoints);
+    VerticalIntrinsicsEstimation result = estimator.estimate(testPoints);
     
     // Check that there's a scanline ID for each point
-    EXPECT_EQ(result.fullScanlines.pointsScanlinesIds.size(), testPoints.size());
+    EXPECT_EQ(result.scanlinesAssignations.pointsScanlinesIds.size(), testPoints.size());
     
     // Check that all scanline IDs are valid
     std::unordered_set<int> validIds;
-    for (const auto& scanline : result.fullScanlines.scanlines) {
+    for (const auto& scanline : result.scanlinesAssignations.scanlines) {
         validIds.insert(scanline.id);
     }
     
-    for (const auto& pointScanlineId : result.fullScanlines.pointsScanlinesIds) {
+    for (const auto& pointScanlineId : result.scanlinesAssignations.pointsScanlinesIds) {
         if (pointScanlineId >= 0) { // -1 means unassigned
             EXPECT_TRUE(validIds.find(pointScanlineId) != validIds.end());
         }

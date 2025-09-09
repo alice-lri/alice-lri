@@ -23,7 +23,7 @@ namespace accurate_ri {
         ScanlineConflictSolver conflictSolver;
 
     public:
-        VerticalIntrinsicsResult estimate(const PointArray &points);
+        VerticalIntrinsicsEstimation estimate(const PointArray &points);
 
     private:
         void init(const PointArray &points);
@@ -34,8 +34,13 @@ namespace accurate_ri {
             int64_t iteration, const PointArray &points, const Candidate& candidate
         ) const;
 
-        VerticalIntrinsicsResult extractResult(
+        VerticalIntrinsicsEstimation extractResult(
             int64_t iteration, const PointArray &points, EndReason endReason
         ) const;
+
+        static VerticalScanline makeVerticalScanline(
+            uint32_t currentScanlineId, const Candidate &candidate, const std::optional<RefinedCandidate> &refinedCandidate,
+            const ScanlineAngleBounds &angleBounds
+        );
     };
 } // namespace accurate_ri

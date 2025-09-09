@@ -22,8 +22,8 @@ namespace accurate_ri {
     nlohmann::json scanlineAngleBoundsToJson(const ScanlineAngleBounds &sab);
     ScanlineAngleBounds scanlineAngleBoundsFromJson(const nlohmann::json &j);
 
-    nlohmann::json scanlineInfoToJson(const ScanlineInfo &si);
-    ScanlineInfo scanlineInfoFromJson(const nlohmann::json &j);
+    nlohmann::json scanlineInfoToJson(const VerticalScanline &si);
+    VerticalScanline scanlineInfoFromJson(const nlohmann::json &j);
 
     nlohmann::json hashToConflictValueToJson(const HashToConflictValue &htc);
     HashToConflictValue hashToConflictValueFromJson(const nlohmann::json &j);
@@ -31,8 +31,8 @@ namespace accurate_ri {
     nlohmann::json endReasonToJson(EndReason er);
     EndReason endReasonFromJson(const nlohmann::json &j);
 
-    nlohmann::json verticalIntrinsicsResultToJson(const VerticalIntrinsicsResult &vir);
-    VerticalIntrinsicsResult verticalIntrinsicsResultFromJson(const nlohmann::json &j);
+    nlohmann::json verticalIntrinsicsResultToJson(const VerticalIntrinsicsEstimation &vir);
+    VerticalIntrinsicsEstimation verticalIntrinsicsResultFromJson(const nlohmann::json &j);
 
     nlohmann::json houghCellToJson(const HoughCell &hc);
     HoughCell houghCellFromJson(const nlohmann::json &j);
@@ -46,6 +46,6 @@ namespace accurate_ri {
     nlohmann::json horizontalIntrinsicsToJson(const HorizontalIntrinsicsResult &hir);
     HorizontalIntrinsicsResult horizontalIntrinsicsFromJson(const nlohmann::json &j);
 
-    nlohmann::json intrinsicsResultToJson(const IntrinsicsResult &i);
-    IntrinsicsResult intrinsicsResultFromJson(const nlohmann::json &j);
+    nlohmann::json intrinsicsResultToJson(const Intrinsics &i);
+    Intrinsics intrinsicsResultFromJson(const nlohmann::json &j);
 }

@@ -105,7 +105,7 @@ private:
             
             // Measure training time
             auto start = std::chrono::high_resolution_clock::now();
-            accurate_ri::IntrinsicsResult intrinsics = accurate_ri::train(cloud);
+            accurate_ri::Intrinsics intrinsics = accurate_ri::train(cloud);
             auto end = std::chrono::high_resolution_clock::now();
             result.trainTime = std::chrono::duration<double>(end - start).count();
             

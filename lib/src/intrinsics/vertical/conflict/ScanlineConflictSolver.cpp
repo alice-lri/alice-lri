@@ -46,7 +46,7 @@ namespace accurate_ri {
 
         // TODO this is trash, especially the restore by hash thing. Do properly and make sure no negative values in accumulator.
         for (const uint32_t otherId: conflicts.conflictingScanlines) {
-            std::optional<ScanlineInfo> removedScanline = scanlinePool.removeScanline(points, otherId);
+            std::optional<VerticalScanline> removedScanline = scanlinePool.removeScanline(points, otherId);
 
             // Restore previously rejected scanlines due to this one
             for (auto it = hashesToConflictsMap.begin(); it != hashesToConflictsMap.end();) {
@@ -204,7 +204,7 @@ namespace accurate_ri {
                 Eigen::ArrayXd minTheoreticalSigns = Eigen::ArrayXd::Ones(scanlineId + 1);
 
                 scanlinePool.forEachScanline(
-                    [&](const ScanlineInfo &otherScanline) {
+                    [&](const VerticalScanline &otherScanline) {
                         const double otherLower = (otherScanline.theoreticalAngleBounds.*otherBound).lower;
                         const double otherUpper = (otherScanline.theoreticalAngleBounds.*otherBound).upper;
 

@@ -12,6 +12,6 @@ private:
     VerticalIntrinsicsEstimator verticalIntrinsicsEstimator;
 
 public:
-    IntrinsicsResult estimate(const PointArray &points);
+    Intrinsics estimate(const PointArray &points);
 };
 } // accurate_ri

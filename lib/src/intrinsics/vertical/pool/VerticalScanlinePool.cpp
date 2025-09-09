@@ -17,7 +17,7 @@ namespace accurate_ri {
 
     std::optional<HoughScanlineEstimation> VerticalScanlinePool::performHoughEstimation() {
         double averageOffset = 0;
-        for (const ScanlineInfo &info: scanlineInfoMap | std::views::values) {
+        for (const VerticalScanline &info: scanlineInfoMap | std::views::values) {
             averageOffset += info.values.offset / static_cast<double>(scanlineInfoMap.size());
         }
 
@@ -33,21 +33,21 @@ namespace accurate_ri {
         };
     }
 
-    void VerticalScanlinePool::assignScanline(const ScanlineInfo &scanline, const Eigen::ArrayXi& pointsIndices) {
+    void VerticalScanlinePool::assignScanline(const VerticalScanline &scanline, const Eigen::ArrayXi& pointsIndices) {
         pointsScanlinesIds(pointsIndices) = static_cast<const int>(scanline.id);
         unassignedPoints -= pointsIndices.size();
 
         scanlineInfoMap.emplace(scanline.id, scanline);
     }
 
-    std::optional<ScanlineInfo> VerticalScanlinePool::removeScanline(const PointArray &points, const uint32_t scanlineId) {
+    std::optional<VerticalScanline> VerticalScanlinePool::removeScanline(const PointArray &points, const uint32_t scanlineId) {
         const auto node = scanlineInfoMap.extract(scanlineId);
         if (!node) {
             return std::nullopt;
         }
 
         const Eigen::ArrayXi indices = scanlineIdToPointsIndices(scanlineId);
-        const ScanlineInfo &scanline = node.mapped();
+        const VerticalScanline &scanline = node.mapped();
 
         unassignedPoints += static_cast<int64_t>(scanline.pointsCount);
         pointsScanlinesIds = (pointsScanlinesIds == static_cast<const int>(scanlineId)).select(-1, pointsScanlinesIds);
@@ -70,11 +70,11 @@ namespace accurate_ri {
         return Eigen::Map<Eigen::ArrayXi>(indicesVector.data(), static_cast<Eigen::Index>(indicesVector.size()));
     }
 
-    FullScanlines VerticalScanlinePool::extractFullSortedScanlines() {
-        std::vector<ScanlineInfo> sortedScanlines = computeSortedScanlines();
+    VerticalScanlinesAssignations VerticalScanlinePool::extractFullSortedScanlineAssignations() {
+        std::vector<VerticalScanline> sortedScanlines = computeSortedScanlines();
         updateScanlineIds(sortedScanlines);
 
-        return FullScanlines {
+        return VerticalScanlinesAssignations {
             .scanlines = std::move(sortedScanlines),
             .pointsScanlinesIds = std::vector(pointsScanlinesIds.data(), pointsScanlinesIds.data() + pointsScanlinesIds.size()),
         };
@@ -87,23 +87,23 @@ namespace accurate_ri {
         };
     }
 
-    std::vector<ScanlineInfo> VerticalScanlinePool::getUnsortedScanlinesCopy() const {
-        std::vector<ScanlineInfo> scanlines;
-        for (const ScanlineInfo &scanlineInfo: scanlineInfoMap | std::views::values) {
+    std::vector<VerticalScanline> VerticalScanlinePool::getUnsortedScanlinesCopy() const {
+        std::vector<VerticalScanline> scanlines;
+        for (const VerticalScanline &scanlineInfo: scanlineInfoMap | std::views::values) {
             scanlines.emplace_back(scanlineInfo);
         }
 
         return scanlines;
     }
 
-    std::vector<ScanlineInfo> VerticalScanlinePool::computeSortedScanlines() const {
-        std::vector<ScanlineInfo> sortedScanlines;
-        for (const ScanlineInfo &scanlineInfo: scanlineInfoMap | std::views::values) {
+    std::vector<VerticalScanline> VerticalScanlinePool::computeSortedScanlines() const {
+        std::vector<VerticalScanline> sortedScanlines;
+        for (const VerticalScanline &scanlineInfo: scanlineInfoMap | std::views::values) {
             sortedScanlines.emplace_back(scanlineInfo);
         }
 
         std::ranges::sort(
-            sortedScanlines, [](const ScanlineInfo &a, const ScanlineInfo &b) {
+            sortedScanlines, [](const VerticalScanline &a, const VerticalScanline &b) {
                 return a.values.angle < b.values.angle;
             }
         );
@@ -111,7 +111,7 @@ namespace accurate_ri {
         return sortedScanlines;
     }
 
-    void VerticalScanlinePool::updateScanlineIds(std::vector<ScanlineInfo> sortedScanlines) {
+    void VerticalScanlinePool::updateScanlineIds(std::vector<VerticalScanline> sortedScanlines) {
         std::unordered_map<uint32_t, uint32_t> oldIdsToNewIdsMap;
         for (uint32_t i = 0; i < sortedScanlines.size(); ++i) {
             oldIdsToNewIdsMap.emplace(sortedScanlines[i].id, i);

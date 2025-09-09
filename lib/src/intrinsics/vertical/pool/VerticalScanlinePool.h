@@ -4,7 +4,7 @@
 namespace accurate_ri {
     class VerticalScanlinePool {
     private:
-        std::unordered_map<uint32_t, ScanlineInfo> scanlineInfoMap;
+        std::unordered_map<uint32_t, VerticalScanline> scanlineInfoMap;
         Eigen::ArrayXi pointsScanlinesIds;
         int64_t unassignedPoints = 0;
 
@@ -19,15 +19,15 @@ namespace accurate_ri {
 
         std::optional<HoughScanlineEstimation> performHoughEstimation();
 
-        void assignScanline(const ScanlineInfo &scanline, const Eigen::ArrayXi &pointsIndices);
+        void assignScanline(const VerticalScanline &scanline, const Eigen::ArrayXi &pointsIndices);
 
-        std::optional<ScanlineInfo> removeScanline(const PointArray &points, uint32_t scanlineId);
+        std::optional<VerticalScanline> removeScanline(const PointArray &points, uint32_t scanlineId);
 
-        FullScanlines extractFullSortedScanlines();
+        VerticalScanlinesAssignations extractFullSortedScanlineAssignations();
 
         [[nodiscard]] OffsetAngleMargin getHoughMargin() const;
 
-        [[nodiscard]] std::vector<ScanlineInfo> getUnsortedScanlinesCopy() const;
+        [[nodiscard]] std::vector<VerticalScanline> getUnsortedScanlinesCopy() const;
 
         Eigen::ArrayXi getScanlinesIds(const Eigen::ArrayXi &pointsIndices) const {
             return pointsScanlinesIds(pointsIndices);
@@ -45,7 +45,7 @@ namespace accurate_ri {
             hough.removeVotes(points, indices);
         }
 
-        const ScanlineInfo &getScanlineById(const uint32_t id) const {
+        const VerticalScanline &getScanlineById(const uint32_t id) const {
             return scanlineInfoMap.at(id);
         }
 
@@ -103,8 +103,8 @@ namespace accurate_ri {
     private:
         Eigen::ArrayXi scanlineIdToPointsIndices(uint32_t scanlineId) const;
 
-        std::vector<ScanlineInfo> computeSortedScanlines() const;
+        std::vector<VerticalScanline> computeSortedScanlines() const;
 
-        void updateScanlineIds(std::vector<ScanlineInfo> sortedScanlines);
+        void updateScanlineIds(std::vector<VerticalScanline> sortedScanlines);
     };
 } // accurate_ri

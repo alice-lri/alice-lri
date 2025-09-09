@@ -1,6 +1,4 @@
 #include "VerticalIntrinsicsEstimator.h"
-
-#include <accurate_ri/accurate_ri.hpp>
 #include <algorithm>
 #include <queue>
 #include <ranges>
@@ -12,6 +10,7 @@
 #include <nlohmann/json.hpp>
 #include "Constants.h"
 #include "BuildOptions.h"
+#include "intrinsics/vertical/VerticalIntrinsicsStructs.h"
 #include "intrinsics/vertical/estimation/VerticalScanlineEstimator.h"
 #include "intrinsics/vertical/estimation/VerticalScanlineLimits.h"
 
@@ -32,7 +31,7 @@ namespace accurate_ri {
     }
 
     // TODO perhaps further split this function, perhaps when we construct the result iteratively
-    VerticalIntrinsicsResult VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
+    VerticalIntrinsicsEstimation VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
         init(points);
 
         int64_t iteration = -1;
@@ -73,29 +72,21 @@ namespace accurate_ri {
                 continue;
             }
 
+            const VerticalScanline scanline =
+                makeVerticalScanline(currentScanlineId, candidate, refinedCandidate, angleBounds);
+
+            // TODO merge?
             scanlinePool->removeVotes(points, refinedCandidate->scanline.limits.indices);
+            scanlinePool->assignScanline(scanline, refinedCandidate->scanline.limits.indices);
 
-            const ScanlineInfo scanlineInfo = ScanlineInfo{
-                .id = currentScanlineId,
-                .pointsCount = static_cast<uint64_t>(refinedCandidate->scanline.limits.indices.size()),
-                .values = refinedCandidate->scanline.values,
-                .ci = refinedCandidate->scanline.ci,
-                .theoreticalAngleBounds = angleBounds,
-                .uncertainty = refinedCandidate->scanline.uncertainty,
-                .houghVotes = candidate.hough->cell.votes,
-                .houghHash = candidate.hough->cell.hash
-            };
-
-            scanlinePool->assignScanline(scanlineInfo, refinedCandidate->scanline.limits.indices);
-
-            VerticalLogging::logScanlineAssignation(scanlineInfo);
+            VerticalLogging::logScanlineAssignation(scanline);
             LOG_INFO("Number of unassigned points: ", scanlinePool->getUnassignedPoints());
             LOG_INFO("");
 
             currentScanlineId++;
         }
 
-        const VerticalIntrinsicsResult result = extractResult(iteration, points, endReason);
+        const VerticalIntrinsicsEstimation result = extractResult(iteration, points, endReason);
         return result;
     }
 
@@ -153,7 +144,7 @@ namespace accurate_ri {
         return result;
     }
 
-    VerticalIntrinsicsResult VerticalIntrinsicsEstimator::extractResult(
+    VerticalIntrinsicsEstimation VerticalIntrinsicsEstimator::extractResult(
         const int64_t iteration, const PointArray &points, const EndReason endReason
     ) const {
         int64_t unassignedPoints = scanlinePool->getUnassignedPoints();
@@ -162,18 +153,33 @@ namespace accurate_ri {
             LOG_WARN("Warning: Found ", unassignedPoints, " spurious points");
         }
 
-        FullScanlines fullScanlines = scanlinePool->extractFullSortedScanlines();
+        VerticalScanlinesAssignations scanlinesAssignations = scanlinePool->extractFullSortedScanlineAssignations();
 
-        LOG_INFO("Number of scanlines: ", fullScanlines.scanlines.size());
+        LOG_INFO("Number of scanlines: ", scanlinesAssignations.scanlines.size());
         LOG_INFO("Number of unassigned points: ", unassignedPoints);
 
-        return VerticalIntrinsicsResult{
+        return VerticalIntrinsicsEstimation{
             .iterations = static_cast<int32_t>(iteration),
-            .scanlinesCount = static_cast<int32_t>(fullScanlines.scanlines.size()),
             .unassignedPoints = static_cast<int32_t>(unassignedPoints),
             .pointsCount = static_cast<int32_t>(points.size()),
             .endReason = endReason,
-            .fullScanlines = std::move(fullScanlines)
+            .scanlinesAssignations = std::move(scanlinesAssignations)
+        };
+    }
+
+    VerticalScanline VerticalIntrinsicsEstimator::makeVerticalScanline(
+        const uint32_t currentScanlineId, const Candidate &candidate,
+        const std::optional<RefinedCandidate> &refinedCandidate, const ScanlineAngleBounds &angleBounds
+    ) {
+        return VerticalScanline{
+            .id = currentScanlineId,
+            .pointsCount = static_cast<uint64_t>(refinedCandidate->scanline.limits.indices.size()),
+            .values = refinedCandidate->scanline.values,
+            .ci = refinedCandidate->scanline.ci,
+            .theoreticalAngleBounds = angleBounds,
+            .uncertainty = refinedCandidate->scanline.uncertainty,
+            .houghVotes = candidate.hough->cell.votes,
+            .houghHash = candidate.hough->cell.hash
         };
     }
 } // namespace accurate_ri

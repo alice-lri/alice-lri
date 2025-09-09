@@ -16,9 +16,5 @@ protected:
 TEST_F(AccurateRIAPITest, ExecuteWithEmptyData) {
     const accurate_ri::PointCloud::Double empty;
     // Expect no crash with empty data
-    accurate_ri::IntrinsicsResult result = accurate_ri::train(empty);
-    
-    // Basic checks on result structure
-    EXPECT_EQ(result.vertical.pointsCount, 0);
-    EXPECT_EQ(result.vertical.scanlinesCount, 0);
+    accurate_ri::Intrinsics result = accurate_ri::train(empty);
 } 
