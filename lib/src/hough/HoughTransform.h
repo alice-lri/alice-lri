@@ -13,6 +13,19 @@ namespace accurate_ri {
         VOTES_ONLY, VOTES_AND_HASHES
     };
 
+    struct HoughCell {
+        uint64_t maxOffsetIndex;
+        uint64_t maxAngleIndex;
+        OffsetAngle maxValues;
+        int64_t votes;
+        uint64_t hash;
+    };
+
+    struct HoughScanlineEstimation {
+        HoughCell cell;
+        OffsetAngleMargin margin;
+    };
+
     /**
      * @class HoughTransform
      * @brief A class to perform the Hough Transform for detecting lines in a 2D space.

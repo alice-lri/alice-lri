@@ -2,7 +2,7 @@
 #include "intrinsics/IntrinsicsEstimator.h"
 #include "rangeimage/RangeImageUtils.h"
 #include "utils/json/JsonConverters.h"
-#include "utils/Logger.h"
+#include "utils/logger/Logger.h"
 #include "utils/Timer.h"
 
 namespace accurate_ri {

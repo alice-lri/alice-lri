@@ -4,7 +4,6 @@
 #include "point/PointArray.h"
 #include "vertical/VerticalIntrinsicsEstimator.h"
 
-
 namespace accurate_ri {
 
 class IntrinsicsEstimator {

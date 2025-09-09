@@ -1,7 +1,7 @@
 #include "VerticalScanlinePool.h"
 #include <optional>
 #include <ranges>
-#include "utils/Logger.h"
+#include "utils/logger/Logger.h"
 
 namespace accurate_ri {
     VerticalScanlinePool::VerticalScanlinePool(

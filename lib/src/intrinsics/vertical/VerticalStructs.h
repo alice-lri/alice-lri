@@ -1,5 +1,4 @@
 #pragma once
-#include <cstdint>
 #include <iomanip>
 #include <unordered_set>
 #include <optional>
@@ -8,13 +7,6 @@
 
 // TODO move structs to their own places (locality of behaviour)
 namespace accurate_ri {
-    struct HoughCell {
-        uint64_t maxOffsetIndex;
-        uint64_t maxAngleIndex;
-        OffsetAngle maxValues;
-        int64_t votes;
-        uint64_t hash;
-    };
 
     struct VerticalBounds {
         Eigen::ArrayXd phis;
@@ -28,11 +20,6 @@ namespace accurate_ri {
         Eigen::ArrayX<bool> mask;
         Eigen::ArrayXd lowerLimit;
         Eigen::ArrayXd upperLimit; // TODO just realized the limits are not really neccessary to store
-    };
-
-    struct HoughScanlineEstimation {
-        HoughCell cell;
-        OffsetAngleMargin margin;
     };
 
     struct ScanlineFitResult {
@@ -66,88 +53,14 @@ namespace accurate_ri {
         }
     };
 
-    struct ScanlineIntersectionInfo {
-        const Eigen::ArrayX<bool> empiricalIntersectionMask;
-        const Eigen::ArrayX<bool> theoreticalIntersectionMask;
-        const bool empiricalIntersection;
-        const bool theoreticalIntersection;
-
-        [[nodiscard]] bool anyIntersection() const {
-            return empiricalIntersection || theoreticalIntersection;
-        }
-
-        [[nodiscard]] bool anyIntersection(const uint32_t i) const {
-            return empiricalIntersectionMask[i] || theoreticalIntersectionMask[i];
-        }
-    };
-
     struct ValueConfInterval {
         double value;
         RealMargin ci;
     };
 
-    struct HeuristicScanline {
-        ValueConfInterval offset;
-        ValueConfInterval angle;
-    };
-
-    struct HeuristicSupportScanline {
-        uint32_t id;
-        double distance;
-    };
-
-    struct HeuristicSupportScanlinePair {
-        std::optional<HeuristicSupportScanline> top;
-        std::optional<HeuristicSupportScanline> bottom;
-    };
-
-    struct HashToConflictValue {
-        std::unordered_set<uint32_t> conflictingScanlines;
-        int64_t votes;
-    };
-
-    struct ScanlineConflictsResult {
-        bool shouldReject;
-        Eigen::ArrayXi conflictingScanlines;
-    };
-
     // TODO move elsewhere
-    template<typename T>
-    std::ostream &operator<<(std::ostream &os, const std::unordered_set<T> &set) {
-        os << std::fixed << std::setprecision(5) << "{";
-
-        bool firstElement = true;
-        for (const auto &element: set) {
-            if (!firstElement) {
-                os << ", ";
-            }
-            os << element;
-            firstElement = false;
-        }
-
-        os << "}";
-        return os;
-    }
-
     inline std::ostream &operator<<(std::ostream &os, const RealMargin &margin) {
         os << std::fixed << std::setprecision(5) << "[" << margin.lower << ", " << margin.upper << "]";
-        return os;
-    }
-
-    template<typename T>
-    std::ostream &operator<<(std::ostream &os, const Eigen::ArrayX<T> &array) {
-        os << std::fixed << std::setprecision(5) << "[";
-
-        bool firstElement = true;
-        for (const auto &element: array) {
-            if (!firstElement) {
-                os << ", ";
-            }
-            os << element;
-            firstElement = false;
-        }
-
-        os << "]";
         return os;
     }
 }

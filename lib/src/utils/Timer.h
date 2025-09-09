@@ -3,7 +3,7 @@
 #include <iostream>
 #include <map>
 
-#include "Logger.h"
+#include "logger/Logger.h"
 
 #ifdef ENABLE_PROFILING
 #define PROFILE_SCOPE(name) Timer timer##__LINE__ (name)

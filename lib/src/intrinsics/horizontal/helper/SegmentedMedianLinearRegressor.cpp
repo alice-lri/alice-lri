@@ -2,7 +2,7 @@
 
 #include "intrinsics/horizontal/helper/HorizontalMath.h"
 #include "math/Stats.h"
-#include "utils/Logger.h"
+#include "utils/logger/Logger.h"
 #include "utils/Utils.h"
 
 namespace accurate_ri {

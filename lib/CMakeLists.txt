@@ -60,7 +60,7 @@ if (ENABLE_PYTHON_DEBUG)
     message(STATUS "Python3 library: ${Python3_LIBRARIES}")
 endif ()
 
-add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
+add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         src/utils/Timer.h
         src/point/PointUtils.cpp
         src/point/PointUtils.h
@@ -111,6 +111,9 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/Logger.h
         src/math/Trigonometry.cpp
         src/intrinsics/vertical/estimation/VerticalHeuristicsEstimator.cpp
         src/intrinsics/vertical/estimation/VerticalHeuristicsEstimator.h
+        src/intrinsics/vertical/estimation/VerticalHeuristicsStructs.h
+        src/utils/logger/LoggingOverrides.h
+        src/intrinsics/vertical/conflict/ScanlineConflictStructs.h
 )
 
 set(_accurate_ri_private_include_dirs

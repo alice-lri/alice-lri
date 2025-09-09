@@ -1,10 +1,11 @@
 #include "VerticalHeuristicsEstimator.h"
 #include <ranges>
 #include "intrinsics/vertical/VerticalStructs.h"
+#include "intrinsics/vertical/estimation/VerticalHeuristicsStructs.h"
 #include "intrinsics/vertical/estimation/VerticalScanlineLimits.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "point/PointArray.h"
-#include "utils/Logger.h"
+#include "utils/logger/Logger.h"
 
 namespace accurate_ri {
     std::optional<ScanlineEstimationResult> VerticalHeuristicsEstimator::estimate(

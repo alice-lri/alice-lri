@@ -5,6 +5,7 @@
 #include <ctime>
 #include <sstream>
 #include <iomanip>
+#include "LoggingOverrides.h"
 
 #define COLOR_RESET  "\033[0m"
 #define COLOR_DEBUG  "\033[36m"

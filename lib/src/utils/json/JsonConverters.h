@@ -1,6 +1,10 @@
 #pragma once
 #include <nlohmann/json.hpp>
+
+#include "accurate_ri/public_structs.hpp"
+#include "hough/HoughTransform.h"
 #include "intrinsics/vertical/VerticalStructs.h"
+#include "intrinsics/vertical/conflict/ScanlineConflictStructs.h"
 
 namespace accurate_ri {
     nlohmann::json offsetAngleToJson(const OffsetAngle &oa);
@@ -24,7 +28,7 @@ namespace accurate_ri {
     nlohmann::json hashToConflictValueToJson(const HashToConflictValue &htc);
     HashToConflictValue hashToConflictValueFromJson(const nlohmann::json &j);
 
-    nlohmann::json endReasonToJson(const EndReason er);
+    nlohmann::json endReasonToJson(EndReason er);
     EndReason endReasonFromJson(const nlohmann::json &j);
 
     nlohmann::json verticalIntrinsicsResultToJson(const VerticalIntrinsicsResult &vir);

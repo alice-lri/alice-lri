@@ -9,7 +9,7 @@
 #include "intrinsics/vertical/estimation/VerticalScanlineLimits.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "point/PointArray.h"
-#include "utils/Logger.h"
+#include "utils/logger/Logger.h"
 #include "utils/Timer.h"
 #include "utils/Utils.h"
 

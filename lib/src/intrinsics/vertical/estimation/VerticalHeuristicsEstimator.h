@@ -1,4 +1,5 @@
 #pragma once
+#include "intrinsics/vertical/estimation/VerticalHeuristicsStructs.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 
 namespace accurate_ri {

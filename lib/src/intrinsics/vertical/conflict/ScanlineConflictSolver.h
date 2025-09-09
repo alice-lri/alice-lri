@@ -1,8 +1,8 @@
 #pragma once
-#include <cstdint>
 #include <unordered_map>
 
 #include "intrinsics/vertical/VerticalStructs.h"
+#include "intrinsics/vertical/conflict/ScanlineConflictStructs.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 
 namespace accurate_ri {

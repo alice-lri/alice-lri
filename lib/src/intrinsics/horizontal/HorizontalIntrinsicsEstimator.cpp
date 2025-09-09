@@ -13,7 +13,7 @@
 #include "helper/PeriodicFitter.h"
 #include "math/Stats.h"
 #include "plotty/matplotlibcpp.hpp"
-#include "utils/Logger.h"
+#include "utils/logger/Logger.h"
 #include "utils/Timer.h"
 #include "utils/Utils.h"
 

@@ -6,7 +6,7 @@
 
 #include "hash/HashUtils.h"
 #include "intrinsics/vertical/VerticalStructs.h"
-#include "utils/Logger.h"
+#include "utils/logger/Logger.h"
 #include "utils/Timer.h"
 #include "utils/Utils.h"
 
