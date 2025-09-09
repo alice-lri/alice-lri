@@ -7,7 +7,6 @@
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <nlohmann/json.hpp>
 
-// TODO RECOVER THIS FILE WITH DETAILED TRAIN OR SOMETHING
 struct DatasetFrame {
     int64_t id;
     int64_t datasetId;
@@ -35,86 +34,85 @@ Config loadConfig() {
     return config;
 }
 
-// std::string endReasonToString(const accurate_ri::EndReason &endReason) {
-//     switch (endReason) {
-//         case accurate_ri::EndReason::ALL_ASSIGNED:
-//             return "ALL_ASSIGNED";
-//         case accurate_ri::EndReason::MAX_ITERATIONS:
-//             return "MAX_ITERATIONS";
-//         case accurate_ri::EndReason::NO_MORE_PEAKS:
-//             return "NO_MORE_PEAKS";
-//         default:
-//             throw std::runtime_error("endReasonToString: Unknown endReason");
-//     }
-// }
+std::string endReasonToString(const accurate_ri::EndReason &endReason) {
+    switch (endReason) {
+        case accurate_ri::EndReason::ALL_ASSIGNED:
+            return "ALL_ASSIGNED";
+        case accurate_ri::EndReason::MAX_ITERATIONS:
+            return "MAX_ITERATIONS";
+        case accurate_ri::EndReason::NO_MORE_PEAKS:
+            return "NO_MORE_PEAKS";
+        default:
+            throw std::runtime_error("endReasonToString: Unknown endReason");
+    }
+}
 
 void storeResult(
     const SQLite::Database &db, const int64_t experimentId, const int64_t frameId,
-    const accurate_ri::Intrinsics &result
+    const accurate_ri::DebugIntrinsics &result
 ) {
-    // SQLite::Statement frameQuery(
-    //     db, R"(
-    //         INSERT INTO intrinsics_frame_result(experiment_id, dataset_frame_id, points_count, scanlines_count,
-    //                                             vertical_iterations, unassigned_points, end_reason)
-    //         VALUES (?, ?, ?, ?, ?, ?, ?);
-    //         )"
-    // );
-    //
-    // frameQuery.bind(1, experimentId);
-    // frameQuery.bind(2, frameId);
-    // frameQuery.bind(3, result.vertical.pointsCount);
-    // frameQuery.bind(4, result.vertical.scanlinesCount);
-    // frameQuery.bind(5, result.vertical.iterations);
-    // frameQuery.bind(6, result.vertical.unassignedPoints);
-    // frameQuery.bind(7, endReasonToString(result.vertical.endReason));
-    //
-    // frameQuery.exec();
-    //
-    // const int64_t frameResultId = db.getLastInsertRowid();
-    //
-    // for (int scanlineIdx = 0; scanlineIdx < result.vertical.scanlinesCount; ++scanlineIdx) {
-    //     SQLite::Statement scanlineQuery(
-    //         db, R"(
-    //         INSERT INTO intrinsics_result_scanline_info(intrinsics_result_id, scanline_idx, points_count, vertical_offset,
-    //                                                     vertical_angle, vertical_ci_offset_lower, vertical_ci_offset_upper,
-    //                                                     vertical_ci_angle_lower, vertical_ci_angle_upper,
-    //                                                     vertical_theoretical_angle_bottom_lower,
-    //                                                     vertical_theoretical_angle_bottom_upper,
-    //                                                     vertical_theoretical_angle_top_lower, vertical_theoretical_angle_top_upper,
-    //                                                     vertical_uncertainty, vertical_last_scanline, vertical_hough_votes,
-    //                                                     vertical_hough_hash, horizontal_offset, horizontal_resolution,
-    //                                                     horizontal_angle_offset, horizontal_heuristic)
-    //         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    //         )"
-    //     );
-    //
-    //     const auto &verticalScanline = result.vertical.fullScanlines.scanlines[scanlineIdx];
-    //     const auto &horizontalScanline = result.horizontal.scanlines[scanlineIdx];
-    //
-    //     scanlineQuery.bind(1, frameResultId);
-    //     scanlineQuery.bind(2, scanlineIdx);
-    //     scanlineQuery.bind(3, static_cast<int>(verticalScanline.pointsCount));
-    //     scanlineQuery.bind(4, verticalScanline.values.offset);
-    //     scanlineQuery.bind(5, verticalScanline.values.angle);
-    //     scanlineQuery.bind(6, verticalScanline.ci.offset.lower);
-    //     scanlineQuery.bind(7, verticalScanline.ci.offset.upper);
-    //     scanlineQuery.bind(8, verticalScanline.ci.angle.lower);
-    //     scanlineQuery.bind(9, verticalScanline.ci.angle.upper);
-    //     scanlineQuery.bind(10, verticalScanline.theoreticalAngleBounds.bottom.lower);
-    //     scanlineQuery.bind(11, verticalScanline.theoreticalAngleBounds.bottom.upper);
-    //     scanlineQuery.bind(12, verticalScanline.theoreticalAngleBounds.top.lower);
-    //     scanlineQuery.bind(13, verticalScanline.theoreticalAngleBounds.top.upper);
-    //     scanlineQuery.bind(14, verticalScanline.uncertainty);
-    //     scanlineQuery.bind(15, false); // TODO
-    //     scanlineQuery.bind(16, verticalScanline.houghVotes);
-    //     scanlineQuery.bind(17, std::to_string(verticalScanline.houghHash));
-    //     scanlineQuery.bind(18, horizontalScanline.offset);
-    //     scanlineQuery.bind(19, horizontalScanline.resolution);
-    //     scanlineQuery.bind(20, horizontalScanline.thetaOffset);
-    //     scanlineQuery.bind(21, horizontalScanline.heuristic);
-    //
-    //     scanlineQuery.exec();
-    // }
+    SQLite::Statement frameQuery(
+        db, R"(
+            INSERT INTO intrinsics_frame_result(experiment_id, dataset_frame_id, points_count, scanlines_count,
+                                                vertical_iterations, unassigned_points, end_reason)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+            )"
+    );
+
+    frameQuery.bind(1, experimentId);
+    frameQuery.bind(2, frameId);
+    frameQuery.bind(3, result.pointsCount);
+    frameQuery.bind(4, static_cast<uint32_t>(result.scanlines.size()));
+    frameQuery.bind(5, result.verticalIterations);
+    frameQuery.bind(6, result.unassignedPoints);
+    frameQuery.bind(7, endReasonToString(result.endReason));
+
+    frameQuery.exec();
+
+    const int64_t frameResultId = db.getLastInsertRowid();
+
+    for (int scanlineIdx = 0; scanlineIdx < result.scanlines.size(); ++scanlineIdx) {
+        SQLite::Statement scanlineQuery(
+            db, R"(
+            INSERT INTO intrinsics_result_scanline_info(intrinsics_result_id, scanline_idx, points_count, vertical_offset,
+                                                        vertical_angle, vertical_ci_offset_lower, vertical_ci_offset_upper,
+                                                        vertical_ci_angle_lower, vertical_ci_angle_upper,
+                                                        vertical_theoretical_angle_bottom_lower,
+                                                        vertical_theoretical_angle_bottom_upper,
+                                                        vertical_theoretical_angle_top_lower, vertical_theoretical_angle_top_upper,
+                                                        vertical_uncertainty, vertical_last_scanline, vertical_hough_votes,
+                                                        vertical_hough_hash, horizontal_offset, horizontal_resolution,
+                                                        horizontal_angle_offset, horizontal_heuristic)
+            values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            )"
+        );
+
+        const auto &scanline = result.scanlines[scanlineIdx];
+
+        scanlineQuery.bind(1, frameResultId);
+        scanlineQuery.bind(2, scanlineIdx);
+        scanlineQuery.bind(3, static_cast<int>(scanline.pointsCount));
+        scanlineQuery.bind(4, scanline.verticalOffset.value);
+        scanlineQuery.bind(5, scanline.verticalAngle.value);
+        scanlineQuery.bind(6, scanline.verticalOffset.ci.lower);
+        scanlineQuery.bind(7, scanline.verticalOffset.ci.upper);
+        scanlineQuery.bind(8, scanline.verticalAngle.ci.lower);
+        scanlineQuery.bind(9, scanline.verticalAngle.ci.upper);
+        scanlineQuery.bind(10, scanline.theoreticalAngleBounds.bottom.lower);
+        scanlineQuery.bind(11, scanline.theoreticalAngleBounds.bottom.upper);
+        scanlineQuery.bind(12, scanline.theoreticalAngleBounds.top.lower);
+        scanlineQuery.bind(13, scanline.theoreticalAngleBounds.top.upper);
+        scanlineQuery.bind(14, scanline.uncertainty);
+        scanlineQuery.bind(15, false); // TODO
+        scanlineQuery.bind(16, scanline.houghVotes);
+        scanlineQuery.bind(17, std::to_string(scanline.houghHash));
+        scanlineQuery.bind(18, scanline.horizontalOffset);
+        scanlineQuery.bind(19, scanline.resolution);
+        scanlineQuery.bind(20, scanline.azimuthalOffset);
+        scanlineQuery.bind(21, scanline.heuristic);
+
+        scanlineQuery.exec();
+    }
 }
 
 int main(const int argc, const char **argv) {
@@ -179,7 +177,7 @@ int main(const int argc, const char **argv) {
         const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
 
         auto start = std::chrono::high_resolution_clock::now();
-        accurate_ri::Intrinsics result = accurate_ri::train(cloud);
+        accurate_ri::DebugIntrinsics result = accurate_ri::debugTrain(cloud);
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration = end - start;
 

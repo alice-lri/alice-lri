@@ -24,7 +24,8 @@ namespace accurate_ri {
         const HorizontalIntrinsicsEstimation horizontal = horizontalIntrinsicsEstimator.estimate(points, vertical);
 
         const std::size_t scanlinesCount = vertical.scanlinesAssignations.scanlines.size();
-        DebugIntrinsics intrinsics = DebugIntrinsics(scanlinesCount);
+        DebugIntrinsics intrinsics = DebugIntrinsics(scanlinesCount, vertical.iterations, vertical.unassignedPoints,
+            vertical.pointsCount, vertical.endReason);
 
         for (int i = 0; i < scanlinesCount; ++i) {
             const auto& verticalScanline = vertical.scanlinesAssignations.scanlines[i];
@@ -61,7 +62,8 @@ namespace accurate_ri {
             .uncertainty = vertical.uncertainty,
             .houghVotes = vertical.houghVotes,
             .houghHash = vertical.houghHash,
-            .pointsCount = vertical.pointsCount
+            .pointsCount = vertical.pointsCount,
+            .theoreticalAngleBounds = vertical.theoreticalAngleBounds
         };
     }
 } // accurate_ri

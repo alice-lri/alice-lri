@@ -13,7 +13,7 @@ namespace accurate_ri {
     AliceArray<T>::AliceArray() : impl(new Impl) {}
 
     template<class T>
-    AliceArray<T>::AliceArray(std::size_t n) : impl(new Impl) {
+    AliceArray<T>::AliceArray(uint64_t n) : impl(new Impl) {
         impl->v.resize(n);
     }
 
@@ -50,12 +50,12 @@ namespace accurate_ri {
     }
 
     template<class T>
-    std::size_t AliceArray<T>::size() const noexcept {
+    uint64_t AliceArray<T>::size() const noexcept {
         return impl->v.size();
     }
 
     template<class T>
-    void AliceArray<T>::resize(std::size_t n) {
+    void AliceArray<T>::resize(uint64_t n) {
         impl->v.resize(n);
     }
 
@@ -70,22 +70,22 @@ namespace accurate_ri {
     }
 
     template<class T>
-    T &AliceArray<T>::operator[](std::size_t i) noexcept {
+    T &AliceArray<T>::operator[](uint64_t i) noexcept {
         return impl->v[i];
     }
 
     template<class T>
-    const T &AliceArray<T>::operator[](std::size_t i) const noexcept {
+    const T &AliceArray<T>::operator[](uint64_t i) const noexcept {
         return impl->v[i];
     }
 
     template<class T>
-    T &AliceArray<T>::at(std::size_t i) {
+    T &AliceArray<T>::at(uint64_t i) {
         return impl->v.at(i);
     }
 
     template<class T>
-    const T &AliceArray<T>::at(std::size_t i) const {
+    const T &AliceArray<T>::at(uint64_t i) const {
         return impl->v.at(i);
     }
 

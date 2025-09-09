@@ -90,6 +90,11 @@ namespace accurate_ri {
         Interval ci;
     };
 
+    struct ACCURATE_RI_API ScanlineAngleBounds {
+        Interval bottom;
+        Interval top;
+    };
+
     struct ACCURATE_RI_API DebugScanline {
         ValueConfInterval verticalOffset;
         ValueConfInterval verticalAngle;
@@ -101,12 +106,29 @@ namespace accurate_ri {
         int64_t houghVotes;
         uint64_t houghHash;
         uint64_t pointsCount;
+        ScanlineAngleBounds theoreticalAngleBounds;
+    };
+
+    enum class ACCURATE_RI_API EndReason {
+        ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
     };
 
     struct ACCURATE_RI_API DebugIntrinsics {
         AliceArray<DebugScanline> scanlines;
+        int32_t verticalIterations = 0;
+        int32_t unassignedPoints = 0;
+        int32_t pointsCount = 0;
+        EndReason endReason = EndReason::MAX_ITERATIONS;
 
         explicit DebugIntrinsics(const int32_t scanlineCount) {
+            scanlines.resize(scanlineCount);
+        }
+
+        DebugIntrinsics(
+            const int32_t scanlineCount, const int32_t verticalIterations, const int32_t unassignedPoints,
+            const int32_t pointsCount, const EndReason endReason
+        ) : verticalIterations(verticalIterations), unassignedPoints(unassignedPoints), pointsCount(pointsCount),
+            endReason(endReason) {
             scanlines.resize(scanlineCount);
         }
     };

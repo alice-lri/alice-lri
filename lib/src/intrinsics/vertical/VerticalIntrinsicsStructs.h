@@ -4,18 +4,10 @@
 #include "utils/CommonStructs.h"
 
 namespace accurate_ri {
-    enum class EndReason {
-        ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
-    };
 
     struct VerticalMargin {
         double offset;
         double angle;
-    };
-
-    struct ScanlineAngleBounds {
-        Interval bottom;
-        Interval top;
     };
 
     struct VerticalScanline {
