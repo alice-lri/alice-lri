@@ -33,7 +33,4 @@ namespace accurate_ri {
         T &at(std::size_t i); // checked
         const T &at(std::size_t i) const;
     };
-
-    extern template class ACCURATE_RI_API AliceArray<float>;
-    extern template class ACCURATE_RI_API AliceArray<double>;
 }

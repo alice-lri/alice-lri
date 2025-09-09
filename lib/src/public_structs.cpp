@@ -174,6 +174,4 @@ namespace accurate_ri {
 
         return impl->pixels.data();
     }
-
-    template class ACCURATE_RI_API AliceArray<DebugScanline>;
 }

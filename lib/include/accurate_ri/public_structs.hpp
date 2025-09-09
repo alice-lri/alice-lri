@@ -13,7 +13,7 @@ namespace accurate_ri {
         double azimuthalOffset;
         int32_t resolution;
     };
-    extern template class ACCURATE_RI_API AliceArray<Scanline>;
+    // extern template class ACCURATE_RI_API AliceArray<Scanline>;
 
     struct ACCURATE_RI_API Intrinsics {
     private:
@@ -102,7 +102,6 @@ namespace accurate_ri {
         uint64_t houghHash;
         uint64_t pointsCount;
     };
-    extern template class ACCURATE_RI_API AliceArray<DebugScanline>;
 
     struct ACCURATE_RI_API DebugIntrinsics {
         AliceArray<DebugScanline> scanlines;

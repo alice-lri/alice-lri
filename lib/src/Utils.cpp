@@ -1,4 +1,5 @@
 #include "accurate_ri/Utils.hpp"
+#include "accurate_ri/public_structs.hpp"
 #include <vector>
 #include <cassert>
 
@@ -87,4 +88,9 @@ namespace accurate_ri {
     const T &AliceArray<T>::at(std::size_t i) const {
         return impl->v.at(i);
     }
+
+    template class AliceArray<float>;
+    template class AliceArray<double>;
+    template class AliceArray<Scanline>;
+    template class AliceArray<DebugScanline>;
 }
