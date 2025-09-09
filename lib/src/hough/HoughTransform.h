@@ -1,7 +1,8 @@
 #pragma once
 #include <optional>
 #include <vector>
-#include "intrinsics/vertical/VerticalStructs.h"
+
+#include "intrinsics/vertical/VerticalIntrinsicsStructs.h"
 #include "point/PointArray.h"
 
 namespace accurate_ri {
@@ -16,14 +17,15 @@ namespace accurate_ri {
     struct HoughCell {
         uint64_t maxOffsetIndex;
         uint64_t maxAngleIndex;
-        OffsetAngle maxValues;
+        double maxOffset;
+        double maxAngle;
         int64_t votes;
         uint64_t hash;
     };
 
     struct HoughScanlineEstimation {
         HoughCell cell;
-        OffsetAngleMargin margin;
+        VerticalMargin margin;
     };
 
     /**

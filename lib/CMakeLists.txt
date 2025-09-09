@@ -74,7 +74,6 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         src/hash/HashUtils.h
         src/point/PointArray.h
         src/point/PointArray.cpp
-        src/intrinsics/vertical/VerticalStructs.h
         src/utils/Utils.h
         src/intrinsics/vertical/helper/VerticalLogging.h
         src/utils/TestUtils.h
@@ -111,11 +110,14 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         src/math/Trigonometry.cpp
         src/intrinsics/vertical/estimation/VerticalHeuristicsEstimator.cpp
         src/intrinsics/vertical/estimation/VerticalHeuristicsEstimator.h
-        src/intrinsics/vertical/estimation/VerticalHeuristicsStructs.h
+        src/intrinsics/vertical/estimation/VerticalScanlineEstimationStructs.h
         src/utils/logger/LoggingOverrides.h
         src/intrinsics/vertical/conflict/ScanlineConflictStructs.h
         src/intrinsics/vertical/VerticalIntrinsicsStructs.h
         src/intrinsics/horizontal/HorizontalIntrinsicsStructs.h
+        src/Array.cpp
+        include/accurate_ri/Array.hpp
+        src/utils/CommonStructs.h
 )
 
 set(_accurate_ri_private_include_dirs

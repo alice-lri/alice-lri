@@ -5,6 +5,23 @@
 #define ACCURATE_RI_API __attribute__((visibility("default")))
 
 namespace accurate_ri {
+    // namespace debug {
+    //     struct ACCURATE_RI_API Scanline {
+    //
+    //     }
+    // }
+
+    struct ACCURATE_RI_API Interval {
+        double lower;
+        double upper;
+
+        [[nodiscard]] double diff() const {
+            return upper - lower;
+        }
+
+        void clampBoth(const double minValue, const double maxValue);
+    };
+
     struct ACCURATE_RI_API Scanline {
         double verticalOffset;
         double verticalAngle;

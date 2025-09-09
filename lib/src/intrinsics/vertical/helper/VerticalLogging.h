@@ -32,11 +32,9 @@ namespace accurate_ri::VerticalLogging {
     }
 
     inline void logHoughInfo(const int64_t iteration, const HoughCell &houghMax) {
-        const OffsetAngle &houghValues = houghMax.maxValues;
-
         LOG_INFO("ITERATION ", iteration);
         LOG_INFO(
-            "Offset: ", houghValues.offset, ", Angle: ", houghValues.angle, ", Votes: ", houghMax.votes,
+            "Offset: ", houghMax.maxOffset, ", Angle: ", houghMax.maxAngle, ", Votes: ", houghMax.votes,
             ", Hash: ", houghMax.hash, ", Hough indices: [", houghMax.maxAngleIndex, "   ", houghMax.maxOffsetIndex,
             "]"
         );
@@ -45,7 +43,7 @@ namespace accurate_ri::VerticalLogging {
     inline void logScanlineAssignation(const VerticalScanline& scanline) {
         LOG_INFO("Scanline ", scanline.id, " assigned with ", scanline.pointsCount, " points");
         LOG_INFO(
-            "Scanline parameters: Offset: ", scanline.values.offset, ", Angle: ", scanline.values.angle,
+            "Scanline parameters: Offset: ", scanline.offset.value, ", Angle: ", scanline.angle.value,
             ", Votes: ", scanline.houghVotes, ", Count: ", scanline.pointsCount,
             ", Lower min theoretical angle: ", scanline.theoreticalAngleBounds.bottom.lower,
             ", Lower max theoretical angle: ", scanline.theoreticalAngleBounds.bottom.upper,
@@ -55,72 +53,4 @@ namespace accurate_ri::VerticalLogging {
         );
     }
 
-    // TODO remove these and below after debugging
-    template<typename T>
-    bool writeBinaryFile(const std::filesystem::path &filePath, const T &data, const std::string &dataName) {
-        std::ofstream outFile(filePath, std::ios::binary);
-
-        if (outFile.is_open()) {
-            outFile.write(reinterpret_cast<const char *>(data.data()), data.size() * sizeof(data[0]));
-            outFile.close();
-            return true;
-        }
-
-        LOG_ERROR("Failed to open file for writing: " + dataName + ".bin");
-        return false;
-    }
-
-    inline void plotDebugInfo(
-        const PointArray &points, const std::vector<VerticalScanline> &scanlines, const ScanlineLimits &limits,
-        const Eigen::ArrayXi &pointsScanlinesIds, const uint32_t iteration, const std::string &prefix,
-        const OffsetAngle &offsetAngle, const double uncertainty
-    ) {
-        return; // TODO enable disable as required
-
-        if (iteration < 335) {
-            return;
-        }
-
-        const std::string folder = "scripts/buffers/";
-        std::filesystem::path folderPath = folder;
-
-        if (!exists(folderPath) && !create_directories(folderPath)) {
-            LOG_ERROR("Failed to create directory: " + folder);
-            return; // Or handle directory creation failure as needed
-        }
-
-        std::vector<std::pair<std::string, EigenDataVariant> > dataToWrite = {
-            {"ranges", points.getRanges()},
-            {"phis", points.getPhis()},
-            {"scanline_lower_limit", limits.lowerLimit},
-            {"scanline_upper_limit", limits.upperLimit},
-            {"points_in_scanline_mask", limits.mask}
-        };
-
-        for (const auto &item: dataToWrite) {
-            std::visit(
-                [&](const auto &data) { // Use std::visit to work with variant
-                    writeBinaryFile(folderPath / (item.first + ".bin"), data, item.first);
-                }, item.second
-            ); // Apply lambda to each variant alternative
-        }
-
-        Eigen::ArrayX<bool> unassignedMask = (pointsScanlinesIds == -1).cast<bool>(); // Explicitly cast to bool Array
-        writeBinaryFile(folderPath / "unassigned_mask.bin", unassignedMask, "unassigned_mask");
-
-        nlohmann::json scanlinesJson;
-        for (const VerticalScanline & scanline : scanlines) {
-            scanlinesJson.push_back(scanlineInfoToJson(scanline));
-        }
-
-        std::ofstream scanlinesFile(folderPath / "scanlines.json");
-        scanlinesFile << scanlinesJson.dump(4);
-        scanlinesFile.flush();
-        scanlinesFile.close();
-
-        std::string command = "python scripts/plot_debug_info.py " + folder + " " + prefix + " " +
-                              std::to_string(iteration) + " " + std::to_string(offsetAngle.offset) + " " +
-                              std::to_string(offsetAngle.angle) + " " + std::to_string(uncertainty);
-        std::system(command.c_str());
-    }
 }

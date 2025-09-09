@@ -1,5 +1,5 @@
 #pragma once
-#include "intrinsics/vertical/estimation/VerticalHeuristicsStructs.h"
+#include "intrinsics/vertical/estimation/VerticalScanlineEstimationStructs.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 
 namespace accurate_ri {
@@ -34,7 +34,7 @@ namespace accurate_ri {
             const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const ValueConfInterval &offset
         );
 
-        static OffsetAngleMargin computeHeuristicMargin(
+        static VerticalMargin computeHeuristicMargin(
             const VerticalScanlinePool &scanlinePool, const HeuristicScanline &scanline
         );
     };

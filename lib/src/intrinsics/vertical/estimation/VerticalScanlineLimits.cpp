@@ -1,5 +1,4 @@
 #include "VerticalScanlineLimits.h"
-#include "intrinsics/vertical/VerticalStructs.h"
 #include "point/PointArray.h"
 #include "utils/Timer.h"
 
@@ -34,20 +33,18 @@ namespace accurate_ri {
 
     // TODO this could be a generic line thing. Take a look at conceptually section in scanlimie limits notebook
     ScanlineLimits VerticalScanlineLimits::computeScanlineLimits(
-        const PointArray &points, const Eigen::ArrayXd &errorBounds, const OffsetAngle &scanlineAttributes,
-        const OffsetAngleMargin &margin
+        const PointArray &points, const Eigen::ArrayXd &errorBounds, const double offset, const double angle,
+        const VerticalMargin &margin
     ) {
         PROFILE_SCOPE("VerticalScanlineLimits::computeScanlineLimits");
         const auto &inv = points.getInvRanges();
         const auto &phi = points.getPhis();
-        const double offset = scanlineAttributes.offset;
-        const double angle = scanlineAttributes.angle;
 
-        const auto sinUpper = ((offset + margin.offset.upper) * inv.array()).min(1).max(-1).asin();
-        const auto sinLower = ((offset - margin.offset.lower) * inv.array()).min(1).max(-1).asin();
+        const auto sinUpper = ((offset + margin.offset) * inv.array()).min(1).max(-1).asin();
+        const auto sinLower = ((offset - margin.offset) * inv.array()).min(1).max(-1).asin();
 
-        Eigen::ArrayXd upper = angle + sinUpper + margin.angle.upper + errorBounds.array();
-        Eigen::ArrayXd lower = angle + sinLower - margin.angle.lower - errorBounds.array();
+        Eigen::ArrayXd upper = angle + sinUpper + margin.angle + errorBounds.array();
+        Eigen::ArrayXd lower = angle + sinLower - margin.angle - errorBounds.array();
         Eigen::ArrayX<bool> mask = (lower <= phi) && (phi <= upper);
         Eigen::ArrayXi idx(mask.count());
 

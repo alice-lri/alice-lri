@@ -1,8 +1,8 @@
 #pragma once
-#include <unordered_map>
 
-#include "intrinsics/vertical/VerticalStructs.h"
+#include <unordered_map>
 #include "intrinsics/vertical/conflict/ScanlineConflictStructs.h"
+#include "intrinsics/vertical/estimation/VerticalScanlineEstimationStructs.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 
 namespace accurate_ri {
@@ -27,7 +27,7 @@ namespace accurate_ri {
             const ScanlineEstimationResult &scanline, uint32_t scanlineId, const HoughCell &houghMax
         );
 
-        ScanlineIntersectionInfo computeScanlineIntersectionInfo(
+        static ScanlineIntersectionInfo computeScanlineIntersectionInfo(
             const VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
             const ScanlineEstimationResult &scanline, uint32_t scanlineId
         );

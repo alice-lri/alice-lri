@@ -1,7 +1,6 @@
 #include "VerticalHeuristicsEstimator.h"
 #include <ranges>
-#include "intrinsics/vertical/VerticalStructs.h"
-#include "intrinsics/vertical/estimation/VerticalHeuristicsStructs.h"
+#include "intrinsics/vertical/estimation/VerticalScanlineEstimationStructs.h"
 #include "intrinsics/vertical/estimation/VerticalScanlineLimits.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "point/PointArray.h"
@@ -13,12 +12,11 @@ namespace accurate_ri {
     ) {
         LOG_WARN("Heuristic fitting");
         const HeuristicScanline scanline = computeHeuristicScanline(points, scanlinePool, scanlineLimits);
-        const OffsetAngleMargin margin = computeHeuristicMargin(scanlinePool, scanline);
+        const VerticalMargin margin = computeHeuristicMargin(scanlinePool, scanline);
         const VerticalBounds bounds = VerticalScanlineLimits::computeErrorBounds(points, scanline.offset.value);
 
-        const OffsetAngle heuristicOffsetAngle = {scanline.offset.value, scanline.angle.value};
         ScanlineLimits heuristicLimits = VerticalScanlineLimits::computeScanlineLimits(
-            points, bounds.final, heuristicOffsetAngle, margin
+            points, bounds.final, scanline.offset.value, scanline.angle.value, margin
         );
 
         if (heuristicLimits.indices.size() == 0) {
@@ -28,11 +26,8 @@ namespace accurate_ri {
         return ScanlineEstimationResult{
             .heuristic = true,
             .uncertainty = std::numeric_limits<double>::infinity(),
-            .values = heuristicOffsetAngle,
-            .ci = OffsetAngleMargin{
-                .offset = scanline.offset.ci,
-                .angle = scanline.angle.ci
-            },
+            .offset = scanline.offset,
+            .angle = scanline.angle,
             .limits = std::move(heuristicLimits)
         };
     }
@@ -84,7 +79,7 @@ namespace accurate_ri {
         scanlinePool.forEachScanline(
             [&](const VerticalScanline &scanline) {
                 const uint32_t scanlineId = scanline.id;
-                const double scanlinePhi = std::asin(scanline.values.offset * invRangesMean) + scanline.values.angle;
+                const double scanlinePhi = std::asin(scanline.offset.value * invRangesMean) + scanline.angle.value;
 
                 std::optional<HeuristicSupportScanline>* target = nullptr;
                 if (scanlinePhi > phisMean) {
@@ -122,7 +117,7 @@ namespace accurate_ri {
 
         for (const auto &scanlineId: supportScanlineIds) {
             const auto &scanline = scanlinePool.getScanlineById(scanlineId);
-            const double offsetDiff = scanline.ci.offset.upper - scanline.ci.offset.lower;
+            const double offsetDiff = scanline.offset.ci.upper - scanline.offset.ci.lower;
 
             if (offsetDiff > maxOffsetDiff) {
                 maxOffsetDiff = offsetDiff;
@@ -139,7 +134,7 @@ namespace accurate_ri {
 
         for (const auto &scanlineId: supportScanlineIds) {
             const auto &scanline = scanlinePool.getScanlineById(scanlineId);
-            meanOffset += scanline.values.offset / static_cast<double>(supportScanlineIds.size());
+            meanOffset += scanline.offset.value / static_cast<double>(supportScanlineIds.size());
         }
 
         return meanOffset;
@@ -149,14 +144,14 @@ namespace accurate_ri {
         const Eigen::ArrayXd &invRanges, const Eigen::ArrayXd &phis, const ValueConfInterval &offset
     ) {
         const double heuristicAngle = (phis - (offset.value * invRanges).asin()).mean();
-        const RealMargin angleMarginTmp = {
+        const Interval angleInterval = {
             .lower = (phis - (offset.ci.lower * invRanges).asin()).mean(),
             .upper = (phis - (offset.ci.upper * invRanges).asin()).mean()
         };
 
-        const RealMargin heuristicAngleCi = {
-            .lower = std::min(angleMarginTmp.lower, angleMarginTmp.upper),
-            .upper = std::max(angleMarginTmp.lower, angleMarginTmp.upper)
+        const Interval heuristicAngleCi = {
+            .lower = std::min(angleInterval.lower, angleInterval.upper),
+            .upper = std::max(angleInterval.lower, angleInterval.upper)
         };
 
         return ValueConfInterval{
@@ -165,16 +160,16 @@ namespace accurate_ri {
         };
     }
 
-    OffsetAngleMargin VerticalHeuristicsEstimator::computeHeuristicMargin(
+    VerticalMargin VerticalHeuristicsEstimator::computeHeuristicMargin(
         const VerticalScanlinePool &scanlinePool, const HeuristicScanline &scanline
     ) {
         double offsetMargin = scanline.offset.ci.diff() / 2;
         double angleMargin = scanline.angle.ci.diff() / 2;
-        const OffsetAngleMargin houghMargin = scanlinePool.getHoughMargin();
+        const VerticalMargin houghMargin = scanlinePool.getHoughMargin();
 
-        offsetMargin = std::max(offsetMargin, houghMargin.offset.upper);
-        angleMargin = std::max(angleMargin, houghMargin.angle.upper);
+        offsetMargin = std::max(offsetMargin, houghMargin.offset);
+        angleMargin = std::max(angleMargin, houghMargin.angle);
 
-        return OffsetAngleMargin {offsetMargin, offsetMargin, angleMargin, angleMargin};
+        return VerticalMargin {.offset = offsetMargin, .angle = angleMargin};
     }
 } // accurate_ri

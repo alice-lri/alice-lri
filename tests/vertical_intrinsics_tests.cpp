@@ -58,16 +58,16 @@ TEST_F(VerticalIntrinsicsEstimatorTest, ResultContainsScanlines) {
     // Check that each scanline has valid angle/offset values
     for (const auto& scanline : result.scanlinesAssignations.scanlines) {
         // Offset and angle should be finite values
-        EXPECT_FALSE(std::isnan(scanline.values.offset));
-        EXPECT_FALSE(std::isinf(scanline.values.offset));
-        EXPECT_FALSE(std::isnan(scanline.values.angle));
-        EXPECT_FALSE(std::isinf(scanline.values.angle));
+        EXPECT_FALSE(std::isnan(scanline.offset.value));
+        EXPECT_FALSE(std::isinf(scanline.offset.value));
+        EXPECT_FALSE(std::isnan(scanline.angle.value));
+        EXPECT_FALSE(std::isinf(scanline.angle.value));
         
         // Confidence intervals should make sense
-        EXPECT_LE(scanline.ci.offset.lower, scanline.values.offset);
-        EXPECT_GE(scanline.ci.offset.upper, scanline.values.offset);
-        EXPECT_LE(scanline.ci.angle.lower, scanline.values.angle);
-        EXPECT_GE(scanline.ci.angle.upper, scanline.values.angle);
+        EXPECT_LE(scanline.offset.ci.lower, scanline.offset.value);
+        EXPECT_GE(scanline.offset.ci.upper, scanline.offset.value);
+        EXPECT_LE(scanline.angle.ci.lower, scanline.angle.value);
+        EXPECT_GE(scanline.angle.ci.upper, scanline.angle.value);
     }
 }
 

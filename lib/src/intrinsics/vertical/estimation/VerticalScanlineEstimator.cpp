@@ -4,7 +4,6 @@
 #include <optional>
 
 #include "Constants.h"
-#include "intrinsics/vertical/VerticalStructs.h"
 #include "intrinsics/vertical/estimation/VerticalHeuristicsEstimator.h"
 #include "intrinsics/vertical/estimation/VerticalScanlineLimits.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
@@ -152,11 +151,9 @@ namespace accurate_ri {
         const PointArray& points, const VerticalScanlinePool &scanlinePool, const Stats::WLSResult &fitResult,
         const VerticalBounds &errorBounds
     ) {
-        const OffsetAngleMargin margin = scanlinePool.getHoughMargin();
-
-        const OffsetAngle scanlineAttributes = {.offset = fitResult.slope, .angle = fitResult.intercept};
+        const VerticalMargin margin = scanlinePool.getHoughMargin();
         ScanlineLimits limits = VerticalScanlineLimits::computeScanlineLimits(
-            points, errorBounds.final, scanlineAttributes, margin
+            points, errorBounds.final, fitResult.slope, fitResult.intercept, margin
         );
 
         LOG_INFO("Minimum limit width (fit): ", (limits.upperLimit - limits.lowerLimit).minCoeff());
@@ -195,23 +192,23 @@ namespace accurate_ri {
     std::optional<ScanlineEstimationResult> VerticalScanlineEstimator::scanlineFitToEstimation(
         const PointArray &points, ScanlineFitResult& scanlineFit
     ) {
-        const OffsetAngle values = {
-            .offset = scanlineFit.fit->slope,
-            .angle = scanlineFit.fit->intercept
+        ValueConfInterval offset = {
+            .value = scanlineFit.fit->slope,
+            .ci = { .lower = scanlineFit.fit->slopeCi[0], .upper = scanlineFit.fit->slopeCi[1] }
         };
 
-        OffsetAngleMargin ci = {
-            .offset = {.lower = scanlineFit.fit->slopeCi[0], .upper = scanlineFit.fit->slopeCi[1]},
-            .angle = {.lower = scanlineFit.fit->interceptCi[0], .upper = scanlineFit.fit->interceptCi[1]}
+        const ValueConfInterval angle = {
+            .value = scanlineFit.fit->intercept,
+            .ci = { .lower = scanlineFit.fit->interceptCi[0], .upper = scanlineFit.fit->interceptCi[1] }
         };
 
-        ci.offset.clampBoth(-points.getMinRange(), points.getMinRange());
+        offset.ci.clampBoth(-points.getMinRange(), points.getMinRange());
 
         return ScanlineEstimationResult{
             .heuristic = false,
             .uncertainty = -scanlineFit.fit->logLikelihood,
-            .values = values,
-            .ci = ci,
+            .offset = offset,
+            .angle = angle,
             .limits = std::move(*scanlineFit.limits)
         };
     }

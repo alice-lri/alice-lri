@@ -1,60 +1,58 @@
 #pragma once
-#include <cstdint>
 #include <vector>
+#include <Eigen/Core>
+#include "utils/CommonStructs.h"
 
-struct RealMargin { // TODO refactor to value and ci or something and use also in heuristics
-    double lower;
-    double upper;
+namespace accurate_ri {
+    enum class EndReason {
+        ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
+    };
 
-    [[nodiscard]] double diff() const {
-        return upper - lower;
-    }
+    struct VerticalMargin {
+        double offset;
+        double angle;
+    };
 
-    void clampBoth(const double minValue, const double maxValue) {
-        lower = std::clamp(lower, minValue, maxValue);
-        upper = std::clamp(upper, minValue, maxValue);
-    }
-};
+    struct ScanlineAngleBounds {
+        Interval bottom;
+        Interval top;
+    };
 
-struct ScanlineAngleBounds {
-    RealMargin bottom;
-    RealMargin top;
-};
+    struct VerticalScanline {
+        uint32_t id;
+        uint64_t pointsCount;
+        ValueConfInterval angle;
+        ValueConfInterval offset;
+        ScanlineAngleBounds theoreticalAngleBounds;
+        double uncertainty;
+        int64_t houghVotes;
+        uint64_t houghHash;
+    };
 
-struct OffsetAngleMargin {
-    RealMargin offset;
-    RealMargin angle;
-};
+    struct VerticalScanlinesAssignations {
+        std::vector<VerticalScanline> scanlines;
+        std::vector<int> pointsScanlinesIds;
+    };
 
-struct OffsetAngle {
-    double offset;
-    double angle;
-};
+    struct VerticalIntrinsicsEstimation {
+        int32_t iterations = 0;
+        int32_t unassignedPoints = 0;
+        int32_t pointsCount = 0;
+        EndReason endReason = EndReason::ALL_ASSIGNED;
+        VerticalScanlinesAssignations scanlinesAssignations;
+    };
 
-struct VerticalScanline {
-    uint32_t id;
-    uint64_t pointsCount;
-    OffsetAngle values;
-    OffsetAngleMargin ci;
-    ScanlineAngleBounds theoreticalAngleBounds;
-    double uncertainty;
-    int64_t houghVotes;
-    uint64_t houghHash;
-};
+    struct VerticalBounds {
+        Eigen::ArrayXd phis;
+        Eigen::ArrayXd correction;
+        Eigen::ArrayXd final;
+    };
 
-enum class EndReason {
-    ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
-};
-
-struct VerticalScanlinesAssignations {
-    std::vector<VerticalScanline> scanlines;
-    std::vector<int> pointsScanlinesIds;
-};
-
-struct VerticalIntrinsicsEstimation {
-    int32_t iterations = 0;
-    int32_t unassignedPoints = 0;
-    int32_t pointsCount = 0;
-    EndReason endReason = EndReason::ALL_ASSIGNED;
-    VerticalScanlinesAssignations scanlinesAssignations;
-};
+    // TODO this containing indices and mask is probably not intuitive
+    struct ScanlineLimits {
+        Eigen::ArrayXi indices;
+        Eigen::ArrayX<bool> mask;
+        Eigen::ArrayXd lowerLimit;
+        Eigen::ArrayXd upperLimit; // TODO just realized the limits are not really neccessary to store
+    };
+}

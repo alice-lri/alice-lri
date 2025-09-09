@@ -1,8 +1,6 @@
 #include "ScanlineConflictSolver.h"
 
 #include <queue>
-
-#include "intrinsics/vertical/VerticalStructs.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "utils/logger/Logger.h"
 #include "utils/Utils.h"

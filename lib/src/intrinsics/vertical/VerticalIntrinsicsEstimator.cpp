@@ -4,7 +4,6 @@
 #include <ranges>
 #include "helper/VerticalLogging.h"
 #include "utils/Utils.h"
-#include "VerticalStructs.h"
 #include "utils/TestUtils.h"
 #include "utils/Timer.h"
 #include <nlohmann/json.hpp>
@@ -116,12 +115,12 @@ namespace accurate_ri {
     std::optional<RefinedCandidate> VerticalIntrinsicsEstimator::refineCandidate(
         const int64_t iteration, const PointArray &points, const Candidate &candidate
     ) const {
-        const OffsetAngleMargin &margin = candidate.hough->margin;
+        const VerticalMargin &margin = candidate.hough->margin;
         const HoughCell &houghMax = candidate.hough->cell;
 
-        VerticalBounds errorBounds = VerticalScanlineLimits::computeErrorBounds(points, houghMax.maxValues.offset);
+        VerticalBounds errorBounds = VerticalScanlineLimits::computeErrorBounds(points, houghMax.maxOffset);
         ScanlineLimits scanlineLimits = VerticalScanlineLimits::computeScanlineLimits(
-            points, errorBounds.final, houghMax.maxValues, margin
+            points, errorBounds.final, houghMax.maxOffset, houghMax.maxAngle, margin
         );
 
         LOG_INFO("Minimum limit width (Hough): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff());
@@ -174,8 +173,8 @@ namespace accurate_ri {
         return VerticalScanline{
             .id = currentScanlineId,
             .pointsCount = static_cast<uint64_t>(refinedCandidate->scanline.limits.indices.size()),
-            .values = refinedCandidate->scanline.values,
-            .ci = refinedCandidate->scanline.ci,
+            .angle = refinedCandidate->scanline.angle,
+            .offset = refinedCandidate->scanline.offset,
             .theoreticalAngleBounds = angleBounds,
             .uncertainty = refinedCandidate->scanline.uncertainty,
             .houghVotes = candidate.hough->cell.votes,

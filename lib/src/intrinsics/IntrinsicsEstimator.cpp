@@ -23,8 +23,8 @@ namespace accurate_ri {
         const VerticalScanline &vertical, const HorizontalScanline &horizontal
     ) {
         return Scanline {
-            .verticalOffset = vertical.values.offset,
-            .verticalAngle = vertical.values.angle,
+            .verticalOffset = vertical.offset.value,
+            .verticalAngle = vertical.angle.value,
             .horizontalOffset = horizontal.offset,
             .azimuthalOffset = horizontal.thetaOffset,
             .resolution = horizontal.resolution

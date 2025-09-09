@@ -1,5 +1,7 @@
 #pragma once
-#include "intrinsics/vertical/VerticalStructs.h"
+#include <optional>
+
+#include "intrinsics/vertical/estimation/VerticalScanlineEstimationStructs.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "point/PointArray.h"
 

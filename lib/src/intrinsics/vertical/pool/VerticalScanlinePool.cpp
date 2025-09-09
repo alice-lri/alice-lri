@@ -18,7 +18,7 @@ namespace accurate_ri {
     std::optional<HoughScanlineEstimation> VerticalScanlinePool::performHoughEstimation() {
         double averageOffset = 0;
         for (const VerticalScanline &info: scanlineInfoMap | std::views::values) {
-            averageOffset += info.values.offset / static_cast<double>(scanlineInfoMap.size());
+            averageOffset += info.offset.value / static_cast<double>(scanlineInfoMap.size());
         }
 
         const std::optional<HoughCell> &houghMaxOpt = hough.findMaximum(averageOffset);
@@ -80,10 +80,10 @@ namespace accurate_ri {
         };
     }
 
-    OffsetAngleMargin VerticalScanlinePool::getHoughMargin() const {
-        return OffsetAngleMargin {
-            {hough.getXStep(), hough.getXStep()},
-            {hough.getYStep(), hough.getYStep()}
+    VerticalMargin VerticalScanlinePool::getHoughMargin() const {
+        return VerticalMargin {
+            .offset = hough.getXStep(),
+            .angle = hough.getYStep()
         };
     }
 
@@ -104,7 +104,7 @@ namespace accurate_ri {
 
         std::ranges::sort(
             sortedScanlines, [](const VerticalScanline &a, const VerticalScanline &b) {
-                return a.values.angle < b.values.angle;
+                return a.angle.value < b.angle.value;
             }
         );
 

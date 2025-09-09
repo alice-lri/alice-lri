@@ -25,7 +25,7 @@ namespace accurate_ri {
 
         VerticalScanlinesAssignations extractFullSortedScanlineAssignations();
 
-        [[nodiscard]] OffsetAngleMargin getHoughMargin() const;
+        [[nodiscard]] VerticalMargin getHoughMargin() const;
 
         [[nodiscard]] std::vector<VerticalScanline> getUnsortedScanlinesCopy() const;
 
