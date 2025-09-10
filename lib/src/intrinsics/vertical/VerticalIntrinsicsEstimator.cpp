@@ -53,14 +53,16 @@ namespace accurate_ri {
             }
 
             const auto angleBounds = estimation->toAngleBounds(points.getMinRange(), points.getMaxRange());
-            const auto scanline = makeVerticalScanline(currentScanlineId, houghCandidate, estimation, angleBounds);
-            const auto candidate = VerticalScanlineCandidate{ .scanline = scanline, .limits = estimation->limits };
+            const auto candidate = VerticalScanlineCandidate{
+                .scanline = makeVerticalScanline(currentScanlineId, houghCandidate, estimation, angleBounds),
+                .limits = estimation->limits
+            };
 
             bool keepScanline;
             if constexpr (BuildOptions::USE_SCANLINE_CONFLICT_SOLVER) {
-                keepScanline = conflictSolver.performScanlineConflictResolution(*scanlinePool, points, scanline);
+                keepScanline = conflictSolver.performScanlineConflictResolution(*scanlinePool, points, candidate);
             } else {
-                keepScanline = conflictSolver.simpleShouldKeep(*scanlinePool, candidate);
+                keepScanline = ScanlineConflictSolver::simpleShouldKeep(*scanlinePool, candidate);
             }
 
             if (!keepScanline) {
@@ -69,10 +71,10 @@ namespace accurate_ri {
 
 
             // TODO merge?
-            scanlinePool->removeVotes(points, estimation->scanline.limits.indices);
-            scanlinePool->assignScanline(scanline, estimation->scanline.limits.indices);
+            scanlinePool->removeVotes(points, candidate.limits.indices);
+            scanlinePool->assignScanline(candidate.scanline, candidate.limits.indices);
 
-            VerticalLogging::logScanlineAssignation(scanline);
+            VerticalLogging::logScanlineAssignation(candidate.scanline);
             LOG_INFO("Number of unassigned points: ", scanlinePool->getUnassignedPoints());
             LOG_INFO("");
 
@@ -158,17 +160,17 @@ namespace accurate_ri {
     }
 
     VerticalScanline VerticalIntrinsicsEstimator::makeVerticalScanline(
-        const uint32_t currentScanlineId, const VerticalScanlineHoughCandidate &candidate,
-        const std::optional<VerticalScanlineEstimation> &refinedCandidate, const ScanlineAngleBounds &angleBounds
+        const uint32_t currentScanlineId, const VerticalScanlineHoughCandidate &houghCandidate,
+        const std::optional<VerticalScanlineEstimation> &estimation, const ScanlineAngleBounds &angleBounds
     ) {
         return VerticalScanline{
             .id = currentScanlineId,
-            .pointsCount = static_cast<uint64_t>(refinedCandidate->limits.indices.size()),
-            .angle = refinedCandidate->angle,
-            .offset = refinedCandidate->offset,
+            .pointsCount = static_cast<uint64_t>(estimation->limits.indices.size()),
+            .angle = estimation->angle,
+            .offset = estimation->offset,
             .theoreticalAngleBounds = angleBounds,
-            .uncertainty = refinedCandidate->uncertainty,
-            .hough = *candidate.estimation,
+            .uncertainty = estimation->uncertainty,
+            .hough = *houghCandidate.estimation,
         };
     }
 } // namespace accurate_ri

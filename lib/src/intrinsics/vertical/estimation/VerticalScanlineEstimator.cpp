@@ -16,7 +16,7 @@ namespace accurate_ri {
 
     std::optional<VerticalScanlineEstimation> VerticalScanlineEstimator::estimate(
         const PointArray &points, const VerticalScanlinePool &scanlinePool,
-        const VerticalBounds &errorBounds, const VerticalScanlineLimits &scanlineLimits
+        const VerticalBounds &errorBounds, const ScanlineLimits &scanlineLimits
     ) {
         if (scanlineLimits.indices.size() == 0) {
             return std::nullopt;
@@ -38,7 +38,7 @@ namespace accurate_ri {
 
     std::optional<VerticalScanlineEstimation> VerticalScanlineEstimator::performStatisticalFit(
         const PointArray &points, const VerticalScanlinePool &scanlinePool, const VerticalBounds &errorBounds,
-        const VerticalScanlineLimits &scanlineLimits
+        const ScanlineLimits &scanlineLimits
     ) {
         ScanlineFitResult scanlineFit = tryFitScanline(points, scanlinePool, errorBounds, scanlineLimits);
 
@@ -51,11 +51,11 @@ namespace accurate_ri {
 
     ScanlineFitResult VerticalScanlineEstimator::tryFitScanline(
         const PointArray &points, const VerticalScanlinePool &scanlinePool,
-        const VerticalBounds &errorBounds, const VerticalScanlineLimits &scanlineLimits
+        const VerticalBounds &errorBounds, const ScanlineLimits &scanlineLimits
     ) {
         PROFILE_SCOPE("VerticalScanlineEstimator::tryFitScanline");
         VerticalBounds currentErrorBounds = errorBounds;
-        VerticalScanlineLimits currentScanlineLimits = scanlineLimits;
+        ScanlineLimits currentScanlineLimits = scanlineLimits;
 
         std::optional<Stats::WLSResult> fitResult;
         auto convergenceState = FitConvergenceState::INITIAL;
@@ -74,7 +74,7 @@ namespace accurate_ri {
             }
 
             currentErrorBounds = VerticalScanlineLimits::computeErrorBounds(points, fitResult->slope);
-            const VerticalScanlineLimits newLimits = computeLimits(points, scanlinePool, *fitResult, currentErrorBounds);
+            const ScanlineLimits newLimits = computeLimits(points, scanlinePool, *fitResult, currentErrorBounds);
 
             convergenceState = computeConvergenceState(currentScanlineLimits.mask, newLimits.mask, convergenceState);
             if (convergenceState == FitConvergenceState::CONFIRMED) {
@@ -88,7 +88,7 @@ namespace accurate_ri {
     }
 
     std::optional<Eigen::ArrayXi> VerticalScanlineEstimator::refinePointsToFitIndices(
-        const PointArray &points, const VerticalScanlineLimits &scanlineLimits, const FitConvergenceState state
+        const PointArray &points, const ScanlineLimits &scanlineLimits, const FitConvergenceState state
     ) {
         if (scanlineLimits.indices.size() <= 2) {
             return std::nullopt;
@@ -147,12 +147,12 @@ namespace accurate_ri {
         return true;
     }
 
-    VerticalScanlineLimits VerticalScanlineEstimator::computeLimits(
+    ScanlineLimits VerticalScanlineEstimator::computeLimits(
         const PointArray& points, const VerticalScanlinePool &scanlinePool, const Stats::WLSResult &fitResult,
         const VerticalBounds &errorBounds
     ) {
         const VerticalMargin margin = scanlinePool.getHoughMargin();
-        VerticalScanlineLimits limits = VerticalScanlineLimits::computeScanlineLimits(
+        ScanlineLimits limits = VerticalScanlineLimits::computeScanlineLimits(
             points, errorBounds.final, fitResult.slope, fitResult.intercept, margin
         );
 
@@ -176,7 +176,7 @@ namespace accurate_ri {
     }
 
     ScanlineFitResult VerticalScanlineEstimator::makeFitResult(
-        const VerticalScanlineLimits &currentScanlineLimits, const std::optional<Stats::WLSResult> &fitResult,
+        const ScanlineLimits &currentScanlineLimits, const std::optional<Stats::WLSResult> &fitResult,
         const FitConvergenceState convergenceState, bool validCi
     ) {
         return {

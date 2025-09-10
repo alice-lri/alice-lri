@@ -17,22 +17,22 @@ namespace accurate_ri {
     public:
         std::optional<VerticalScanlineEstimation> estimate(
             const PointArray &points, const VerticalScanlinePool &scanlinePool,
-            const VerticalBounds &errorBounds, const VerticalScanlineLimits &scanlineLimits
+            const VerticalBounds &errorBounds, const ScanlineLimits &scanlineLimits
         );
 
     private:
         ScanlineFitResult tryFitScanline(
             const PointArray &points, const VerticalScanlinePool &scanlinePool, const VerticalBounds &errorBounds, const
-            VerticalScanlineLimits &scanlineLimits
+            ScanlineLimits &scanlineLimits
         );
 
         std::optional<VerticalScanlineEstimation> performStatisticalFit(
             const PointArray &points, const VerticalScanlinePool &scanlinePool, const VerticalBounds &errorBounds,
-            const VerticalScanlineLimits &scanlineLimits
+            const ScanlineLimits &scanlineLimits
         );
 
         static std::optional<Eigen::ArrayXi> refinePointsToFitIndices(
-            const PointArray &points, const VerticalScanlineLimits &scanlineLimits, FitConvergenceState state
+            const PointArray &points, const ScanlineLimits &scanlineLimits, FitConvergenceState state
         );
 
         static Stats::WLSResult fitScanline(
@@ -42,7 +42,7 @@ namespace accurate_ri {
 
         bool verifyConfidenceIntervals(const Stats::WLSResult &fitResult);
 
-        static VerticalScanlineLimits computeLimits(
+        static ScanlineLimits computeLimits(
             const PointArray &points, const VerticalScanlinePool &scanlinePool, const Stats::WLSResult &fitResult,
             const VerticalBounds &errorBounds
         );
@@ -52,7 +52,7 @@ namespace accurate_ri {
         );
 
         static ScanlineFitResult makeFitResult(
-            const VerticalScanlineLimits &currentScanlineLimits, const std::optional<Stats::WLSResult> &fitResult,
+            const ScanlineLimits &currentScanlineLimits, const std::optional<Stats::WLSResult> &fitResult,
             FitConvergenceState convergenceState, bool validCi
         );
 

@@ -3,7 +3,6 @@
 #include <Eigen/Core>
 
 #include "hough/HoughStructs.h"
-#include "intrinsics/vertical/estimation/VerticalScanlineLimits.h"
 #include "utils/CommonStructs.h"
 
 namespace accurate_ri {

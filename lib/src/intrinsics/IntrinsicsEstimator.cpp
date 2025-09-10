@@ -60,8 +60,8 @@ namespace accurate_ri {
             .resolution = horizontal.resolution,
             .heuristic = horizontal.heuristic, // TODO or vertical heuristic?
             .uncertainty = vertical.uncertainty,
-            .houghVotes = vertical.houghVotes,
-            .houghHash = vertical.houghHash,
+            .houghVotes = vertical.hough.cell.votes,
+            .houghHash = vertical.hough.cell.hash,
             .pointsCount = vertical.pointsCount,
             .theoreticalAngleBounds = vertical.theoreticalAngleBounds
         };

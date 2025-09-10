@@ -1,5 +1,6 @@
 #pragma once
 #include "hough/HoughTransform.h"
+#include "intrinsics/vertical/VerticalIntrinsicsStructs.h"
 
 namespace accurate_ri {
     class VerticalScanlinePool {

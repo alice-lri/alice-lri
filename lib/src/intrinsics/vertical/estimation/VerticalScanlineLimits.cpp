@@ -32,7 +32,7 @@ namespace accurate_ri {
     }
 
     // TODO this could be a generic line thing. Take a look at conceptually section in scanlimie limits notebook
-    VerticalScanlineLimits VerticalScanlineLimits::computeScanlineLimits(
+    ScanlineLimits VerticalScanlineLimits::computeScanlineLimits(
         const PointArray &points, const Eigen::ArrayXd &errorBounds, const double offset, const double angle,
         const VerticalMargin &margin
     ) {

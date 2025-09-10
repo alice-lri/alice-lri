@@ -35,8 +35,8 @@ namespace accurate_ri {
         ) const;
 
         static VerticalScanline makeVerticalScanline(
-            uint32_t currentScanlineId, const VerticalScanlineHoughCandidate &candidate,
-            const std::optional<VerticalScanlineEstimation> &refinedCandidate, const ScanlineAngleBounds &angleBounds
+            uint32_t currentScanlineId, const VerticalScanlineHoughCandidate &houghCandidate,
+            const std::optional<VerticalScanlineEstimation> &estimation, const ScanlineAngleBounds &angleBounds
         );
     };
 } // namespace accurate_ri
