@@ -24,8 +24,16 @@ namespace accurate_ri {
             const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
         );
 
-        static ScanlineIntersectionInfo computeScanlineIntersectionInfo(
+        static ScanlineIntersectionInfo computeIntersections(
             const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
         );
+
+        static Eigen::ArrayX<bool> computeEmpiricalIntersections(
+            const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
+        );
+
+        static Eigen::ArrayX<bool> computeTheoreticalIntersections(
+           const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
+       );
     };
 } // accurate_ri

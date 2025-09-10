@@ -41,10 +41,10 @@ namespace accurate_ri::VerticalLogging {
         LOG_INFO(
             "Scanline parameters: Offset: ", scanline.offset.value, ", Angle: ", scanline.angle.value,
             ", Votes: ", scanline.hough.cell.votes, ", Count: ", scanline.pointsCount,
-            ", Lower min theoretical angle: ", scanline.theoreticalAngleBounds.bottom.lower,
-            ", Lower max theoretical angle: ", scanline.theoreticalAngleBounds.bottom.upper,
-            ", Upper min theoretical angle: ", scanline.theoreticalAngleBounds.top.lower,
-            ", Upper max theoretical angle: ", scanline.theoreticalAngleBounds.top.upper,
+            ", Lower min theoretical angle: ", scanline.theoreticalAngleBounds.lowerLine.lower,
+            ", Lower max theoretical angle: ", scanline.theoreticalAngleBounds.lowerLine.upper,
+            ", Upper min theoretical angle: ", scanline.theoreticalAngleBounds.upperLine.lower,
+            ", Upper max theoretical angle: ", scanline.theoreticalAngleBounds.upperLine.upper,
             ", Uncertainty: ", scanline.uncertainty
         );
     }

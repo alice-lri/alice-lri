@@ -65,6 +65,10 @@ namespace accurate_ri {
             return upper - lower;
         }
 
+        [[nodiscard]] bool intersects(const Interval &other) const {
+            return lower <= other.upper && other.lower <= upper;
+        }
+
         void clampBoth(double minValue, double maxValue);
     };
 
@@ -74,8 +78,8 @@ namespace accurate_ri {
     };
 
     struct ACCURATE_RI_API ScanlineAngleBounds {
-        Interval bottom;
-        Interval top;
+        Interval lowerLine;
+        Interval upperLine;
     };
 
     struct ACCURATE_RI_API DebugScanline {

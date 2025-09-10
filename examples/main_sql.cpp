@@ -98,10 +98,10 @@ void storeResult(
         scanlineQuery.bind(7, scanline.verticalOffset.ci.upper);
         scanlineQuery.bind(8, scanline.verticalAngle.ci.lower);
         scanlineQuery.bind(9, scanline.verticalAngle.ci.upper);
-        scanlineQuery.bind(10, scanline.theoreticalAngleBounds.bottom.lower);
-        scanlineQuery.bind(11, scanline.theoreticalAngleBounds.bottom.upper);
-        scanlineQuery.bind(12, scanline.theoreticalAngleBounds.top.lower);
-        scanlineQuery.bind(13, scanline.theoreticalAngleBounds.top.upper);
+        scanlineQuery.bind(10, scanline.theoreticalAngleBounds.lowerLine.lower);
+        scanlineQuery.bind(11, scanline.theoreticalAngleBounds.lowerLine.upper);
+        scanlineQuery.bind(12, scanline.theoreticalAngleBounds.upperLine.lower);
+        scanlineQuery.bind(13, scanline.theoreticalAngleBounds.upperLine.upper);
         scanlineQuery.bind(14, scanline.uncertainty);
         scanlineQuery.bind(15, false); // TODO
         scanlineQuery.bind(16, scanline.houghVotes);

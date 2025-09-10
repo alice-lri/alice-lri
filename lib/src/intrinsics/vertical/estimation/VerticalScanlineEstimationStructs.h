@@ -40,14 +40,19 @@ namespace accurate_ri {
         [[nodiscard]] ScanlineAngleBounds toAngleBounds(
             const double minRange, const double maxRange
         ) const {
+            const double lowerLineA = angle.ci.lower + asin(offset.ci.lower / maxRange);
+            const double lowerLineB = angle.ci.lower + asin(offset.ci.lower / minRange);
+            const double upperLineA = angle.ci.upper + asin(offset.ci.upper / maxRange);
+            const double upperLineB = angle.ci.upper + asin(offset.ci.upper / minRange);
+
             return {
-                .bottom = {
-                    .lower = angle.ci.lower + asin(offset.ci.lower / maxRange),
-                    .upper = angle.ci.lower + asin(offset.ci.lower / minRange)
+                .lowerLine = {
+                    .lower = std::min(lowerLineA, lowerLineB),
+                    .upper = std::max(lowerLineA, lowerLineB)
                 },
-                .top = {
-                    .lower = angle.ci.upper + asin(offset.ci.upper / maxRange),
-                    .upper = angle.ci.upper + asin(offset.ci.upper / minRange)
+                .upperLine = {
+                    .lower = std::min(upperLineA, upperLineB),
+                    .upper = std::max(upperLineA, upperLineB)
                 }
             };
         }

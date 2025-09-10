@@ -6,7 +6,7 @@
 #include "utils/Utils.h"
 
 namespace accurate_ri {
-    
+
     bool ScanlineConflictSolver::performScanlineConflictResolution(
         VerticalScanlinePool &scanlinePool, const PointArray &points, const VerticalScanlineCandidate &candidate
     ) {
@@ -86,7 +86,7 @@ namespace accurate_ri {
     ScanlineConflictsResult ScanlineConflictSolver::evaluateScanlineConflicts(
         const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
-        const ScanlineIntersectionInfo &intersectionInfo = computeScanlineIntersectionInfo(
+        const ScanlineIntersectionInfo &intersectionInfo = computeIntersections(
             scanlinePool, candidate
         );
 
@@ -172,49 +172,13 @@ namespace accurate_ri {
         };
     }
 
-    ScanlineIntersectionInfo ScanlineConflictSolver::computeScanlineIntersectionInfo(
+    ScanlineIntersectionInfo ScanlineConflictSolver::computeIntersections(
         const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
-        const auto scanlineId = candidate.scanline.id;
-        const ScanlineAngleBounds &angleBounds = candidate.scanline.theoreticalAngleBounds;
+        Eigen::ArrayX<bool> empiricalIntersectionMask = computeEmpiricalIntersections(scanlinePool, candidate);
+        const bool empiricalIntersection = empiricalIntersectionMask.any();
 
-        const Eigen::ArrayXi &conflictingScanlinesIdsVerbose = scanlinePool.getScanlinesIds(candidate.limits.indices);
-        Eigen::ArrayX<bool> empiricalIntersectionMask = Eigen::ArrayX<bool>::Constant(scanlineId + 1, false);
-        bool empiricalIntersection = false;
-
-        for (const int32_t conflictingId: conflictingScanlinesIdsVerbose) {
-            if (conflictingId >= 0) {
-                empiricalIntersection = true;
-                empiricalIntersectionMask[conflictingId] = true;
-            }
-        }
-
-        Eigen::ArrayX<bool> theoreticalIntersectionMask = Eigen::ArrayX<bool>::Constant(scanlineId + 1, true);
-        const std::vector boundsPointers = {&ScanlineAngleBounds::bottom, &ScanlineAngleBounds::top};
-
-        for (const auto thisBound: boundsPointers) {
-            const double thisLower = (angleBounds.*thisBound).lower;
-            const double thisUpper = (angleBounds.*thisBound).upper;
-
-            for (const auto otherBound: boundsPointers) {
-                Eigen::ArrayXd maxTheoreticalSigns = Eigen::ArrayXd::Ones(scanlineId + 1);
-                Eigen::ArrayXd minTheoreticalSigns = Eigen::ArrayXd::Ones(scanlineId + 1);
-
-                scanlinePool.forEachScanline(
-                    [&](const VerticalScanline &otherScanline) {
-                        const double otherLower = (otherScanline.theoreticalAngleBounds.*otherBound).lower;
-                        const double otherUpper = (otherScanline.theoreticalAngleBounds.*otherBound).upper;
-
-                        minTheoreticalSigns[otherScanline.id] = Utils::compare(thisLower, otherLower);
-                        maxTheoreticalSigns[otherScanline.id] = Utils::compare(thisUpper, otherUpper);
-                    }
-                );
-
-                theoreticalIntersectionMask = theoreticalIntersectionMask && (
-                                                  (maxTheoreticalSigns * minTheoreticalSigns).array() != 1).array();
-            }
-        }
-
+        Eigen::ArrayX<bool> theoreticalIntersectionMask = computeTheoreticalIntersections(scanlinePool, candidate);
         const bool theoreticalIntersection = theoreticalIntersectionMask.any();
 
         return {
@@ -225,10 +189,47 @@ namespace accurate_ri {
         };
     }
 
+    Eigen::ArrayX<bool> ScanlineConflictSolver::computeEmpiricalIntersections(
+        const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
+    ) {
+        Eigen::ArrayX<bool> result = Eigen::ArrayX<bool>::Constant(candidate.scanline.id + 1, false);
+        const Eigen::ArrayXi &conflictingScanlinesIdsVerbose = scanlinePool.getScanlinesIds(candidate.limits.indices);
+
+        for (const int32_t conflictingId: conflictingScanlinesIdsVerbose) {
+            if (conflictingId >= 0) {
+                result[conflictingId] = true;
+            }
+        }
+
+        return result;
+    }
+
+    Eigen::ArrayX<bool> ScanlineConflictSolver::computeTheoreticalIntersections(
+        const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
+    ) {
+        Eigen::ArrayX<bool> result = Eigen::ArrayX<bool>::Constant(candidate.scanline.id + 1, true);
+
+        const std::vector boundsLinesPointers = {&ScanlineAngleBounds::lowerLine, &ScanlineAngleBounds::upperLine};
+        const ScanlineAngleBounds &angleBounds = candidate.scanline.theoreticalAngleBounds;
+
+        for (const auto thisLinePtr: boundsLinesPointers) {
+            const Interval& thisLine = angleBounds.*thisLinePtr;
+
+            for (const auto otherLinePtr: boundsLinesPointers) {
+                scanlinePool.forEachScanline([&](const VerticalScanline &otherScanline) {
+                    const Interval& otherLine = otherScanline.theoreticalAngleBounds.*otherLinePtr;
+                    result[otherScanline.id] = result[otherScanline.id] && otherLine.intersects(thisLine);
+                });
+            }
+        }
+
+        return result;
+    }
+
     bool ScanlineConflictSolver::simpleShouldKeep(
         VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
-        const auto intersectionInfo = computeScanlineIntersectionInfo(scanlinePool, candidate);
+        const auto intersectionInfo = computeIntersections(scanlinePool, candidate);
         const bool conflicting = intersectionInfo.empiricalIntersection;
 
         if (conflicting) {
