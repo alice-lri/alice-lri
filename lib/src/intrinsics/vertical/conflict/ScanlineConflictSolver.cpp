@@ -3,13 +3,13 @@
 #include <queue>
 #include <functional>
 
+#include "intrinsics/vertical/conflict/IntersectionCalculator.h"
 #include "intrinsics/vertical/helper/VerticalLogging.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "utils/logger/Logger.h"
 #include "utils/Utils.h"
 
 namespace accurate_ri {
-
     bool ScanlineConflictSolver::performScanlineConflictResolution(
         VerticalScanlinePool &scanlinePool, const PointArray &points, const VerticalScanlineCandidate &candidate
     ) {
@@ -28,6 +28,23 @@ namespace accurate_ri {
         return true;
     }
 
+    void ScanlineConflictSolver::rejectScanline(
+        VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate& candidate,
+        const ScanlineConflicts &conflicts
+    ) {
+        LOG_INFO("Scanline rejected");
+        LOG_INFO("");
+
+        const HoughCell houghMax = candidate.scanline.hough.cell;
+        scanlinePool.invalidateByHash(houghMax.hash);
+
+        if (conflicts.conflictingScanlines.empty()) {
+            return;
+        }
+
+        markAsRejectedByConflictingIds(candidate.scanline.hough.cell, conflicts.conflictingScanlines);
+    }
+
     void ScanlineConflictSolver::rejectConflictingScanlines(
         VerticalScanlinePool &scanlinePool, const PointArray &points, const VerticalScanlineCandidate &candidate,
         const ScanlineConflicts &conflicts
@@ -35,10 +52,10 @@ namespace accurate_ri {
         std::vector<std::pair<uint64_t, int64_t>> hashesToRestore;
         LOG_INFO("Removing scanlines: ", conflicts.conflictingScanlines);
 
-        for (const uint32_t otherId: conflicts.conflictingScanlines) {
-            restorePreviouslyRejectedByConflictingId(hashesToRestore, otherId);
+        for (const uint32_t toRemoveId: conflicts.conflictingScanlines) {
+            restorePreviouslyRejectedByConflictingId(hashesToRestore, toRemoveId);
 
-            std::optional<VerticalScanline> removedScanline = scanlinePool.removeScanline(points, otherId);
+            const std::optional<VerticalScanline> removedScanline = scanlinePool.removeScanline(points, toRemoveId);
             if (!removedScanline) {
                 continue;
             }
@@ -82,28 +99,10 @@ namespace accurate_ri {
         }
     }
 
-    void ScanlineConflictSolver::rejectScanline(
-        VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate& candidate,
-        const ScanlineConflicts &conflicts
-    ) {
-        LOG_INFO("Scanline rejected");
-        LOG_INFO("");
-
-        const HoughCell houghMax = candidate.scanline.hough.cell;
-        scanlinePool.invalidateByHash(houghMax.hash);
-
-        if (conflicts.conflictingScanlines.empty()) {
-            return;
-        }
-
-        markAsRejectedByConflictingIds(candidate.scanline.hough.cell, conflicts.conflictingScanlines);
-    }
-
     ScanlineConflicts ScanlineConflictSolver::evaluateConflicts(
         const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
-        ScanlineIntersectionFlags intersectionFlags = computeIntersectionFlags(scanlinePool, candidate);
-
+        auto intersectionFlags = IntersectionCalculator::computeIntersectionFlags(scanlinePool, candidate);
         if (!intersectionFlags.anyIntersection()) {
             return {
                 .shouldReject = false,
@@ -111,7 +110,7 @@ namespace accurate_ri {
             };
         }
 
-        auto intersectionInfo = computeIntersectionInfo(scanlinePool, std::move(intersectionFlags));
+        auto intersectionInfo = IntersectionCalculator::computeIntersectionInfo(scanlinePool, std::move(intersectionFlags));
         VerticalLogging::logIntersectionProblem(intersectionInfo, candidate);
 
         constexpr double inf = std::numeric_limits<double>::infinity();
@@ -128,86 +127,6 @@ namespace accurate_ri {
         return rejectConflicting(std::move(intersectionInfo));
     }
 
-    ScanlineIntersectionFlags ScanlineConflictSolver::computeIntersectionFlags(
-        const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
-    ) {
-        std::vector<bool> empiricalIntersectionMask = computeEmpiricalIntersections(scanlinePool, candidate);
-        const bool empiricalIntersection = std::ranges::any_of(empiricalIntersectionMask, std::identity{});
-
-        std::vector<bool> theoreticalIntersectionMask = computeTheoreticalIntersections(scanlinePool, candidate);
-        const bool theoreticalIntersection = std::ranges::any_of(theoreticalIntersectionMask, std::identity{});
-
-        return {
-            .empiricalIntersectionMask = std::move(empiricalIntersectionMask),
-            .theoreticalIntersectionMask = std::move(theoreticalIntersectionMask),
-            .empiricalIntersection = empiricalIntersection,
-            .theoreticalIntersection = theoreticalIntersection
-        };
-    }
-
-    std::vector<bool> ScanlineConflictSolver::computeEmpiricalIntersections(
-        const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
-    ) {
-        std::vector result(candidate.scanline.id + 1, false);
-        const Eigen::ArrayXi &conflictingScanlinesIdsVerbose = scanlinePool.getScanlinesIds(candidate.limits.indices);
-
-        for (const int32_t conflictingId: conflictingScanlinesIdsVerbose) {
-            if (conflictingId >= 0) {
-                result[conflictingId] = true;
-            }
-        }
-
-        return result;
-    }
-
-    std::vector<bool> ScanlineConflictSolver::computeTheoreticalIntersections(
-        const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
-    ) {
-        std::vector result(candidate.scanline.id + 1, false);
-
-        const std::vector boundsLinesPointers = {&ScanlineAngleBounds::lowerLine, &ScanlineAngleBounds::upperLine};
-        const ScanlineAngleBounds &angleBounds = candidate.scanline.theoreticalAngleBounds;
-
-        scanlinePool.forEachScanline([&](const VerticalScanline &otherScanline) {
-            bool allIntersect = true;
-            for (const auto thisLinePtr: boundsLinesPointers) {
-                const Interval& thisLine = angleBounds.*thisLinePtr;
-
-                for (const auto otherLinePtr: boundsLinesPointers) {
-                    const Interval& otherLine = otherScanline.theoreticalAngleBounds.*otherLinePtr;
-                    allIntersect = allIntersect && otherLine.anyContained(thisLine);
-                }
-            }
-
-            result[otherScanline.id] = allIntersect;
-        });
-
-        return result;
-    }
-
-    ScanlineIntersectionInfo ScanlineConflictSolver::computeIntersectionInfo(
-        const VerticalScanlinePool &scanlinePool, ScanlineIntersectionFlags &&flags
-    ) {
-        std::vector<uint32_t> conflictingIds;
-        conflictingIds.reserve(flags.empiricalIntersectionMask.size());
-
-        for (int i = 0; i < flags.empiricalIntersectionMask.size(); ++i) {
-            if (flags.anyIntersection(i)) {
-                conflictingIds.emplace_back(i);
-            }
-        }
-
-        std::vector<double> conflictingUncertainties(conflictingIds.size());
-        for (int i = 0; i < conflictingIds.size(); ++i) {
-            conflictingUncertainties[i] = scanlinePool.getScanlineById(conflictingIds[i]).uncertainty;
-        }
-
-        return {
-            .flags = std::move(flags),
-            .conflictingIds = conflictingIds,
-            .conflictingUncertainties = conflictingUncertainties
-        };
-    }
 
     ScanlineConflicts ScanlineConflictSolver::rejectCandidateIfEmpiricalIntersection(
         ScanlineIntersectionInfo &&intersection
@@ -257,7 +176,7 @@ namespace accurate_ri {
     bool ScanlineConflictSolver::simpleShouldKeep(
         VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
-        const auto intersectionInfo = computeIntersectionFlags(scanlinePool, candidate);
+        const auto intersectionInfo = IntersectionCalculator::computeIntersectionFlags(scanlinePool, candidate);
         const bool conflicting = intersectionInfo.empiricalIntersection;
 
         if (conflicting) {

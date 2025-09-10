@@ -39,22 +39,6 @@ namespace accurate_ri {
             const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
         );
 
-        static ScanlineIntersectionFlags computeIntersectionFlags(
-            const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
-        );
-
-        static std::vector<bool> computeEmpiricalIntersections(
-            const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
-        );
-
-        static std::vector<bool> computeTheoreticalIntersections(
-            const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
-        );
-
-        static ScanlineIntersectionInfo computeIntersectionInfo(
-            const VerticalScanlinePool &scanlinePool, ScanlineIntersectionFlags &&flags
-        );
-
         static ScanlineConflicts rejectCandidateIfEmpiricalIntersection(
             ScanlineIntersectionInfo &&intersection
         );
