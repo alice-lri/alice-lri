@@ -2,18 +2,16 @@
 #include <cstdint>
 #include <vector>
 
-#include "accurate_ri/Utils.hpp"
+#include "accurate_ri/AliceArray.hpp"
 
 namespace accurate_ri {
-
-    struct ACCURATE_RI_API Scanline {
+    struct Scanline {
         double verticalOffset;
         double verticalAngle;
         double horizontalOffset;
         double azimuthalOffset;
         int32_t resolution;
     };
-    // extern template class ACCURATE_RI_API AliceArray<Scanline>;
 
     struct ACCURATE_RI_API Intrinsics {
     private:
@@ -29,9 +27,9 @@ namespace accurate_ri {
 
         ~Intrinsics();
 
-        Scanline &scanlineAt(int32_t idx); // like vector::at
-        const Scanline &scanlineAt(int32_t idx) const;
-        int32_t scanlinesCount() const;
+        Scanline &scanlineAt(int32_t idx);
+        [[nodiscard]] const Scanline &scanlineAt(int32_t idx) const;
+        [[nodiscard]] int32_t scanlinesCount() const;
     };
 
     struct ACCURATE_RI_API RangeImage {
@@ -54,23 +52,23 @@ namespace accurate_ri {
         double& operator()(uint32_t row, uint32_t col);
         const double& operator()(uint32_t row, uint32_t col) const;
 
-        uint32_t width() const;
-        uint32_t height() const;
-        const double* data() const;
+        [[nodiscard]] uint32_t width() const;
+        [[nodiscard]] uint32_t height() const;
+        [[nodiscard]] const double* data() const;
         double* data();
     };
 
     namespace PointCloud {
-        struct ACCURATE_RI_API Float {
-            std::vector<float> x;
-            std::vector<float> y;
-            std::vector<float> z;
+        struct Float {
+            AliceArray<float> x;
+            AliceArray<float> y;
+            AliceArray<float> z;
         };
 
-        struct ACCURATE_RI_API Double {
-            std::vector<double> x;
-            std::vector<double> y;
-            std::vector<double> z;
+        struct Double {
+            AliceArray<double> x;
+            AliceArray<double> y;
+            AliceArray<double> z;
         };
     }
 
@@ -82,20 +80,20 @@ namespace accurate_ri {
             return upper - lower;
         }
 
-        void clampBoth(const double minValue, const double maxValue);
+        void clampBoth(double minValue, double maxValue);
     };
 
-    struct ACCURATE_RI_API ValueConfInterval {
+    struct ValueConfInterval {
         double value;
         Interval ci;
     };
 
-    struct ACCURATE_RI_API ScanlineAngleBounds {
+    struct ScanlineAngleBounds {
         Interval bottom;
         Interval top;
     };
 
-    struct ACCURATE_RI_API DebugScanline {
+    struct DebugScanline {
         ValueConfInterval verticalOffset;
         ValueConfInterval verticalAngle;
         double horizontalOffset;
@@ -109,11 +107,11 @@ namespace accurate_ri {
         ScanlineAngleBounds theoreticalAngleBounds;
     };
 
-    enum class ACCURATE_RI_API EndReason {
+    enum class EndReason {
         ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
     };
 
-    struct ACCURATE_RI_API DebugIntrinsics {
+    struct DebugIntrinsics {
         AliceArray<DebugScanline> scanlines;
         int32_t verticalIterations = 0;
         int32_t unassignedPoints = 0;

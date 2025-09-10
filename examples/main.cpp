@@ -16,12 +16,9 @@ std::optional<int> secureStoi(const std::string &str) {
 // TODO review each time I add to a collection whether I am copying or not. Especially maps/sets, use emplace
 // TODO maybe every function that does not return an eigen pre-allocated buffer should take a parameter out instead
 // TODO handle receiving points like all zeros and stuff like that
-// TODO get rid of all ArrayX<bool> apparently they are not safe. Use uint8_t maybe
-// TODO define proper classes for Json and so on, right now exporting too much
 // TODO public headers should have NO STL things (vector, string, etc.) https://chatgpt.com/c/683d803b-3f7c-8010-be9d-1ed7dbe70a0c
 // TODO decide what to do with logs and stuff for the library version
 // TODO maybe reserve log warn and error for user relevant logs
-// TODO maybe add additional fit refinement step for offsets (curve fit with arcsin or similar)
 int main(int argc, char **argv) {
     std::string path;
     std::optional<int> accurateDigits = std::nullopt;
@@ -61,7 +58,7 @@ int main(int argc, char **argv) {
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0079_sync/velodyne_points/data/0000000099.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0087_sync/velodyne_points/data/0000000263.bin";
             accurateDigits = std::nullopt;
-            outputPath = "../../Datasets/output/accurate_ri_cpp/";
+            outputPath = "../../Datasets/output/accurate_ri_cpp/intrinsics.json";
             break;
         case 2:
             path = argv[1];

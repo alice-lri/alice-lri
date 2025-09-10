@@ -6,6 +6,7 @@
 #include "utils/logger/Logger.h"
 #include "utils/Timer.h"
 #include "utils/Utils.h"
+#include "Constants.h"
 
 namespace accurate_ri::RangeImageUtils {
     RangeImage computeRangeImage(
@@ -18,7 +19,7 @@ namespace accurate_ri::RangeImageUtils {
         const Eigen::ArrayXd phis = (z / ranges).asin();
         const Eigen::ArrayXd thetas = y.binaryExpr(
             x, [](const double yi, const double xi) {
-                return std::atan2(yi, xi) + M_PI;
+                return std::atan2(yi, xi) + std::numbers::pi;
             }
         );
 
@@ -47,7 +48,7 @@ namespace accurate_ri::RangeImageUtils {
             correctedThetas(pointIdx) = thetas(pointIdx) - hOffset / rangesXy(pointIdx) - thetaOffset;
         }
 
-        Utils::positiveFmodInplace(correctedThetas, 2 * M_PI);
+        Utils::positiveFmodInplace(correctedThetas, Constant::TWO_PI);
 
         int32_t lcmHorizontalResolution = 1;
         for (int i = 0; i < intrinsics.scanlinesCount(); ++i) {
@@ -80,10 +81,10 @@ namespace accurate_ri::RangeImageUtils {
     }
 
     PointCloud::Double unProjectRangeImage(const Intrinsics &intrinsics, const RangeImage &image) {
-        std::vector<double> xs, ys, zs;
+        AliceArray<double> xs, ys, zs;
 
         for (int32_t row = 0; row < image.height(); ++row) {
-            const uint32_t scanlineIdx = image.height() - row - 1;
+            const int32_t scanlineIdx = static_cast<int32_t>(image.height()) - row - 1;
             const double vOffset = intrinsics.scanlineAt(scanlineIdx).verticalOffset;
             const double vAngle = intrinsics.scanlineAt(scanlineIdx).verticalAngle;
             const double hOffset = intrinsics.scanlineAt(scanlineIdx).horizontalOffset;
@@ -98,9 +99,9 @@ namespace accurate_ri::RangeImageUtils {
 
                 const double originalPhi = vAngle + vOffset / range;
                 const double rangeXy = range * std::cos(originalPhi);
-                double originalTheta = col * 2 * M_PI / image.width() - M_PI;
+                double originalTheta = col * Constant::TWO_PI / image.width() - std::numbers::pi;
                 originalTheta += hOffset / rangeXy + thetaOffset;
-                originalTheta = Utils::positiveFmod(originalTheta, 2 * M_PI);
+                originalTheta = Utils::positiveFmod(originalTheta, Constant::TWO_PI);
 
                 xs.emplace_back(rangeXy * std::cos(originalTheta));
                 ys.emplace_back(rangeXy * std::sin(originalTheta));

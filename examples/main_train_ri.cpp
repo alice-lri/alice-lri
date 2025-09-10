@@ -10,8 +10,8 @@
 #include <boost/preprocessor/list/fold_right.hpp>
 
 template <typename T>
-std::vector<size_t> argsort(const std::vector<T>& v) {
-    std::vector<size_t> indices(v.size());
+accurate_ri::AliceArray<size_t> argsort(const accurate_ri::AliceArray<T>& v) {
+    accurate_ri::AliceArray<size_t> indices(v.size());
     for (size_t i = 0; i < indices.size(); ++i) {
         indices[i] = i;
     }
@@ -21,18 +21,20 @@ std::vector<size_t> argsort(const std::vector<T>& v) {
 }
 
 template <typename T>
-std::vector<T> apply_argsort(const std::vector<T>& data, const std::vector<size_t>& indices) {
-    std::vector<T> sorted;
+accurate_ri::AliceArray<T> apply_argsort(const accurate_ri::AliceArray<T>& data, const accurate_ri::AliceArray<size_t>& indices) {
+    accurate_ri::AliceArray<T> sorted;
     sorted.reserve(indices.size());
     for (size_t idx : indices) {
-        sorted.push_back(data[idx]);
+        sorted.emplace_back(data[idx]);
     }
     return sorted;
 }
 
 template <typename T>
-std::vector<size_t> lex_argsort(const std::vector<T>& x, const std::vector<T>& y, const std::vector<T>& z) {
-    std::vector<size_t> indices(x.size());
+accurate_ri::AliceArray<size_t> lex_argsort(
+    const accurate_ri::AliceArray<T>& x, const accurate_ri::AliceArray<T>& y, const accurate_ri::AliceArray<T>& z
+) {
+    accurate_ri::AliceArray<size_t> indices(x.size());
     std::iota(indices.begin(), indices.end(), 0);
     std::stable_sort(indices.begin(), indices.end(), [&](size_t i, size_t j) {
         if (x[i] != x[j]) return x[i] < x[j];
