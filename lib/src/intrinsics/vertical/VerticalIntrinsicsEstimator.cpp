@@ -6,7 +6,6 @@
 #include "utils/Utils.h"
 #include "utils/TestUtils.h"
 #include "utils/Timer.h"
-#include <nlohmann/json.hpp>
 #include "Constants.h"
 #include "BuildOptions.h"
 #include "intrinsics/vertical/VerticalIntrinsicsStructs.h"

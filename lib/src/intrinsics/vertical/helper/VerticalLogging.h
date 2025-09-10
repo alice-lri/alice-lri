@@ -4,13 +4,9 @@
 #include <filesystem>
 #include <variant>
 #include <Eigen/Dense>
-#include <nlohmann/json.hpp>
 
 #include "hough/HoughTransform.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
-#include "utils/json/JsonConverters.h"
-
-using EigenDataVariant = std::variant<Eigen::ArrayXd, Eigen::ArrayX<bool>>; // List all possible Eigen types
 
 namespace accurate_ri::VerticalLogging {
 
