@@ -65,10 +65,7 @@ namespace accurate_ri {
             return upper - lower;
         }
 
-        [[nodiscard]] bool intersects(const Interval &other) const {
-            return lower <= other.upper && other.lower <= upper;
-        }
-
+        [[nodiscard]] bool anyContained(const Interval &other) const;
         void clampBoth(double minValue, double maxValue);
     };
 

@@ -39,6 +39,7 @@ namespace accurate_ri {
         static void log(LogLevel level, const char *file, int line, Args &&... args) {
             std::ostringstream logStream;
 
+            using ::operator<<;
             logStream << getTimestamp() << " [" << getLogLevelString(level) << "] ";
             (logStream << ... << std::forward<Args>(args));
             logStream << " (" << file << ":" << line << ")" << std::endl;

@@ -2,9 +2,9 @@
 #include <unordered_set>
 #include <Eigen/Core>
 
-struct ScanlineConflictsResult {
+struct ScanlineConflicts {
     bool shouldReject;
-    Eigen::ArrayXi conflictingScanlines;
+    std::vector<uint32_t> conflictingScanlines;
 };
 
 struct HashToConflictValue {
@@ -13,8 +13,8 @@ struct HashToConflictValue {
 };
 
 struct ScanlineIntersectionFlags {
-    Eigen::ArrayX<bool> empiricalIntersectionMask;
-    Eigen::ArrayX<bool> theoreticalIntersectionMask;
+    std::vector<bool> empiricalIntersectionMask;
+    std::vector<bool> theoreticalIntersectionMask;
     bool empiricalIntersection;
     bool theoreticalIntersection;
 
@@ -28,6 +28,6 @@ struct ScanlineIntersectionFlags {
 };
 struct ScanlineIntersectionInfo {
     ScanlineIntersectionFlags flags;
-    Eigen::ArrayXi conflictingIds;
-    Eigen::ArrayXd conflictingUncertainties;
+    std::vector<uint32_t> conflictingIds;
+    std::vector<double> conflictingUncertainties;
 };

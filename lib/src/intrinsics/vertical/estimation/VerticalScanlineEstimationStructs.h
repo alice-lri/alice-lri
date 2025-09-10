@@ -45,14 +45,25 @@ namespace accurate_ri {
             const double upperLineA = angle.ci.upper + asin(offset.ci.upper / maxRange);
             const double upperLineB = angle.ci.upper + asin(offset.ci.upper / minRange);
 
+            // return {
+            //     .lowerLine = {
+            //         .lower = std::min(lowerLineA, lowerLineB),
+            //         .upper = std::max(lowerLineA, lowerLineB)
+            //     },
+            //     .upperLine = {
+            //         .lower = std::min(upperLineA, upperLineB),
+            //         .upper = std::max(upperLineA, upperLineB)
+            //     }
+            // };
+
             return {
                 .lowerLine = {
-                    .lower = std::min(lowerLineA, lowerLineB),
-                    .upper = std::max(lowerLineA, lowerLineB)
+                    .lower = lowerLineA,
+                    .upper = lowerLineB
                 },
                 .upperLine = {
-                    .lower = std::min(upperLineA, upperLineB),
-                    .upper = std::max(upperLineA, upperLineB)
+                    .lower = upperLineA,
+                    .upper = upperLineB
                 }
             };
         }

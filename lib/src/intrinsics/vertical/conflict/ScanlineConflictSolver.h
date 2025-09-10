@@ -20,7 +20,22 @@ namespace accurate_ri {
         );
 
     private:
-        static ScanlineConflictsResult evaluateConflicts(
+        void rejectScanline(
+            VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate, const ScanlineConflicts &conflicts
+        );
+
+        void rejectConflictingScanlines(
+            VerticalScanlinePool &scanlinePool, const PointArray &points, const VerticalScanlineCandidate &candidate,
+            const ScanlineConflicts &conflicts
+        );
+
+        void restorePreviouslyRejectedByConflictingId(
+            std::vector<std::pair<uint64_t, int64_t>> &hashesToRestore, uint32_t conflictingId
+        );
+
+        void markAsRejectedByConflictingIds(const HoughCell &rejected, const std::span<const uint32_t> &conflictingIds);
+
+        static ScanlineConflicts evaluateConflicts(
             const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
         );
 
@@ -28,26 +43,26 @@ namespace accurate_ri {
             const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
         );
 
-        static Eigen::ArrayX<bool> computeEmpiricalIntersections(
+        static std::vector<bool> computeEmpiricalIntersections(
             const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
         );
 
-        static Eigen::ArrayX<bool> computeTheoreticalIntersections(
-           const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
-       );
+        static std::vector<bool> computeTheoreticalIntersections(
+            const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
+        );
 
         static ScanlineIntersectionInfo computeIntersectionInfo(
             const VerticalScanlinePool &scanlinePool, ScanlineIntersectionFlags &&flags
         );
 
-        static ScanlineConflictsResult rejectCandidateIfEmpiricalIntersection(
+        static ScanlineConflicts rejectCandidateIfEmpiricalIntersection(
             ScanlineIntersectionInfo &&intersection
         );
 
-        static ScanlineConflictsResult rejectCandidate(
+        static ScanlineConflicts rejectCandidate(
             const VerticalScanlineCandidate &candidate, const ScanlineIntersectionInfo &intersection
         );
 
-        static ScanlineConflictsResult rejectConflicting(ScanlineIntersectionInfo &&intersection);
+        static ScanlineConflicts rejectConflicting(ScanlineIntersectionInfo &&intersection);
     };
 } // accurate_ri

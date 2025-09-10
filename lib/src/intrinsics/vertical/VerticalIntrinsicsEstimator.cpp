@@ -14,7 +14,7 @@
 
 namespace accurate_ri {
     void VerticalIntrinsicsEstimator::init(const PointArray &points) {
-        double offsetMax = std::min(std::ranges::min(points.getRanges()), Constant::MAX_OFFSET) - Constant::OFFSET_STEP;
+        double offsetMax = std::min(points.getRanges().minCoeff(), Constant::MAX_OFFSET) - Constant::OFFSET_STEP;
         double offsetMin = -offsetMax;
 
         double angleMax = M_PI / 2 - Constant::ANGLE_STEP;
