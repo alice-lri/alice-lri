@@ -5,7 +5,7 @@
 #include "accurate_ri/AliceArray.hpp"
 
 namespace accurate_ri {
-    struct Scanline {
+    struct ACCURATE_RI_API Scanline {
         double verticalOffset;
         double verticalAngle;
         double horizontalOffset;
@@ -83,17 +83,17 @@ namespace accurate_ri {
         void clampBoth(double minValue, double maxValue);
     };
 
-    struct ValueConfInterval {
+    struct ACCURATE_RI_API ValueConfInterval {
         double value;
         Interval ci;
     };
 
-    struct ScanlineAngleBounds {
+    struct ACCURATE_RI_API ScanlineAngleBounds {
         Interval bottom;
         Interval top;
     };
 
-    struct DebugScanline {
+    struct ACCURATE_RI_API DebugScanline {
         ValueConfInterval verticalOffset;
         ValueConfInterval verticalAngle;
         double horizontalOffset;
@@ -107,11 +107,11 @@ namespace accurate_ri {
         ScanlineAngleBounds theoreticalAngleBounds;
     };
 
-    enum class EndReason {
+    enum class ACCURATE_RI_API EndReason {
         ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
     };
 
-    struct DebugIntrinsics {
+    struct ACCURATE_RI_API DebugIntrinsics {
         AliceArray<DebugScanline> scanlines;
         int32_t verticalIterations = 0;
         int32_t unassignedPoints = 0;

@@ -111,14 +111,6 @@ namespace accurate_ri {
 
     template class ACCURATE_RI_API AliceArray<float>;
     template class ACCURATE_RI_API AliceArray<double>;
-    template class ACCURATE_RI_API AliceArray<int8_t>;
-    template class ACCURATE_RI_API AliceArray<int16_t>;
-    template class ACCURATE_RI_API AliceArray<int32_t>;
-    template class ACCURATE_RI_API AliceArray<int64_t>;
-    template class ACCURATE_RI_API AliceArray<uint8_t>;
-    template class ACCURATE_RI_API AliceArray<uint16_t>;
-    template class ACCURATE_RI_API AliceArray<uint32_t>;
-    template class ACCURATE_RI_API AliceArray<uint64_t>;
     template class ACCURATE_RI_API AliceArray<Scanline>;
     template class ACCURATE_RI_API AliceArray<DebugScanline>;
 }

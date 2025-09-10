@@ -1,7 +1,11 @@
 #pragma once
 #include <cstdint>
 
-#define ACCURATE_RI_API __attribute__((visibility("default")))
+#if defined(_MSC_VER)
+  #define ACCURATE_RI_API __declspec(dllexport /* or dllimport */)
+#else
+  #define ACCURATE_RI_API __attribute__((visibility("default")))
+#endif
 
 namespace accurate_ri {
     template<class T>
