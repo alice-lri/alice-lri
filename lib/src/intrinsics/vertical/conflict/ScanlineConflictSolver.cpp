@@ -1,6 +1,8 @@
 #include "ScanlineConflictSolver.h"
 
 #include <queue>
+
+#include "intrinsics/vertical/helper/VerticalLogging.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "utils/logger/Logger.h"
 #include "utils/Utils.h"
@@ -10,7 +12,7 @@ namespace accurate_ri {
     bool ScanlineConflictSolver::performScanlineConflictResolution(
         VerticalScanlinePool &scanlinePool, const PointArray &points, const VerticalScanlineCandidate &candidate
     ) {
-        const ScanlineConflictsResult &conflicts = evaluateScanlineConflicts(scanlinePool, candidate);
+        const ScanlineConflictsResult &conflicts = evaluateConflicts(scanlinePool, candidate);
 
         if (conflicts.shouldReject) {
             LOG_INFO("Scanline rejected");
@@ -81,98 +83,37 @@ namespace accurate_ri {
 
         return true;
     }
-
-    // TODO review this method, maybe precompute actually conflicting scanlines and do ifs based on that
-    ScanlineConflictsResult ScanlineConflictSolver::evaluateScanlineConflicts(
+    
+    ScanlineConflictsResult ScanlineConflictSolver::evaluateConflicts(
         const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
-        const ScanlineIntersectionInfo &intersectionInfo = computeIntersections(
-            scanlinePool, candidate
-        );
+        ScanlineIntersectionFlags intersectionFlags = computeIntersectionFlags(scanlinePool, candidate);
 
-        if (!intersectionInfo.anyIntersection()) {
+        if (!intersectionFlags.anyIntersection()) {
             return {
                 .shouldReject = false,
                 .conflictingScanlines = Eigen::ArrayXi()
             };
         }
 
-        LOG_WARN("Possible problem detected");
-        LOG_INFO(
-            "Intersects other scanline: ", intersectionInfo.empiricalIntersection? "True": "False",
-            ", Intersects theoretically: ", intersectionInfo.theoreticalIntersection,
-            ", Fit success: ", "True",
-            ", Points in scanline: ", candidate.limits.indices.size(), " vs ", candidate.scanline.hough.cell.votes
-        );
+        auto intersectionInfo = computeIntersectionInfo(scanlinePool, std::move(intersectionFlags));
+        VerticalLogging::logIntersectionProblem(intersectionInfo, candidate);
 
+        constexpr double inf = std::numeric_limits<double>::infinity();
+        const double minConflictingUncertainty = intersectionInfo.conflictingUncertainties.minCoeff() - 1e-6;
 
-        Eigen::ArrayXi conflictingScanlines = Eigen::ArrayXi::Zero(intersectionInfo.empiricalIntersectionMask.size());
-        int j = 0;
-        for (int i = 0; i < intersectionInfo.empiricalIntersectionMask.size(); ++i) {
-            if (intersectionInfo.anyIntersection(i)) {
-                conflictingScanlines(j++) = i;
-            }
-        }
-        conflictingScanlines.conservativeResize(j);
-
-        Eigen::ArrayXd conflictingScanlinesUncertainties(conflictingScanlines.size());
-        for (int i = 0; i < conflictingScanlines.size(); ++i) {
-            conflictingScanlinesUncertainties(i) = scanlinePool.getScanlineById(conflictingScanlines(i)).uncertainty;
+        if (candidate.scanline.uncertainty == inf && minConflictingUncertainty == inf) {
+            return rejectCandidateIfEmpiricalIntersection(std::move(intersectionInfo));
         }
 
-        LOG_INFO(
-            "Intersects with scanlines: ", conflictingScanlines,
-            ", Current scanline uncertainty: ", candidate.scanline.uncertainty,
-            ", Conflicting scanlines uncertainties: ", conflictingScanlinesUncertainties
-        );
-
-        const double minConflictingUncertainty = conflictingScanlinesUncertainties.minCoeff() - 1e-6;
         if (candidate.scanline.uncertainty >= minConflictingUncertainty) {
-            if (minConflictingUncertainty == std::numeric_limits<double>::infinity()) {
-                LOG_INFO(
-                    "New uncertainty is infinite, but so are the conflicting scanlines uncertainties. Intersects other empirical: ",
-                    intersectionInfo.empiricalIntersection? "True": "False", "."
-                );
-
-                const bool reject = intersectionInfo.empiricalIntersection;
-
-                return {
-                    .shouldReject = reject,
-                    .conflictingScanlines = reject? std::move(conflictingScanlines) : Eigen::ArrayXi(),
-                };
-            }
-
-            LOG_INFO(
-                "New uncertainty is higher than conflicting scanlines uncertainties. Rejecting current scanline"
-            );
-
-            Eigen::ArrayXi actuallyConflictingScanlines = Eigen::ArrayXi::Zero(conflictingScanlines.size());
-
-            j = 0;
-            for (int i = 0; i < conflictingScanlines.size(); ++i) {
-                if (candidate.scanline.uncertainty >= conflictingScanlinesUncertainties(i)) {
-                    actuallyConflictingScanlines(j++) = conflictingScanlines(i);
-                }
-            }
-            actuallyConflictingScanlines.conservativeResize(j);
-
-            return {
-                .shouldReject = true,
-                .conflictingScanlines = std::move(actuallyConflictingScanlines)
-            };
+            return rejectCandidate(candidate, intersectionInfo);
         }
 
-        LOG_INFO(
-            "New uncertainty is lower than conflicting scanlines uncertainties. Rejecting conflicting scanlines"
-        );
-
-        return {
-            .shouldReject = false,
-            .conflictingScanlines = std::move(conflictingScanlines)
-        };
+        return rejectConflicting(std::move(intersectionInfo));
     }
 
-    ScanlineIntersectionInfo ScanlineConflictSolver::computeIntersections(
+    ScanlineIntersectionFlags ScanlineConflictSolver::computeIntersectionFlags(
         const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
         Eigen::ArrayX<bool> empiricalIntersectionMask = computeEmpiricalIntersections(scanlinePool, candidate);
@@ -226,10 +167,79 @@ namespace accurate_ri {
         return result;
     }
 
+    ScanlineIntersectionInfo ScanlineConflictSolver::computeIntersectionInfo(
+        const VerticalScanlinePool &scanlinePool, ScanlineIntersectionFlags &&flags
+    ) {
+        Eigen::ArrayXi conflictingIds = Eigen::ArrayXi::Zero(flags.empiricalIntersectionMask.size());
+        int j = 0;
+        for (int i = 0; i < flags.empiricalIntersectionMask.size(); ++i) {
+            if (flags.anyIntersection(i)) {
+                conflictingIds(j++) = i;
+            }
+        }
+        conflictingIds.conservativeResize(j);
+
+        Eigen::ArrayXd conflictingUncertainties(conflictingIds.size());
+        for (int i = 0; i < conflictingIds.size(); ++i) {
+            conflictingUncertainties(i) = scanlinePool.getScanlineById(conflictingIds(i)).uncertainty;
+        }
+
+        return {
+            .flags = std::move(flags),
+            .conflictingIds = conflictingIds,
+            .conflictingUncertainties = conflictingUncertainties
+        };
+    }
+
+    ScanlineConflictsResult ScanlineConflictSolver::rejectCandidateIfEmpiricalIntersection(
+        ScanlineIntersectionInfo &&intersection
+    ) {
+        LOG_INFO(
+            "New uncertainty is infinite, but so are the conflicting scanlines uncertainties. ",
+            "Intersects other empirical: ", intersection.flags.empiricalIntersection? "True": "False", "."
+        );
+
+        const bool reject = intersection.flags.empiricalIntersection;
+
+        return {
+            .shouldReject = reject,
+            .conflictingScanlines = reject? std::move(intersection.conflictingIds) : Eigen::ArrayXi(),
+        };
+    }
+
+    ScanlineConflictsResult ScanlineConflictSolver::rejectCandidate(
+        const VerticalScanlineCandidate &candidate, const ScanlineIntersectionInfo &intersection
+    ) {
+        Eigen::ArrayXi betterScanlineIds = Eigen::ArrayXi::Zero(intersection.conflictingIds.size());
+        LOG_INFO("New uncertainty is higher than conflicting scanlines uncertainties. Rejecting current scanline");
+
+        int j = 0;
+        for (int i = 0; i < intersection.conflictingIds.size(); ++i) {
+            if (candidate.scanline.uncertainty >= intersection.conflictingUncertainties(i)) {
+                betterScanlineIds(j++) = intersection.conflictingIds(i);
+            }
+        }
+        betterScanlineIds.conservativeResize(j);
+
+        return {
+            .shouldReject = true,
+            .conflictingScanlines = std::move(betterScanlineIds)
+        };
+    }
+
+    ScanlineConflictsResult ScanlineConflictSolver::rejectConflicting(ScanlineIntersectionInfo &&intersection) {
+        LOG_INFO("New uncertainty is lower than conflicting scanlines uncertainties. Rejecting conflicting scanlines");
+
+        return {
+            .shouldReject = false,
+            .conflictingScanlines = std::move(intersection.conflictingIds)
+        };
+    }
+
     bool ScanlineConflictSolver::simpleShouldKeep(
         VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
-        const auto intersectionInfo = computeIntersections(scanlinePool, candidate);
+        const auto intersectionInfo = computeIntersectionFlags(scanlinePool, candidate);
         const bool conflicting = intersectionInfo.empiricalIntersection;
 
         if (conflicting) {

@@ -49,4 +49,21 @@ namespace accurate_ri::VerticalLogging {
         );
     }
 
+    inline void logIntersectionProblem(
+        const ScanlineIntersectionInfo& intersection, const VerticalScanlineCandidate& candidate
+    ) {
+        LOG_WARN("Possible problem detected");
+        LOG_INFO(
+            "Intersects other scanline: ", intersection.flags.empiricalIntersection? "True": "False",
+            ", Intersects theoretically: ", intersection.flags.theoreticalIntersection,
+            ", Fit success: ", "True",
+            ", Points in scanline: ", candidate.limits.indices.size(), " vs ", candidate.scanline.hough.cell.votes
+        );
+
+        LOG_INFO(
+            "Intersects with scanlines: ", intersection.conflictingIds,
+            ", Current scanline uncertainty: ", candidate.scanline.uncertainty,
+            ", Conflicting scanlines uncertainties: ", intersection.conflictingUncertainties
+        );
+    }
 }

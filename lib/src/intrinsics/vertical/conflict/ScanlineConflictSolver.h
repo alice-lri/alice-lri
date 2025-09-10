@@ -20,11 +20,11 @@ namespace accurate_ri {
         );
 
     private:
-        static ScanlineConflictsResult evaluateScanlineConflicts(
+        static ScanlineConflictsResult evaluateConflicts(
             const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
         );
 
-        static ScanlineIntersectionInfo computeIntersections(
+        static ScanlineIntersectionFlags computeIntersectionFlags(
             const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
         );
 
@@ -35,5 +35,19 @@ namespace accurate_ri {
         static Eigen::ArrayX<bool> computeTheoreticalIntersections(
            const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
        );
+
+        static ScanlineIntersectionInfo computeIntersectionInfo(
+            const VerticalScanlinePool &scanlinePool, ScanlineIntersectionFlags &&flags
+        );
+
+        static ScanlineConflictsResult rejectCandidateIfEmpiricalIntersection(
+            ScanlineIntersectionInfo &&intersection
+        );
+
+        static ScanlineConflictsResult rejectCandidate(
+            const VerticalScanlineCandidate &candidate, const ScanlineIntersectionInfo &intersection
+        );
+
+        static ScanlineConflictsResult rejectConflicting(ScanlineIntersectionInfo &&intersection);
     };
 } // accurate_ri

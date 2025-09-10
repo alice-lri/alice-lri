@@ -12,11 +12,11 @@ struct HashToConflictValue {
     int64_t votes;
 };
 
-struct ScanlineIntersectionInfo {
-    const Eigen::ArrayX<bool> empiricalIntersectionMask;
-    const Eigen::ArrayX<bool> theoreticalIntersectionMask;
-    const bool empiricalIntersection;
-    const bool theoreticalIntersection;
+struct ScanlineIntersectionFlags {
+    Eigen::ArrayX<bool> empiricalIntersectionMask;
+    Eigen::ArrayX<bool> theoreticalIntersectionMask;
+    bool empiricalIntersection;
+    bool theoreticalIntersection;
 
     [[nodiscard]] bool anyIntersection() const {
         return empiricalIntersection || theoreticalIntersection;
@@ -25,4 +25,9 @@ struct ScanlineIntersectionInfo {
     [[nodiscard]] bool anyIntersection(const uint32_t i) const {
         return empiricalIntersectionMask[i] || theoreticalIntersectionMask[i];
     }
+};
+struct ScanlineIntersectionInfo {
+    ScanlineIntersectionFlags flags;
+    Eigen::ArrayXi conflictingIds;
+    Eigen::ArrayXd conflictingUncertainties;
 };
