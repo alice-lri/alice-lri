@@ -4,6 +4,7 @@
 #include <fstream>
 #include <optional>
 #include <cmath>
+#include <vector>
 
 namespace FileUtils {
     double roundToDigits(const double value, const std::optional<int> digits) {

@@ -1,7 +1,4 @@
 #pragma once
-#include <cstdint>
-#include <vector>
-
 #include "accurate_ri/AliceArray.hpp"
 
 namespace accurate_ri {
@@ -15,47 +12,35 @@ namespace accurate_ri {
 
     struct ACCURATE_RI_API Intrinsics {
     private:
-        struct Impl;
-        Impl* impl;
+        AliceArray<Scanline> scanlines;
 
     public:
-        explicit Intrinsics(int32_t scanlineCount);
-        Intrinsics(const Intrinsics& other);
-        Intrinsics& operator=(const Intrinsics& other);
-        Intrinsics(Intrinsics&& other) noexcept;
-        Intrinsics& operator=(Intrinsics&& other) noexcept;
+        explicit Intrinsics(const int32_t scanlineCount): scanlines(scanlineCount) { }
 
-        ~Intrinsics();
-
-        Scanline &scanlineAt(int32_t idx);
-        [[nodiscard]] const Scanline &scanlineAt(int32_t idx) const;
-        [[nodiscard]] int32_t scanlinesCount() const;
+        Scanline &scanlineAt(const int32_t idx) { return scanlines[idx]; }
+        [[nodiscard]] const Scanline &scanlineAt(const int32_t idx) const { return scanlines[idx]; }
+        [[nodiscard]] uint64_t scanlinesCount() const { return scanlines.size(); }
     };
 
     struct ACCURATE_RI_API RangeImage {
     private:
-        struct Impl;
-        Impl* impl;
+        AliceArray<double> pixels;
+        uint32_t w;
+        uint32_t h;
 
     public:
-        RangeImage(uint32_t width, uint32_t height);
-        RangeImage(uint32_t width, uint32_t height, double initialValue);
+        RangeImage(): w(0), h(0) { }
+        RangeImage(const uint32_t w, const uint32_t h): pixels(w * h), w(w), h(h) {};
+        RangeImage(const uint32_t w, const uint32_t h, const double initialValue):
+            pixels(w * h, initialValue), w(w), h(h) {};
 
-        RangeImage(const RangeImage& other);
-        RangeImage& operator=(const RangeImage& other);
+        double& operator()(const uint32_t row, const uint32_t col) { return pixels[row * w + col]; }
+        const double& operator()(const uint32_t row, const uint32_t col) const { return pixels[row * w + col]; }
 
-        RangeImage(RangeImage&& other) noexcept;
-        RangeImage& operator=(RangeImage&& other) noexcept;
-
-        ~RangeImage();
-
-        double& operator()(uint32_t row, uint32_t col);
-        const double& operator()(uint32_t row, uint32_t col) const;
-
-        [[nodiscard]] uint32_t width() const;
-        [[nodiscard]] uint32_t height() const;
-        [[nodiscard]] const double* data() const;
-        double* data();
+        [[nodiscard]] uint32_t width() const { return w; }
+        [[nodiscard]] uint32_t height() const { return h; }
+        [[nodiscard]] const double* data() const { return pixels.data(); }
+        double* data() { return pixels.data(); }
     };
 
     namespace PointCloud {

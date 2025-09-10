@@ -18,6 +18,11 @@ namespace accurate_ri {
     }
 
     template<class T>
+    AliceArray<T>::AliceArray(uint64_t n, const T &initialValue) : impl(new Impl) {
+        impl->v.resize(n, initialValue);
+    }
+
+    template<class T>
     AliceArray<T>::AliceArray(const T* data, uint64_t n) : impl(new Impl) {
         impl->v.assign(data, data + n);
     }
@@ -109,8 +114,8 @@ namespace accurate_ri {
         return impl->v[i];
     }
 
-    template class ACCURATE_RI_API AliceArray<float>;
-    template class ACCURATE_RI_API AliceArray<double>;
-    template class ACCURATE_RI_API AliceArray<Scanline>;
-    template class ACCURATE_RI_API AliceArray<DebugScanline>;
+    template class AliceArray<float>;
+    template class AliceArray<double>;
+    template class AliceArray<Scanline>;
+    template class AliceArray<DebugScanline>;
 }

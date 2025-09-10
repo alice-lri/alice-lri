@@ -9,27 +9,6 @@
 
 namespace accurate_ri {
     template<class T>
-    class ACCURATE_RI_API AliceSpan {
-    private:
-        T* _data = nullptr;
-        uint64_t _size = 0;
-
-    public:
-        constexpr AliceSpan() noexcept = default;
-        AliceSpan(T *data, const uint64_t n) : _data(data), _size(n) {}
-
-        [[nodiscard]] uint64_t size() const noexcept { return _size; }
-        T *data() noexcept { return _data; }
-        const T *data() const noexcept { return _data; }
-        T &operator[](std::size_t i) noexcept { return _data[i]; }
-        const T &operator[](std::size_t i) const noexcept { return _data[i]; }
-        T *begin() noexcept { return _data; }
-        T *end() noexcept { return _data + _size; }
-        const T *begin() const noexcept { return _data; }
-        const T *end() const noexcept { return _data + _size; }
-    };
-
-    template<class T>
     class ACCURATE_RI_API AliceArray {
     private:
         struct Impl;
@@ -38,6 +17,7 @@ namespace accurate_ri {
     public:
         AliceArray();
         explicit AliceArray(uint64_t n);
+        AliceArray(uint64_t n, const T &initialValue);
         AliceArray(const T* data, uint64_t n);
 
         AliceArray(const AliceArray &);
@@ -62,8 +42,5 @@ namespace accurate_ri {
         void reserve(uint64_t n);
         void shrink_to_fit();
         void clear();
-
-        AliceSpan<T> span() noexcept { return {data(), size()}; }
-        AliceSpan<const T> span() const noexcept { return {data(), size()}; }
     };
 }

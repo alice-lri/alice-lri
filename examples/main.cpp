@@ -16,7 +16,6 @@ std::optional<int> secureStoi(const std::string &str) {
 // TODO review each time I add to a collection whether I am copying or not. Especially maps/sets, use emplace
 // TODO maybe every function that does not return an eigen pre-allocated buffer should take a parameter out instead
 // TODO handle receiving points like all zeros and stuff like that
-// TODO public headers should have NO STL things (vector, string, etc.) https://chatgpt.com/c/683d803b-3f7c-8010-be9d-1ed7dbe70a0c
 // TODO decide what to do with logs and stuff for the library version
 // TODO maybe reserve log warn and error for user relevant logs
 int main(int argc, char **argv) {
