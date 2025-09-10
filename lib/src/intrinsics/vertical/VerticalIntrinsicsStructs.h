@@ -1,14 +1,12 @@
 #pragma once
 #include <vector>
 #include <Eigen/Core>
+
+#include "hough/HoughStructs.h"
+#include "intrinsics/vertical/estimation/VerticalScanlineLimits.h"
 #include "utils/CommonStructs.h"
 
 namespace accurate_ri {
-
-    struct VerticalMargin {
-        double offset;
-        double angle;
-    };
 
     struct VerticalScanline {
         uint32_t id;
@@ -17,8 +15,8 @@ namespace accurate_ri {
         ValueConfInterval offset;
         ScanlineAngleBounds theoreticalAngleBounds;
         double uncertainty;
-        int64_t houghVotes;
-        uint64_t houghHash;
+        bool heuristic;
+        HoughScanlineEstimation hough;
     };
 
     struct VerticalScanlinesAssignations {
@@ -46,5 +44,10 @@ namespace accurate_ri {
         Eigen::ArrayX<bool> mask;
         Eigen::ArrayXd lowerLimit;
         Eigen::ArrayXd upperLimit; // TODO just realized the limits are not really neccessary to store
+    };
+
+    struct VerticalScanlineCandidate {
+        VerticalScanline scanline;
+        ScanlineLimits limits;
     };
 }

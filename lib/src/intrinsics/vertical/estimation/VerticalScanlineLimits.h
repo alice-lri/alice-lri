@@ -7,7 +7,7 @@ namespace accurate_ri::VerticalScanlineLimits {
     VerticalBounds computeErrorBounds(const PointArray &points, double offset);
 
     ScanlineLimits computeScanlineLimits(
-        const PointArray &points, const Eigen::ArrayXd &errorBounds, const double offset, const double angle,
+        const PointArray &points, const Eigen::ArrayXd &errorBounds, double offset, double angle,
         const VerticalMargin &margin
     );
 

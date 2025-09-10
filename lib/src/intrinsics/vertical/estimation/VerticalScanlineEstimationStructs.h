@@ -30,7 +30,7 @@ namespace accurate_ri {
         bool validCi = false;
     };
 
-    struct ScanlineEstimationResult {
+    struct VerticalScanlineEstimation {
         bool heuristic;
         double uncertainty;
         ValueConfInterval offset;

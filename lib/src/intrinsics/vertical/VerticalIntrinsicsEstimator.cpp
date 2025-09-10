@@ -40,43 +40,37 @@ namespace accurate_ri {
         while (scanlinePool->anyUnassigned()) {
             iteration++;
 
-            Candidate candidate = findCandidate(iteration);
-            if (!candidate.valid) { // TODO valid is unintituive since we break and finish
-                endReason = *candidate.endReason;
+            VerticalScanlineHoughCandidate houghCandidate = findCandidate(iteration);
+            if (!houghCandidate.valid) { // TODO valid is unintituive since we break and finish
+                endReason = *houghCandidate.endReason;
                 break;
             }
 
-            const std::optional<RefinedCandidate> refinedCandidate = refineCandidate(iteration, points, candidate);
-            if (!refinedCandidate) {
-                scanlinePool->invalidateByHash(candidate.hough->cell.hash);
+            const auto estimation = estimateScanline(points, *houghCandidate.estimation);
+            if (!estimation) {
+                scanlinePool->invalidateByHash(houghCandidate.estimation->cell.hash);
                 continue;
             }
 
-            const ScanlineAngleBounds angleBounds = refinedCandidate->scanline
-                    .toAngleBounds(points.getMinRange(), points.getMaxRange());
+            const auto angleBounds = estimation->toAngleBounds(points.getMinRange(), points.getMaxRange());
+            const auto scanline = makeVerticalScanline(currentScanlineId, houghCandidate, estimation, angleBounds);
+            const auto candidate = VerticalScanlineCandidate{ .scanline = scanline, .limits = estimation->limits };
 
             bool keepScanline;
             if constexpr (BuildOptions::USE_SCANLINE_CONFLICT_SOLVER) {
-                keepScanline = conflictSolver.performScanlineConflictResolution(
-                    *scanlinePool, points, angleBounds, refinedCandidate->scanline, currentScanlineId,
-                    candidate.hough->cell
-                );
+                keepScanline = conflictSolver.performScanlineConflictResolution(*scanlinePool, points, scanline);
             } else {
-                keepScanline = conflictSolver.simpleShouldKeep(
-                    *scanlinePool, angleBounds, refinedCandidate->scanline, currentScanlineId, candidate.hough->cell
-                );
+                keepScanline = conflictSolver.simpleShouldKeep(*scanlinePool, candidate);
             }
 
             if (!keepScanline) {
                 continue;
             }
 
-            const VerticalScanline scanline =
-                makeVerticalScanline(currentScanlineId, candidate, refinedCandidate, angleBounds);
 
             // TODO merge?
-            scanlinePool->removeVotes(points, refinedCandidate->scanline.limits.indices);
-            scanlinePool->assignScanline(scanline, refinedCandidate->scanline.limits.indices);
+            scanlinePool->removeVotes(points, estimation->scanline.limits.indices);
+            scanlinePool->assignScanline(scanline, estimation->scanline.limits.indices);
 
             VerticalLogging::logScanlineAssignation(scanline);
             LOG_INFO("Number of unassigned points: ", scanlinePool->getUnassignedPoints());
@@ -89,8 +83,8 @@ namespace accurate_ri {
         return result;
     }
 
-    Candidate VerticalIntrinsicsEstimator::findCandidate(const int64_t iteration) const {
-        Candidate result;
+    VerticalScanlineHoughCandidate VerticalIntrinsicsEstimator::findCandidate(const int64_t iteration) const {
+        VerticalScanlineHoughCandidate result;
 
         if (iteration > Constant::VERTICAL_MAX_ITERATIONS) {
             LOG_WARN("Warning: Maximum iterations reached");
@@ -98,35 +92,35 @@ namespace accurate_ri {
             return result;
         }
 
-        result.hough = scanlinePool->performHoughEstimation();
+        result.estimation = scanlinePool->performHoughEstimation();
 
-        if (!result.hough) {
+        if (!result.estimation) {
             LOG_WARN("Warning: No more peaks found");
             result.endReason = EndReason::NO_MORE_PEAKS;
             return result;
         }
 
         result.valid = true;
-        VerticalLogging::logHoughInfo(iteration, result.hough->cell);
+        VerticalLogging::logHoughInfo(iteration, result.estimation->cell);
 
         return result;
     }
 
-    std::optional<RefinedCandidate> VerticalIntrinsicsEstimator::refineCandidate(
-        const int64_t iteration, const PointArray &points, const Candidate &candidate
+    std::optional<VerticalScanlineEstimation> VerticalIntrinsicsEstimator::estimateScanline(
+        const PointArray &points, const HoughScanlineEstimation &hough
     ) const {
-        const VerticalMargin &margin = candidate.hough->margin;
-        const HoughCell &houghMax = candidate.hough->cell;
+        const VerticalMargin &margin = hough.margin;
+        const HoughCell &houghMax = hough.cell;
 
-        VerticalBounds errorBounds = VerticalScanlineLimits::computeErrorBounds(points, houghMax.maxOffset);
-        ScanlineLimits scanlineLimits = VerticalScanlineLimits::computeScanlineLimits(
+        const VerticalBounds errorBounds = VerticalScanlineLimits::computeErrorBounds(points, houghMax.maxOffset);
+        const ScanlineLimits scanlineLimits = VerticalScanlineLimits::computeScanlineLimits(
             points, errorBounds.final, houghMax.maxOffset, houghMax.maxAngle, margin
         );
 
         LOG_INFO("Minimum limit width (Hough): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff());
 
         VerticalScanlineEstimator scanlineEstimator;
-        std::optional<ScanlineEstimationResult> estimationResultOpt = scanlineEstimator.estimate(
+        std::optional<VerticalScanlineEstimation> estimationResultOpt = scanlineEstimator.estimate(
             points, *scanlinePool, errorBounds, scanlineLimits
         );
 
@@ -137,10 +131,7 @@ namespace accurate_ri {
             return std::nullopt;
         }
 
-        RefinedCandidate result;
-        result.scanline = std::move(*estimationResultOpt);
-
-        return result;
+        return estimationResultOpt;
     }
 
     VerticalIntrinsicsEstimation VerticalIntrinsicsEstimator::extractResult(
@@ -167,18 +158,17 @@ namespace accurate_ri {
     }
 
     VerticalScanline VerticalIntrinsicsEstimator::makeVerticalScanline(
-        const uint32_t currentScanlineId, const Candidate &candidate,
-        const std::optional<RefinedCandidate> &refinedCandidate, const ScanlineAngleBounds &angleBounds
+        const uint32_t currentScanlineId, const VerticalScanlineHoughCandidate &candidate,
+        const std::optional<VerticalScanlineEstimation> &refinedCandidate, const ScanlineAngleBounds &angleBounds
     ) {
         return VerticalScanline{
             .id = currentScanlineId,
-            .pointsCount = static_cast<uint64_t>(refinedCandidate->scanline.limits.indices.size()),
-            .angle = refinedCandidate->scanline.angle,
-            .offset = refinedCandidate->scanline.offset,
+            .pointsCount = static_cast<uint64_t>(refinedCandidate->limits.indices.size()),
+            .angle = refinedCandidate->angle,
+            .offset = refinedCandidate->offset,
             .theoreticalAngleBounds = angleBounds,
-            .uncertainty = refinedCandidate->scanline.uncertainty,
-            .houghVotes = candidate.hough->cell.votes,
-            .houghHash = candidate.hough->cell.hash
+            .uncertainty = refinedCandidate->uncertainty,
+            .hough = *candidate.estimation,
         };
     }
 } // namespace accurate_ri

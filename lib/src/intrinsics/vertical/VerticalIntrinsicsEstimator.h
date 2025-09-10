@@ -5,14 +5,10 @@
 #include "point/PointArray.h"
 
 namespace accurate_ri {
-    struct Candidate {
-        std::optional<HoughScanlineEstimation> hough = std::nullopt;
+    struct VerticalScanlineHoughCandidate {
+        std::optional<HoughScanlineEstimation> estimation = std::nullopt;
         std::optional<EndReason> endReason = std::nullopt;
         bool valid = false;
-    };
-
-    struct RefinedCandidate {
-        ScanlineEstimationResult scanline;
     };
 
     class VerticalIntrinsicsEstimator {
@@ -28,10 +24,10 @@ namespace accurate_ri {
     private:
         void init(const PointArray &points);
 
-        Candidate findCandidate(int64_t iteration) const;
+        VerticalScanlineHoughCandidate findCandidate(int64_t iteration) const;
 
-        std::optional<RefinedCandidate> refineCandidate(
-            int64_t iteration, const PointArray &points, const Candidate& candidate
+        std::optional<VerticalScanlineEstimation> estimateScanline(
+            const PointArray &points, const HoughScanlineEstimation &hough
         ) const;
 
         VerticalIntrinsicsEstimation extractResult(
@@ -39,8 +35,8 @@ namespace accurate_ri {
         ) const;
 
         static VerticalScanline makeVerticalScanline(
-            uint32_t currentScanlineId, const Candidate &candidate, const std::optional<RefinedCandidate> &refinedCandidate,
-            const ScanlineAngleBounds &angleBounds
+            uint32_t currentScanlineId, const VerticalScanlineHoughCandidate &candidate,
+            const std::optional<VerticalScanlineEstimation> &refinedCandidate, const ScanlineAngleBounds &angleBounds
         );
     };
 } // namespace accurate_ri

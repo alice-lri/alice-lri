@@ -12,24 +12,20 @@ namespace accurate_ri {
 
     public:
         bool performScanlineConflictResolution(
-            VerticalScanlinePool &scanlinePool, const PointArray &points, const ScanlineAngleBounds &angleBounds,
-            const ScanlineEstimationResult &scanline, uint32_t scanlineId, const HoughCell &houghMax
+            VerticalScanlinePool &scanlinePool, const PointArray &points, const VerticalScanlineCandidate &candidate
         );
 
-        bool simpleShouldKeep(
-            VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
-            const ScanlineEstimationResult &scanline, uint32_t scanlineId, const HoughCell &houghMax
+        static bool simpleShouldKeep(
+            VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
         );
 
     private:
-        ScanlineConflictsResult evaluateScanlineConflicts(
-            const VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
-            const ScanlineEstimationResult &scanline, uint32_t scanlineId, const HoughCell &houghMax
+        static ScanlineConflictsResult evaluateScanlineConflicts(
+            const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
         );
 
         static ScanlineIntersectionInfo computeScanlineIntersectionInfo(
-            const VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
-            const ScanlineEstimationResult &scanline, uint32_t scanlineId
+            const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
         );
     };
 } // accurate_ri

@@ -15,24 +15,24 @@ namespace accurate_ri {
         };
 
     public:
-        std::optional<ScanlineEstimationResult> estimate(
+        std::optional<VerticalScanlineEstimation> estimate(
             const PointArray &points, const VerticalScanlinePool &scanlinePool,
-            const VerticalBounds &errorBounds, const ScanlineLimits &scanlineLimits
+            const VerticalBounds &errorBounds, const VerticalScanlineLimits &scanlineLimits
         );
 
     private:
         ScanlineFitResult tryFitScanline(
             const PointArray &points, const VerticalScanlinePool &scanlinePool, const VerticalBounds &errorBounds, const
-            ScanlineLimits &scanlineLimits
+            VerticalScanlineLimits &scanlineLimits
         );
 
-        std::optional<ScanlineEstimationResult> performStatisticalFit(
+        std::optional<VerticalScanlineEstimation> performStatisticalFit(
             const PointArray &points, const VerticalScanlinePool &scanlinePool, const VerticalBounds &errorBounds,
-            const ScanlineLimits &scanlineLimits
+            const VerticalScanlineLimits &scanlineLimits
         );
 
         static std::optional<Eigen::ArrayXi> refinePointsToFitIndices(
-            const PointArray &points, const ScanlineLimits &scanlineLimits, FitConvergenceState state
+            const PointArray &points, const VerticalScanlineLimits &scanlineLimits, FitConvergenceState state
         );
 
         static Stats::WLSResult fitScanline(
@@ -42,7 +42,7 @@ namespace accurate_ri {
 
         bool verifyConfidenceIntervals(const Stats::WLSResult &fitResult);
 
-        static ScanlineLimits computeLimits(
+        static VerticalScanlineLimits computeLimits(
             const PointArray &points, const VerticalScanlinePool &scanlinePool, const Stats::WLSResult &fitResult,
             const VerticalBounds &errorBounds
         );
@@ -52,11 +52,11 @@ namespace accurate_ri {
         );
 
         static ScanlineFitResult makeFitResult(
-            const ScanlineLimits &currentScanlineLimits, const std::optional<Stats::WLSResult> &fitResult,
+            const VerticalScanlineLimits &currentScanlineLimits, const std::optional<Stats::WLSResult> &fitResult,
             FitConvergenceState convergenceState, bool validCi
         );
 
-        static std::optional<ScanlineEstimationResult> scanlineFitToEstimation(
+        static std::optional<VerticalScanlineEstimation> scanlineFitToEstimation(
             const PointArray &points, ScanlineFitResult& scanlineFit
         );
     };

@@ -5,13 +5,13 @@
 namespace accurate_ri {
     class VerticalHeuristicsEstimator {
     public:
-        static std::optional<ScanlineEstimationResult> estimate(
-            const PointArray &points, const VerticalScanlinePool &scanlinePool, const ScanlineLimits &scanlineLimits
+        static std::optional<VerticalScanlineEstimation> estimate(
+            const PointArray &points, const VerticalScanlinePool &scanlinePool, const VerticalScanlineLimits &scanlineLimits
         );
 
     private:
         static HeuristicScanline computeHeuristicScanline(
-            const PointArray &points, const VerticalScanlinePool &scanlinePool, const ScanlineLimits &limits
+            const PointArray &points, const VerticalScanlinePool &scanlinePool, const VerticalScanlineLimits &limits
         );
 
         static ValueConfInterval computeHeuristicOffset(

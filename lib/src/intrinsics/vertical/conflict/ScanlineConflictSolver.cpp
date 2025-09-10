@@ -6,19 +6,17 @@
 #include "utils/Utils.h"
 
 namespace accurate_ri {
-    // TODO merge bounds and scanlineid into single object.
+    
     bool ScanlineConflictSolver::performScanlineConflictResolution(
-        VerticalScanlinePool &scanlinePool, const PointArray &points, const ScanlineAngleBounds &angleBounds,
-        const ScanlineEstimationResult &scanline, const uint32_t scanlineId, const HoughCell &houghMax
+        VerticalScanlinePool &scanlinePool, const PointArray &points, const VerticalScanlineCandidate &candidate
     ) {
-        const ScanlineConflictsResult &conflicts = evaluateScanlineConflicts(
-            scanlinePool, angleBounds, scanline, scanlineId, houghMax
-        );
+        const ScanlineConflictsResult &conflicts = evaluateScanlineConflicts(scanlinePool, candidate);
 
         if (conflicts.shouldReject) {
             LOG_INFO("Scanline rejected");
             LOG_INFO("");
 
+            const HoughCell houghMax = candidate.scanline.hough.cell;
             scanlinePool.invalidateByHash(houghMax.hash);
 
             if (conflicts.conflictingScanlines.size() == 0) {
@@ -67,13 +65,13 @@ namespace accurate_ri {
 
             // Store the removed line, as conflicting with current one
             hashesToConflictsMap.emplace(
-                removedScanline->houghHash, HashToConflictValue{
-                    .conflictingScanlines = {scanlineId},
-                    .votes = removedScanline->houghVotes
+                removedScanline->hough.cell.hash, HashToConflictValue{
+                    .conflictingScanlines = {candidate.scanline.id},
+                    .votes = removedScanline->hough.cell.votes
                 }
             );
 
-            LOG_INFO("Added hash ", removedScanline->houghHash, " to the map");
+            LOG_INFO("Added hash ", removedScanline->hough.cell.hash, " to the map");
         }
 
         for (const auto &[hash, votes] : hashesToRestore) {
@@ -86,11 +84,10 @@ namespace accurate_ri {
 
     // TODO review this method, maybe precompute actually conflicting scanlines and do ifs based on that
     ScanlineConflictsResult ScanlineConflictSolver::evaluateScanlineConflicts(
-        const VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
-        const ScanlineEstimationResult &scanline, const uint32_t scanlineId, const HoughCell &houghMax
+        const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
         const ScanlineIntersectionInfo &intersectionInfo = computeScanlineIntersectionInfo(
-            scanlinePool, angleBounds, scanline, scanlineId
+            scanlinePool, candidate
         );
 
         if (!intersectionInfo.anyIntersection()) {
@@ -105,7 +102,7 @@ namespace accurate_ri {
             "Intersects other scanline: ", intersectionInfo.empiricalIntersection? "True": "False",
             ", Intersects theoretically: ", intersectionInfo.theoreticalIntersection,
             ", Fit success: ", "True",
-            ", Points in scanline: ", scanline.limits.indices.size(), " vs ", houghMax.votes
+            ", Points in scanline: ", candidate.limits.indices.size(), " vs ", candidate.scanline.hough.cell.votes
         );
 
 
@@ -125,12 +122,12 @@ namespace accurate_ri {
 
         LOG_INFO(
             "Intersects with scanlines: ", conflictingScanlines,
-            ", Current scanline uncertainty: ", scanline.uncertainty,
+            ", Current scanline uncertainty: ", candidate.scanline.uncertainty,
             ", Conflicting scanlines uncertainties: ", conflictingScanlinesUncertainties
         );
 
         const double minConflictingUncertainty = conflictingScanlinesUncertainties.minCoeff() - 1e-6;
-        if (scanline.uncertainty >= minConflictingUncertainty) {
+        if (candidate.scanline.uncertainty >= minConflictingUncertainty) {
             if (minConflictingUncertainty == std::numeric_limits<double>::infinity()) {
                 LOG_INFO(
                     "New uncertainty is infinite, but so are the conflicting scanlines uncertainties. Intersects other empirical: ",
@@ -153,7 +150,7 @@ namespace accurate_ri {
 
             j = 0;
             for (int i = 0; i < conflictingScanlines.size(); ++i) {
-                if (scanline.uncertainty >= conflictingScanlinesUncertainties(i)) {
+                if (candidate.scanline.uncertainty >= conflictingScanlinesUncertainties(i)) {
                     actuallyConflictingScanlines(j++) = conflictingScanlines(i);
                 }
             }
@@ -176,10 +173,12 @@ namespace accurate_ri {
     }
 
     ScanlineIntersectionInfo ScanlineConflictSolver::computeScanlineIntersectionInfo(
-        const VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
-        const ScanlineEstimationResult &scanline, const uint32_t scanlineId
+        const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
-        const Eigen::ArrayXi &conflictingScanlinesIdsVerbose = scanlinePool.getScanlinesIds(scanline.limits.indices);
+        const auto scanlineId = candidate.scanline.id;
+        const ScanlineAngleBounds &angleBounds = candidate.scanline.theoreticalAngleBounds;
+
+        const Eigen::ArrayXi &conflictingScanlinesIdsVerbose = scanlinePool.getScanlinesIds(candidate.limits.indices);
         Eigen::ArrayX<bool> empiricalIntersectionMask = Eigen::ArrayX<bool>::Constant(scanlineId + 1, false);
         bool empiricalIntersection = false;
 
@@ -227,14 +226,13 @@ namespace accurate_ri {
     }
 
     bool ScanlineConflictSolver::simpleShouldKeep(
-        VerticalScanlinePool &scanlinePool, const ScanlineAngleBounds &angleBounds,
-        const ScanlineEstimationResult &scanline, const uint32_t scanlineId, const HoughCell &houghMax
+        VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
-        const auto intersectionInfo = computeScanlineIntersectionInfo(scanlinePool, angleBounds, scanline, scanlineId);
+        const auto intersectionInfo = computeScanlineIntersectionInfo(scanlinePool, candidate);
         const bool conflicting = intersectionInfo.empiricalIntersection;
 
         if (conflicting) {
-            scanlinePool.invalidateByHash(houghMax.hash);
+            scanlinePool.invalidateByHash(candidate.scanline.hough.cell.hash);
         }
 
         return !conflicting;
