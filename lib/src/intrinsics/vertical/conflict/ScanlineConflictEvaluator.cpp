@@ -77,7 +77,7 @@ namespace accurate_ri {
         const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
     ) {
         std::vector result(candidate.scanline.id + 1, false);
-        const Eigen::ArrayXi &conflictingScanlinesIdsVerbose = scanlinePool.getScanlinesIds(candidate.limits.indices);
+        const Eigen::ArrayXi conflictingScanlinesIdsVerbose = scanlinePool.getScanlinesIds(candidate.limits.indices);
 
         for (const int32_t conflictingId: conflictingScanlinesIdsVerbose) {
             if (conflictingId >= 0) {

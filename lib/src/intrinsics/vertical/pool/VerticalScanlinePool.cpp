@@ -33,11 +33,14 @@ namespace accurate_ri {
         };
     }
 
-    void VerticalScanlinePool::assignScanline(const VerticalScanline &scanline, const Eigen::ArrayXi& pointsIndices) {
-        pointsScanlinesIds(pointsIndices) = static_cast<const int>(scanline.id);
+    void VerticalScanlinePool::acceptCandidate(const PointArray &points, const VerticalScanlineCandidate &candidate) {
+        const Eigen::ArrayXi &pointsIndices = candidate.limits.indices;
+        hough.removeVotes(points, pointsIndices);
+
+        pointsScanlinesIds(pointsIndices) = static_cast<const int>(candidate.scanline.id);
         unassignedPoints -= pointsIndices.size();
 
-        scanlineInfoMap.emplace(scanline.id, scanline);
+        scanlineInfoMap.emplace(candidate.scanline.id, candidate.scanline);
     }
 
     std::optional<VerticalScanline> VerticalScanlinePool::removeScanline(const PointArray &points, const uint32_t scanlineId) {
@@ -85,15 +88,6 @@ namespace accurate_ri {
             .offset = hough.getXStep(),
             .angle = hough.getYStep()
         };
-    }
-
-    std::vector<VerticalScanline> VerticalScanlinePool::getUnsortedScanlinesCopy() const {
-        std::vector<VerticalScanline> scanlines;
-        for (const VerticalScanline &scanlineInfo: scanlineInfoMap | std::views::values) {
-            scanlines.emplace_back(scanlineInfo);
-        }
-
-        return scanlines;
     }
 
     std::vector<VerticalScanline> VerticalScanlinePool::computeSortedScanlines() const {

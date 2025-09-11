@@ -10,7 +10,7 @@ enum class HoughMode {
 };
 
 struct HoughCell {
-    std::uint64_t maxOffsetIndex;
+    uint64_t maxOffsetIndex;
     uint64_t maxAngleIndex;
     double maxOffset;
     double maxAngle;

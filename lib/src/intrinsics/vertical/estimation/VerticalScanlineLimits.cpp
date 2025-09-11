@@ -1,12 +1,13 @@
 #include "VerticalScanlineLimits.h"
 #include "point/PointArray.h"
 #include "utils/Timer.h"
+#include "utils/Utils.h"
 
 namespace accurate_ri {
-    // TODO precompute (whatever is possible) on PointArray
+
     VerticalBounds VerticalScanlineLimits::computeErrorBounds(const PointArray &points, const double offset) {
         PROFILE_SCOPE("VerticalScanlineLimits::computeErrorBounds");
-        double coordsEps = points.getCoordsEps();
+        const double coordsEps = points.getCoordsEps();
         const auto &zs = points.getZ();
         const auto &rangesXy = points.getRangesXy();
         const auto &ranges = points.getRanges();
@@ -31,7 +32,6 @@ namespace accurate_ri {
         return result;
     }
 
-    // TODO this could be a generic line thing. Take a look at conceptually section in scanlimie limits notebook
     ScanlineLimits VerticalScanlineLimits::computeScanlineLimits(
         const PointArray &points, const Eigen::ArrayXd &errorBounds, const double offset, const double angle,
         const VerticalMargin &margin
@@ -43,18 +43,12 @@ namespace accurate_ri {
         const auto sinUpper = ((offset + margin.offset) * inv.array()).min(1).max(-1).asin();
         const auto sinLower = ((offset - margin.offset) * inv.array()).min(1).max(-1).asin();
 
-        Eigen::ArrayXd upper = angle + sinUpper + margin.angle + errorBounds.array();
-        Eigen::ArrayXd lower = angle + sinLower - margin.angle - errorBounds.array();
+        const Eigen::ArrayXd upper = angle + sinUpper + margin.angle + errorBounds.array();
+        const Eigen::ArrayXd lower = angle + sinLower - margin.angle - errorBounds.array();
+
         Eigen::ArrayX<bool> mask = (lower <= phi) && (phi <= upper);
-        Eigen::ArrayXi idx(mask.count());
-
-        int k = 0;
-        for (Eigen::Index i = 0; i < mask.size(); ++i) {
-            if (mask[i]) {
-                idx[k++] = static_cast<int>(i);
-            }
-        }
-
-        return { std::move(idx), std::move(mask), std::move(lower), std::move(upper) };
+        Eigen::ArrayXi indices = Utils::eigenMaskToIndices(mask);
+        
+        return { std::move(indices), std::move(mask) };
     }
 } // accurate_ri

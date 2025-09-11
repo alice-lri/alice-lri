@@ -156,8 +156,6 @@ namespace accurate_ri {
             points, errorBounds.final, fitResult.slope, fitResult.intercept, margin
         );
 
-        LOG_INFO("Minimum limit width (fit): ", (limits.upperLimit - limits.lowerLimit).minCoeff());
-
         return limits;
     }
 

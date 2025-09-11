@@ -40,7 +40,7 @@ namespace accurate_ri {
             iteration++;
 
             VerticalScanlineHoughCandidate houghCandidate = findCandidate(iteration);
-            if (!houghCandidate.valid) { // TODO valid is unintituive since we break and finish
+            if (!houghCandidate.available) {
                 endReason = *houghCandidate.endReason;
                 break;
             }
@@ -68,11 +68,7 @@ namespace accurate_ri {
                 continue;
             }
 
-
-            // TODO merge?
-            scanlinePool->removeVotes(points, candidate.limits.indices);
-            scanlinePool->assignScanline(candidate.scanline, candidate.limits.indices);
-
+            scanlinePool->acceptCandidate(points, candidate);
             VerticalLogging::logScanlineAssignation(candidate.scanline);
             LOG_INFO("Number of unassigned points: ", scanlinePool->getUnassignedPoints());
             LOG_INFO("");
@@ -101,7 +97,7 @@ namespace accurate_ri {
             return result;
         }
 
-        result.valid = true;
+        result.available = true;
         VerticalLogging::logHoughInfo(iteration, result.estimation->cell);
 
         return result;
@@ -117,8 +113,6 @@ namespace accurate_ri {
         const ScanlineLimits scanlineLimits = VerticalScanlineLimits::computeScanlineLimits(
             points, errorBounds.final, houghMax.maxOffset, houghMax.maxAngle, margin
         );
-
-        LOG_INFO("Minimum limit width (Hough): ", (scanlineLimits.upperLimit - scanlineLimits.lowerLimit).minCoeff());
 
         VerticalScanlineEstimator scanlineEstimator;
         std::optional<VerticalScanlineEstimation> estimationResultOpt = scanlineEstimator.estimate(

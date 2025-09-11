@@ -8,7 +8,7 @@ namespace accurate_ri {
     struct VerticalScanlineHoughCandidate {
         std::optional<HoughScanlineEstimation> estimation = std::nullopt;
         std::optional<EndReason> endReason = std::nullopt;
-        bool valid = false;
+        bool available = false;
     };
 
     class VerticalIntrinsicsEstimator {

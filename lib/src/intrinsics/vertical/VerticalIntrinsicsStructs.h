@@ -37,12 +37,9 @@ namespace accurate_ri {
         Eigen::ArrayXd final;
     };
 
-    // TODO this containing indices and mask is probably not intuitive
     struct ScanlineLimits {
         Eigen::ArrayXi indices;
         Eigen::ArrayX<bool> mask;
-        Eigen::ArrayXd lowerLimit;
-        Eigen::ArrayXd upperLimit; // TODO just realized the limits are not really neccessary to store
     };
 
     struct VerticalScanlineCandidate {
