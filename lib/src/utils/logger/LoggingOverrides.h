@@ -5,7 +5,6 @@
 #include <unordered_set>
 #include <vector>
 #include <Eigen/Core>
-
 #include "accurate_ri/public_structs.hpp"
 
 template<typename T>

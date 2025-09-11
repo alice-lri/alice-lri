@@ -140,7 +140,6 @@ namespace accurate_ri {
         const double thetaStep = 2 * M_PI / resolution;
         const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
 
-        // TODO call twice first reconstruct and then unreconstructed
         const Eigen::ArrayXd diffToIdeal = HorizontalMath::computeDiffToIdeal(
             scanlineArray.getThetas(scanlineIdx), resolution, false
         );

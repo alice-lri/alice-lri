@@ -82,27 +82,15 @@ namespace accurate_ri {
     }
 
     RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) {
-        const auto size = static_cast<Eigen::Index>(points.x.size());
-
-        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(points.x.data(), size).cast<double>();
-        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXf>(points.y.data(), size).cast<double>();
-        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(points.z.data(), size).cast<double>();
-
-        return RangeImageUtils::computeRangeImage(intrinsics, xArray, yArray, zArray);
+        return RangeImageUtils::projectToRangeImage(intrinsics, points);
     }
 
     RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points) {
-        const auto size = static_cast<Eigen::Index>(points.x.size());
-
-        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
-        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
-        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
-
-        return RangeImageUtils::computeRangeImage(intrinsics, xArray, yArray, zArray);
+        return RangeImageUtils::projectToRangeImage(intrinsics, points);
     }
 
     PointCloud::Double unProjectToPointCloud(const Intrinsics &intrinsics, const RangeImage &rangeImage) {
-        return RangeImageUtils::unProjectRangeImage(intrinsics, rangeImage);
+        return RangeImageUtils::unProjectToPointCloud(intrinsics, rangeImage);
     }
 
     Intrinsics intrinsicsFromJsonStr(const AliceString &json) {
