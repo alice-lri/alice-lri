@@ -58,12 +58,13 @@ namespace accurate_ri {
             .horizontalOffset = horizontal.offset,
             .azimuthalOffset = horizontal.thetaOffset,
             .resolution = horizontal.resolution,
-            .heuristic = horizontal.heuristic, // TODO or vertical heuristic?
             .uncertainty = vertical.uncertainty,
             .houghVotes = vertical.hough.cell.votes,
             .houghHash = vertical.hough.cell.hash,
             .pointsCount = vertical.pointsCount,
-            .theoreticalAngleBounds = vertical.theoreticalAngleBounds
+            .theoreticalAngleBounds = vertical.theoreticalAngleBounds,
+            .verticalHeuristic = vertical.uncertainty == std::numeric_limits<double>::infinity(),
+            .horizontalHeuristic = horizontal.heuristic
         };
     }
 } // accurate_ri

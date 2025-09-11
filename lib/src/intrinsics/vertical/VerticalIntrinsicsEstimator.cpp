@@ -30,7 +30,6 @@ namespace accurate_ri {
         return scanlinePool;
     }
 
-    // TODO perhaps further split this function, perhaps when we construct the result iteratively
     VerticalIntrinsicsEstimation VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
         VerticalScanlinePool scanlinePool = init(points);
         ScanlineConflictSolver conflictSolver;

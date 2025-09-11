@@ -85,12 +85,13 @@ namespace accurate_ri {
         double horizontalOffset;
         double azimuthalOffset;
         int32_t resolution;
-        bool heuristic;
         double uncertainty;
         int64_t houghVotes;
         uint64_t houghHash;
         uint64_t pointsCount;
         ScanlineAngleBounds theoreticalAngleBounds;
+        bool verticalHeuristic;
+        bool horizontalHeuristic;
     };
 
     enum class ACCURATE_RI_API EndReason {

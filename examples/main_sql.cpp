@@ -103,13 +103,13 @@ void storeResult(
         scanlineQuery.bind(12, scanline.theoreticalAngleBounds.upperLine.lower);
         scanlineQuery.bind(13, scanline.theoreticalAngleBounds.upperLine.upper);
         scanlineQuery.bind(14, scanline.uncertainty);
-        scanlineQuery.bind(15, false); // TODO
+        scanlineQuery.bind(15, false);
         scanlineQuery.bind(16, scanline.houghVotes);
         scanlineQuery.bind(17, std::to_string(scanline.houghHash));
         scanlineQuery.bind(18, scanline.horizontalOffset);
         scanlineQuery.bind(19, scanline.resolution);
         scanlineQuery.bind(20, scanline.azimuthalOffset);
-        scanlineQuery.bind(21, scanline.heuristic);
+        scanlineQuery.bind(21, scanline.horizontalHeuristic);
 
         scanlineQuery.exec();
     }
