@@ -109,8 +109,8 @@ namespace accurate_ri {
         return intrinsicsFromJson(json);
     }
 
-    AliceString intrinsicsToJsonStr(const Intrinsics &result) {
-        const std::string json = intrinsicsToJson(result);
+    AliceString intrinsicsToJsonStr(const Intrinsics &result, const int32_t indent) {
+        const std::string json = intrinsicsToJson(result).dump(indent);
         return AliceString(json.c_str());
     }
 
@@ -121,9 +121,9 @@ namespace accurate_ri {
         return intrinsicsFromJson(json);
     }
 
-    void intrinsicsToJsonFile(const Intrinsics &result, const char *outputPath) {
+    void intrinsicsToJsonFile(const Intrinsics &result, const char *outputPath, const int32_t indent) {
         const nlohmann::json json = intrinsicsToJson(result);
         std::ofstream outFile(outputPath);
-        outFile << json.dump(4);
+        outFile << json.dump(indent);
     }
 }
