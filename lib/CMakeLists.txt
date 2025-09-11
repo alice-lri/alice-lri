@@ -119,8 +119,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         include/accurate_ri/AliceArray.hpp
         src/utils/CommonStructs.h
         src/hough/HoughStructs.h
-        src/intrinsics/vertical/conflict/IntersectionCalculator.cpp
-        src/intrinsics/vertical/conflict/IntersectionCalculator.h
+        src/intrinsics/vertical/conflict/ScanlineConflictEvaluator.cpp
+        src/intrinsics/vertical/conflict/ScanlineConflictEvaluator.h
 )
 
 set(_accurate_ri_private_include_dirs

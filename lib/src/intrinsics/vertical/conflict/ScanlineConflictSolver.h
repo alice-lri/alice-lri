@@ -35,18 +35,5 @@ namespace accurate_ri {
 
         void markAsRejectedByConflictingIds(const HoughCell &rejected, const std::span<const uint32_t> &conflictingIds);
 
-        static ScanlineConflicts evaluateConflicts(
-            const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
-        );
-
-        static ScanlineConflicts rejectCandidateIfEmpiricalIntersection(
-            ScanlineIntersectionInfo &&intersection
-        );
-
-        static ScanlineConflicts rejectCandidate(
-            const VerticalScanlineCandidate &candidate, const ScanlineIntersectionInfo &intersection
-        );
-
-        static ScanlineConflicts rejectConflicting(ScanlineIntersectionInfo &&intersection);
     };
 } // accurate_ri
