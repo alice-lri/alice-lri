@@ -2,8 +2,6 @@
 
 #include "Constants.h"
 #include "math/Trigonometry.h"
-#include "plotty/matplotlibcpp.hpp"
-
 
 namespace accurate_ri {
 

@@ -38,15 +38,6 @@ namespace accurate_ri {
         EXPECT_TRUE(diffResult.isApprox(expectedDiff, 1e-10));
     }
 
-    TEST_F(UtilsTest, MedianInPlaceFunction) {
-        // Test medianInPlace function
-        Eigen::ArrayXd testArray(5);
-        testArray << 9.0, 1.0, 5.0, 3.0, 7.0;
-
-        double median = Utils::medianInPlace(testArray);
-        EXPECT_NEAR(median, 5.0, 1e-10);
-    }
-
     TEST_F(UtilsTest, EigenMaskToIndicesFunction) {
         // Test eigenMaskToIndices function
         Eigen::ArrayX<bool> mask(5);

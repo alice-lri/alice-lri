@@ -4,7 +4,6 @@
 #include <ranges>
 #include "helper/VerticalLogging.h"
 #include "utils/Utils.h"
-#include "utils/TestUtils.h"
 #include "utils/Timer.h"
 #include "Constants.h"
 #include "BuildOptions.h"

@@ -76,7 +76,6 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         src/point/PointArray.cpp
         src/utils/Utils.h
         src/intrinsics/vertical/helper/VerticalLogging.h
-        src/utils/TestUtils.h
         src/utils/json/JsonConverters.cpp
         src/utils/json/JsonConverters.h
         src/math/Stats.cpp
@@ -92,8 +91,6 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         include/accurate_ri/public_structs.hpp
         src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.cpp
         src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.h
-        src/plotty/matplotlibcpp.hpp
-        src/plotty/matplotlibcpp.cpp
         src/rangeimage/RangeImageUtils.cpp
         src/rangeimage/RangeImageUtils.h
         src/Constants.h

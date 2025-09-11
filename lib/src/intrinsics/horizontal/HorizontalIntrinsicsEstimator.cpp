@@ -13,7 +13,6 @@
 #include "helper/PeriodicFitter.h"
 #include "intrinsics/horizontal/HorizontalIntrinsicsStructs.h"
 #include "math/Stats.h"
-#include "plotty/matplotlibcpp.hpp"
 #include "utils/logger/Logger.h"
 #include "utils/Timer.h"
 #include "utils/Utils.h"

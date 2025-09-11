@@ -1,8 +1,5 @@
 #pragma once
-#include <cstdint>
 #include <Eigen/Core>
-#include <type_traits>
-#include <utility>
 
 namespace accurate_ri::Utils {
     template<typename T>
@@ -26,31 +23,6 @@ namespace accurate_ri::Utils {
 
     inline void positiveFmodInplace(Eigen::ArrayXd& x, double y) {
         x = x - y * (x / y).floor();
-    }
-
-    /**
-     * \brief Computes the median of the input array in-place.
-     *
-     * This function rearranges the elements of the input array such that the median
-     * value is placed in its correct position. The input array is modified during
-     * the computation, and its original order is not preserved.
-     *
-     * \tparam T The type of the Eigen array.
-     * \param array The input Eigen array, which will be modified in-place.
-     * \return The median value of the input array.
-     *
-     * \note This function invalidates the input array by modifying its order.
-     */
-    template<typename T>
-    typename T::Scalar medianInPlace(Eigen::ArrayBase<T> &array) {
-        using Scalar = typename T::Scalar;
-        const size_t n = array.size();
-        size_t mid = n / 2;
-
-        std::nth_element(array.begin(), array.begin() + mid, array.begin() + n);
-        Scalar medianValue = array(mid);
-
-        return medianValue;
     }
 
     inline Eigen::ArrayXi eigenMaskToIndices(const Eigen::ArrayX<bool> &mask) {
