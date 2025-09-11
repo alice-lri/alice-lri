@@ -35,15 +35,15 @@ namespace accurate_ri {
             const PointArray &points, const ScanlineLimits &scanlineLimits, FitConvergenceState state
         );
 
-        static Stats::WLSResult fitScanline(
+        static WLSResult fitScanline(
             const PointArray &points, const Eigen::ArrayXi &pointsToFitIndices, const VerticalBounds &errorBounds,
             FitConvergenceState state
         );
 
-        bool verifyConfidenceIntervals(const Stats::WLSResult &fitResult);
+        bool verifyConfidenceIntervals(const WLSResult &fitResult);
 
         static ScanlineLimits computeLimits(
-            const PointArray &points, const VerticalScanlinePool &scanlinePool, const Stats::WLSResult &fitResult,
+            const PointArray &points, const VerticalScanlinePool &scanlinePool, const WLSResult &fitResult,
             const VerticalBounds &errorBounds
         );
 
@@ -52,7 +52,7 @@ namespace accurate_ri {
         );
 
         static ScanlineFitResult makeFitResult(
-            const ScanlineLimits &currentScanlineLimits, const std::optional<Stats::WLSResult> &fitResult,
+            const ScanlineLimits &currentScanlineLimits, const std::optional<WLSResult> &fitResult,
             FitConvergenceState convergenceState, bool validCi
         );
 

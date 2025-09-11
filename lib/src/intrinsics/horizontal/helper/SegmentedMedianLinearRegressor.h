@@ -1,5 +1,7 @@
 # pragma once
 #include <vector>
+
+#include "math/LinearRegressor.h"
 #include "math/Stats.h"
 
 namespace accurate_ri {
@@ -31,7 +33,7 @@ namespace accurate_ri {
             maxSlope(maxSlope),
             interceptMod(interceptMod) {}
 
-        [[nodiscard]] Stats::LRResult fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
+        [[nodiscard]] LRResult fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
 
     private:
         void processSegment(

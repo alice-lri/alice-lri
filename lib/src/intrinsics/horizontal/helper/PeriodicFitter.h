@@ -1,11 +1,12 @@
 #pragma once
+#include "math/LinearRegressor.h"
 #include "math/Stats.h"
 
 
 namespace accurate_ri {
     class PeriodicFitter {
     public:
-        static Stats::LRResult fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, double period, double slopeGuess);
+        static LRResult fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, double period, double slopeGuess);
 
     private:
         struct NewMultiLineResult {
@@ -20,7 +21,7 @@ namespace accurate_ri {
 
         static double computeCircularMeanIntercept(const Eigen::ArrayXd& residuals, double period);
 
-        static Stats::LRResult refineFit(
+        static LRResult refineFit(
             const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, NewMultiLineResult &multiLineResult, double period
         );
     };

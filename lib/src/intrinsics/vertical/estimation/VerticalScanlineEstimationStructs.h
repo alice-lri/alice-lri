@@ -3,6 +3,7 @@
 #include <optional>
 
 #include "intrinsics/vertical/VerticalIntrinsicsStructs.h"
+#include "math/LinearRegressor.h"
 #include "math/Stats.h"
 #include "utils/CommonStructs.h"
 
@@ -24,7 +25,7 @@ namespace accurate_ri {
     };
 
     struct ScanlineFitResult {
-        std::optional<Stats::WLSResult> fit;
+        std::optional<WLSResult> fit;
         std::optional<ScanlineLimits> limits;
         bool success = false;
         bool validCi = false;
@@ -45,25 +46,14 @@ namespace accurate_ri {
             const double upperLineA = angle.ci.upper + asin(offset.ci.upper / maxRange);
             const double upperLineB = angle.ci.upper + asin(offset.ci.upper / minRange);
 
-            // return {
-            //     .lowerLine = {
-            //         .lower = std::min(lowerLineA, lowerLineB),
-            //         .upper = std::max(lowerLineA, lowerLineB)
-            //     },
-            //     .upperLine = {
-            //         .lower = std::min(upperLineA, upperLineB),
-            //         .upper = std::max(upperLineA, upperLineB)
-            //     }
-            // };
-
             return {
                 .lowerLine = {
-                    .lower = lowerLineA,
-                    .upper = lowerLineB
+                    .lower = std::min(lowerLineA, lowerLineB),
+                    .upper = std::max(lowerLineA, lowerLineB)
                 },
                 .upperLine = {
-                    .lower = upperLineA,
-                    .upper = upperLineB
+                    .lower = std::min(upperLineA, upperLineB),
+                    .upper = std::max(upperLineA, upperLineB)
                 }
             };
         }

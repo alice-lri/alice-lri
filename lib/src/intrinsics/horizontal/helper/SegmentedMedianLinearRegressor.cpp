@@ -6,14 +6,14 @@
 #include "utils/Utils.h"
 
 namespace accurate_ri {
-    Stats::LRResult SegmentedMedianLinearRegressor::fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const {
+    LRResult SegmentedMedianLinearRegressor::fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const {
         const Segments segments = segmentAndFit(x, y);
 
         if (segments.count() == 0) {
-            return Stats::LRResult(0,0);
+            return LRResult(0,0);
         }
 
-        return Stats::LRResult(
+        return LRResult(
             Stats::weightedMedian(segments.slopes, segments.weights),
             Stats::weightedMedian(segments.intercepts, segments.weights),
             std::nullopt
@@ -52,7 +52,7 @@ namespace accurate_ri {
         const Eigen::Map<const Eigen::ArrayXd> fitX(x.data() + startIdx, size);
         const Eigen::Map<const Eigen::ArrayXd> fitY(y.data() + startIdx, size);
 
-        const auto lrResult = Stats::linearRegression(fitX, fitY, false);
+        const auto lrResult = LinearRegressor::fit(fitX, fitY, false);
         const double slope = lrResult.slope;
         const double intercept = Utils::positiveFmod(lrResult.intercept, interceptMod);
 

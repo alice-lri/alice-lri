@@ -151,10 +151,10 @@ namespace accurate_ri {
         const SegmentedMedianLinearRegressor segmentedRegressor(
             Constant::INV_RANGES_SEGMENT_THRESHOLD, thetaStep / 4, Constant::MAX_OFFSET, thetaStep
         );
-        const Stats::LRResult lrGuess = segmentedRegressor.fit(invRangesXy, diffToIdealReconstructed);
+        const LRResult lrGuess = segmentedRegressor.fit(invRangesXy, diffToIdealReconstructed);
 
         LOG_DEBUG("Slope guess: ", lrGuess.slope, ", Intercept guess: ", lrGuess.intercept);
-        const Stats::LRResult fitResult = PeriodicFitter::fit(invRangesXy, diffToIdeal, thetaStep, lrGuess.slope);
+        const LRResult fitResult = PeriodicFitter::fit(invRangesXy, diffToIdeal, thetaStep, lrGuess.slope);
 
         return ResolutionOffsetLoss(
             resolution,

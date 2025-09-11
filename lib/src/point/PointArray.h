@@ -5,9 +5,6 @@ namespace accurate_ri {
     struct PointArrayExtraInfo {
         Eigen::ArrayXd range, rangeXy, phi, theta;
         Eigen::ArrayXd invRange, invRangeXy;
-        // TODO precompute phi bounds as well if possible
-        Eigen::ArrayXd thetaUpperBound; // TODO consider renaming to diff to ideal bounds (here and also in the horizontal array)
-        Eigen::ArrayXd rangeXyMinusBound;
         double maxRange = 0, minRange = 0;
         double coordsEps = 0;
     };
@@ -67,13 +64,9 @@ namespace accurate_ri {
         [[nodiscard]] inline double getMaxRange() const { return extraInfo.maxRange; }
         [[nodiscard]] inline double getMinRange() const { return extraInfo.minRange; }
 
-        [[nodiscard]] inline const Eigen::ArrayXd& getThetaUpperBound() const { return extraInfo.thetaUpperBound; }
-        [[nodiscard]] inline const Eigen::ArrayXd& getRangeXyMinusBound() const { return extraInfo.rangeXyMinusBound; }
-
         [[nodiscard]] size_t size() const { return x.size(); }
 
     private:
         void computeExtraInfo();
-        void computeThetasUpperBound() const;
     };
 }

@@ -57,7 +57,7 @@ namespace accurate_ri {
         VerticalBounds currentErrorBounds = errorBounds;
         ScanlineLimits currentScanlineLimits = scanlineLimits;
 
-        std::optional<Stats::WLSResult> fitResult;
+        std::optional<WLSResult> fitResult;
         auto convergenceState = FitConvergenceState::INITIAL;
         bool validCi = false;
 
@@ -109,7 +109,7 @@ namespace accurate_ri {
         return Utils::eigenMaskToIndices(*pointsToFitMask);
     }
 
-    Stats::WLSResult VerticalScanlineEstimator::fitScanline(
+    WLSResult VerticalScanlineEstimator::fitScanline(
         const PointArray &points, const Eigen::ArrayXi &pointsToFitIndices, const VerticalBounds &errorBounds,
         const FitConvergenceState state
     ) {
@@ -120,7 +120,7 @@ namespace accurate_ri {
         const Eigen::ArrayXd &phisFiltered = phis(pointsToFitIndices);
         const Eigen::ArrayXd &boundsFiltered = errorBounds.final(pointsToFitIndices);
 
-        Stats::WLSResult fitResult = Stats::wlsBoundsFit(invRangesFiltered, phisFiltered, boundsFiltered);
+        WLSResult fitResult = LinearRegressor::wlsBoundsFit(invRangesFiltered, phisFiltered, boundsFiltered);
         int32_t pointFitCount = static_cast<int32_t>(pointsToFitIndices.size());
 
         LOG_INFO(
@@ -131,7 +131,7 @@ namespace accurate_ri {
         return fitResult;
     }
 
-    bool VerticalScanlineEstimator::verifyConfidenceIntervals(const Stats::WLSResult &fitResult) {
+    bool VerticalScanlineEstimator::verifyConfidenceIntervals(const WLSResult &fitResult) {
         double offsetCiWidth = fitResult.slopeCi(1) - fitResult.slopeCi(0);
         if (offsetCiWidth > 1e-2) {
             ciTooWideState++;
@@ -148,7 +148,7 @@ namespace accurate_ri {
     }
 
     ScanlineLimits VerticalScanlineEstimator::computeLimits(
-        const PointArray& points, const VerticalScanlinePool &scanlinePool, const Stats::WLSResult &fitResult,
+        const PointArray& points, const VerticalScanlinePool &scanlinePool, const WLSResult &fitResult,
         const VerticalBounds &errorBounds
     ) {
         const VerticalMargin margin = scanlinePool.getHoughMargin();
@@ -174,7 +174,7 @@ namespace accurate_ri {
     }
 
     ScanlineFitResult VerticalScanlineEstimator::makeFitResult(
-        const ScanlineLimits &currentScanlineLimits, const std::optional<Stats::WLSResult> &fitResult,
+        const ScanlineLimits &currentScanlineLimits, const std::optional<WLSResult> &fitResult,
         const FitConvergenceState convergenceState, bool validCi
     ) {
         return {

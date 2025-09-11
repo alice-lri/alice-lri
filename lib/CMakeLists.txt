@@ -121,6 +121,8 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         src/hough/HoughStructs.h
         src/intrinsics/vertical/conflict/ScanlineConflictEvaluator.cpp
         src/intrinsics/vertical/conflict/ScanlineConflictEvaluator.h
+        src/math/LinearRegressor.cpp
+        src/math/LinearRegressor.h
 )
 
 set(_accurate_ri_private_include_dirs

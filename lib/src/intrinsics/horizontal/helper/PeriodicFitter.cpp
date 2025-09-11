@@ -7,7 +7,7 @@
 
 namespace accurate_ri {
 
-    Stats::LRResult PeriodicFitter::fit(
+    LRResult PeriodicFitter::fit(
         const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const double period, const double slopeGuess
     ) {
         NewMultiLineResult multiLineResult;
@@ -51,20 +51,20 @@ namespace accurate_ri {
         return (period * circularMean) / Constant::TWO_PI;
     }
 
-    Stats::LRResult PeriodicFitter::refineFit(
+    LRResult PeriodicFitter::refineFit(
         const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, NewMultiLineResult &multiLineResult, const double period
     ) {
         const int32_t halfSize = static_cast<int32_t>(x.size()) / 2;
         Eigen::ArrayXd shiftedY = y - multiLineResult.linesIdx.cast<double>() * period;
 
-        const Stats::LRResult fitResultFirst = Stats::linearRegression(x.head(halfSize), shiftedY.head(halfSize), true);
-        const Stats::LRResult fitResultLast = Stats::linearRegression(x.tail(halfSize), shiftedY.tail(halfSize), true);
-        const Stats::LRResult fitResultAll = Stats::linearRegression(x, shiftedY, true);
-        const Stats::LRResult& optFit = (fitResultFirst.mse < fitResultLast.mse) ? fitResultFirst : fitResultLast;
+        const LRResult fitResultFirst = LinearRegressor::fit(x.head(halfSize), shiftedY.head(halfSize), true);
+        const LRResult fitResultLast = LinearRegressor::fit(x.tail(halfSize), shiftedY.tail(halfSize), true);
+        const LRResult fitResultAll = LinearRegressor::fit(x, shiftedY, true);
+        const LRResult& optFit = (fitResultFirst.mse < fitResultLast.mse) ? fitResultFirst : fitResultLast;
 
         computePeriodicResiduals(x, y, period, optFit.slope, optFit.intercept, multiLineResult);
         shiftedY = y - multiLineResult.linesIdx.cast<double>() * period;
-        const Stats::LRResult fitResultFinal = Stats::linearRegression(x, shiftedY, true);
+        const LRResult fitResultFinal = LinearRegressor::fit(x, shiftedY, true);
 
         return fitResultAll.mse < fitResultFinal.mse ? fitResultAll : fitResultFinal;
     }

@@ -20,26 +20,5 @@ namespace accurate_ri {
         extraInfo.invRangeXy = extraInfo.rangeXy.array().inverse();
         extraInfo.maxRange = extraInfo.range.maxCoeff();
         extraInfo.minRange = extraInfo.range.minCoeff();
-
-        extraInfo.rangeXyMinusBound = extraInfo.rangeXy - std::sqrt(2) * extraInfo.coordsEps;
-
-        computeThetasUpperBound();
-    }
-
-    void PointArray::computeThetasUpperBound() const {
-        const auto xAbs = x.abs();
-        const auto yAbs = y.abs();
-        const auto term1 = (yAbs + extraInfo.coordsEps).binaryExpr(
-            xAbs - extraInfo.coordsEps, [](const double y, const double x) {
-                return std::atan2(y, x);
-            }
-        );
-        const auto term2 = yAbs.binaryExpr(
-            xAbs, [](const double y, const double x) {
-                return std::atan2(y, x);
-            }
-        );
-
-        extraInfo.thetaUpperBound = term1 - term2;
     }
 }

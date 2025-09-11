@@ -3,6 +3,8 @@
 #include <Eigen/Core>
 #include <vector>
 
+#include "math/LinearRegressor.h"
+
 namespace accurate_ri {
 
 class StatsTest : public ::testing::Test {
@@ -25,7 +27,7 @@ protected:
 
 TEST_F(StatsTest, SimpleLinearRegression) {
     // Test simple linear regression on perfect linear data
-    Stats::LRResult result = Stats::linearRegression(x, y);
+    LRResult result = LinearRegressor::fit(x, y);
     
     // For y = 2x, slope should be 2 and intercept should be 0
     EXPECT_NEAR(result.slope, 2.0, 1e-10);
@@ -34,7 +36,7 @@ TEST_F(StatsTest, SimpleLinearRegression) {
 
 TEST_F(StatsTest, WeightedLinearRegression) {
     // Test weighted linear regression
-    Stats::WLSResult result = Stats::wlsBoundsFit(x, y, weights);
+    WLSResult result = LinearRegressor::wlsBoundsFit(x, y, weights);
     
     // For y = 2x with uniform weights, should get the same results as simple LR
     EXPECT_NEAR(result.slope, 2.0, 1e-10);
@@ -51,7 +53,7 @@ TEST_F(StatsTest, WeightedBoundsRegression) {
     Eigen::ArrayXd bounds = Eigen::ArrayXd::Constant(5, 0.1); // 0.1 error bound for each point
     
     // Test weighted bounds regression
-    auto result = Stats::wlsBoundsFit(x, y, bounds);
+    auto result = LinearRegressor::wlsBoundsFit(x, y, bounds);
     
     // For y = 2x with small bounds, should get approximately the same results
     EXPECT_NEAR(result.slope, 2.0, 0.1);
