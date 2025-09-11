@@ -87,7 +87,7 @@ namespace accurate_ri {
         VerticalScanlineHoughCandidate result;
 
         if (iteration > Constant::VERTICAL_MAX_ITERATIONS) {
-            LOG_WARN("Warning: Maximum iterations reached");
+            LOG_WARN("Warning: Maximum iterations reached. Incomplete estimation!");
             result.endReason = EndReason::MAX_ITERATIONS;
             return result;
         }
@@ -95,7 +95,7 @@ namespace accurate_ri {
         result.estimation = scanlinePool.performHoughEstimation();
 
         if (!result.estimation) {
-            LOG_WARN("Warning: No more peaks found");
+            LOG_WARN("Warning: No more peaks found in Hough. Incomplete estimation!");
             result.endReason = EndReason::NO_MORE_PEAKS;
             return result;
         }
@@ -139,7 +139,7 @@ namespace accurate_ri {
         int64_t unassignedPoints = scanlinePool.getUnassignedPoints();
 
         if (scanlinePool.anyUnassigned()) {
-            LOG_WARN("Warning: Found ", unassignedPoints, " spurious points");
+            LOG_WARN("Warning: Found ", unassignedPoints, " spurious points. Incomplete estimation!");
         }
 
         VerticalScanlinesAssignations scanlinesAssignations = scanlinePool.extractFullSortedScanlineAssignations();

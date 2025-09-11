@@ -40,7 +40,7 @@ namespace accurate_ri {
             std::ostringstream logStream;
 
             using ::operator<<;
-            logStream << getTimestamp() << " [" << getLogLevelString(level) << "] ";
+            logStream << getTimestamp() << " [" << getLogLevelString(level) << "] ALICE-LRI: ";
             (logStream << ... << std::forward<Args>(args));
             logStream << " (" << file << ":" << line << ")" << std::endl;
 

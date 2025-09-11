@@ -15,11 +15,11 @@ namespace accurate_ri {
         AliceArray<Scanline> scanlines;
 
     public:
-        explicit Intrinsics(const int32_t scanlineCount): scanlines(scanlineCount) { }
+        explicit Intrinsics(const int32_t scanlineCount) noexcept : scanlines(scanlineCount) { }
 
-        Scanline &scanlineAt(const int32_t idx) { return scanlines[idx]; }
-        [[nodiscard]] const Scanline &scanlineAt(const int32_t idx) const { return scanlines[idx]; }
-        [[nodiscard]] uint64_t scanlinesCount() const { return scanlines.size(); }
+        Scanline &scanlineAt(const int32_t idx) noexcept { return scanlines[idx]; }
+        [[nodiscard]] const Scanline &scanlineAt(const int32_t idx) const noexcept { return scanlines[idx]; }
+        [[nodiscard]] uint64_t scanlinesCount() const noexcept { return scanlines.size(); }
     };
 
     struct ACCURATE_RI_API RangeImage {
@@ -29,18 +29,18 @@ namespace accurate_ri {
         uint32_t h;
 
     public:
-        RangeImage(): w(0), h(0) { }
-        RangeImage(const uint32_t w, const uint32_t h): pixels(w * h), w(w), h(h) {}
-        RangeImage(const uint32_t w, const uint32_t h, const double initialValue):
+        RangeImage() noexcept : w(0), h(0) { }
+        RangeImage(const uint32_t w, const uint32_t h) noexcept : pixels(w * h), w(w), h(h) {}
+        RangeImage(const uint32_t w, const uint32_t h, const double initialValue) noexcept :
             pixels(w * h, initialValue), w(w), h(h) {}
 
-        double& operator()(const uint32_t row, const uint32_t col) { return pixels[row * w + col]; }
-        const double& operator()(const uint32_t row, const uint32_t col) const { return pixels[row * w + col]; }
+        double& operator()(const uint32_t row, const uint32_t col) noexcept { return pixels[row * w + col]; }
+        const double& operator()(const uint32_t row, const uint32_t col) const noexcept { return pixels[row * w + col]; }
 
-        [[nodiscard]] uint32_t width() const { return w; }
-        [[nodiscard]] uint32_t height() const { return h; }
-        [[nodiscard]] const double* data() const { return pixels.data(); }
-        double* data() { return pixels.data(); }
+        [[nodiscard]] uint32_t width() const noexcept { return w; }
+        [[nodiscard]] uint32_t height() const noexcept { return h; }
+        [[nodiscard]] const double* data() const noexcept { return pixels.data(); }
+        double* data() noexcept { return pixels.data(); }
     };
 
     namespace PointCloud {
@@ -61,12 +61,12 @@ namespace accurate_ri {
         double lower;
         double upper;
 
-        [[nodiscard]] double diff() const {
+        [[nodiscard]] double diff() const noexcept {
             return upper - lower;
         }
 
-        [[nodiscard]] bool anyContained(const Interval &other) const;
-        void clampBoth(double minValue, double maxValue);
+        [[nodiscard]] bool anyContained(const Interval &other) const noexcept;
+        void clampBoth(double minValue, double maxValue) noexcept;
     };
 
     struct ACCURATE_RI_API ValueConfInterval {
@@ -105,15 +105,15 @@ namespace accurate_ri {
         int32_t pointsCount = 0;
         EndReason endReason = EndReason::MAX_ITERATIONS;
 
-        explicit DebugIntrinsics(const int32_t scanlineCount) {
+        explicit DebugIntrinsics(const int32_t scanlineCount) noexcept {
             scanlines.resize(scanlineCount);
         }
 
         DebugIntrinsics(
             const int32_t scanlineCount, const int32_t verticalIterations, const int32_t unassignedPoints,
             const int32_t pointsCount, const EndReason endReason
-        ) : verticalIterations(verticalIterations), unassignedPoints(unassignedPoints), pointsCount(pointsCount),
-            endReason(endReason) {
+        ) noexcept : verticalIterations(verticalIterations), unassignedPoints(unassignedPoints),
+            pointsCount(pointsCount),endReason(endReason) {
             scanlines.resize(scanlineCount);
         }
     };

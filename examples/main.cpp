@@ -12,12 +12,7 @@ std::optional<int> secureStoi(const std::string &str) {
     }
 }
 
-// TODO perf, identify memory  bottlenecks. Reuse Eigen buffers as much as possible, especially in loops
-// TODO review each time I add to a collection whether I am copying or not. Especially maps/sets, use emplace
-// TODO maybe every function that does not return an eigen pre-allocated buffer should take a parameter out instead
 // TODO handle receiving points like all zeros and stuff like that
-// TODO decide what to do with logs and stuff for the library version
-// TODO maybe reserve log warn and error for user relevant logs
 int main(int argc, char **argv) {
     std::string path;
     std::optional<int> accurateDigits = std::nullopt;

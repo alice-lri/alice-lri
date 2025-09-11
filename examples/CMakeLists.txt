@@ -35,15 +35,3 @@ target_include_directories(examples_tran_ri PRIVATE ${Eigen3_INCLUDE_DIRS})
 target_include_directories(measure_times PRIVATE ${Eigen3_INCLUDE_DIRS})
 target_include_directories(eigen_loop_vs_select PRIVATE ${Eigen3_INCLUDE_DIRS})
 target_include_directories(eigen_lazy_vs_immediate PRIVATE ${Eigen3_INCLUDE_DIRS})
-
-
-if(ENABLE_STRICT_WARNINGS) #TODO make this trigger in release mode
-    message(STATUS "Strict warnings enabled")
-    target_compile_options(examples PRIVATE
-            -Wall -Wextra -Wpedantic  # General best practices
-            -Wshadow -Wnon-virtual-dtor -Wold-style-cast -Wcast-align
-            -Woverloaded-virtual -Wconversion -Wsign-conversion
-            -Wpessimizing-move -Wredundant-move -Werror=unused-value
-            -Werror=unused-variable -Werror=unused-parameter
-    )
-endif()

@@ -52,7 +52,7 @@ namespace accurate_ri::VerticalLogging {
     inline void logIntersectionProblem(
         const ScanlineIntersectionInfo& intersection, const VerticalScanlineCandidate& candidate
     ) {
-        LOG_WARN("Possible problem detected");
+        LOG_INFO("Possible problem detected");
         LOG_INFO(
             "Intersects other scanline: ", intersection.flags.empiricalIntersection? "True": "False",
             ", Intersects theoretically: ", intersection.flags.theoreticalIntersection,

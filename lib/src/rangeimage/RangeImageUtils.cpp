@@ -153,7 +153,7 @@ namespace accurate_ri::RangeImageUtils {
 
             if (rangeImage(row, col) != 0) {
                 LOG_WARN("Overwriting pixel at (", row, ", ", col, ") with range ", ranges(pointIdx),
-                         " (previously: ", rangeImage(row, col), ")");
+                         " (previously: ", rangeImage(row, col), "). Losslessness not achieved!");
             }
 
             rangeImage(row, col) = ranges(pointIdx);

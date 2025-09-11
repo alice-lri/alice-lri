@@ -18,7 +18,7 @@ namespace accurate_ri {
         return IntrinsicsEstimator::estimate(points);
     }
 
-    Intrinsics train(const PointCloud::Float &points) {
+    Intrinsics train(const PointCloud::Float &points) noexcept {
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
         const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(points.x.data(), size).cast<double>();
@@ -31,7 +31,7 @@ namespace accurate_ri {
         return result;
     }
 
-    Intrinsics train(const PointCloud::Double &points) {
+    Intrinsics train(const PointCloud::Double &points) noexcept {
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
         const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
@@ -44,7 +44,7 @@ namespace accurate_ri {
         return result;
     }
 
-    DebugIntrinsics debugTrain(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) {
+    DebugIntrinsics debugTrain(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) noexcept {
         PROFILE_SCOPE("TOTAL");
 
         if (xArray.size() == 0 || yArray.size() == 0 || zArray.size() == 0) {
@@ -55,7 +55,7 @@ namespace accurate_ri {
         return IntrinsicsEstimator::debugEstimate(points);
     }
 
-    DebugIntrinsics debugTrain(const PointCloud::Float &points) {
+    DebugIntrinsics debugTrain(const PointCloud::Float &points) noexcept {
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
         const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(points.x.data(), size).cast<double>();
@@ -68,7 +68,7 @@ namespace accurate_ri {
         return result;
     }
 
-    DebugIntrinsics debugTrain(const PointCloud::Double &points) {
+    DebugIntrinsics debugTrain(const PointCloud::Double &points) noexcept {
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
         const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
@@ -81,35 +81,35 @@ namespace accurate_ri {
         return result;
     }
 
-    RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) {
+    RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) noexcept {
         return RangeImageUtils::projectToRangeImage(intrinsics, points);
     }
 
-    RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points) {
+    RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points) noexcept {
         return RangeImageUtils::projectToRangeImage(intrinsics, points);
     }
 
-    PointCloud::Double unProjectToPointCloud(const Intrinsics &intrinsics, const RangeImage &rangeImage) {
+    PointCloud::Double unProjectToPointCloud(const Intrinsics &intrinsics, const RangeImage &rangeImage) noexcept {
         return RangeImageUtils::unProjectToPointCloud(intrinsics, rangeImage);
     }
 
-    Intrinsics intrinsicsFromJsonStr(const AliceString &json) {
+    Intrinsics intrinsicsFromJsonStr(const AliceString &json) noexcept {
         return intrinsicsFromJson(json);
     }
 
-    AliceString intrinsicsToJsonStr(const Intrinsics &result, const int32_t indent) {
+    AliceString intrinsicsToJsonStr(const Intrinsics &result, const int32_t indent) noexcept {
         const std::string json = intrinsicsToJson(result).dump(indent);
         return AliceString(json.c_str());
     }
 
-    Intrinsics intrinsicsFromJsonFile(const char *path) {
+    Intrinsics intrinsicsFromJsonFile(const char *path) noexcept {
         std::ifstream inFile(path);
         nlohmann::json json;
         inFile >> json;
         return intrinsicsFromJson(json);
     }
 
-    void intrinsicsToJsonFile(const Intrinsics &result, const char *outputPath, const int32_t indent) {
+    void intrinsicsToJsonFile(const Intrinsics &result, const char *outputPath, const int32_t indent) noexcept {
         const nlohmann::json json = intrinsicsToJson(result);
         std::ofstream outFile(outputPath);
         outFile << json.dump(indent);

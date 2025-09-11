@@ -137,7 +137,7 @@ namespace accurate_ri {
             ciTooWideState++;
 
             if (ciTooWideState >= 2) {
-                LOG_WARN("CI too wide: ", offsetCiWidth);
+                LOG_INFO("CI too wide: ", offsetCiWidth);
                 return false;
             }
         } else {

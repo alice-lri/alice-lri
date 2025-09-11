@@ -4,11 +4,11 @@
 #include "utils/Utils.h"
 
 namespace accurate_ri {
-    bool Interval::anyContained(const Interval &other) const {
+    bool Interval::anyContained(const Interval &other) const noexcept {
         return Utils::compare(lower, other.lower) * Utils::compare(upper, other.upper) != 1;
     }
 
-    void Interval::clampBoth(const double minValue, const double maxValue) {
+    void Interval::clampBoth(const double minValue, const double maxValue) noexcept {
         lower = std::clamp(lower, minValue, maxValue);
         upper = std::clamp(upper, minValue, maxValue);
     }

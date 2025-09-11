@@ -61,7 +61,7 @@ namespace accurate_ri {
         LOG_DEBUG("Processing horizontal scanline: ", scanlineIdx);
 
         if (scanlineArray.getSize(scanlineIdx) < Constant::HORIZONTAL_MIN_POINTS_PER_SCANLINE) {
-            LOG_WARN("Warning: Scanline ", scanlineIdx, " has less than the minimum points");
+            LOG_INFO("Warning: Scanline ", scanlineIdx, " has less than the minimum points");
 
             if constexpr (BuildOptions::USE_HORIZONTAL_HEURISTICS) {
                 return std::nullopt;
@@ -75,7 +75,7 @@ namespace accurate_ri {
         const auto optimizeResult = findOptimalHorizontalParameters(scanlineArray, scanlineIdx);
 
         if (!optimizeResult) {
-            LOG_WARN("Horizontal optimization failed for scanline ", scanlineIdx);
+            LOG_INFO("Horizontal optimization failed for scanline ", scanlineIdx);
             return std::nullopt;
         }
 

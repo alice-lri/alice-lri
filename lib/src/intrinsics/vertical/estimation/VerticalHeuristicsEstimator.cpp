@@ -10,7 +10,7 @@ namespace accurate_ri {
     std::optional<VerticalScanlineEstimation> VerticalHeuristicsEstimator::estimate(
         const PointArray &points, const VerticalScanlinePool &scanlinePool, const ScanlineLimits &scanlineLimits
     ) {
-        LOG_WARN("Heuristic fitting");
+        LOG_INFO("Heuristic fitting");
         const HeuristicScanline scanline = computeHeuristicScanline(points, scanlinePool, scanlineLimits);
         const VerticalMargin margin = computeHeuristicMargin(scanlinePool, scanline);
         const VerticalBounds bounds = VerticalScanlineLimits::computeErrorBounds(points, scanline.offset.value);
