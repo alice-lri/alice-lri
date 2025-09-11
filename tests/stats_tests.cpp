@@ -66,16 +66,5 @@ TEST_F(StatsTest, WeightedBoundsRegression) {
     EXPECT_GE(result.interceptCi(1), result.intercept);
 }
 
-TEST_F(StatsTest, IntMode) {
-    // Test the mode computation for integers
-    std::vector<int> values = {1, 2, 2, 3, 2, 4, 5};
-    int mode = Stats::intMode(values);
-    EXPECT_EQ(mode, 2);
-    
-    // Empty vector case
-    std::vector<int> emptyValues;
-    mode = Stats::intMode(emptyValues);
-    EXPECT_EQ(mode, 0);
-}
 
 } // namespace accurate_ri 

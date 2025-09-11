@@ -25,9 +25,8 @@ namespace accurate_ri {
             : slope(slope), intercept(intercept), mse(mse) {}
     };
 
-    class LinearRegressor {
-    public:
-        static LRResult fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, bool computeMse = false);
-        static WLSResult wlsBoundsFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &bounds);
+    namespace  LinearRegressor {
+        LRResult fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, bool computeMse = false);
+        WLSResult wlsBoundsFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &bounds);
     };
 } // accurate_ri
