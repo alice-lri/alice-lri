@@ -45,9 +45,9 @@ namespace accurate_ri::RangeImageUtils {
         PROFILE_SCOPE("RangeImageUtils::projectToRangeImage");
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
-        const Eigen::ArrayXd x = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
-        const Eigen::ArrayXd y = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
-        const Eigen::ArrayXd z = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
+        const auto x = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
+        const auto y = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
+        const auto z = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
 
         const Eigen::ArrayXd rangesXySquared = x.square() + y.square();
         const Eigen::ArrayXd ranges = (rangesXySquared + z.square()).sqrt();
