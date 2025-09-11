@@ -5,7 +5,6 @@
 #include "intrinsics/vertical/VerticalIntrinsicsStructs.h"
 #include "math/LinearRegressor.h"
 #include "math/Stats.h"
-#include "utils/CommonStructs.h"
 
 namespace accurate_ri {
 

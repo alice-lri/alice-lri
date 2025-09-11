@@ -6,6 +6,8 @@
 #include <vector>
 #include <Eigen/Core>
 
+#include "accurate_ri/public_structs.hpp"
+
 template<typename T>
 std::ostream &operator<<(std::ostream &os, const std::unordered_set<T> &set) {
     os << std::fixed << std::setprecision(5) << "{";
@@ -54,5 +56,10 @@ std::ostream &operator<<(std::ostream &os, const std::vector<T> &vec) {
     }
 
     os << "]";
+    return os;
+}
+
+inline std::ostream &operator<<(std::ostream &os, const accurate_ri::Interval &interval) {
+    os << std::fixed << std::setprecision(5) << "[" << interval.lower << ", " << interval.upper << "]";
     return os;
 }

@@ -2,9 +2,8 @@
 #include <optional>
 #include <vector>
 #include <Eigen/Core>
-
+#include "accurate_ri/public_structs.hpp"
 #include "hough/HoughStructs.h"
-#include "utils/CommonStructs.h"
 
 namespace accurate_ri {
     struct VerticalScanline {
