@@ -1,11 +1,6 @@
 #pragma once
 #include <cstdint>
-
-#if defined(_MSC_VER)
-  #define ACCURATE_RI_API __declspec(dllexport /* or dllimport */)
-#else
-  #define ACCURATE_RI_API __attribute__((visibility("default")))
-#endif
+#include "Api.h"
 
 namespace accurate_ri {
     template<class T>
@@ -15,13 +10,13 @@ namespace accurate_ri {
         Impl* impl = nullptr;
 
     public:
-        AliceArray();
-        explicit AliceArray(uint64_t n);
-        AliceArray(uint64_t n, const T &initialValue);
-        AliceArray(const T* data, uint64_t n);
+        AliceArray() noexcept;
+        explicit AliceArray(uint64_t n) noexcept;
+        AliceArray(uint64_t n, const T &initialValue) noexcept;
+        AliceArray(const T* data, uint64_t n) noexcept;
 
-        AliceArray(const AliceArray &);
-        AliceArray &operator=(const AliceArray &);
+        AliceArray(const AliceArray &) noexcept;
+        AliceArray &operator=(const AliceArray &) noexcept;
         AliceArray(AliceArray &&) noexcept;
         AliceArray &operator=(AliceArray &&) noexcept;
         ~AliceArray() noexcept;
@@ -36,11 +31,11 @@ namespace accurate_ri {
         const T *begin() const noexcept { return data(); }
         const T *end() const noexcept { return data() + size(); }
 
-        void push_back(const T &value);
-        void emplace_back(const T &value);
-        void resize(uint64_t n);
-        void reserve(uint64_t n);
-        void shrink_to_fit();
-        void clear();
+        void push_back(const T &value) noexcept;
+        void emplace_back(const T &value) noexcept;
+        void resize(uint64_t n) noexcept;
+        void reserve(uint64_t n) noexcept;
+        void shrink_to_fit() noexcept;
+        void clear() noexcept;
     };
 }

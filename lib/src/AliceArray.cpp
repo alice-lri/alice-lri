@@ -10,28 +10,28 @@ namespace accurate_ri {
     };
 
     template<class T>
-    AliceArray<T>::AliceArray() : impl(new Impl) {}
+    AliceArray<T>::AliceArray() noexcept : impl(new Impl) {}
 
     template<class T>
-    AliceArray<T>::AliceArray(uint64_t n) : impl(new Impl) {
+    AliceArray<T>::AliceArray(uint64_t n) noexcept : impl(new Impl) {
         impl->v.resize(n);
     }
 
     template<class T>
-    AliceArray<T>::AliceArray(uint64_t n, const T &initialValue) : impl(new Impl) {
+    AliceArray<T>::AliceArray(uint64_t n, const T &initialValue) noexcept : impl(new Impl) {
         impl->v.resize(n, initialValue);
     }
 
     template<class T>
-    AliceArray<T>::AliceArray(const T* data, uint64_t n) : impl(new Impl) {
+    AliceArray<T>::AliceArray(const T* data, uint64_t n) noexcept : impl(new Impl) {
         impl->v.assign(data, data + n);
     }
 
     template<class T>
-    AliceArray<T>::AliceArray(const AliceArray &o) : impl(new Impl(*o.impl)) {}
+    AliceArray<T>::AliceArray(const AliceArray &o) noexcept: impl(new Impl(*o.impl)) {}
 
     template<class T>
-    AliceArray<T> &AliceArray<T>::operator=(const AliceArray &o) {
+    AliceArray<T> &AliceArray<T>::operator=(const AliceArray &o) noexcept {
         if (this != &o) {
             AliceArray tmp(o);
             std::swap(impl, tmp.impl);
@@ -65,32 +65,32 @@ namespace accurate_ri {
     }
 
     template<class T>
-    void AliceArray<T>::resize(uint64_t n) {
+    void AliceArray<T>::resize(uint64_t n) noexcept {
         impl->v.resize(n);
     }
 
     template<class T>
-    void AliceArray<T>::push_back(const T &value) {
+    void AliceArray<T>::push_back(const T &value) noexcept {
         impl->v.push_back(value);
     }
 
     template<class T>
-    void AliceArray<T>::emplace_back(const T &value) {
+    void AliceArray<T>::emplace_back(const T &value) noexcept {
         impl->v.emplace_back(value);
     }
 
     template<class T>
-    void AliceArray<T>::reserve(uint64_t n) {
+    void AliceArray<T>::reserve(uint64_t n) noexcept {
         impl->v.reserve(n);
     }
 
     template<class T>
-    void AliceArray<T>::shrink_to_fit() {
+    void AliceArray<T>::shrink_to_fit() noexcept {
         impl->v.shrink_to_fit();
     }
 
     template<class T>
-    void AliceArray<T>::clear() {
+    void AliceArray<T>::clear() noexcept {
         impl->v.clear();
     }
 

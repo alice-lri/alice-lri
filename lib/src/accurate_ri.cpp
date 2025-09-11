@@ -81,19 +81,6 @@ namespace accurate_ri {
         return result;
     }
 
-    Intrinsics readFromJson(const char *path) {
-        std::ifstream inFile(path);
-        nlohmann::json json;
-        inFile >> json;
-        return intrinsicsFromJson(json);
-    }
-
-    void writeToJson(const Intrinsics &result, const char *outputPath) {
-        nlohmann::json json = intrinsicsToJson(result);
-        std::ofstream outFile(outputPath);
-        outFile << json.dump(4);
-    }
-
     RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) {
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
@@ -116,5 +103,27 @@ namespace accurate_ri {
 
     PointCloud::Double unProjectToPointCloud(const Intrinsics &intrinsics, const RangeImage &rangeImage) {
         return RangeImageUtils::unProjectRangeImage(intrinsics, rangeImage);
+    }
+
+    Intrinsics intrinsicsFromJsonStr(const AliceString &json) {
+        return intrinsicsFromJson(json);
+    }
+
+    AliceString intrinsicsToJsonStr(const Intrinsics &result) {
+        const std::string json = intrinsicsToJson(result);
+        return AliceString(json.c_str());
+    }
+
+    Intrinsics intrinsicsFromJsonFile(const char *path) {
+        std::ifstream inFile(path);
+        nlohmann::json json;
+        inFile >> json;
+        return intrinsicsFromJson(json);
+    }
+
+    void intrinsicsToJsonFile(const Intrinsics &result, const char *outputPath) {
+        const nlohmann::json json = intrinsicsToJson(result);
+        std::ofstream outFile(outputPath);
+        outFile << json.dump(4);
     }
 }
