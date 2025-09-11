@@ -1,4 +1,5 @@
 #pragma once
+#include <optional>
 #include <vector>
 #include <Eigen/Core>
 
@@ -6,7 +7,6 @@
 #include "utils/CommonStructs.h"
 
 namespace accurate_ri {
-
     struct VerticalScanline {
         uint32_t id;
         uint64_t pointsCount;
@@ -40,6 +40,12 @@ namespace accurate_ri {
     struct ScanlineLimits {
         Eigen::ArrayXi indices;
         Eigen::ArrayX<bool> mask;
+    };
+
+    struct VerticalScanlineHoughCandidate {
+        std::optional<HoughScanlineEstimation> estimation = std::nullopt;
+        std::optional<EndReason> endReason = std::nullopt;
+        bool available = false;
     };
 
     struct VerticalScanlineCandidate {

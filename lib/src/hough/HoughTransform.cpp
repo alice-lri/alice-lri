@@ -92,7 +92,7 @@ namespace accurate_ri {
         }
     }
 
-    std::optional<HoughCell> HoughTransform::findMaximum(const std::optional<double> averageX) {
+    std::optional<HoughCell> HoughTransform::findMaximum(const std::optional<double> averageX) const {
         PROFILE_SCOPE("HoughTransform::findMaximum");
         std::vector<std::pair<size_t, size_t> > maxIndices;
         int64_t maxVotes = 0;
@@ -130,7 +130,6 @@ namespace accurate_ri {
             }
         }
 
-
         return indicesToCell(closestPair);
     }
 
@@ -157,7 +156,7 @@ namespace accurate_ri {
         }
     }
 
-    HoughCell HoughTransform::indicesToCell(const std::pair<int64_t, int64_t> &indices) {
+    HoughCell HoughTransform::indicesToCell(const std::pair<int64_t, int64_t> &indices) const {
         return {
             static_cast<uint64_t>(indices.first),
             static_cast<uint64_t>(indices.second),

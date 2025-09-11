@@ -50,7 +50,7 @@ namespace accurate_ri {
          * @param averageX Optional average x value to find the closest maximum.
          * @return Optional pair of coordinates (x, y) of the maximum value.
          */
-        std::optional<HoughCell> findMaximum(std::optional<double> averageX);
+        std::optional<HoughCell> findMaximum(std::optional<double> averageX) const;
 
         /**
          * @brief Gets the x value given an index.
@@ -138,6 +138,6 @@ namespace accurate_ri {
             uint64_t pointIndex, int64_t x, int32_t y, int32_t previousY, HoughOperation operation, HoughMode mode
         );
 
-        HoughCell indicesToCell(const std::pair<int64_t, int64_t> &indices);
+        HoughCell indicesToCell(const std::pair<int64_t, int64_t> &indices) const;
     };
 } // accurate_ri

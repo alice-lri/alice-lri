@@ -13,41 +13,44 @@
 #include "intrinsics/vertical/estimation/VerticalScanlineLimits.h"
 
 namespace accurate_ri {
-    void VerticalIntrinsicsEstimator::init(const PointArray &points) {
-        double offsetMax = std::min(points.getRanges().minCoeff(), Constant::MAX_OFFSET) - Constant::OFFSET_STEP;
-        double offsetMin = -offsetMax;
+    VerticalScanlinePool VerticalIntrinsicsEstimator::init(const PointArray &points) {
+        const double offsetMax = std::min(points.getRanges().minCoeff(), Constant::MAX_OFFSET) - Constant::OFFSET_STEP;
+        const double offsetMin = -offsetMax;
 
-        double angleMax = M_PI / 2 - Constant::ANGLE_STEP;
-        double angleMin = -angleMax;
+        constexpr double angleMax = M_PI / 2 - Constant::ANGLE_STEP;
+        constexpr double angleMin = -angleMax;
 
-        scanlinePool = std::make_unique<VerticalScanlinePool>(
+        VerticalScanlinePool scanlinePool(
             offsetMin, offsetMax, Constant::OFFSET_STEP, angleMin, angleMax, Constant::ANGLE_STEP
         );
 
-        VerticalLogging::printHeaderDebugInfo(points, *scanlinePool);
-        scanlinePool->performPrecomputations(points);
+        VerticalLogging::printHeaderDebugInfo(points, scanlinePool);
+        scanlinePool.performPrecomputations(points);
+
+        return scanlinePool;
     }
 
     // TODO perhaps further split this function, perhaps when we construct the result iteratively
     VerticalIntrinsicsEstimation VerticalIntrinsicsEstimator::estimate(const PointArray &points) {
-        init(points);
+        VerticalScanlinePool scanlinePool = init(points);
+        ScanlineConflictSolver conflictSolver;
 
         int64_t iteration = -1;
         uint32_t currentScanlineId = 0;
         EndReason endReason = EndReason::ALL_ASSIGNED;
 
-        while (scanlinePool->anyUnassigned()) {
+        while (scanlinePool.anyUnassigned()) {
             iteration++;
 
-            VerticalScanlineHoughCandidate houghCandidate = findCandidate(iteration);
+            VerticalScanlineHoughCandidate houghCandidate = findCandidate(scanlinePool, iteration);
             if (!houghCandidate.available) {
                 endReason = *houghCandidate.endReason;
                 break;
             }
 
-            const auto estimation = estimateScanline(points, *houghCandidate.estimation);
+            const auto estimation = estimateScanline(points, scanlinePool, *houghCandidate.estimation);
             if (!estimation) {
-                scanlinePool->invalidateByHash(houghCandidate.estimation->cell.hash);
+                scanlinePool.invalidateByHash(houghCandidate.estimation->cell.hash);
                 continue;
             }
 
@@ -59,28 +62,30 @@ namespace accurate_ri {
 
             bool keepScanline;
             if constexpr (BuildOptions::USE_SCANLINE_CONFLICT_SOLVER) {
-                keepScanline = conflictSolver.performScanlineConflictResolution(*scanlinePool, points, candidate);
+                keepScanline = conflictSolver.performScanlineConflictResolution(scanlinePool, points, candidate);
             } else {
-                keepScanline = ScanlineConflictSolver::simpleShouldKeep(*scanlinePool, candidate);
+                keepScanline = ScanlineConflictSolver::simpleShouldKeep(scanlinePool, candidate);
             }
 
             if (!keepScanline) {
                 continue;
             }
 
-            scanlinePool->acceptCandidate(points, candidate);
+            scanlinePool.acceptCandidate(points, candidate);
             VerticalLogging::logScanlineAssignation(candidate.scanline);
-            LOG_INFO("Number of unassigned points: ", scanlinePool->getUnassignedPoints());
+            LOG_INFO("Number of unassigned points: ", scanlinePool.getUnassignedPoints());
             LOG_INFO("");
 
             currentScanlineId++;
         }
 
-        const VerticalIntrinsicsEstimation result = extractResult(iteration, points, endReason);
+        const VerticalIntrinsicsEstimation result = extractResult(iteration, points, scanlinePool, endReason);
         return result;
     }
 
-    VerticalScanlineHoughCandidate VerticalIntrinsicsEstimator::findCandidate(const int64_t iteration) const {
+    VerticalScanlineHoughCandidate VerticalIntrinsicsEstimator::findCandidate(
+        const VerticalScanlinePool &scanlinePool, const int64_t iteration
+    ) {
         VerticalScanlineHoughCandidate result;
 
         if (iteration > Constant::VERTICAL_MAX_ITERATIONS) {
@@ -89,7 +94,7 @@ namespace accurate_ri {
             return result;
         }
 
-        result.estimation = scanlinePool->performHoughEstimation();
+        result.estimation = scanlinePool.performHoughEstimation();
 
         if (!result.estimation) {
             LOG_WARN("Warning: No more peaks found");
@@ -104,8 +109,8 @@ namespace accurate_ri {
     }
 
     std::optional<VerticalScanlineEstimation> VerticalIntrinsicsEstimator::estimateScanline(
-        const PointArray &points, const HoughScanlineEstimation &hough
-    ) const {
+        const PointArray &points, const VerticalScanlinePool& scanlinePool, const HoughScanlineEstimation &hough
+    ) {
         const VerticalMargin &margin = hough.margin;
         const HoughCell &houghMax = hough.cell;
 
@@ -116,7 +121,7 @@ namespace accurate_ri {
 
         VerticalScanlineEstimator scanlineEstimator;
         std::optional<VerticalScanlineEstimation> estimationResultOpt = scanlineEstimator.estimate(
-            points, *scanlinePool, errorBounds, scanlineLimits
+            points, scanlinePool, errorBounds, scanlineLimits
         );
 
         if (!estimationResultOpt) {
@@ -130,15 +135,16 @@ namespace accurate_ri {
     }
 
     VerticalIntrinsicsEstimation VerticalIntrinsicsEstimator::extractResult(
-        const int64_t iteration, const PointArray &points, const EndReason endReason
-    ) const {
-        int64_t unassignedPoints = scanlinePool->getUnassignedPoints();
+        const int64_t iteration, const PointArray &points, VerticalScanlinePool& scanlinePool,
+        const EndReason endReason
+    ) {
+        int64_t unassignedPoints = scanlinePool.getUnassignedPoints();
 
-        if (scanlinePool->anyUnassigned()) {
+        if (scanlinePool.anyUnassigned()) {
             LOG_WARN("Warning: Found ", unassignedPoints, " spurious points");
         }
 
-        VerticalScanlinesAssignations scanlinesAssignations = scanlinePool->extractFullSortedScanlineAssignations();
+        VerticalScanlinesAssignations scanlinesAssignations = scanlinePool.extractFullSortedScanlineAssignations();
 
         LOG_INFO("Number of scanlines: ", scanlinesAssignations.scanlines.size());
         LOG_INFO("Number of unassigned points: ", unassignedPoints);

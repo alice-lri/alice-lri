@@ -4,6 +4,7 @@
 #include "utils/logger/Logger.h"
 
 namespace accurate_ri {
+
     VerticalScanlinePool::VerticalScanlinePool(
         const double offsetMin, const double offsetMax, const double offsetStep, const double angleMin,
         const double angleMax, const double angleStep
@@ -15,7 +16,7 @@ namespace accurate_ri {
         unassignedPoints = static_cast<int64_t>(points.size());
     }
 
-    std::optional<HoughScanlineEstimation> VerticalScanlinePool::performHoughEstimation() {
+    std::optional<HoughScanlineEstimation> VerticalScanlinePool::performHoughEstimation() const {
         double averageOffset = 0;
         for (const VerticalScanline &info: scanlineInfoMap | std::views::values) {
             averageOffset += info.offset.value / static_cast<double>(scanlineInfoMap.size());

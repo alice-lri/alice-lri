@@ -32,7 +32,7 @@ namespace accurate_ri {
         }
 
         void performPrecomputations(const PointArray &points);
-        std::optional<HoughScanlineEstimation> performHoughEstimation();
+        std::optional<HoughScanlineEstimation> performHoughEstimation() const;
 
         void acceptCandidate(const PointArray &points, const VerticalScanlineCandidate &candidate);
         std::optional<VerticalScanline> removeScanline(const PointArray &points, uint32_t scanlineId);

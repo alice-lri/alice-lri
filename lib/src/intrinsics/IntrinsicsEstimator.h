@@ -6,13 +6,10 @@
 
 namespace accurate_ri {
     class IntrinsicsEstimator {
-    private:
-        HorizontalIntrinsicsEstimator horizontalIntrinsicsEstimator;
-        VerticalIntrinsicsEstimator verticalIntrinsicsEstimator;
 
     public:
-        Intrinsics estimate(const PointArray &points);
-        DebugIntrinsics debugEstimate(const PointArray &points);
+        static Intrinsics estimate(const PointArray &points);
+        static DebugIntrinsics debugEstimate(const PointArray &points);
 
     private:
         static Scanline makeScanline(const VerticalScanline &vertical, const HorizontalScanline &horizontal);

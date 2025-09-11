@@ -3,8 +3,8 @@
 namespace accurate_ri {
 
     Intrinsics IntrinsicsEstimator::estimate(const PointArray &points) {
-        const VerticalIntrinsicsEstimation vertical = verticalIntrinsicsEstimator.estimate(points);
-        const HorizontalIntrinsicsEstimation horizontal = horizontalIntrinsicsEstimator.estimate(points, vertical);
+        const VerticalIntrinsicsEstimation vertical = VerticalIntrinsicsEstimator::estimate(points);
+        const HorizontalIntrinsicsEstimation horizontal = HorizontalIntrinsicsEstimator::estimate(points, vertical);
 
         const std::size_t scanlinesCount = vertical.scanlinesAssignations.scanlines.size();
         Intrinsics intrinsics = Intrinsics(scanlinesCount);
@@ -20,8 +20,8 @@ namespace accurate_ri {
     }
 
     DebugIntrinsics IntrinsicsEstimator::debugEstimate(const PointArray &points) {
-        const VerticalIntrinsicsEstimation vertical = verticalIntrinsicsEstimator.estimate(points);
-        const HorizontalIntrinsicsEstimation horizontal = horizontalIntrinsicsEstimator.estimate(points, vertical);
+        const VerticalIntrinsicsEstimation vertical = VerticalIntrinsicsEstimator::estimate(points);
+        const HorizontalIntrinsicsEstimation horizontal = HorizontalIntrinsicsEstimator::estimate(points, vertical);
 
         const std::size_t scanlinesCount = vertical.scanlinesAssignations.scanlines.size();
         DebugIntrinsics intrinsics = DebugIntrinsics(scanlinesCount, vertical.iterations, vertical.unassignedPoints,

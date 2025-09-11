@@ -48,7 +48,7 @@ namespace accurate_ri {
 
         Eigen::ArrayX<bool> mask = (lower <= phi) && (phi <= upper);
         Eigen::ArrayXi indices = Utils::eigenMaskToIndices(mask);
-        
+
         return { std::move(indices), std::move(mask) };
     }
 } // accurate_ri

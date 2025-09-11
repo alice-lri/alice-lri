@@ -1,38 +1,26 @@
 #pragma once
-#include <memory>
 #include "intrinsics/vertical/conflict/ScanlineConflictSolver.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "point/PointArray.h"
 
 namespace accurate_ri {
-    struct VerticalScanlineHoughCandidate {
-        std::optional<HoughScanlineEstimation> estimation = std::nullopt;
-        std::optional<EndReason> endReason = std::nullopt;
-        bool available = false;
-    };
-
     class VerticalIntrinsicsEstimator {
-    private:
-        // TODO maybe avoid this
-        // TODO consider removing these and making it stateless
-        std::unique_ptr<VerticalScanlinePool> scanlinePool = nullptr;
-        ScanlineConflictSolver conflictSolver;
 
     public:
-        VerticalIntrinsicsEstimation estimate(const PointArray &points);
+        static VerticalIntrinsicsEstimation estimate(const PointArray &points);
 
     private:
-        void init(const PointArray &points);
+        static VerticalScanlinePool init(const PointArray &points);
 
-        VerticalScanlineHoughCandidate findCandidate(int64_t iteration) const;
+        static VerticalScanlineHoughCandidate findCandidate(const VerticalScanlinePool &scanlinePool, int64_t iteration);
 
-        std::optional<VerticalScanlineEstimation> estimateScanline(
-            const PointArray &points, const HoughScanlineEstimation &hough
-        ) const;
+        static std::optional<VerticalScanlineEstimation> estimateScanline(
+            const PointArray &points, const VerticalScanlinePool &scanlinePool, const HoughScanlineEstimation &hough
+        );
 
-        VerticalIntrinsicsEstimation extractResult(
-            int64_t iteration, const PointArray &points, EndReason endReason
-        ) const;
+        static VerticalIntrinsicsEstimation extractResult(
+            int64_t iteration, const PointArray &points, VerticalScanlinePool &scanlinePool, EndReason endReason
+        );
 
         static VerticalScanline makeVerticalScanline(
             uint32_t currentScanlineId, const VerticalScanlineHoughCandidate &houghCandidate,

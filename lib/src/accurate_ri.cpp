@@ -15,9 +15,7 @@ namespace accurate_ri {
         }
 
         const PointArray points(xArray, yArray, zArray);
-        IntrinsicsEstimator estimator{};
-
-        return estimator.estimate(points);
+        return IntrinsicsEstimator::estimate(points);
     }
 
     Intrinsics train(const PointCloud::Float &points) {
@@ -54,9 +52,7 @@ namespace accurate_ri {
         }
 
         const PointArray points(xArray, yArray, zArray);
-        IntrinsicsEstimator estimator{};
-
-        return estimator.debugEstimate(points);
+        return IntrinsicsEstimator::debugEstimate(points);
     }
 
     DebugIntrinsics debugTrain(const PointCloud::Float &points) {
