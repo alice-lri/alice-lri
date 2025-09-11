@@ -1,5 +1,4 @@
 #include "HorizontalMath.h"
-#include <cstdint>
 #include <numeric>
 #include <numbers>
 #include "utils/Utils.h"

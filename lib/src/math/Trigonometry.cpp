@@ -1,7 +1,6 @@
 #include "math/Trigonometry.h"
 #include <cmath>
-#include <numbers>
-
+#include <array>
 #include "Constants.h"
 
 namespace accurate_ri::Trigonometry {

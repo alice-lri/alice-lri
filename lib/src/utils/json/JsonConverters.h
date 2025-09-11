@@ -6,6 +6,6 @@ namespace accurate_ri {
     nlohmann::json scanlineToJson(const Scanline& scanline);
     Scanline scanlineFromJson(const nlohmann::json &j);
 
-    nlohmann::json intrinsicsToJson(const Intrinsics &i);
+    nlohmann::json intrinsicsToJson(const Intrinsics &intrinsics);
     Intrinsics intrinsicsFromJson(const nlohmann::json &j);
 }

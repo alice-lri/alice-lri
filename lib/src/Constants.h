@@ -1,5 +1,6 @@
 #pragma once
 #include <cstdint>
+#include <numbers>
 
 namespace accurate_ri::Constant {
     constexpr double TWO_PI = 2.0 * std::numbers::pi;

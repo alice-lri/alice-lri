@@ -1,5 +1,4 @@
 #pragma once
-#include <array>
 #include <cstdint>
 
 namespace accurate_ri::Trigonometry {

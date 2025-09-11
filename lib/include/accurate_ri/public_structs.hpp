@@ -30,9 +30,9 @@ namespace accurate_ri {
 
     public:
         RangeImage(): w(0), h(0) { }
-        RangeImage(const uint32_t w, const uint32_t h): pixels(w * h), w(w), h(h) {};
+        RangeImage(const uint32_t w, const uint32_t h): pixels(w * h), w(w), h(h) {}
         RangeImage(const uint32_t w, const uint32_t h, const double initialValue):
-            pixels(w * h, initialValue), w(w), h(h) {};
+            pixels(w * h, initialValue), w(w), h(h) {}
 
         double& operator()(const uint32_t row, const uint32_t col) { return pixels[row * w + col]; }
         const double& operator()(const uint32_t row, const uint32_t col) const { return pixels[row * w + col]; }

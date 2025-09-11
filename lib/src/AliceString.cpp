@@ -107,12 +107,12 @@ namespace accurate_ri {
         impl->s.append(c_str);
     }
 
-    void AliceString::append(const char *buf, const uint64_t n) noexcept {
-        if (!buf || n == 0) {
+    void AliceString::append(const char *data, const uint64_t n) noexcept {
+        if (!data || n == 0) {
             return;
         }
 
-        impl->s.append(buf, n);
+        impl->s.append(data, n);
     }
 
     void AliceString::append(const AliceString &other) noexcept {

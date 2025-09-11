@@ -1,5 +1,4 @@
 #pragma once
-#include <Eigen/Dense>
 #include "point/PointArray.h"
 
 namespace accurate_ri {
