@@ -6,8 +6,9 @@ namespace accurate_ri {
 
     enum class ErrorCode {
         NONE = 0,
+        MISMATCHED_SIZES,
         EMPTY_POINT_CLOUD,
-        RANGES_XY_ZERO
+        RANGES_XY_ZERO,
     };
 
     AliceString errorMessage(ErrorCode code);

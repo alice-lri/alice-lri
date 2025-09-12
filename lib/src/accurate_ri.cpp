@@ -13,6 +13,11 @@ namespace accurate_ri {
     Result<PointArray> validateInput(
         const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
     ) noexcept {
+        const bool equalSizes = x.size() == y.size() && y.size() == z.size();
+        if (!equalSizes) {
+            return Result<PointArray>(Status::error(ErrorCode::MISMATCHED_SIZES));
+        }
+
         if (x.empty() || y.empty() || z.empty()) {
             return Result<PointArray>(Status::error(ErrorCode::EMPTY_POINT_CLOUD));
         }
