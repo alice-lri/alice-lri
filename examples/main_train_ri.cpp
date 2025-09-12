@@ -63,8 +63,8 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    const accurate_ri::RangeImage ri = accurate_ri::projectToRangeImage(*result, targetCloud);
-    const accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(*result, ri);
+    const auto ri = accurate_ri::projectToRangeImage(*result, targetCloud);
+    const accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(*result, *ri);
 
     const auto originalSort = lex_argsort(targetCloud.x, targetCloud.y, targetCloud.z);
     const auto reconstructedSort = lex_argsort(reconstructed.x, reconstructed.y, reconstructed.z);

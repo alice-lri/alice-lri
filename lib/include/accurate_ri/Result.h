@@ -9,6 +9,7 @@ namespace accurate_ri {
         MISMATCHED_SIZES,
         EMPTY_POINT_CLOUD,
         RANGES_XY_ZERO,
+        INTERNAL_ERROR,
     };
 
     AliceString errorMessage(ErrorCode code);

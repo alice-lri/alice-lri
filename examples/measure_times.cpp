@@ -119,7 +119,7 @@ private:
             
             // Measure projection time
             start = std::chrono::high_resolution_clock::now();
-            accurate_ri::RangeImage rangeImage = accurate_ri::projectToRangeImage(*intrinsics, cloud);
+            accurate_ri::Result<accurate_ri::RangeImage> rangeImage = accurate_ri::projectToRangeImage(*intrinsics, cloud);
             end = std::chrono::high_resolution_clock::now();
             result.projectTime = std::chrono::duration<double>(end - start).count();
             
@@ -127,7 +127,7 @@ private:
             
             // Measure unprojection time
             start = std::chrono::high_resolution_clock::now();
-            accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(*intrinsics, rangeImage);
+            accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(*intrinsics, *rangeImage);
             end = std::chrono::high_resolution_clock::now();
             result.unprojectTime = std::chrono::duration<double>(end - start).count();
             

@@ -3,34 +3,49 @@
 #include "accurate_ri/Result.h"
 #include "intrinsics/IntrinsicsEstimator.h"
 #include "rangeimage/RangeImageUtils.h"
-#include "utils/Error.h"
 #include "utils/json/JsonConverters.h"
 #include "utils/logger/Logger.h"
 #include "utils/Timer.h"
 
 namespace accurate_ri {
     template <typename Scalar>
-    Result<PointArray> validateInput(
+    Result<bool> validateInput(
         const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
     ) noexcept {
         const bool equalSizes = x.size() == y.size() && y.size() == z.size();
         if (!equalSizes) {
-            return Result<PointArray>(Status::error(ErrorCode::MISMATCHED_SIZES));
+            return Result<bool>(Status::error(ErrorCode::MISMATCHED_SIZES));
         }
 
         if (x.empty() || y.empty() || z.empty()) {
-            return Result<PointArray>(Status::error(ErrorCode::EMPTY_POINT_CLOUD));
+            return Result<bool>(Status::error(ErrorCode::EMPTY_POINT_CLOUD));
         }
 
         const Eigen::ArrayXd xCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(x.data(), x.size()).template cast<double>();
         const Eigen::ArrayXd yCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(y.data(), y.size()).template cast<double>();
         const Eigen::ArrayXd zCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(z.data(), z.size()).template cast<double>();
 
-        try {
-            return Result(PointArray(xCast, yCast, zCast));
-        } catch (const DataValidationError &e) {
-            return Result<PointArray>(Status::error(e.code()));
+        if ((xCast.square() + yCast.square()).minCoeff() <= 0) {
+            return Result<bool>(Status::error(ErrorCode::RANGES_XY_ZERO));
         }
+
+        return Result(true);
+    }
+
+    template <typename Scalar>
+    Result<PointArray> validateAndBuildPointArray(
+        const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
+    ) noexcept {
+        const auto validation = validateInput(x, y, z);
+        if (!validation) {
+            return Result<PointArray>(validation.status());
+        }
+
+        const Eigen::ArrayXd xCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(x.data(), x.size()).template cast<double>();
+        const Eigen::ArrayXd yCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(y.data(), y.size()).template cast<double>();
+        const Eigen::ArrayXd zCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(z.data(), z.size()).template cast<double>();
+
+        return Result(PointArray(xCast, yCast, zCast));
     }
 
     template <typename Scalar>
@@ -38,27 +53,35 @@ namespace accurate_ri {
         const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
     ) noexcept {
         PROFILE_SCOPE("TOTAL");
-        const Result<PointArray> pointsResult = validateInput(x, y, z);
+        try {
+            const Result<PointArray> pointsResult = validateAndBuildPointArray(x, y, z);
 
-        if (!pointsResult) {
-            return Result<Intrinsics>(pointsResult.status());
+            if (!pointsResult) {
+                return Result<Intrinsics>(pointsResult.status());
+            }
+
+            return Result(IntrinsicsEstimator::estimate(*pointsResult));
+        } catch (const std::exception &e) {
+            return Result<Intrinsics>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }
-
-        return Result(IntrinsicsEstimator::estimate(*pointsResult));
     }
 
     template <typename Scalar>
     Result<DebugIntrinsics> debugTrain(
         const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
     ) noexcept {
-        PROFILE_SCOPE("TOTAL");
-        const Result<PointArray> pointsResult = validateInput(x, y, z);
+        try {
+            PROFILE_SCOPE("TOTAL");
+            const Result<PointArray> pointsResult = validateAndBuildPointArray(x, y, z);
 
-        if (!pointsResult) {
-            return Result<DebugIntrinsics>(pointsResult.status());
+            if (!pointsResult) {
+                return Result<DebugIntrinsics>(pointsResult.status());
+            }
+
+            return Result(IntrinsicsEstimator::debugEstimate(*pointsResult));
+        } catch (const std::exception &e) {
+            return Result<DebugIntrinsics>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }
-
-        return Result(IntrinsicsEstimator::debugEstimate(*pointsResult));
     }
 
     Result<Intrinsics> train(const PointCloud::Float &points) noexcept {
@@ -89,18 +112,37 @@ namespace accurate_ri {
         return result;
     }
 
-    RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) noexcept {
-        return RangeImageUtils::projectToRangeImage(intrinsics, points);
+    Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) noexcept {
+        try {
+            const auto validation = validateInput(points.x, points.y, points.z);
+            if (!validation) {
+                return Result<RangeImage>(validation.status());
+            }
+
+            return Result(RangeImageUtils::projectToRangeImage(intrinsics, points));
+        } catch (const std::exception &e) {
+            return Result<RangeImage>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+        }
     }
 
-    RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points) noexcept {
-        return RangeImageUtils::projectToRangeImage(intrinsics, points);
+    Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points) noexcept {
+        try {
+            const auto validation = validateInput(points.x, points.y, points.z);
+            if (!validation) {
+                return Result<RangeImage>(validation.status());
+            }
+
+            return Result(RangeImageUtils::projectToRangeImage(intrinsics, points));
+        } catch (const std::exception &e) {
+            return Result<RangeImage>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+        }
     }
 
     PointCloud::Double unProjectToPointCloud(const Intrinsics &intrinsics, const RangeImage &rangeImage) noexcept {
         return RangeImageUtils::unProjectToPointCloud(intrinsics, rangeImage);
     }
 
+    // TODO handle exceptions and so on
     Intrinsics intrinsicsFromJsonStr(const AliceString &json) noexcept {
         return intrinsicsFromJson(json);
     }

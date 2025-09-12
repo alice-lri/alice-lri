@@ -12,7 +12,7 @@ namespace accurate_ri {
     class PointArray {
     private:
         Eigen::ArrayXd x, y, z;
-        mutable PointArrayExtraInfo extraInfo;
+        PointArrayExtraInfo extraInfo;
 
     public:
         PointArray(Eigen::ArrayXd &&x_, Eigen::ArrayXd &&y_, Eigen::ArrayXd &&z_)

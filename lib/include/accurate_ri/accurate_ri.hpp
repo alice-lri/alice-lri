@@ -9,8 +9,12 @@ namespace accurate_ri {
     ACCURATE_RI_API Result<DebugIntrinsics> debugTrain(const PointCloud::Float &points) noexcept;
     ACCURATE_RI_API Result<DebugIntrinsics> debugTrain(const PointCloud::Double &points) noexcept;
 
-    ACCURATE_RI_API RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) noexcept;
-    ACCURATE_RI_API RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points) noexcept;
+    ACCURATE_RI_API Result<RangeImage> projectToRangeImage(
+        const Intrinsics &intrinsics, const PointCloud::Float &points
+    ) noexcept;
+    ACCURATE_RI_API Result<RangeImage> projectToRangeImage(
+        const Intrinsics &intrinsics, const PointCloud::Double &points
+    ) noexcept;
     ACCURATE_RI_API PointCloud::Double unProjectToPointCloud(const Intrinsics &intrinsics, const RangeImage &rangeImage) noexcept;
 
     ACCURATE_RI_API Intrinsics intrinsicsFromJsonStr(const AliceString& json) noexcept;

@@ -11,6 +11,8 @@ namespace accurate_ri {
                 return AliceString("Point cloud is empty");
             case ErrorCode::RANGES_XY_ZERO:
                 return AliceString("Point cloud contains points at (x,y) = (0,0): geometric error");
+            case ErrorCode::INTERNAL_ERROR:
+                return AliceString("Internal error");
             default:
                 return AliceString("Unknown data validation error");
         }

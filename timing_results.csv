@@ -1,2 +1,2 @@
 dataset,filename,train_time_s,project_time_s,unproject_time_s,total_time_s
-kitti,2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000000.bin,30.999750,0.009388,0.003793,31.012931
+kitti,2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/0000000000.bin,31.098824,0.009335,0.003719,31.111878

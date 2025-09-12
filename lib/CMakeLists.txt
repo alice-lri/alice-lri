@@ -123,7 +123,6 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         include/accurate_ri/AliceString.h
         include/accurate_ri/Api.h
         include/accurate_ri/Result.h
-        src/utils/Error.h
         src/Result.cpp
 )
 
