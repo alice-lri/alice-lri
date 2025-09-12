@@ -3,27 +3,43 @@
 #include "accurate_ri/Result.h"
 #include "intrinsics/IntrinsicsEstimator.h"
 #include "rangeimage/RangeImageUtils.h"
+#include "utils/Error.h"
 #include "utils/json/JsonConverters.h"
 #include "utils/logger/Logger.h"
 #include "utils/Timer.h"
 
 namespace accurate_ri {
     template <typename Scalar>
-    Result<Intrinsics> train(
+    Result<PointArray> validateInput(
         const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
     ) noexcept {
-        PROFILE_SCOPE("TOTAL");
-
         if (x.empty() || y.empty() || z.empty()) {
-            return Result<Intrinsics>(Status::error(ErrorCode::EMPTY_POINT_CLOUD));
+            return Result<PointArray>(Status::error(ErrorCode::EMPTY_POINT_CLOUD));
         }
 
         const Eigen::ArrayXd xCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(x.data(), x.size()).template cast<double>();
         const Eigen::ArrayXd yCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(y.data(), y.size()).template cast<double>();
         const Eigen::ArrayXd zCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(z.data(), z.size()).template cast<double>();
 
-        const PointArray points(xCast, yCast, zCast);
-        return Result(IntrinsicsEstimator::estimate(points));
+        try {
+            return Result(PointArray(xCast, yCast, zCast));
+        } catch (const DataValidationError &e) {
+            return Result<PointArray>(Status::error(e.code()));
+        }
+    }
+
+    template <typename Scalar>
+    Result<Intrinsics> train(
+        const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
+    ) noexcept {
+        PROFILE_SCOPE("TOTAL");
+        const Result<PointArray> pointsResult = validateInput(x, y, z);
+
+        if (!pointsResult) {
+            return Result<Intrinsics>(pointsResult.status());
+        }
+
+        return Result(IntrinsicsEstimator::estimate(*pointsResult));
     }
 
     template <typename Scalar>
@@ -31,17 +47,13 @@ namespace accurate_ri {
         const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
     ) noexcept {
         PROFILE_SCOPE("TOTAL");
+        const Result<PointArray> pointsResult = validateInput(x, y, z);
 
-        if (x.empty() || y.empty() || z.empty()) {
-            return Result<DebugIntrinsics>(Status::error(ErrorCode::EMPTY_POINT_CLOUD));
+        if (!pointsResult) {
+            return Result<DebugIntrinsics>(pointsResult.status());
         }
 
-        const Eigen::ArrayXd xCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(x.data(), x.size()).template cast<double>();
-        const Eigen::ArrayXd yCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(y.data(), y.size()).template cast<double>();
-        const Eigen::ArrayXd zCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(z.data(), z.size()).template cast<double>();
-
-        const PointArray points(xCast, yCast, zCast);
-        return Result(IntrinsicsEstimator::debugEstimate(points));
+        return Result(IntrinsicsEstimator::debugEstimate(*pointsResult));
     }
 
     Result<Intrinsics> train(const PointCloud::Float &points) noexcept {

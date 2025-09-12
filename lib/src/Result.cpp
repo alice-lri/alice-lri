@@ -5,6 +5,8 @@ namespace accurate_ri {
         switch (code) {
             case ErrorCode::NONE:
                 return AliceString();
+            case ErrorCode::EMPTY_POINT_CLOUD:
+                return AliceString("Point cloud is empty");
             case ErrorCode::RANGES_XY_ZERO:
                 return AliceString("Point cloud contains points at (x,y) = (0,0): geometric error");
             default:

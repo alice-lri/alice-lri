@@ -79,7 +79,7 @@ int main(int argc, char **argv) {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    const accurate_ri::AliceArray<double> zeros(10, 0);
+    const accurate_ri::AliceArray<double> zeros(0);
     // const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
     const accurate_ri::PointCloud::Double cloud(zeros, zeros, zeros);
 
