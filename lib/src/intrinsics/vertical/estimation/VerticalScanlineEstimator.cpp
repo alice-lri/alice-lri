@@ -62,7 +62,7 @@ namespace accurate_ri {
         bool validCi = false;
 
         for (uint64_t attempt = 0; attempt < Constant::VERTICAL_MAX_FIT_ATTEMPTS; ++attempt) {
-            const auto pointsToFitIndices = refinePointsToFitIndices(points, scanlineLimits, convergenceState);
+            const auto pointsToFitIndices = refinePointsToFitIndices(points, currentScanlineLimits, convergenceState);
             if (!pointsToFitIndices) {
                 break;
             }
