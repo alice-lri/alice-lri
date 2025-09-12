@@ -9,55 +9,45 @@
 #include "Constants.h"
 
 namespace accurate_ri::RangeImageUtils {
-    inline RangeImage computeRangeImage(
-        const Intrinsics &intrinsics, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &thetas,
-        const Eigen::ArrayXd &ranges, const Eigen::ArrayXd &rangesXy
+    template<typename Scalar>
+    RangeImage computeRangeImage(
+        const Intrinsics &intrinsics, const Eigen::ArrayX<Scalar> &x, const Eigen::ArrayX<Scalar> &y,
+        const Eigen::ArrayX<Scalar> &z
     );
-    inline int32_t findBestScanline(
-        const Intrinsics& intrinsics, const Eigen::ArrayXd &ranges, const Eigen::ArrayXd &phis, int32_t pointIdx
+
+    template<typename Scalar>
+    int32_t findBestScanline(
+        const Intrinsics& intrinsics, const Eigen::ArrayX<Scalar> &ranges, const Eigen::ArrayX<Scalar> &phis, int32_t pointIdx
     );
-    inline RangeImage buildProjection(
-        const Intrinsics &intrinsics, const Eigen::ArrayXi &scanlinesByPoints, const Eigen::ArrayXd &ranges,
+
+    template<typename Scalar>
+    RangeImage buildProjection(
+        const Intrinsics &intrinsics, const Eigen::ArrayXi &scanlinesByPoints, const Eigen::ArrayX<Scalar> &ranges,
         const Eigen::ArrayXd &correctedThetas
     );
+
     inline int32_t calculateLcmHorizontalResolution(const Intrinsics &intrinsics);
 
     RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) {
         PROFILE_SCOPE("RangeImageUtils::projectToRangeImage");
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
-        const auto x = Eigen::Map<const Eigen::ArrayXf>(points.x.data(), size);
-        const auto y = Eigen::Map<const Eigen::ArrayXf>(points.y.data(), size);
-        const auto z = Eigen::Map<const Eigen::ArrayXf>(points.z.data(), size);
+        const Eigen::ArrayXf x = Eigen::Map<const Eigen::ArrayXf>(points.x.data(), size);
+        const Eigen::ArrayXf y = Eigen::Map<const Eigen::ArrayXf>(points.y.data(), size);
+        const Eigen::ArrayXf z = Eigen::Map<const Eigen::ArrayXf>(points.z.data(), size);
 
-        const Eigen::ArrayXd rangesXySquared = (x.square() + y.square()).cast<double>();
-        const Eigen::ArrayXd ranges = (rangesXySquared + z.square().cast<double>()).sqrt();
-        const Eigen::ArrayXd rangesXy = rangesXySquared.sqrt();
-        const Eigen::ArrayXd phis = (z.cast<double>() / ranges).asin();
-        const Eigen::ArrayXd thetas = y.binaryExpr(x, [](const double yi, const double xi) {
-            return std::atan2(yi, xi) + std::numbers::pi;
-        });
-
-        return computeRangeImage(intrinsics, phis, thetas, ranges, rangesXy);
+        return computeRangeImage(intrinsics, x, y, z);
     }
 
     RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points) {
         PROFILE_SCOPE("RangeImageUtils::projectToRangeImage");
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
-        const auto x = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
-        const auto y = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
-        const auto z = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
+        const Eigen::ArrayXd x = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
+        const Eigen::ArrayXd y = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
+        const Eigen::ArrayXd z = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
 
-        const Eigen::ArrayXd rangesXySquared = x.square() + y.square();
-        const Eigen::ArrayXd ranges = (rangesXySquared + z.square()).sqrt();
-        const Eigen::ArrayXd rangesXy = rangesXySquared.sqrt();
-        const Eigen::ArrayXd phis = (z / ranges).asin();
-        const Eigen::ArrayXd thetas = y.binaryExpr(x, [](const double yi, const double xi) {
-            return std::atan2(yi, xi) + std::numbers::pi;
-        });
-
-        return computeRangeImage(intrinsics, phis, thetas, ranges, rangesXy);
+        return computeRangeImage(intrinsics, x, y, z);
     }
 
     // TODO maybe compare to pre-loop once to count?
@@ -93,12 +83,20 @@ namespace accurate_ri::RangeImageUtils {
         return PointCloud::Double(std::move(xs), std::move(ys), std::move(zs));
     }
 
-    inline RangeImage computeRangeImage(
-        const Intrinsics &intrinsics, const Eigen::ArrayXd &phis, const Eigen::ArrayXd &thetas,
-        const Eigen::ArrayXd &ranges, const Eigen::ArrayXd &rangesXy
+    template<typename Scalar>
+    RangeImage computeRangeImage(
+        const Intrinsics &intrinsics, const Eigen::ArrayX<Scalar> &x, const Eigen::ArrayX<Scalar> &y,
+        const Eigen::ArrayX<Scalar> &z
     ) {
-        Eigen::ArrayXi scanlinesByPoints(phis.size());
+        const Eigen::ArrayX<Scalar> rangesXySquared = x.square() + y.square();
+        const Eigen::ArrayX<Scalar> ranges = (rangesXySquared + z.square()).sqrt();
+        const Eigen::ArrayX<Scalar> rangesXy = rangesXySquared.sqrt();
+        const Eigen::ArrayX<Scalar> phis = (z / ranges).asin();
+        const Eigen::ArrayX<Scalar> thetas = y.binaryExpr(x, [](const Scalar yi, const Scalar xi) {
+            return static_cast<Scalar>(std::atan2(yi, xi) + std::numbers::pi);
+        });
         Eigen::ArrayXd correctedThetas(phis.size());
+        Eigen::ArrayXi scanlinesByPoints(phis.size());
 
         for (int32_t pointIdx = 0; pointIdx < phis.size(); ++pointIdx) {
             const int32_t bestScanlineIdx = findBestScanline(intrinsics, ranges, phis, pointIdx);
@@ -114,8 +112,10 @@ namespace accurate_ri::RangeImageUtils {
         return buildProjection(intrinsics, scanlinesByPoints, ranges, correctedThetas);
     }
 
-    inline int32_t findBestScanline(
-        const Intrinsics& intrinsics, const Eigen::ArrayXd &ranges, const Eigen::ArrayXd &phis, const int32_t pointIdx
+    template<typename Scalar>
+    int32_t findBestScanline(
+        const Intrinsics& intrinsics, const Eigen::ArrayX<Scalar> &ranges, const Eigen::ArrayX<Scalar> &phis,
+        const int32_t pointIdx
     ) {
         double minPhiDiff = std::numeric_limits<double>::max();
         int32_t bestScanlineIdx = -1;
@@ -136,8 +136,9 @@ namespace accurate_ri::RangeImageUtils {
         return bestScanlineIdx;
     }
 
-    inline RangeImage buildProjection(
-        const Intrinsics &intrinsics, const Eigen::ArrayXi &scanlinesByPoints, const Eigen::ArrayXd &ranges,
+    template<typename Scalar>
+    RangeImage buildProjection(
+        const Intrinsics &intrinsics, const Eigen::ArrayXi &scanlinesByPoints, const Eigen::ArrayX<Scalar> &ranges,
         const Eigen::ArrayXd &correctedThetas
     ) {
         const int32_t lcmHorizontalResolution = calculateLcmHorizontalResolution(intrinsics);
