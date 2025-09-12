@@ -36,28 +36,28 @@ private:
                 "../../Datasets/LiDAR/kitti/",
                 {
                     "2011_09_26/2011_09_26_drive_0001_sync/velodyne_points/data/",
-                    "2011_09_26/2011_09_26_drive_0117_sync/velodyne_points/data/",
-                    "2011_09_28/2011_09_28_drive_0001_sync/velodyne_points/data/",
-                    "2011_09_28/2011_09_28_drive_0222_sync/velodyne_points/data/",
-                    "2011_09_29/2011_09_29_drive_0004_sync/velodyne_points/data/",
-                    "2011_09_29/2011_09_29_drive_0071_sync/velodyne_points/data/",
-                    "2011_09_30/2011_09_30_drive_0016_sync/velodyne_points/data/",
-                    "2011_09_30/2011_09_30_drive_0034_sync/velodyne_points/data/",
-                    "2011_10_03/2011_10_03_drive_0027_sync/velodyne_points/data/",
-                    "2011_10_03/2011_10_03_drive_0047_sync/velodyne_points/data/",
+                    // "2011_09_26/2011_09_26_drive_0117_sync/velodyne_points/data/",
+                    // "2011_09_28/2011_09_28_drive_0001_sync/velodyne_points/data/",
+                    // "2011_09_28/2011_09_28_drive_0222_sync/velodyne_points/data/",
+                    // "2011_09_29/2011_09_29_drive_0004_sync/velodyne_points/data/",
+                    // "2011_09_29/2011_09_29_drive_0071_sync/velodyne_points/data/",
+                    // "2011_09_30/2011_09_30_drive_0016_sync/velodyne_points/data/",
+                    // "2011_09_30/2011_09_30_drive_0034_sync/velodyne_points/data/",
+                    // "2011_10_03/2011_10_03_drive_0027_sync/velodyne_points/data/",
+                    // "2011_10_03/2011_10_03_drive_0047_sync/velodyne_points/data/",
                 }
             },
-            {
-                "durlar", 
-                "../../Datasets/LiDAR/durlar/dataset/DurLAR/",
-                {
-                    "DurLAR_20210716/ouster_points/data/",
-                    "DurLAR_20210901/ouster_points/data/",
-                    "DurLAR_20211012/ouster_points/data/",
-                    "DurLAR_20211208/ouster_points/data/",
-                    "DurLAR_20211209/ouster_points/data/"
-                }
-            }
+            // {
+            //     "durlar",
+            //     "../../Datasets/LiDAR/durlar/dataset/DurLAR/",
+            //     {
+            //         "DurLAR_20210716/ouster_points/data/",
+            //         "DurLAR_20210901/ouster_points/data/",
+            //         "DurLAR_20211012/ouster_points/data/",
+            //         "DurLAR_20211208/ouster_points/data/",
+            //         "DurLAR_20211209/ouster_points/data/"
+            //     }
+            // }
         };
     }
     

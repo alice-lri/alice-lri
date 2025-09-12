@@ -12,14 +12,15 @@ namespace accurate_ri {
 
     struct ACCURATE_RI_API Intrinsics {
     private:
-        AliceArray<Scanline> scanlines;
+        AliceArray<Scanline> scanlines_;
 
     public:
-        explicit Intrinsics(const int32_t scanlineCount) noexcept : scanlines(scanlineCount) { }
+        explicit Intrinsics(const int32_t scanlineCount) noexcept : scanlines_(scanlineCount) { }
 
-        Scanline &scanlineAt(const int32_t idx) noexcept { return scanlines[idx]; }
-        [[nodiscard]] const Scanline &scanlineAt(const int32_t idx) const noexcept { return scanlines[idx]; }
-        [[nodiscard]] uint64_t scanlinesCount() const noexcept { return scanlines.size(); }
+        Scanline &scanlineAt(const int32_t idx) noexcept { return scanlines_[idx]; }
+        [[nodiscard]] const Scanline &scanlineAt(const int32_t idx) const noexcept { return scanlines_[idx]; }
+        [[nodiscard]] uint64_t scanlinesCount() const noexcept { return scanlines_.size(); }
+        [[nodiscard]] const AliceArray<Scanline> &scanlines() const noexcept { return scanlines_; }
     };
 
     struct ACCURATE_RI_API RangeImage {
@@ -39,6 +40,7 @@ namespace accurate_ri {
 
         [[nodiscard]] uint32_t width() const noexcept { return w; }
         [[nodiscard]] uint32_t height() const noexcept { return h; }
+        [[nodiscard]] uint64_t size() const noexcept { return w * h; }
         [[nodiscard]] const double* data() const noexcept { return pixels.data(); }
         double* data() noexcept { return pixels.data(); }
     };
@@ -48,12 +50,24 @@ namespace accurate_ri {
             AliceArray<float> x;
             AliceArray<float> y;
             AliceArray<float> z;
+
+            void reserve(const uint64_t count) {
+                x.reserve(count);
+                y.reserve(count);
+                z.reserve(count);
+            }
         };
 
         struct Double {
             AliceArray<double> x;
             AliceArray<double> y;
             AliceArray<double> z;
+
+            void reserve(const uint64_t count) {
+                x.reserve(count);
+                y.reserve(count);
+                z.reserve(count);
+            }
         };
     }
 

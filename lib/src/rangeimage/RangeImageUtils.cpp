@@ -1,6 +1,7 @@
 #include "RangeImageUtils.h"
 #include <numbers>
 #include <numeric>
+#include <span>
 #include <Eigen/Core>
 #include "accurate_ri/public_structs.hpp"
 #include "utils/logger/Logger.h"
@@ -17,7 +18,7 @@ namespace accurate_ri::RangeImageUtils {
 
     template<typename Scalar>
     int32_t findBestScanline(
-        const Intrinsics& intrinsics, const Eigen::ArrayX<Scalar> &ranges, const Eigen::ArrayX<Scalar> &phis, int32_t pointIdx
+        std::span<Scanline const> scanlines, const Eigen::ArrayX<Scalar> &ranges, const Eigen::ArrayX<Scalar> &phis, int32_t pointIdx
     );
 
     template<typename Scalar>
@@ -50,37 +51,36 @@ namespace accurate_ri::RangeImageUtils {
         return computeRangeImage(intrinsics, x, y, z);
     }
 
-    // TODO maybe compare to pre-loop once to count?
     PointCloud::Double unProjectToPointCloud(const Intrinsics &intrinsics, const RangeImage &image) {
-        AliceArray<double> xs, ys, zs;
+        PointCloud::Double result;
+        const double *const rangeImageData = image.data();
+        const Scanline* const scanlines = intrinsics.scanlines().data();
 
         for (int32_t row = 0; row < image.height(); ++row) {
             const int32_t scanlineIdx = static_cast<int32_t>(image.height()) - row - 1;
-            const double vOffset = intrinsics.scanlineAt(scanlineIdx).verticalOffset;
-            const double vAngle = intrinsics.scanlineAt(scanlineIdx).verticalAngle;
-            const double hOffset = intrinsics.scanlineAt(scanlineIdx).horizontalOffset;
-            const double thetaOffset = intrinsics.scanlineAt(scanlineIdx).azimuthalOffset;
+            const Scanline &scanline = scanlines[scanlineIdx];
 
             for (int32_t col = 0; col < image.width(); ++col) {
-                const double range = image(row, col);
+                const int32_t flatIdx = row * image.width() + col;
+                const double range = rangeImageData[flatIdx];
 
                 if (range <= 0) {
                     continue;
                 }
 
-                const double originalPhi = vAngle + vOffset / range;
+                const double originalPhi = scanline.verticalAngle + scanline.verticalOffset / range;
                 const double rangeXy = range * std::cos(originalPhi);
                 double originalTheta = col * Constant::TWO_PI / image.width() - std::numbers::pi;
-                originalTheta += hOffset / rangeXy + thetaOffset;
+                originalTheta += scanline.horizontalOffset / rangeXy + scanline.azimuthalOffset;
                 originalTheta = Utils::positiveFmod(originalTheta, Constant::TWO_PI);
 
-                xs.emplace_back(rangeXy * std::cos(originalTheta));
-                ys.emplace_back(rangeXy * std::sin(originalTheta));
-                zs.emplace_back(range * std::sin(originalPhi));
+                result.x.emplace_back(rangeXy * std::cos(originalTheta));
+                result.y.emplace_back(rangeXy * std::sin(originalTheta));
+                result.z.emplace_back(range * std::sin(originalPhi));
             }
         }
 
-        return PointCloud::Double(std::move(xs), std::move(ys), std::move(zs));
+        return result;
     }
 
     template<typename Scalar>
@@ -98,12 +98,16 @@ namespace accurate_ri::RangeImageUtils {
         Eigen::ArrayXd correctedThetas(phis.size());
         Eigen::ArrayXi scanlinesByPoints(phis.size());
 
+        const Scanline* const scanlinesData = intrinsics.scanlines().data();
+        const int32_t scanlinesCount = intrinsics.scanlinesCount();
+        const std::span scanlines(scanlinesData, scanlinesCount);
+
         for (int32_t pointIdx = 0; pointIdx < phis.size(); ++pointIdx) {
-            const int32_t bestScanlineIdx = findBestScanline(intrinsics, ranges, phis, pointIdx);
+            const int32_t bestScanlineIdx = findBestScanline(scanlines, ranges, phis, pointIdx);
 
             scanlinesByPoints(pointIdx) = bestScanlineIdx;
-            const double hOffset = intrinsics.scanlineAt(bestScanlineIdx).horizontalOffset;
-            const double thetaOffset = intrinsics.scanlineAt(bestScanlineIdx).azimuthalOffset;
+            const double hOffset = scanlines[bestScanlineIdx].horizontalOffset;
+            const double thetaOffset = scanlines[bestScanlineIdx].azimuthalOffset;
             correctedThetas(pointIdx) = thetas(pointIdx) - hOffset / rangesXy(pointIdx) - thetaOffset;
         }
 
@@ -114,15 +118,15 @@ namespace accurate_ri::RangeImageUtils {
 
     template<typename Scalar>
     int32_t findBestScanline(
-        const Intrinsics& intrinsics, const Eigen::ArrayX<Scalar> &ranges, const Eigen::ArrayX<Scalar> &phis,
-        const int32_t pointIdx
+        const std::span<Scanline const> scanlines, const Eigen::ArrayX<Scalar> &ranges,
+        const Eigen::ArrayX<Scalar> &phis, const int32_t pointIdx
     ) {
         double minPhiDiff = std::numeric_limits<double>::max();
         int32_t bestScanlineIdx = -1;
 
-        for (int32_t laserIdx = 0; laserIdx < intrinsics.scanlinesCount(); ++laserIdx) {
-            const double vOffset = intrinsics.scanlineAt(laserIdx).verticalOffset;
-            const double vAngle = intrinsics.scanlineAt(laserIdx).verticalAngle;
+        for (int32_t laserIdx = 0; laserIdx < scanlines.size(); ++laserIdx) {
+            const double vOffset = scanlines[laserIdx].verticalOffset;
+            const double vAngle = scanlines[laserIdx].verticalAngle;
 
             const double phiCorrection = vOffset / ranges(pointIdx);
             const double phiDiff = std::abs(phis(pointIdx) - phiCorrection - vAngle);
@@ -141,23 +145,27 @@ namespace accurate_ri::RangeImageUtils {
         const Intrinsics &intrinsics, const Eigen::ArrayXi &scanlinesByPoints, const Eigen::ArrayX<Scalar> &ranges,
         const Eigen::ArrayXd &correctedThetas
     ) {
-        const int32_t lcmHorizontalResolution = calculateLcmHorizontalResolution(intrinsics);
-        RangeImage rangeImage(lcmHorizontalResolution, intrinsics.scanlinesCount(), 0);
+        const int32_t width = calculateLcmHorizontalResolution(intrinsics);
+        const int32_t height = intrinsics.scanlinesCount();
+        RangeImage rangeImage(width, height, 0);
+        double *rangeImageData = rangeImage.data();
 
         for (int32_t pointIdx = 0; pointIdx < ranges.size(); ++pointIdx) {
-            const uint32_t row = intrinsics.scanlinesCount() - scanlinesByPoints(pointIdx) - 1;
+            const uint32_t row = height - scanlinesByPoints(pointIdx) - 1;
             const double normalizedTheta =  correctedThetas(pointIdx) / (2 * std::numbers::pi);
-            auto col = static_cast<int32_t>(std::round(normalizedTheta * lcmHorizontalResolution));
+            auto col = static_cast<int32_t>(std::round(normalizedTheta * width));
 
-            col = col < 0 ? lcmHorizontalResolution - col : col;
-            col = col >= lcmHorizontalResolution ? col - lcmHorizontalResolution : col;
+            col = col < 0 ? width - col : col;
+            col = col >= width ? col - width : col;
 
-            if (rangeImage(row, col) != 0) {
+            const int32_t flatIdx = row * width + col;
+
+            if (rangeImageData[flatIdx] != 0) {
                 LOG_WARN("Overwriting pixel at (", row, ", ", col, ") with range ", ranges(pointIdx),
                          " (previously: ", rangeImage(row, col), "). Losslessness not achieved!");
             }
 
-            rangeImage(row, col) = ranges(pointIdx);
+            rangeImageData[flatIdx] = ranges(pointIdx);
         }
 
         return rangeImage;
