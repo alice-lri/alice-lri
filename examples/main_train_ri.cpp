@@ -56,10 +56,15 @@ int main(int argc, char **argv) {
     const accurate_ri::PointCloud::Double trainCloud(std::move(trainPoints.x), std::move(trainPoints.y), std::move(trainPoints.z));
     const accurate_ri::PointCloud::Double targetCloud(std::move(targetPoints.x), std::move(targetPoints.y), std::move(targetPoints.z));
 
-    accurate_ri::Intrinsics result = accurate_ri::train(trainCloud);
+    accurate_ri::Result<accurate_ri::Intrinsics> result = accurate_ri::train(trainCloud);
 
-    const accurate_ri::RangeImage ri = accurate_ri::projectToRangeImage(result, targetCloud);
-    const accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(result, ri);
+    if (!result) {
+        std::cout << result.status().message.c_str();
+        return 1;
+    }
+
+    const accurate_ri::RangeImage ri = accurate_ri::projectToRangeImage(*result, targetCloud);
+    const accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(*result, ri);
 
     const auto originalSort = lex_argsort(targetCloud.x, targetCloud.y, targetCloud.z);
     const auto reconstructedSort = lex_argsort(reconstructed.x, reconstructed.y, reconstructed.z);

@@ -105,7 +105,13 @@ private:
             
             // Measure training time
             auto start = std::chrono::high_resolution_clock::now();
-            accurate_ri::Intrinsics intrinsics = accurate_ri::train(cloud);
+            auto intrinsics = accurate_ri::train(cloud);
+
+            if (!intrinsics) {
+                std::cerr << intrinsics.status().message.c_str() << std::endl;
+                throw std::runtime_error("Could not train intrinsics for file: " + filePath);
+            }
+
             auto end = std::chrono::high_resolution_clock::now();
             result.trainTime = std::chrono::duration<double>(end - start).count();
             
@@ -113,7 +119,7 @@ private:
             
             // Measure projection time
             start = std::chrono::high_resolution_clock::now();
-            accurate_ri::RangeImage rangeImage = accurate_ri::projectToRangeImage(intrinsics, cloud);
+            accurate_ri::RangeImage rangeImage = accurate_ri::projectToRangeImage(*intrinsics, cloud);
             end = std::chrono::high_resolution_clock::now();
             result.projectTime = std::chrono::duration<double>(end - start).count();
             
@@ -121,7 +127,7 @@ private:
             
             // Measure unprojection time
             start = std::chrono::high_resolution_clock::now();
-            accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(intrinsics, rangeImage);
+            accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(*intrinsics, rangeImage);
             end = std::chrono::high_resolution_clock::now();
             result.unprojectTime = std::chrono::duration<double>(end - start).count();
             

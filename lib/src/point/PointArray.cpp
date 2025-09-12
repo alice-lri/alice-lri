@@ -1,5 +1,6 @@
 #include "PointArray.h"
 #include "PointUtils.h"
+#include "utils/Error.h"
 
 namespace accurate_ri {
     void PointArray::computeExtraInfo() {
@@ -7,14 +8,16 @@ namespace accurate_ri {
 
         const Eigen::ArrayXd &rangeXySquared = x.array().square() + y.array().square();
 
+        if (rangeXySquared.minCoeff() <= 0) {
+            throw DataValidationError(ErrorCode::RANGES_XY_ZERO);
+        }
+
         extraInfo.rangeXy = rangeXySquared.sqrt();
         extraInfo.range = (rangeXySquared + z.array().square()).sqrt();
         extraInfo.phi = (z.array() / extraInfo.range.array()).asin();
-        extraInfo.theta = y.binaryExpr(
-            x, [](double yi, double xi) {
-                return std::atan2(yi, xi);
-            }
-        );
+        extraInfo.theta = y.binaryExpr(x, [](const double yi, const double xi) {
+            return std::atan2(yi, xi);
+        });
 
         extraInfo.invRange = extraInfo.range.array().inverse();
         extraInfo.invRangeXy = extraInfo.rangeXy.array().inverse();

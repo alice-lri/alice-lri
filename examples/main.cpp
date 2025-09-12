@@ -77,25 +77,31 @@ int main(int argc, char **argv) {
 
     FileUtils::Points points = FileUtils::loadBinaryFile(path, accurateDigits);
 
-    double initialZ = points.z[12];
     auto start = std::chrono::high_resolution_clock::now();
 
-    const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
+    const accurate_ri::AliceArray<double> zeros(10, 0);
+    // const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
+    const accurate_ri::PointCloud::Double cloud(zeros, zeros, zeros);
 
-    accurate_ri::Intrinsics intrinsics = accurate_ri::train(cloud);
+    const accurate_ri::Result<accurate_ri::Intrinsics> intrinsics = accurate_ri::train(cloud);
+    if (!intrinsics) {
+        std::cerr << intrinsics.status().message.c_str();
+        return 1;
+    }
+
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end - start;
     std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
 
     if (outputPath) {
-        accurate_ri::intrinsicsToJsonFile(intrinsics, outputPath->data(), 4);
+        accurate_ri::intrinsicsToJsonFile(*intrinsics, outputPath->data(), 4);
     }
 
-    const auto jsonStr = accurate_ri::intrinsicsToJsonStr(intrinsics);
+    const auto jsonStr = accurate_ri::intrinsicsToJsonStr(*intrinsics);
     std::cout << jsonStr.c_str() << std::endl;
 
-    const accurate_ri::RangeImage ri = accurate_ri::projectToRangeImage(intrinsics, cloud);
-    accurate_ri::unProjectToPointCloud(intrinsics, ri);
+    const accurate_ri::RangeImage ri = accurate_ri::projectToRangeImage(*intrinsics, cloud);
+    accurate_ri::unProjectToPointCloud(*intrinsics, ri);
 
     return 0;
 }

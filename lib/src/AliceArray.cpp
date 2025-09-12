@@ -70,6 +70,11 @@ namespace accurate_ri {
     }
 
     template<class T>
+    bool AliceArray<T>::empty() const noexcept {
+        return impl->v.empty();
+    }
+
+    template<class T>
     void AliceArray<T>::push_back(const T &value) noexcept {
         impl->v.push_back(value);
     }

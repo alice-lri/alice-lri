@@ -31,6 +31,7 @@ namespace accurate_ri {
         const T *begin() const noexcept { return data(); }
         const T *end() const noexcept { return data() + size(); }
 
+        [[nodiscard]] bool empty() const noexcept;
         void push_back(const T &value) noexcept;
         void emplace_back(const T &value) noexcept;
         void resize(uint64_t n) noexcept;

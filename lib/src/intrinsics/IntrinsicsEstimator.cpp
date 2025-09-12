@@ -6,8 +6,8 @@ namespace accurate_ri {
         const VerticalIntrinsicsEstimation vertical = VerticalIntrinsicsEstimator::estimate(points);
         const HorizontalIntrinsicsEstimation horizontal = HorizontalIntrinsicsEstimator::estimate(points, vertical);
 
-        const std::size_t scanlinesCount = vertical.scanlinesAssignations.scanlines.size();
-        Intrinsics intrinsics = Intrinsics(scanlinesCount);
+        const int32_t scanlinesCount = static_cast<int32_t>(vertical.scanlinesAssignations.scanlines.size());
+        Intrinsics intrinsics(scanlinesCount);
 
         for (int i = 0; i < scanlinesCount; ++i) {
             const auto& verticalScanline = vertical.scanlinesAssignations.scanlines[i];
@@ -23,8 +23,8 @@ namespace accurate_ri {
         const VerticalIntrinsicsEstimation vertical = VerticalIntrinsicsEstimator::estimate(points);
         const HorizontalIntrinsicsEstimation horizontal = HorizontalIntrinsicsEstimator::estimate(points, vertical);
 
-        const std::size_t scanlinesCount = vertical.scanlinesAssignations.scanlines.size();
-        DebugIntrinsics intrinsics = DebugIntrinsics(scanlinesCount, vertical.iterations, vertical.unassignedPoints,
+        const int32_t scanlinesCount = static_cast<int32_t>(vertical.scanlinesAssignations.scanlines.size());
+        DebugIntrinsics intrinsics(scanlinesCount, vertical.iterations, vertical.unassignedPoints,
             vertical.pointsCount, vertical.endReason);
 
         for (int i = 0; i < scanlinesCount; ++i) {

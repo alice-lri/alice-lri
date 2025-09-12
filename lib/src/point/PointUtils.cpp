@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cmath>
 
-#define MIN_COORDS_EPS (1e-6 / 2)
+constexpr double MIN_COORDS_EPS = 1e-6 / 2;
 
 namespace accurate_ri {
     double PointUtils::computeCoordsEps(const PointArray &points) {
@@ -14,9 +14,9 @@ namespace accurate_ri {
         std::ranges::sort(sortedY);
         std::ranges::sort(sortedZ);
 
-        double minDiff = std::numeric_limits<double>::max();
+        double minDiff = std::numeric_limits<double>::infinity();
 
-        for (size_t i = 1; i < sortedX.size(); i++) {
+        for (int32_t i = 1; i < sortedX.size(); i++) {
             const double diffX = sortedX[i] - sortedX[i - 1];
             minDiff = diffX > 0 ? std::min(minDiff, diffX) : minDiff;
 
@@ -25,6 +25,10 @@ namespace accurate_ri {
 
             const double diffZ = sortedZ[i] - sortedZ[i - 1];
             minDiff = diffZ > 0 ? std::min(minDiff, diffZ) : minDiff;
+        }
+
+        if (minDiff == std::numeric_limits<double>::infinity()) {
+            return MIN_COORDS_EPS;
         }
 
         return std::max(minDiff / 2, MIN_COORDS_EPS);

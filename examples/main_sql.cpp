@@ -177,12 +177,16 @@ int main(const int argc, const char **argv) {
         const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
 
         auto start = std::chrono::high_resolution_clock::now();
-        accurate_ri::DebugIntrinsics result = accurate_ri::debugTrain(cloud);
+        auto result = accurate_ri::debugTrain(cloud);
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration = end - start;
 
-        storeResult(db, experimentId, frame.id, result);
+        if (!result) {
+            std::cerr << result.status().message.c_str();
+            throw std::runtime_error("Could not train intrinsics for file: " + framePath.string());
+        }
 
+        storeResult(db, experimentId, frame.id, *result);
         std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
     }
 

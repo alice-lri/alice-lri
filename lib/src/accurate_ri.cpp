@@ -1,4 +1,6 @@
 #include "accurate_ri/accurate_ri.hpp"
+
+#include "accurate_ri/Result.h"
 #include "intrinsics/IntrinsicsEstimator.h"
 #include "rangeimage/RangeImageUtils.h"
 #include "utils/json/JsonConverters.h"
@@ -6,76 +8,65 @@
 #include "utils/Timer.h"
 
 namespace accurate_ri {
-
-    Intrinsics train(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) {
+    template <typename Scalar>
+    Result<Intrinsics> train(
+        const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
+    ) noexcept {
         PROFILE_SCOPE("TOTAL");
 
-        if (xArray.size() == 0 || yArray.size() == 0 || zArray.size() == 0) {
-            return Intrinsics(0);
+        if (x.empty() || y.empty() || z.empty()) {
+            return Result<Intrinsics>(Status::error(ErrorCode::EMPTY_POINT_CLOUD));
         }
 
-        const PointArray points(xArray, yArray, zArray);
-        return IntrinsicsEstimator::estimate(points);
+        const Eigen::ArrayXd xCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(x.data(), x.size()).template cast<double>();
+        const Eigen::ArrayXd yCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(y.data(), y.size()).template cast<double>();
+        const Eigen::ArrayXd zCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(z.data(), z.size()).template cast<double>();
+
+        const PointArray points(xCast, yCast, zCast);
+        return Result(IntrinsicsEstimator::estimate(points));
     }
 
-    Intrinsics train(const PointCloud::Float &points) noexcept {
-        const auto size = static_cast<Eigen::Index>(points.x.size());
-
-        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(points.x.data(), size).cast<double>();
-        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXf>(points.y.data(), size).cast<double>();
-        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(points.z.data(), size).cast<double>();
-
-        const Intrinsics result = train(xArray, yArray, zArray);
-        PRINT_PROFILE_REPORT();
-
-        return result;
-    }
-
-    Intrinsics train(const PointCloud::Double &points) noexcept {
-        const auto size = static_cast<Eigen::Index>(points.x.size());
-
-        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
-        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
-        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
-
-        const Intrinsics result = train(xArray, yArray, zArray);
-        PRINT_PROFILE_REPORT();
-
-        return result;
-    }
-
-    DebugIntrinsics debugTrain(const Eigen::ArrayXd &xArray, const Eigen::ArrayXd &yArray, const Eigen::ArrayXd &zArray) noexcept {
+    template <typename Scalar>
+    Result<DebugIntrinsics> debugTrain(
+        const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
+    ) noexcept {
         PROFILE_SCOPE("TOTAL");
 
-        if (xArray.size() == 0 || yArray.size() == 0 || zArray.size() == 0) {
-            return DebugIntrinsics(0);
+        if (x.empty() || y.empty() || z.empty()) {
+            return Result<DebugIntrinsics>(Status::error(ErrorCode::EMPTY_POINT_CLOUD));
         }
 
-        const PointArray points(xArray, yArray, zArray);
-        return IntrinsicsEstimator::debugEstimate(points);
+        const Eigen::ArrayXd xCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(x.data(), x.size()).template cast<double>();
+        const Eigen::ArrayXd yCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(y.data(), y.size()).template cast<double>();
+        const Eigen::ArrayXd zCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(z.data(), z.size()).template cast<double>();
+
+        const PointArray points(xCast, yCast, zCast);
+        return Result(IntrinsicsEstimator::debugEstimate(points));
     }
 
-    DebugIntrinsics debugTrain(const PointCloud::Float &points) noexcept {
-        const auto size = static_cast<Eigen::Index>(points.x.size());
-
-        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXf>(points.x.data(), size).cast<double>();
-        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXf>(points.y.data(), size).cast<double>();
-        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXf>(points.z.data(), size).cast<double>();
-
-        const DebugIntrinsics result = debugTrain(xArray, yArray, zArray);
+    Result<Intrinsics> train(const PointCloud::Float &points) noexcept {
+        const auto result = train(points.x, points.y, points.z);
         PRINT_PROFILE_REPORT();
 
         return result;
     }
 
-    DebugIntrinsics debugTrain(const PointCloud::Double &points) noexcept {
-        const auto size = static_cast<Eigen::Index>(points.x.size());
+    Result<Intrinsics> train(const PointCloud::Double &points) noexcept {
+        const auto result = train(points.x, points.y, points.z);
+        PRINT_PROFILE_REPORT();
 
-        const Eigen::ArrayXd xArray = Eigen::Map<const Eigen::ArrayXd>(points.x.data(), size);
-        const Eigen::ArrayXd yArray = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
-        const Eigen::ArrayXd zArray = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
+        return result;
+    }
 
-        const DebugIntrinsics result = debugTrain(xArray, yArray, zArray);
+    Result<DebugIntrinsics> debugTrain(const PointCloud::Float &points) noexcept {
+        const auto result = debugTrain(points.x, points.y, points.z);
+        PRINT_PROFILE_REPORT();
+
+        return result;
+    }
+
+    Result<DebugIntrinsics> debugTrain(const PointCloud::Double &points) noexcept {
+        const auto result = debugTrain(points.x, points.y, points.z);
         PRINT_PROFILE_REPORT();
 
         return result;

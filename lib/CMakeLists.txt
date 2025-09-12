@@ -122,6 +122,9 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         src/AliceString.cpp
         include/accurate_ri/AliceString.h
         include/accurate_ri/Api.h
+        include/accurate_ri/Result.h
+        src/utils/Error.h
+        src/Result.cpp
 )
 
 set(_accurate_ri_private_include_dirs
