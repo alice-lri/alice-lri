@@ -17,8 +17,10 @@ namespace accurate_ri {
     ) noexcept;
     ACCURATE_RI_API PointCloud::Double unProjectToPointCloud(const Intrinsics &intrinsics, const RangeImage &rangeImage) noexcept;
 
-    ACCURATE_RI_API Intrinsics intrinsicsFromJsonStr(const AliceString& json) noexcept;
+    ACCURATE_RI_API Result<Intrinsics> intrinsicsFromJsonStr(const AliceString &json) noexcept;
     ACCURATE_RI_API AliceString intrinsicsToJsonStr(const Intrinsics &result, int32_t indent = -1) noexcept;
-    ACCURATE_RI_API Intrinsics intrinsicsFromJsonFile(const char *path) noexcept;
-    ACCURATE_RI_API void intrinsicsToJsonFile(const Intrinsics &result, const char *outputPath, int32_t indent = -1) noexcept;
+    ACCURATE_RI_API Result<Intrinsics> intrinsicsFromJsonFile(const char *path) noexcept;
+    ACCURATE_RI_API Status intrinsicsToJsonFile(
+        const Intrinsics &result, const char *outputPath, int32_t indent = -1
+    ) noexcept;
 }

@@ -9,16 +9,16 @@
 
 namespace accurate_ri {
     template <typename Scalar>
-    Result<bool> validateInput(
+    Status validateInput(
         const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
     ) noexcept {
         const bool equalSizes = x.size() == y.size() && y.size() == z.size();
         if (!equalSizes) {
-            return Result<bool>(Status::error(ErrorCode::MISMATCHED_SIZES));
+            return Status::error(ErrorCode::MISMATCHED_SIZES);
         }
 
         if (x.empty() || y.empty() || z.empty()) {
-            return Result<bool>(Status::error(ErrorCode::EMPTY_POINT_CLOUD));
+            return Status::error(ErrorCode::EMPTY_POINT_CLOUD);
         }
 
         const Eigen::ArrayXd xCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(x.data(), x.size()).template cast<double>();
@@ -26,19 +26,19 @@ namespace accurate_ri {
         const Eigen::ArrayXd zCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(z.data(), z.size()).template cast<double>();
 
         if ((xCast.square() + yCast.square()).minCoeff() <= 0) {
-            return Result<bool>(Status::error(ErrorCode::RANGES_XY_ZERO));
+            return Status::error(ErrorCode::RANGES_XY_ZERO);
         }
 
-        return Result(true);
+        return Status::ok();
     }
 
     template <typename Scalar>
     Result<PointArray> validateAndBuildPointArray(
         const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
     ) noexcept {
-        const auto validation = validateInput(x, y, z);
-        if (!validation) {
-            return Result<PointArray>(validation.status());
+        const auto validationStatus = validateInput(x, y, z);
+        if (!validationStatus) {
+            return Result<PointArray>(validationStatus);
         }
 
         const Eigen::ArrayXd xCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(x.data(), x.size()).template cast<double>();
@@ -114,9 +114,9 @@ namespace accurate_ri {
 
     Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) noexcept {
         try {
-            const auto validation = validateInput(points.x, points.y, points.z);
-            if (!validation) {
-                return Result<RangeImage>(validation.status());
+            const auto validationStatus = validateInput(points.x, points.y, points.z);
+            if (!validationStatus) {
+                return Result<RangeImage>(validationStatus);
             }
 
             return Result(RangeImageUtils::projectToRangeImage(intrinsics, points));
@@ -127,9 +127,9 @@ namespace accurate_ri {
 
     Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points) noexcept {
         try {
-            const auto validation = validateInput(points.x, points.y, points.z);
-            if (!validation) {
-                return Result<RangeImage>(validation.status());
+            const auto validationStatus = validateInput(points.x, points.y, points.z);
+            if (!validationStatus) {
+                return Result<RangeImage>(validationStatus);
             }
 
             return Result(RangeImageUtils::projectToRangeImage(intrinsics, points));
@@ -142,9 +142,12 @@ namespace accurate_ri {
         return RangeImageUtils::unProjectToPointCloud(intrinsics, rangeImage);
     }
 
-    // TODO handle exceptions and so on
-    Intrinsics intrinsicsFromJsonStr(const AliceString &json) noexcept {
-        return intrinsicsFromJson(json);
+    Result<Intrinsics> intrinsicsFromJsonStr(const AliceString &json) noexcept {
+        try {
+            return Result(intrinsicsFromJson(json));
+        } catch (const std::exception &e) {
+            return Result<Intrinsics>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+        }
     }
 
     AliceString intrinsicsToJsonStr(const Intrinsics &result, const int32_t indent) noexcept {
@@ -152,16 +155,33 @@ namespace accurate_ri {
         return AliceString(json.c_str());
     }
 
-    Intrinsics intrinsicsFromJsonFile(const char *path) noexcept {
-        std::ifstream inFile(path);
-        nlohmann::json json;
-        inFile >> json;
-        return intrinsicsFromJson(json);
+    Result<Intrinsics> intrinsicsFromJsonFile(const char *path) noexcept {
+        try {
+            std::ifstream inFile;
+            inFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
+            inFile.open(path, std::ifstream::in);
+
+            nlohmann::json json;
+            inFile >> json;
+
+            return Result(intrinsicsFromJson(json));
+        } catch (const std::exception &e) {
+            return Result<Intrinsics>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+        }
     }
 
-    void intrinsicsToJsonFile(const Intrinsics &result, const char *outputPath, const int32_t indent) noexcept {
-        const nlohmann::json json = intrinsicsToJson(result);
-        std::ofstream outFile(outputPath);
-        outFile << json.dump(indent);
+    Status intrinsicsToJsonFile(const Intrinsics &result, const char *outputPath, const int32_t indent) noexcept {
+        try {
+            const nlohmann::json json = intrinsicsToJson(result);
+            std::ofstream outFile;
+
+            outFile.exceptions(std::ofstream::failbit | std::ofstream::badbit);
+            outFile.open(outputPath, std::ofstream::out | std::ofstream::trunc);
+            outFile << json.dump(indent);
+
+            return Status::ok();
+        } catch (const std::exception &e) {
+            return Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what()));
+        }
     }
 }

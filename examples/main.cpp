@@ -84,8 +84,7 @@ int main(int argc, char **argv) {
     const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
     // const accurate_ri::PointCloud::Double cloud;
     // const accurate_ri::Result<accurate_ri::Intrinsics> intrinsics = accurate_ri::train(cloud);
-    const auto parsed = accurate_ri::intrinsicsFromJsonFile(outputPath->data());
-    const accurate_ri::Result<accurate_ri::Intrinsics> intrinsics = accurate_ri::Result(parsed);
+    const auto intrinsics = accurate_ri::intrinsicsFromJsonFile(outputPath->data());
     if (!intrinsics) {
         std::cerr << intrinsics.status().message.c_str();
         return 1;
@@ -96,7 +95,11 @@ int main(int argc, char **argv) {
     std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
 
     if (outputPath) {
-        accurate_ri::intrinsicsToJsonFile(*intrinsics, outputPath->data(), 4);
+        const auto status = accurate_ri::intrinsicsToJsonFile(*intrinsics, outputPath->data(), 4);
+        if (!status) {
+            std::cerr << status.message.c_str();
+            return 1;
+        }
     }
 
     const auto jsonStr = accurate_ri::intrinsicsToJsonStr(*intrinsics);
