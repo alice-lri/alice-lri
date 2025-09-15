@@ -1,4 +1,3 @@
-# TODO define release mode where we disable eigen debug and optimize the code for the native platform and so on
 set(CMAKE_CXX_STANDARD 20)
 option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
 
