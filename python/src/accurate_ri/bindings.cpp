@@ -48,8 +48,9 @@ PYBIND11_MODULE(_accurate_ri, m) {
 
     py::class_<accurate_ri::Intrinsics>(m, "Intrinsics")
         .def(py::init<int32_t>())
-        .def("scanline_at", py::overload_cast<int32_t>(&accurate_ri::Intrinsics::scanlineAt), py::return_value_policy::reference_internal)
-        .def("scanlines_count", &accurate_ri::Intrinsics::scanlinesCount);
+        .def_property_readonly("scanlines", [](const accurate_ri::Intrinsics& self) {
+            return std::vector(self.scanlines.begin(), self.scanlines.end());
+        });
 
     py::class_<accurate_ri::Interval>(m, "Interval")
         .def(py::init<>())
@@ -69,38 +70,31 @@ PYBIND11_MODULE(_accurate_ri, m) {
         .def_readwrite("lower_line", &accurate_ri::ScanlineAngleBounds::lowerLine)
         .def_readwrite("upper_line", &accurate_ri::ScanlineAngleBounds::upperLine);
 
-    // py::class_<accurate_ri::DebugScanline>(m, "DebugScanline")
-    //     .def(py::init<>())
-    //     .def_readwrite("vertical_offset", &accurate_ri::DebugScanline::verticalOffset)
-    //     .def_readwrite("vertical_angle", &accurate_ri::DebugScanline::verticalAngle)
-    //     .def_readwrite("horizontal_offset", &accurate_ri::DebugScanline::horizontalOffset)
-    //     .def_readwrite("azimuthal_offset", &accurate_ri::DebugScanline::azimuthalOffset)
-    //     .def_readwrite("resolution", &accurate_ri::DebugScanline::resolution)
-    //     .def_readwrite("uncertainty", &accurate_ri::DebugScanline::uncertainty)
-    //     .def_readwrite("hough_votes", &accurate_ri::DebugScanline::houghVotes)
-    //     .def_readwrite("hough_hash", &accurate_ri::DebugScanline::houghHash)
-    //     .def_readwrite("points_count", &accurate_ri::DebugScanline::pointsCount)
-    //     .def_readwrite("theoretical_angle_bounds", &accurate_ri::DebugScanline::theoreticalAngleBounds)
-    //     .def_readwrite("vertical_heuristic", &accurate_ri::DebugScanline::verticalHeuristic)
-    //     .def_readwrite("horizontal_heuristic", &accurate_ri::DebugScanline::horizontalHeuristic);
+    py::class_<accurate_ri::DebugScanline>(m, "DebugScanline")
+        .def(py::init<>())
+        .def_readwrite("vertical_offset", &accurate_ri::DebugScanline::verticalOffset)
+        .def_readwrite("vertical_angle", &accurate_ri::DebugScanline::verticalAngle)
+        .def_readwrite("horizontal_offset", &accurate_ri::DebugScanline::horizontalOffset)
+        .def_readwrite("azimuthal_offset", &accurate_ri::DebugScanline::azimuthalOffset)
+        .def_readwrite("resolution", &accurate_ri::DebugScanline::resolution)
+        .def_readwrite("uncertainty", &accurate_ri::DebugScanline::uncertainty)
+        .def_readwrite("hough_votes", &accurate_ri::DebugScanline::houghVotes)
+        .def_readwrite("hough_hash", &accurate_ri::DebugScanline::houghHash)
+        .def_readwrite("points_count", &accurate_ri::DebugScanline::pointsCount)
+        .def_readwrite("theoretical_angle_bounds", &accurate_ri::DebugScanline::theoreticalAngleBounds)
+        .def_readwrite("vertical_heuristic", &accurate_ri::DebugScanline::verticalHeuristic)
+        .def_readwrite("horizontal_heuristic", &accurate_ri::DebugScanline::horizontalHeuristic);
 
-    // py::class_<accurate_ri::DebugIntrinsics>(m, "DebugIntrinsics")
-    //     .def(py::init<int32_t>())
-    //     .def(py::init<int32_t, int32_t, int32_t, int32_t, accurate_ri::EndReason>())
-    //     // Don't expose scanlines directly - use methods instead
-    //     .def("scanlines_count", [](const accurate_ri::DebugIntrinsics& self) -> size_t {
-    //         return self.scanlines.size();
-    //     }, "Get the number of scanlines")
-    //     .def("get_scanline", [](const accurate_ri::DebugIntrinsics& self, size_t index) -> accurate_ri::DebugScanline {
-    //         if (index >= self.scanlines.size()) {
-    //             throw py::index_error("Scanline index out of range");
-    //         }
-    //         return self.scanlines[index];
-    //     }, "Get a specific scanline by index")
-    //     .def_readwrite("vertical_iterations", &accurate_ri::DebugIntrinsics::verticalIterations)
-    //     .def_readwrite("unassigned_points", &accurate_ri::DebugIntrinsics::unassignedPoints)
-    //     .def_readwrite("points_count", &accurate_ri::DebugIntrinsics::pointsCount)
-    //     .def_readwrite("end_reason", &accurate_ri::DebugIntrinsics::endReason);
+    py::class_<accurate_ri::DebugIntrinsics>(m, "DebugIntrinsics")
+        .def(py::init<int32_t>())
+        .def(py::init<int32_t, int32_t, int32_t, int32_t, accurate_ri::EndReason>())
+        .def_property_readonly("scanlines", [](const accurate_ri::DebugIntrinsics& self) {
+            return std::vector(self.scanlines.begin(), self.scanlines.end());
+        })
+        .def_readwrite("vertical_iterations", &accurate_ri::DebugIntrinsics::verticalIterations)
+        .def_readwrite("unassigned_points", &accurate_ri::DebugIntrinsics::unassignedPoints)
+        .def_readwrite("points_count", &accurate_ri::DebugIntrinsics::pointsCount)
+        .def_readwrite("end_reason", &accurate_ri::DebugIntrinsics::endReason);
 
     // RangeImage class
     py::class_<accurate_ri::RangeImage>(m, "RangeImage")
@@ -164,23 +158,23 @@ PYBIND11_MODULE(_accurate_ri, m) {
     }, py::arg("x"), py::arg("y"), py::arg("z"),
        "Estimate intrinsics from double vectors");
 
-    // m.def("debug_train", [&unwrap_result](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
-    //     // Convert std::vector to AliceArray
-    //     accurate_ri::PointCloud::Float cloud;
-    //     cloud.x = accurate_ri::AliceArray<float>(x.data(), x.size());
-    //     cloud.y = accurate_ri::AliceArray<float>(y.data(), y.size());
-    //     cloud.z = accurate_ri::AliceArray<float>(z.data(), z.size());
-    //     return unwrap_result(accurate_ri::debugTrain(cloud));
-    // }, "Estimate intrinsics from float vectors with debug info");
-    //
-    // m.def("debug_train", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
-    //     // Convert std::vector to AliceArray
-    //     accurate_ri::PointCloud::Double cloud;
-    //     cloud.x = accurate_ri::AliceArray<double>(x.data(), x.size());
-    //     cloud.y = accurate_ri::AliceArray<double>(y.data(), y.size());
-    //     cloud.z = accurate_ri::AliceArray<double>(z.data(), z.size());
-    //     return unwrap_result(accurate_ri::debugTrain(cloud));
-    // }, "Estimate intrinsics from double vectors with debug info");
+    m.def("debug_train", [&unwrap_result](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
+        // Convert std::vector to AliceArray
+        accurate_ri::PointCloud::Float cloud;
+        cloud.x = accurate_ri::AliceArray<float>(x.data(), x.size());
+        cloud.y = accurate_ri::AliceArray<float>(y.data(), y.size());
+        cloud.z = accurate_ri::AliceArray<float>(z.data(), z.size());
+        return unwrap_result(accurate_ri::debugTrain(cloud));
+    }, "Estimate intrinsics from float vectors with debug info");
+
+    m.def("debug_train", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
+        // Convert std::vector to AliceArray
+        accurate_ri::PointCloud::Double cloud;
+        cloud.x = accurate_ri::AliceArray<double>(x.data(), x.size());
+        cloud.y = accurate_ri::AliceArray<double>(y.data(), y.size());
+        cloud.z = accurate_ri::AliceArray<double>(z.data(), z.size());
+        return unwrap_result(accurate_ri::debugTrain(cloud));
+    }, "Estimate intrinsics from double vectors with debug info");
 
     m.def("project_to_range_image", [&unwrap_result](const accurate_ri::Intrinsics& intr, const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
         // Convert std::vector to AliceArray

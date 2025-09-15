@@ -26,8 +26,8 @@ namespace accurate_ri {
         nlohmann::json j;
         j["scanlines"] = nlohmann::json::array();
 
-        for (int i = 0; i < intrinsics.scanlinesCount(); ++i) {
-            j["scanlines"].push_back(scanlineToJson(intrinsics.scanlineAt(i)));
+        for (int i = 0; i < intrinsics.scanlines.size(); ++i) {
+            j["scanlines"].push_back(scanlineToJson(intrinsics.scanlines[i]));
         }
 
         return j;
@@ -36,8 +36,8 @@ namespace accurate_ri {
     Intrinsics intrinsicsFromJson(const nlohmann::json &j) {
         Intrinsics intrinsics(j.at("scanlines").size());
 
-        for (int i = 0; i < intrinsics.scanlinesCount(); ++i) {
-            intrinsics.scanlineAt(i) = scanlineFromJson(j.at("scanlines")[i]);
+        for (int i = 0; i < intrinsics.scanlines.size(); ++i) {
+            intrinsics.scanlines[i] = scanlineFromJson(j.at("scanlines")[i]);
         }
 
         return intrinsics;

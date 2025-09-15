@@ -4,7 +4,36 @@ Python bindings for the AccurateRI C++ library
 from __future__ import annotations
 import numpy
 import typing
-__all__: list[str] = ['ALL_ASSIGNED', 'EMPTY_POINT_CLOUD', 'EndReason', 'ErrorCode', 'INTERNAL_ERROR', 'Interval', 'Intrinsics', 'MAX_ITERATIONS', 'MISMATCHED_SIZES', 'NONE', 'NO_MORE_PEAKS', 'RANGES_XY_ZERO', 'RangeImage', 'Scanline', 'ScanlineAngleBounds', 'ValueConfInterval', 'error_message', 'intrinsics_from_json_file', 'intrinsics_from_json_str', 'intrinsics_to_json_file', 'intrinsics_to_json_str', 'project_to_range_image', 'train', 'unproject_to_point_cloud']
+__all__: list[str] = ['ALL_ASSIGNED', 'DebugIntrinsics', 'DebugScanline', 'EMPTY_POINT_CLOUD', 'EndReason', 'ErrorCode', 'INTERNAL_ERROR', 'Interval', 'Intrinsics', 'MAX_ITERATIONS', 'MISMATCHED_SIZES', 'NONE', 'NO_MORE_PEAKS', 'RANGES_XY_ZERO', 'RangeImage', 'Scanline', 'ScanlineAngleBounds', 'ValueConfInterval', 'debug_train', 'error_message', 'intrinsics_from_json_file', 'intrinsics_from_json_str', 'intrinsics_to_json_file', 'intrinsics_to_json_str', 'project_to_range_image', 'train', 'unproject_to_point_cloud']
+class DebugIntrinsics:
+    end_reason: EndReason
+    points_count: int
+    unassigned_points: int
+    vertical_iterations: int
+    @typing.overload
+    def __init__(self, arg0: int) -> None:
+        ...
+    @typing.overload
+    def __init__(self, arg0: int, arg1: int, arg2: int, arg3: int, arg4: EndReason) -> None:
+        ...
+    @property
+    def scanlines(self) -> list[DebugScanline]:
+        ...
+class DebugScanline:
+    azimuthal_offset: float
+    horizontal_heuristic: bool
+    horizontal_offset: float
+    hough_hash: int
+    hough_votes: int
+    points_count: int
+    resolution: int
+    theoretical_angle_bounds: ScanlineAngleBounds
+    uncertainty: float
+    vertical_angle: ValueConfInterval
+    vertical_heuristic: bool
+    vertical_offset: ValueConfInterval
+    def __init__(self) -> None:
+        ...
 class EndReason:
     """
     Members:
@@ -105,9 +134,8 @@ class Interval:
 class Intrinsics:
     def __init__(self, arg0: int) -> None:
         ...
-    def scanline_at(self, arg0: int) -> Scanline:
-        ...
-    def scanlines_count(self) -> int:
+    @property
+    def scanlines(self) -> list[Scanline]:
         ...
 class RangeImage:
     def __array__(self) -> numpy.ndarray[numpy.float64]:
@@ -147,6 +175,16 @@ class ValueConfInterval:
     value: float
     def __init__(self) -> None:
         ...
+@typing.overload
+def debug_train(arg0: list[float], arg1: list[float], arg2: list[float]) -> DebugIntrinsics:
+    """
+    Estimate intrinsics from float vectors with debug info
+    """
+@typing.overload
+def debug_train(arg0: list[float], arg1: list[float], arg2: list[float]) -> DebugIntrinsics:
+    """
+    Estimate intrinsics from double vectors with debug info
+    """
 def error_message(arg0: ErrorCode) -> str:
     """
     Get error message for error code

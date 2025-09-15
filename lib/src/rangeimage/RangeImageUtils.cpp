@@ -54,14 +54,14 @@ namespace accurate_ri::RangeImageUtils {
     PointCloud::Double unProjectToPointCloud(const Intrinsics &intrinsics, const RangeImage &image) {
         PointCloud::Double result;
         const double *const rangeImageData = image.data();
-        const Scanline* const scanlines = intrinsics.scanlines().data();
+        const Scanline* const scanlines = intrinsics.scanlines.data();
 
         for (int32_t row = 0; row < image.height(); ++row) {
             const int32_t scanlineIdx = static_cast<int32_t>(image.height()) - row - 1;
             const Scanline &scanline = scanlines[scanlineIdx];
 
             for (int32_t col = 0; col < image.width(); ++col) {
-                const int32_t flatIdx = row * image.width() + col;
+                const uint32_t flatIdx = row * image.width() + col;
                 const double range = rangeImageData[flatIdx];
 
                 if (range <= 0) {
@@ -98,8 +98,8 @@ namespace accurate_ri::RangeImageUtils {
         Eigen::ArrayXd correctedThetas(phis.size());
         Eigen::ArrayXi scanlinesByPoints(phis.size());
 
-        const Scanline* const scanlinesData = intrinsics.scanlines().data();
-        const int32_t scanlinesCount = intrinsics.scanlinesCount();
+        const Scanline* const scanlinesData = intrinsics.scanlines.data();
+        const uint64_t scanlinesCount = intrinsics.scanlines.size();
         const std::span scanlines(scanlinesData, scanlinesCount);
 
         for (int32_t pointIdx = 0; pointIdx < phis.size(); ++pointIdx) {
@@ -146,12 +146,12 @@ namespace accurate_ri::RangeImageUtils {
         const Eigen::ArrayXd &correctedThetas
     ) {
         const int32_t width = calculateLcmHorizontalResolution(intrinsics);
-        const int32_t height = intrinsics.scanlinesCount();
+        const int32_t height = static_cast<int32_t>(intrinsics.scanlines.size());
         RangeImage rangeImage(width, height, 0);
         double *rangeImageData = rangeImage.data();
 
         for (int32_t pointIdx = 0; pointIdx < ranges.size(); ++pointIdx) {
-            const uint32_t row = height - scanlinesByPoints(pointIdx) - 1;
+            const int32_t row = height - scanlinesByPoints(pointIdx) - 1;
             const double normalizedTheta =  correctedThetas(pointIdx) / (2 * std::numbers::pi);
             auto col = static_cast<int32_t>(std::round(normalizedTheta * width));
 
@@ -173,8 +173,7 @@ namespace accurate_ri::RangeImageUtils {
 
     inline int32_t calculateLcmHorizontalResolution(const Intrinsics &intrinsics) {
         int32_t result = 1;
-        for (int i = 0; i < intrinsics.scanlinesCount(); ++i) {
-            const auto &scanline = intrinsics.scanlineAt(i);
+        for (const auto & scanline : intrinsics.scanlines) {
             if (scanline.resolution == 0) {
                 continue;
             }

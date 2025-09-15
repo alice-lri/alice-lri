@@ -13,7 +13,7 @@ namespace accurate_ri {
             const auto& verticalScanline = vertical.scanlinesAssignations.scanlines[i];
             const auto& horizontalScanline = horizontal.scanlines[i];
 
-            intrinsics.scanlineAt(i) = makeScanline(verticalScanline, horizontalScanline);
+            intrinsics.scanlines[i] = makeScanline(verticalScanline, horizontalScanline);
         }
 
         return intrinsics;

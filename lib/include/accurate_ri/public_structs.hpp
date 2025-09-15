@@ -11,16 +11,8 @@ namespace accurate_ri {
     };
 
     struct ACCURATE_RI_API Intrinsics {
-    private:
-        AliceArray<Scanline> scanlines_;
-
-    public:
-        explicit Intrinsics(const int32_t scanlineCount) noexcept : scanlines_(scanlineCount) { }
-
-        Scanline &scanlineAt(const int32_t idx) noexcept { return scanlines_[idx]; }
-        [[nodiscard]] const Scanline &scanlineAt(const int32_t idx) const noexcept { return scanlines_[idx]; }
-        [[nodiscard]] uint64_t scanlinesCount() const noexcept { return scanlines_.size(); }
-        [[nodiscard]] const AliceArray<Scanline> &scanlines() const noexcept { return scanlines_; }
+        AliceArray<Scanline> scanlines;
+        explicit Intrinsics(const int32_t scanlineCount) noexcept : scanlines(scanlineCount) { }
     };
 
     struct ACCURATE_RI_API RangeImage {
