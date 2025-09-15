@@ -1,5 +1,5 @@
 [build-system]
-requires = ["scikit-build-core", "pybind11"]
+requires = ["scikit-build-core", "pybind11", "pybind11-stubgen"]
 build-backend = "scikit_build_core.build"
 
 [project]
@@ -11,6 +11,18 @@ authors = [
 ]
 license = { text = "MIT" }
 requires-python = ">=3.7"
+dependencies = [
+    "numpy>=1.20.0",
+]
+optional-dependencies.dev = [
+    "pytest>=6.0",
+    "pybind11-stubgen>=0.10.0",
+    "mypy>=0.900",
+]
+optional-dependencies.test = [
+    "pytest>=6.0",
+    "numpy>=1.20.0",
+]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Programming Language :: C++",
@@ -19,14 +31,14 @@ classifiers = [
 ]
 
 [tool.scikit-build]
-cmake.minimum-version = "3.20"
+cmake.version = ">=3.20"
 build-dir = "build"
 wheel.packages = ["accurate_ri"]
+wheel.py-api = "py3"
 
 [tool.scikit-build.cmake.define]
 CMAKE_BUILD_TYPE="Release"
 LOG_LEVEL = "NONE"
 ENABLE_TRACE_FILE="OFF"
-ENABLE_PROFILING="OFF"
+ENABLE_PROFILING="OFF" 
 LIB_MODE="ON"
-#TODO add python stubs and stuff like that, figure out how the things work low level and what scikit is solving

@@ -14,11 +14,11 @@ namespace accurate_ri {
     ) noexcept {
         const bool equalSizes = x.size() == y.size() && y.size() == z.size();
         if (!equalSizes) {
-            return Status::error(ErrorCode::MISMATCHED_SIZES);
+            return Status::buildError(ErrorCode::MISMATCHED_SIZES);
         }
 
         if (x.empty() || y.empty() || z.empty()) {
-            return Status::error(ErrorCode::EMPTY_POINT_CLOUD);
+            return Status::buildError(ErrorCode::EMPTY_POINT_CLOUD);
         }
 
         const Eigen::ArrayXd xCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(x.data(), x.size()).template cast<double>();
@@ -26,10 +26,10 @@ namespace accurate_ri {
         const Eigen::ArrayXd zCast = Eigen::Map<const Eigen::ArrayX<Scalar>>(z.data(), z.size()).template cast<double>();
 
         if ((xCast.square() + yCast.square()).minCoeff() <= 0) {
-            return Status::error(ErrorCode::RANGES_XY_ZERO);
+            return Status::buildError(ErrorCode::RANGES_XY_ZERO);
         }
 
-        return Status::ok();
+        return Status::buildOk();
     }
 
     template <typename Scalar>
@@ -62,7 +62,7 @@ namespace accurate_ri {
 
             return Result(IntrinsicsEstimator::estimate(*pointsResult));
         } catch (const std::exception &e) {
-            return Result<Intrinsics>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+            return Result<Intrinsics>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }
     }
 
@@ -80,7 +80,7 @@ namespace accurate_ri {
 
             return Result(IntrinsicsEstimator::debugEstimate(*pointsResult));
         } catch (const std::exception &e) {
-            return Result<DebugIntrinsics>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+            return Result<DebugIntrinsics>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }
     }
 
@@ -121,7 +121,7 @@ namespace accurate_ri {
 
             return Result(RangeImageUtils::projectToRangeImage(intrinsics, points));
         } catch (const std::exception &e) {
-            return Result<RangeImage>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+            return Result<RangeImage>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }
     }
 
@@ -134,7 +134,7 @@ namespace accurate_ri {
 
             return Result(RangeImageUtils::projectToRangeImage(intrinsics, points));
         } catch (const std::exception &e) {
-            return Result<RangeImage>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+            return Result<RangeImage>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }
     }
 
@@ -146,7 +146,7 @@ namespace accurate_ri {
         try {
             return Result(intrinsicsFromJson(json));
         } catch (const std::exception &e) {
-            return Result<Intrinsics>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+            return Result<Intrinsics>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }
     }
 
@@ -166,7 +166,7 @@ namespace accurate_ri {
 
             return Result(intrinsicsFromJson(json));
         } catch (const std::exception &e) {
-            return Result<Intrinsics>(Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+            return Result<Intrinsics>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }
     }
 
@@ -179,9 +179,9 @@ namespace accurate_ri {
             outFile.open(outputPath, std::ofstream::out | std::ofstream::trunc);
             outFile << json.dump(indent);
 
-            return Status::ok();
+            return Status::buildOk();
         } catch (const std::exception &e) {
-            return Status::error(ErrorCode::INTERNAL_ERROR, AliceString(e.what()));
+            return Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what()));
         }
     }
 }

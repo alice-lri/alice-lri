@@ -1,10 +1,11 @@
 #pragma once
 #include <new>
+#include "accurate_ri/Api.h"
 #include "accurate_ri/AliceString.h"
 
 namespace accurate_ri {
 
-    enum class ErrorCode {
+    enum class ACCURATE_RI_API ErrorCode {
         NONE = 0,
         MISMATCHED_SIZES,
         EMPTY_POINT_CLOUD,
@@ -12,21 +13,21 @@ namespace accurate_ri {
         INTERNAL_ERROR,
     };
 
-    AliceString errorMessage(ErrorCode code);
+    AliceString ACCURATE_RI_API errorMessage(ErrorCode code);
 
-    struct Status {
+    struct ACCURATE_RI_API Status {
         ErrorCode code = ErrorCode::NONE;
         AliceString message = AliceString();
 
-        static Status ok() noexcept { return {ErrorCode::NONE, AliceString()}; }
-        static Status error(const ErrorCode c) noexcept { return {c, errorMessage(c)}; }
-        static Status error(const ErrorCode c, const AliceString &msg) noexcept { return {c, msg}; }
+        static Status buildOk() noexcept { return {ErrorCode::NONE, AliceString()}; }
+        static Status buildError(const ErrorCode c) noexcept { return {c, errorMessage(c)}; }
+        static Status buildError(const ErrorCode c, const AliceString &msg) noexcept { return {c, msg}; }
 
         explicit operator bool() const noexcept { return code == ErrorCode::NONE; }
     };
 
     template<class T>
-    class Result {
+    class ACCURATE_RI_API Result {
     private:
         union {
             T value_;
@@ -88,7 +89,7 @@ namespace accurate_ri {
                 return status_;
             }
 
-            static Status okStatus = Status::ok();
+            static Status okStatus = Status::buildOk();
             return okStatus;
         }
 

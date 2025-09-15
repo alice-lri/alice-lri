@@ -6,8 +6,8 @@
     "include": [
         "../cmake-build-debug/lib/CMakePresets.json",
         "../cmake-build-release/lib/CMakePresets.json",
-        "../python/build/lib/CMakePresets.json",
         "../cmake-build-release-install/lib/CMakePresets.json",
-        "../cmake-build-release-debug/lib/CMakePresets.json"
+        "../cmake-build-release-debug/lib/CMakePresets.json",
+        "../python/build/lib/CMakePresets.json"
     ]
 }
