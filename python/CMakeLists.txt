@@ -11,7 +11,7 @@ find_package(pybind11 REQUIRED)
 add_subdirectory(${CMAKE_SOURCE_DIR}/../lib ${CMAKE_BINARY_DIR}/lib)
 
 # Create Python module
-pybind11_add_module(_accurate_ri accurate_ri/bindings.cpp)
+pybind11_add_module(_accurate_ri src/accurate_ri/bindings.cpp)
 target_link_libraries(_accurate_ri PRIVATE accurate_ri)
 target_include_directories(_accurate_ri PRIVATE ${CMAKE_SOURCE_DIR}/../lib/include)
 

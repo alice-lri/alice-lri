@@ -168,7 +168,7 @@ def intrinsics_to_json_str(intrinsics: Intrinsics, indent: int = -1) -> str:
     Convert intrinsics to JSON string
     """
 @typing.overload
-def project_to_range_image(arg0: Intrinsics, arg1: list[float], arg2: list[float], arg3: list[float]) -> ...:
+def project_to_range_image(arg0: Intrinsics, arg1: list[float], arg2: list[float], arg3: list[float]) -> RangeImage:
     """
     Project float cloud to range image
     """
