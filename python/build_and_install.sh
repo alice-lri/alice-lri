@@ -2,6 +2,7 @@
 set -e
 
 echo "🔧 Setting up Conan dependencies..."
+rm -Rf build
 mkdir -p build/lib
 conan install ../lib -s compiler.cppstd=gnu20 -s build_type=Release -of build/lib --build=missing
 
