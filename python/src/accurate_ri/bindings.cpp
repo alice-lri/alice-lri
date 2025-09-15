@@ -7,6 +7,8 @@
 #include <accurate_ri/accurate_ri.hpp>
 #include <accurate_ri/Result.h>
 #include <accurate_ri/AliceString.h>
+#include <sstream>
+#include <iostream>
 
 namespace py = pybind11;
 
@@ -44,12 +46,26 @@ PYBIND11_MODULE(_accurate_ri, m) {
         .def_readwrite("vertical_angle", &accurate_ri::Scanline::verticalAngle)
         .def_readwrite("horizontal_offset", &accurate_ri::Scanline::horizontalOffset)
         .def_readwrite("azimuthal_offset", &accurate_ri::Scanline::azimuthalOffset)
-        .def_readwrite("resolution", &accurate_ri::Scanline::resolution);
+        .def_readwrite("resolution", &accurate_ri::Scanline::resolution)
+        .def("__repr__", [](const accurate_ri::Scanline& self) {
+            std::ostringstream oss;
+            oss << "Scanline(vertical_offset=" << self.verticalOffset
+                << ", vertical_angle=" << self.verticalAngle
+                << ", horizontal_offset=" << self.horizontalOffset
+                << ", azimuthal_offset=" << self.azimuthalOffset
+                << ", resolution=" << self.resolution << ")";
+            return oss.str();
+        });
 
     py::class_<accurate_ri::Intrinsics>(m, "Intrinsics")
         .def(py::init<int32_t>())
         .def_property_readonly("scanlines", [](const accurate_ri::Intrinsics& self) {
             return std::vector(self.scanlines.begin(), self.scanlines.end());
+        })
+        .def("__repr__", [](const accurate_ri::Intrinsics& self) {
+            std::ostringstream oss;
+            oss << "Intrinsics(scanlines=[...])";
+            return oss.str();
         });
 
     py::class_<accurate_ri::Interval>(m, "Interval")
@@ -58,17 +74,34 @@ PYBIND11_MODULE(_accurate_ri, m) {
         .def_readwrite("upper", &accurate_ri::Interval::upper)
         .def("diff", &accurate_ri::Interval::diff)
         .def("any_contained", &accurate_ri::Interval::anyContained)
-        .def("clamp_both", &accurate_ri::Interval::clampBoth);
+        .def("clamp_both", &accurate_ri::Interval::clampBoth)
+        .def("__repr__", [](const accurate_ri::Interval& self) {
+            std::ostringstream oss;
+            oss << "Interval(lower=" << self.lower << ", upper=" << self.upper << ")";
+            return oss.str();
+        });
 
     py::class_<accurate_ri::ValueConfInterval>(m, "ValueConfInterval")
         .def(py::init<>())
         .def_readwrite("value", &accurate_ri::ValueConfInterval::value)
-        .def_readwrite("ci", &accurate_ri::ValueConfInterval::ci);
+        .def_readwrite("ci", &accurate_ri::ValueConfInterval::ci)
+        .def("__repr__", [](const accurate_ri::ValueConfInterval& self) {
+            std::ostringstream oss;
+            oss << "ValueConfInterval(value=" << self.value << ", ci=Interval(lower=" << self.ci.lower << ", upper=" << self.ci.upper << "))";
+            return oss.str();
+        });
 
     py::class_<accurate_ri::ScanlineAngleBounds>(m, "ScanlineAngleBounds")
         .def(py::init<>())
         .def_readwrite("lower_line", &accurate_ri::ScanlineAngleBounds::lowerLine)
-        .def_readwrite("upper_line", &accurate_ri::ScanlineAngleBounds::upperLine);
+        .def_readwrite("upper_line", &accurate_ri::ScanlineAngleBounds::upperLine)
+        .def("__repr__", [](const accurate_ri::ScanlineAngleBounds& self) {
+            std::ostringstream oss;
+            oss << "ScanlineAngleBounds(" <<
+                "lower_line=[" << self.lowerLine.lower << ", " << self.lowerLine.upper << "], " <<
+                "upper_line=[" << self.upperLine.lower << ", " << self.upperLine.upper << "])";
+            return oss.str();
+        });
 
     py::class_<accurate_ri::DebugScanline>(m, "DebugScanline")
         .def(py::init<>())
@@ -83,7 +116,23 @@ PYBIND11_MODULE(_accurate_ri, m) {
         .def_readwrite("points_count", &accurate_ri::DebugScanline::pointsCount)
         .def_readwrite("theoretical_angle_bounds", &accurate_ri::DebugScanline::theoreticalAngleBounds)
         .def_readwrite("vertical_heuristic", &accurate_ri::DebugScanline::verticalHeuristic)
-        .def_readwrite("horizontal_heuristic", &accurate_ri::DebugScanline::horizontalHeuristic);
+        .def_readwrite("horizontal_heuristic", &accurate_ri::DebugScanline::horizontalHeuristic)
+        .def("__repr__", [](const accurate_ri::DebugScanline& self) {
+            std::ostringstream oss;
+            oss << "DebugScanline(vertical_offset=" << self.verticalOffset.value
+                << ", vertical_angle=" << self.verticalAngle.value
+                << ", horizontal_offset=" << self.horizontalOffset
+                << ", azimuthal_offset=" << self.azimuthalOffset
+                << ", resolution=" << self.resolution
+                << ", uncertainty=" << self.uncertainty
+                << ", hough_votes=" << self.houghVotes
+                << ", hough_hash=" << self.houghHash
+                << ", points_count=" << self.pointsCount
+                << ", theoretical_angle_bounds=ScanlineAngleBounds()"
+                << ", vertical_heuristic=" << self.verticalHeuristic
+                << ", horizontal_heuristic=" << self.horizontalHeuristic << ")";
+            return oss.str();
+        });
 
     py::class_<accurate_ri::DebugIntrinsics>(m, "DebugIntrinsics")
         .def(py::init<int32_t>())
@@ -94,15 +143,28 @@ PYBIND11_MODULE(_accurate_ri, m) {
         .def_readwrite("vertical_iterations", &accurate_ri::DebugIntrinsics::verticalIterations)
         .def_readwrite("unassigned_points", &accurate_ri::DebugIntrinsics::unassignedPoints)
         .def_readwrite("points_count", &accurate_ri::DebugIntrinsics::pointsCount)
-        .def_readwrite("end_reason", &accurate_ri::DebugIntrinsics::endReason);
+        .def_readwrite("end_reason", &accurate_ri::DebugIntrinsics::endReason)
+        .def("__repr__", [](const accurate_ri::DebugIntrinsics& self) {
+            std::ostringstream oss;
+            oss << "DebugIntrinsics(scanlines=[" << self.scanlines.size() << "], vertical_iterations=" << self.verticalIterations
+                << ", unassigned_points=" << self.unassignedPoints
+                << ", points_count=" << self.pointsCount
+                << ", end_reason=" << static_cast<int>(self.endReason) << ")";
+            return oss.str();
+        });
 
     // RangeImage class
     py::class_<accurate_ri::RangeImage>(m, "RangeImage")
         .def(py::init<>())
         .def(py::init<uint32_t, uint32_t>(), py::arg("width"), py::arg("height"))
         .def(py::init<uint32_t, uint32_t, double>(), py::arg("width"), py::arg("height"), py::arg("initial_value"))
-        .def("width", &accurate_ri::RangeImage::width)
-        .def("height", &accurate_ri::RangeImage::height)
+        .def_property_readonly("width", &accurate_ri::RangeImage::width)
+        .def_property_readonly("height", &accurate_ri::RangeImage::height)
+        .def("__repr__", [](const accurate_ri::RangeImage& self) {
+            std::ostringstream oss;
+            oss << "RangeImage(width=" << self.width() << ", height=" << self.height() << ")";
+            return oss.str();
+        })
         .def("__getitem__", [](const accurate_ri::RangeImage &ri, py::tuple idx) -> double {
             if (idx.size() != 2)
                 throw py::index_error("Need 2 indices");
@@ -129,6 +191,11 @@ PYBIND11_MODULE(_accurate_ri, m) {
                 ri.data(),                                         // pointer to data
                 self                                              // keep alive
             );
+        })
+        .def("__repr__", [](const accurate_ri::RangeImage& self) {
+            std::ostringstream oss;
+            oss << "RangeImage(width=" << self.width() << ", height=" << self.height() << ")";
+            return oss.str();
         });
 
     // Main API functions with vector inputs for convenience
