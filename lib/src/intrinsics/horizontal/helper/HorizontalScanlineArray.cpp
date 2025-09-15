@@ -1,7 +1,7 @@
 #include "HorizontalScanlineArray.h"
 #include "utils/Utils.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     HorizontalScanlineArray::HorizontalScanlineArray(
         const PointArray &points, const std::vector<int> &pointsScanlinesIds, const int32_t scanlinesCount,
         const SortingCriteria sortingCriteria

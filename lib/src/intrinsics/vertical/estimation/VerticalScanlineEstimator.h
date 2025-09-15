@@ -5,7 +5,7 @@
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "point/PointArray.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     class VerticalScanlineEstimator {
     private:
         int32_t ciTooWideState = 0;
@@ -60,4 +60,4 @@ namespace accurate_ri {
             const PointArray &points, ScanlineFitResult& scanlineFit
         );
     };
-} // accurate_ri
+}

@@ -5,7 +5,7 @@
 #include "utils/logger/Logger.h"
 #include "utils/Utils.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     LRResult SegmentedMedianLinearRegressor::fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const {
         const Segments segments = segmentAndFit(x, y);
 
@@ -80,4 +80,4 @@ namespace accurate_ri {
     uint64_t SegmentedMedianLinearRegressor::Segments::count() const {
         return slopes.size();
     }
-} // accurate_ri
+}

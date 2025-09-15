@@ -1,13 +1,13 @@
-#include "accurate_ri/accurate_ri.hpp"
+#include "alice_lri/alice_lri.hpp"
 
-#include "accurate_ri/Result.h"
+#include "alice_lri/Result.h"
 #include "intrinsics/IntrinsicsEstimator.h"
 #include "rangeimage/RangeImageUtils.h"
 #include "utils/json/JsonConverters.h"
 #include "utils/logger/Logger.h"
 #include "utils/Timer.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     template <typename Scalar>
     Status validateInput(
         const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z

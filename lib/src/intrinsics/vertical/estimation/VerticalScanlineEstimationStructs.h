@@ -6,7 +6,7 @@
 #include "math/LinearRegressor.h"
 #include "math/Stats.h"
 
-namespace accurate_ri {
+namespace alice_lri {
 
     struct HeuristicScanline {
         ValueConfInterval offset;

@@ -1,11 +1,11 @@
 #pragma once
 #include <optional>
 #include <string>
-#include "accurate_ri/accurate_ri.hpp"
+#include "alice_lri/alice_lri.hpp"
 
 namespace FileUtils {
     struct Points {
-        accurate_ri::AliceArray<double> x, y, z;
+        alice_lri::AliceArray<double> x, y, z;
     };
 
     Points loadBinaryFile(const std::string &filename, const std::optional<int>& accurateDigits);

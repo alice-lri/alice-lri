@@ -15,7 +15,7 @@ set(JSON_BuildTests OFF CACHE INTERNAL "")
 find_package(Eigen3 REQUIRED)
 include_directories(Eigen3_INCLUDE_DIRS)
 
-target_link_libraries(accurate_ri PRIVATE)
+target_link_libraries(alice_lri PRIVATE)
 
 add_executable(examples main.cpp ${SRC_FILES} ${HEADER_FILES})
 add_executable(examples_sql main_sql.cpp ${SRC_FILES} ${HEADER_FILES})
@@ -24,10 +24,10 @@ add_executable(measure_times measure_times.cpp ${SRC_FILES} ${HEADER_FILES})
 add_executable(eigen_loop_vs_select eigen_loop_vs_select.cpp)
 add_executable(eigen_lazy_vs_immediate eigen_lazy_vs_immediate.cpp)
 
-target_link_libraries(examples PRIVATE accurate_ri)
-target_link_libraries(examples_sql PRIVATE accurate_ri SQLiteCpp nlohmann_json::nlohmann_json)
-target_link_libraries(examples_tran_ri PRIVATE accurate_ri)
-target_link_libraries(measure_times PRIVATE accurate_ri)
+target_link_libraries(examples PRIVATE alice_lri)
+target_link_libraries(examples_sql PRIVATE alice_lri SQLiteCpp nlohmann_json::nlohmann_json)
+target_link_libraries(examples_tran_ri PRIVATE alice_lri)
+target_link_libraries(measure_times PRIVATE alice_lri)
 
 target_include_directories(examples PRIVATE ${Eigen3_INCLUDE_DIRS})
 target_include_directories(examples_sql PRIVATE ${Eigen3_INCLUDE_DIRS})

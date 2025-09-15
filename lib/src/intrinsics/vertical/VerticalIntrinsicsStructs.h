@@ -2,10 +2,10 @@
 #include <optional>
 #include <vector>
 #include <Eigen/Core>
-#include "accurate_ri/public_structs.hpp"
+#include "alice_lri/public_structs.hpp"
 #include "hough/HoughStructs.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     struct VerticalScanline {
         uint32_t id;
         uint64_t pointsCount;

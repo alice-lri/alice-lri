@@ -2,7 +2,7 @@
 #include <numeric>
 #include "utils/Timer.h"
 
-namespace accurate_ri::Stats {
+namespace alice_lri::Stats {
     double weightedMedian(const std::span<const double> values, const std::span<const int32_t> weights) {
         const std::size_t n = values.size();
         if (n == 0 || weights.size() != n) {

@@ -1,9 +1,9 @@
 find_package(GTest REQUIRED)
 
 # Add test executable
-add_executable(accurate_ri_tests 
+add_executable(alice_lri_tests 
     tests.cpp
-    accurate_ri_tests.cpp
+    alice_lri_tests.cpp
     hough_transform_tests.cpp
     stats_tests.cpp
     vertical_intrinsics_tests.cpp
@@ -15,19 +15,19 @@ add_executable(accurate_ri_tests
 find_package(Eigen3 REQUIRED)
 
 # Include directories
-target_include_directories(accurate_ri_tests PRIVATE
+target_include_directories(alice_lri_tests PRIVATE
     ${CMAKE_SOURCE_DIR}/lib/src
     ${CMAKE_SOURCE_DIR}/lib/include
     ${EIGEN3_INCLUDE_DIR}  # Add Eigen include directory
 )
 
 # Link with the library and Google Test
-target_link_libraries(accurate_ri_tests
-    accurate_ri
+target_link_libraries(alice_lri_tests
+    alice_lri
     gtest
     gtest_main
     Eigen3::Eigen  # Link with Eigen if necessary
 )
 
 # Add the test to CTest
-add_test(NAME accurate_ri_tests COMMAND accurate_ri_tests)
+add_test(NAME alice_lri_tests COMMAND alice_lri_tests)

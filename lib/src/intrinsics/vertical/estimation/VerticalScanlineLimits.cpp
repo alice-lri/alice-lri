@@ -3,7 +3,7 @@
 #include "utils/Timer.h"
 #include "utils/Utils.h"
 
-namespace accurate_ri {
+namespace alice_lri {
 
     VerticalBounds VerticalScanlineLimits::computeErrorBounds(const PointArray &points, const double offset) {
         PROFILE_SCOPE("VerticalScanlineLimits::computeErrorBounds");
@@ -51,4 +51,4 @@ namespace accurate_ri {
 
         return { std::move(indices), std::move(mask) };
     }
-} // accurate_ri
+}

@@ -1,4 +1,4 @@
-name: accurate_ri_env
+name: alice_lri_env
 channels:
   - https://repo.anaconda.com/pkgs/main
   - https://repo.anaconda.com/pkgs/r

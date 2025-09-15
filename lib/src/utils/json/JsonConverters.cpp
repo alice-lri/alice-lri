@@ -1,6 +1,6 @@
 #include "JsonConverters.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     nlohmann::json scanlineToJson(const Scanline& scanline) {
         nlohmann::json j;
         j["verticalOffset"] = scanline.verticalOffset;
@@ -42,4 +42,4 @@ namespace accurate_ri {
 
         return intrinsics;
     }
-} // accurate_ri
+}

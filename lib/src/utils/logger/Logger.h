@@ -19,7 +19,7 @@
 #define LOG_LEVEL_ERROR 4
 #define LOG_LEVEL_NONE  5
 
-namespace accurate_ri {
+namespace alice_lri {
     enum LogLevel {
         Debug = LOG_LEVEL_DEBUG,
         Info = LOG_LEVEL_INFO,
@@ -101,25 +101,25 @@ namespace accurate_ri {
 
     // **Compile-Time Optimized Logging Macros (Now with `<<` support!)**
 #if LOG_LEVEL <= LOG_LEVEL_DEBUG
-#define LOG_DEBUG(...) accurate_ri::Logger::log(accurate_ri::Debug, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_DEBUG(...) alice_lri::Logger::log(alice_lri::Debug, __FILE__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_DEBUG(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_INFO
-#define LOG_INFO(...) accurate_ri::Logger::log(accurate_ri::Info, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_INFO(...) alice_lri::Logger::log(alice_lri::Info, __FILE__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_INFO(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_WARN
-#define LOG_WARN(...) accurate_ri::Logger::log(accurate_ri::Warn, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_WARN(...) alice_lri::Logger::log(alice_lri::Warn, __FILE__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_WARN(...) do {} while (0)
 #endif
 
 #if LOG_LEVEL <= LOG_LEVEL_ERROR
-#define LOG_ERROR(...) accurate_ri::Logger::log(accurate_ri::Error, __FILE__, __LINE__, __VA_ARGS__)
+#define LOG_ERROR(...) alice_lri::Logger::log(alice_lri::Error, __FILE__, __LINE__, __VA_ARGS__)
 #else
 #define LOG_ERROR(...) do {} while (0)
 #endif

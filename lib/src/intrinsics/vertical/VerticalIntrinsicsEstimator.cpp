@@ -11,7 +11,7 @@
 #include "intrinsics/vertical/estimation/VerticalScanlineEstimator.h"
 #include "intrinsics/vertical/estimation/VerticalScanlineLimits.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     VerticalScanlinePool VerticalIntrinsicsEstimator::init(const PointArray &points) {
         const double offsetMax = std::min(points.getRanges().minCoeff(), Constant::MAX_OFFSET) - Constant::OFFSET_STEP;
         const double offsetMin = -offsetMax;
@@ -170,4 +170,4 @@ namespace accurate_ri {
             .hough = *houghCandidate.estimation,
         };
     }
-} // namespace accurate_ri
+}

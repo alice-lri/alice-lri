@@ -3,9 +3,9 @@ requires = ["scikit-build-core", "pybind11", "pybind11-stubgen"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "accurate_ri"
+name = "alice_lri"
 version = "0.1.0"
-description = "Python bindings for AccurateRI"
+description = "Python bindings for ALICE-LRI"
 authors = [
     { name = "Samuel Soutullo", email = "s.soutullo@usc.es" }
 ]
@@ -33,7 +33,7 @@ classifiers = [
 [tool.scikit-build]
 cmake.version = ">=3.20"
 build-dir = "build"
-wheel.packages = ["accurate_ri"]
+wheel.packages = ["alice_lri"]
 wheel.py-api = "py3"
 install.components = ["python"]
 

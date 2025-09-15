@@ -7,7 +7,7 @@
 #include "intrinsics/vertical/VerticalIntrinsicsStructs.h"
 #include "point/PointArray.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     struct ResolutionOffsetLoss {
         int32_t resolution;
         double offset;
@@ -62,4 +62,4 @@ namespace accurate_ri {
             const HorizontalScanlineArray &scanlineArray
         );
     };
-} // accurate_ri
+}

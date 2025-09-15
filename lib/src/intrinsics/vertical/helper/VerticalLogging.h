@@ -8,7 +8,7 @@
 #include "hough/HoughTransform.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 
-namespace accurate_ri::VerticalLogging {
+namespace alice_lri::VerticalLogging {
 
     inline void printHeaderDebugInfo(const PointArray &points, const VerticalScanlinePool &hough) {
         LOG_INFO("==| Parameters |==");

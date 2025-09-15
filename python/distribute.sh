@@ -2,4 +2,4 @@
 set -e
 
 pip wheel . -w dist
-auditwheel repair dist/accurate_ri*.whl
+auditwheel repair dist/alice_lri*.whl

@@ -3,7 +3,7 @@
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 #include "point/PointArray.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     class VerticalIntrinsicsEstimator {
 
     public:
@@ -27,4 +27,4 @@ namespace accurate_ri {
             const std::optional<VerticalScanlineEstimation> &estimation, const ScanlineAngleBounds &angleBounds
         );
     };
-} // namespace accurate_ri
+}

@@ -1,7 +1,7 @@
 #pragma once
 #include <Eigen/Dense>
 
-namespace accurate_ri {
+namespace alice_lri {
     struct PointArrayExtraInfo {
         Eigen::ArrayXd range, rangeXy, phi, theta;
         Eigen::ArrayXd invRange, invRangeXy;

@@ -2,7 +2,7 @@
 #include "intrinsics/vertical/VerticalIntrinsicsStructs.h"
 #include "point/PointArray.h"
 
-namespace accurate_ri::VerticalScanlineLimits {
+namespace alice_lri::VerticalScanlineLimits {
 
     VerticalBounds computeErrorBounds(const PointArray &points, double offset);
 
@@ -11,5 +11,5 @@ namespace accurate_ri::VerticalScanlineLimits {
         const VerticalMargin &margin
     );
 
-} // accurate_ri
+}
 

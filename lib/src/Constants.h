@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <numbers>
 
-namespace accurate_ri::Constant {
+namespace alice_lri::Constant {
     constexpr double TWO_PI = 2.0 * std::numbers::pi;
 
     constexpr uint64_t VERTICAL_MAX_ITERATIONS = 10000;

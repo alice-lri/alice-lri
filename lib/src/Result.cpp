@@ -1,6 +1,6 @@
-#include "accurate_ri/Result.h"
+#include "alice_lri/Result.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     AliceString errorMessage(const ErrorCode code) {
         switch (code) {
             case ErrorCode::NONE:

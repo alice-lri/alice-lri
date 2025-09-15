@@ -3,9 +3,9 @@
 
 #include "Api.h"
 
-namespace accurate_ri {
+namespace alice_lri {
 
-    class ACCURATE_RI_API AliceString {
+    class ALICE_LRI_API AliceString {
     private:
         struct Impl;
         Impl* impl = nullptr;

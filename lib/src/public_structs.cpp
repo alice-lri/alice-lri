@@ -1,9 +1,9 @@
 #include <algorithm>
-#include <accurate_ri/public_structs.hpp>
+#include <alice_lri/public_structs.hpp>
 
 #include "utils/Utils.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     bool Interval::anyContained(const Interval &other) const noexcept {
         return Utils::compare(lower, other.lower) * Utils::compare(upper, other.upper) != 1;
     }

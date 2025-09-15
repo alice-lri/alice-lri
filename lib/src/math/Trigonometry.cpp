@@ -3,7 +3,7 @@
 #include <array>
 #include "Constants.h"
 
-namespace accurate_ri::Trigonometry {
+namespace alice_lri::Trigonometry {
     const std::array<double, TRIG_TABLE_SIZE>& getSinTable() {
         static const std::array<double, TRIG_TABLE_SIZE> lut = [] {
             std::array<double, TRIG_TABLE_SIZE> table{};

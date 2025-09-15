@@ -2,7 +2,7 @@
 #include "intrinsics/vertical/estimation/VerticalScanlineEstimationStructs.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     class VerticalHeuristicsEstimator {
     public:
         static std::optional<VerticalScanlineEstimation> estimate(
@@ -38,4 +38,4 @@ namespace accurate_ri {
             const VerticalScanlinePool &scanlinePool, const HeuristicScanline &scanline
         );
     };
-} // accurate_ri
+}

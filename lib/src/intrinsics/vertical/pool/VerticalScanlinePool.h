@@ -2,7 +2,7 @@
 #include "hough/HoughTransform.h"
 #include "intrinsics/vertical/VerticalIntrinsicsStructs.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     class VerticalScanlinePool {
     private:
         std::unordered_map<uint32_t, VerticalScanline> scanlineInfoMap;
@@ -59,4 +59,4 @@ namespace accurate_ri {
         void updateScanlineIds(std::vector<VerticalScanline> sortedScanlines);
 
     };
-} // accurate_ri
+}

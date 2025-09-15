@@ -1,7 +1,7 @@
 #pragma once
-#include "accurate_ri/public_structs.hpp"
+#include "alice_lri/public_structs.hpp"
 
-namespace accurate_ri::RangeImageUtils {
+namespace alice_lri::RangeImageUtils {
     RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points);
     RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points);
 

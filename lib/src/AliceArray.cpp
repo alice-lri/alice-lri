@@ -1,9 +1,9 @@
-#include "accurate_ri/AliceArray.hpp"
-#include "accurate_ri/public_structs.hpp"
+#include "alice_lri/AliceArray.hpp"
+#include "alice_lri/public_structs.hpp"
 #include <vector>
 #include <utility>
 
-namespace accurate_ri {
+namespace alice_lri {
     template<class T>
     struct AliceArray<T>::Impl {
         std::vector<T> v;

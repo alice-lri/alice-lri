@@ -5,7 +5,7 @@
 #include "intrinsics/vertical/estimation/VerticalScanlineEstimationStructs.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     class ScanlineConflictSolver {
     private:
         std::unordered_map<uint64_t, HashToConflictValue> hashesToConflictsMap;
@@ -36,4 +36,4 @@ namespace accurate_ri {
         void markAsRejectedByConflictingIds(const HoughCell &rejected, const std::span<const uint32_t> &conflictingIds);
 
     };
-} // accurate_ri
+}

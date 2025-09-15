@@ -2,7 +2,7 @@
 
 #include "intrinsics/vertical/helper/VerticalLogging.h"
 
-namespace accurate_ri {
+namespace alice_lri {
 
     ScanlineConflicts ScanlineConflictEvaluator::evaluateConflicts(
     const VerticalScanlinePool &scanlinePool, const VerticalScanlineCandidate &candidate
@@ -157,4 +157,4 @@ namespace accurate_ri {
             .conflictingScanlines = std::move(intersection.conflictingIds)
         };
     }
-} // accurate_ri
+}

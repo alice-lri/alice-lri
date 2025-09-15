@@ -3,7 +3,7 @@
 #include <numbers>
 #include "utils/Utils.h"
 
-namespace accurate_ri::HorizontalMath {
+namespace alice_lri::HorizontalMath {
 
     Eigen::ArrayXd computeDiffToIdeal(const Eigen::ArrayXd &thetas, const uint32_t resolution, const bool reconstruct) {
         const double thetaStep = 2 * std::numbers::pi / static_cast<double>(resolution);
@@ -23,4 +23,4 @@ namespace accurate_ri::HorizontalMath {
 
         return diffToIdeal;
     }
-} // accurate_ri
+}

@@ -4,7 +4,7 @@
 #include "math/LinearRegressor.h"
 #include "math/Stats.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     class SegmentedMedianLinearRegressor {
     private:
         struct Segments {
@@ -43,4 +43,4 @@ namespace accurate_ri {
 
         [[nodiscard]] Segments segmentAndFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y) const;
     };
-} // accurate_ri
+}

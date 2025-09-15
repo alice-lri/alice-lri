@@ -1,8 +1,8 @@
 #pragma once
 #include <nlohmann/json.hpp>
-#include "accurate_ri/public_structs.hpp"
+#include "alice_lri/public_structs.hpp"
 
-namespace accurate_ri {
+namespace alice_lri {
     nlohmann::json scanlineToJson(const Scanline& scanline);
     Scanline scanlineFromJson(const nlohmann::json &j);
 

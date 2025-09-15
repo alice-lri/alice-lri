@@ -4,7 +4,7 @@
 #include <Eigen/Core>
 #include <vector>
 
-namespace accurate_ri {
+namespace alice_lri {
 
 class HoughTransformTest : public ::testing::Test {
 protected:
@@ -137,4 +137,4 @@ TEST_F(HoughTransformTest, RestoreVotes) {
     }
 }
 
-} // namespace accurate_ri 
+}

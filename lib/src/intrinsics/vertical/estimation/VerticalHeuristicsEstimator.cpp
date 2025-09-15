@@ -6,7 +6,7 @@
 #include "point/PointArray.h"
 #include "utils/logger/Logger.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     std::optional<VerticalScanlineEstimation> VerticalHeuristicsEstimator::estimate(
         const PointArray &points, const VerticalScanlinePool &scanlinePool, const ScanlineLimits &scanlineLimits
     ) {
@@ -172,4 +172,4 @@ namespace accurate_ri {
 
         return VerticalMargin {.offset = offsetMargin, .angle = angleMargin};
     }
-} // accurate_ri
+}

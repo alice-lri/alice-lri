@@ -1,3 +1,0 @@
-[submodule "lib/external/osqp-eigen"]
-	path = lib/external/osqp-eigen
-	url = https://github.com/robotology/osqp-eigen.git

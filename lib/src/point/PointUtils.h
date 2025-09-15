@@ -1,11 +1,11 @@
 #pragma once
 #include "PointArray.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     class PointUtils {
     public:
         static double computeCoordsEps(const PointArray& points);
     };
 
 
-} // accurate_ri
+}

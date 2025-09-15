@@ -1,5 +1,5 @@
 #include <optional>
-#include "accurate_ri/accurate_ri.hpp"
+#include "alice_lri/alice_lri.hpp"
 #include "FileUtils.h"
 #include <vector>
 #include <algorithm>
@@ -10,7 +10,7 @@
 #include <boost/preprocessor/list/fold_right.hpp>
 
 template <typename T>
-std::vector<size_t> argsort(const accurate_ri::AliceArray<T>& v) {
+std::vector<size_t> argsort(const alice_lri::AliceArray<T>& v) {
     std::vector<size_t> indices(v.size());
     for (size_t i = 0; i < indices.size(); ++i) {
         indices[i] = i;
@@ -21,8 +21,8 @@ std::vector<size_t> argsort(const accurate_ri::AliceArray<T>& v) {
 }
 
 template <typename T>
-accurate_ri::AliceArray<T> apply_argsort(const accurate_ri::AliceArray<T>& data, const std::vector<size_t>& indices) {
-    accurate_ri::AliceArray<T> sorted;
+alice_lri::AliceArray<T> apply_argsort(const alice_lri::AliceArray<T>& data, const std::vector<size_t>& indices) {
+    alice_lri::AliceArray<T> sorted;
     sorted.reserve(indices.size());
     for (size_t idx : indices) {
         sorted.emplace_back(data[idx]);
@@ -32,7 +32,7 @@ accurate_ri::AliceArray<T> apply_argsort(const accurate_ri::AliceArray<T>& data,
 
 template <typename T>
 std::vector<size_t> lex_argsort(
-    const accurate_ri::AliceArray<T>& x, const accurate_ri::AliceArray<T>& y, const accurate_ri::AliceArray<T>& z
+    const alice_lri::AliceArray<T>& x, const alice_lri::AliceArray<T>& y, const alice_lri::AliceArray<T>& z
 ) {
     std::vector<size_t> indices(x.size());
     std::iota(indices.begin(), indices.end(), 0);
@@ -53,18 +53,18 @@ int main(int argc, char **argv) {
     FileUtils::Points targetPoints = FileUtils::loadBinaryFile(targetPath, std::nullopt);
     // FileUtils::Points targetPoints = FileUtils::loadBinaryFile(trainPath, std::nullopt);
 
-    const accurate_ri::PointCloud::Double trainCloud(std::move(trainPoints.x), std::move(trainPoints.y), std::move(trainPoints.z));
-    const accurate_ri::PointCloud::Double targetCloud(std::move(targetPoints.x), std::move(targetPoints.y), std::move(targetPoints.z));
+    const alice_lri::PointCloud::Double trainCloud(std::move(trainPoints.x), std::move(trainPoints.y), std::move(trainPoints.z));
+    const alice_lri::PointCloud::Double targetCloud(std::move(targetPoints.x), std::move(targetPoints.y), std::move(targetPoints.z));
 
-    accurate_ri::Result<accurate_ri::Intrinsics> result = accurate_ri::train(trainCloud);
+    alice_lri::Result<alice_lri::Intrinsics> result = alice_lri::train(trainCloud);
 
     if (!result) {
         std::cout << result.status().message.c_str();
         return 1;
     }
 
-    const auto ri = accurate_ri::projectToRangeImage(*result, targetCloud);
-    const accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(*result, *ri);
+    const auto ri = alice_lri::projectToRangeImage(*result, targetCloud);
+    const alice_lri::PointCloud::Double reconstructed = alice_lri::unProjectToPointCloud(*result, *ri);
 
     const auto originalSort = lex_argsort(targetCloud.x, targetCloud.y, targetCloud.z);
     const auto reconstructedSort = lex_argsort(reconstructed.x, reconstructed.y, reconstructed.z);

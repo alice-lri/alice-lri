@@ -3,7 +3,7 @@
 #include <Eigen/Core>
 #include <vector>
 
-namespace accurate_ri {
+namespace alice_lri {
     class UtilsTest : public ::testing::Test {
     protected:
         void SetUp() override {
@@ -50,4 +50,4 @@ namespace accurate_ri {
         EXPECT_EQ(indices.size(), expectedIndices.size());
         EXPECT_TRUE(indices.isApprox(expectedIndices));
     }
-} // namespace accurate_ri
+}

@@ -2,9 +2,9 @@
 #include <cstdint>
 #include "Api.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     template<class T>
-    class ACCURATE_RI_API AliceArray {
+    class ALICE_LRI_API AliceArray {
     private:
         struct Impl;
         Impl* impl = nullptr;

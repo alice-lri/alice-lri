@@ -12,7 +12,7 @@
 #include "utils/Timer.h"
 #include "utils/Utils.h"
 
-namespace accurate_ri {
+namespace alice_lri {
 
     std::optional<VerticalScanlineEstimation> VerticalScanlineEstimator::estimate(
         const PointArray &points, const VerticalScanlinePool &scanlinePool,
@@ -210,4 +210,4 @@ namespace accurate_ri {
             .limits = std::move(*scanlineFit.limits)
         };
     }
-} // accurate_ri
+}

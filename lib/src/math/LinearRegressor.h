@@ -3,7 +3,7 @@
 #include <Eigen/Core>
 
 
-namespace accurate_ri {
+namespace alice_lri {
     struct WLSResult {
         double slope;
         double intercept;
@@ -29,4 +29,4 @@ namespace accurate_ri {
         LRResult fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, bool computeMse = false);
         WLSResult wlsBoundsFit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const Eigen::ArrayXd &bounds);
     }
-} // accurate_ri
+}

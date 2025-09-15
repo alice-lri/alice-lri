@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <map>
-#include "accurate_ri/accurate_ri.hpp"
+#include "alice_lri/alice_lri.hpp"
 #include "FileUtils.h"
 
 struct TimingResult {
@@ -99,13 +99,13 @@ private:
             
             // Load the point cloud
             FileUtils::Points points = FileUtils::loadBinaryFile(filePath, std::nullopt);
-            const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
+            const alice_lri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
             
             std::cout << "  Loaded " << cloud.x.size() << " points" << std::endl;
             
             // Measure training time
             auto start = std::chrono::high_resolution_clock::now();
-            auto intrinsics = accurate_ri::train(cloud);
+            auto intrinsics = alice_lri::train(cloud);
 
             if (!intrinsics) {
                 std::cerr << intrinsics.status().message.c_str() << std::endl;
@@ -119,7 +119,7 @@ private:
             
             // Measure projection time
             start = std::chrono::high_resolution_clock::now();
-            accurate_ri::Result<accurate_ri::RangeImage> rangeImage = accurate_ri::projectToRangeImage(*intrinsics, cloud);
+            alice_lri::Result<alice_lri::RangeImage> rangeImage = alice_lri::projectToRangeImage(*intrinsics, cloud);
             end = std::chrono::high_resolution_clock::now();
             result.projectTime = std::chrono::duration<double>(end - start).count();
             
@@ -127,7 +127,7 @@ private:
             
             // Measure unprojection time
             start = std::chrono::high_resolution_clock::now();
-            accurate_ri::PointCloud::Double reconstructed = accurate_ri::unProjectToPointCloud(*intrinsics, *rangeImage);
+            alice_lri::PointCloud::Double reconstructed = alice_lri::unProjectToPointCloud(*intrinsics, *rangeImage);
             end = std::chrono::high_resolution_clock::now();
             result.unprojectTime = std::chrono::duration<double>(end - start).count();
             
@@ -287,7 +287,7 @@ public:
 };
 
 int main(int argc, char** argv) {
-    std::cout << "AccurateRI Timing Benchmark" << std::endl;
+    std::cout << "ALICE-LRI Timing Benchmark" << std::endl;
     std::cout << "Measuring train, project, and unproject times" << std::endl;
     std::cout << "Datasets: KITTI and DurLAR" << std::endl;
     std::cout << std::string(100, '=') << std::endl;

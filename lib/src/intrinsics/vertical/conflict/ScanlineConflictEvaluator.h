@@ -2,7 +2,7 @@
 #include "intrinsics/vertical/conflict/ScanlineConflictStructs.h"
 #include "intrinsics/vertical/pool/VerticalScanlinePool.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     class ScanlineConflictEvaluator {
     public:
         static ScanlineConflicts evaluateConflicts(
@@ -34,4 +34,4 @@ namespace accurate_ri {
 
         static ScanlineConflicts rejectConflicting(ScanlineIntersectionInfo &&intersection);
     };
-} // accurate_ri
+}

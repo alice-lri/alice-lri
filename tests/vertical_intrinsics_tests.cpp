@@ -3,7 +3,7 @@
 #include "point/PointArray.h"
 #include <cmath>
 
-namespace accurate_ri {
+namespace alice_lri {
 
 class VerticalIntrinsicsEstimatorTest : public ::testing::Test {
 protected:
@@ -91,4 +91,4 @@ TEST_F(VerticalIntrinsicsEstimatorTest, PointsAssignedToScanlines) {
     }
 }
 
-} // namespace accurate_ri 
+}

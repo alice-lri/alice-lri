@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <optional>
-#include "accurate_ri/accurate_ri.hpp"
+#include "alice_lri/alice_lri.hpp"
 #include "FileUtils.h"
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <nlohmann/json.hpp>
@@ -34,13 +34,13 @@ Config loadConfig() {
     return config;
 }
 
-std::string endReasonToString(const accurate_ri::EndReason &endReason) {
+std::string endReasonToString(const alice_lri::EndReason &endReason) {
     switch (endReason) {
-        case accurate_ri::EndReason::ALL_ASSIGNED:
+        case alice_lri::EndReason::ALL_ASSIGNED:
             return "ALL_ASSIGNED";
-        case accurate_ri::EndReason::MAX_ITERATIONS:
+        case alice_lri::EndReason::MAX_ITERATIONS:
             return "MAX_ITERATIONS";
-        case accurate_ri::EndReason::NO_MORE_PEAKS:
+        case alice_lri::EndReason::NO_MORE_PEAKS:
             return "NO_MORE_PEAKS";
         default:
             throw std::runtime_error("endReasonToString: Unknown endReason");
@@ -49,7 +49,7 @@ std::string endReasonToString(const accurate_ri::EndReason &endReason) {
 
 void storeResult(
     const SQLite::Database &db, const int64_t experimentId, const int64_t frameId,
-    const accurate_ri::DebugIntrinsics &result
+    const alice_lri::DebugIntrinsics &result
 ) {
     SQLite::Statement frameQuery(
         db, R"(
@@ -174,10 +174,10 @@ int main(const int argc, const char **argv) {
 
         FileUtils::Points points = FileUtils::loadBinaryFile(framePath.string(), std::nullopt);
 
-        const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
+        const alice_lri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
 
         auto start = std::chrono::high_resolution_clock::now();
-        auto result = accurate_ri::debugTrain(cloud);
+        auto result = alice_lri::debugTrain(cloud);
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration = end - start;
 

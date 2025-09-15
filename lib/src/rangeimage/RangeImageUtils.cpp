@@ -3,13 +3,13 @@
 #include <numeric>
 #include <span>
 #include <Eigen/Core>
-#include "accurate_ri/public_structs.hpp"
+#include "alice_lri/public_structs.hpp"
 #include "utils/logger/Logger.h"
 #include "utils/Timer.h"
 #include "utils/Utils.h"
 #include "Constants.h"
 
-namespace accurate_ri::RangeImageUtils {
+namespace alice_lri::RangeImageUtils {
     template<typename Scalar>
     RangeImage computeRangeImage(
         const Intrinsics &intrinsics, const Eigen::ArrayX<Scalar> &x, const Eigen::ArrayX<Scalar> &y,

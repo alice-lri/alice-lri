@@ -1,7 +1,7 @@
-#include "accurate_ri/AliceString.h"
+#include "alice_lri/AliceString.h"
 #include <string>
 
-namespace accurate_ri {
+namespace alice_lri {
     struct AliceString::Impl {
         std::string s;
     };
@@ -121,4 +121,4 @@ namespace accurate_ri {
 
         append(buf, n);
     }
-} // accurate_ri
+}

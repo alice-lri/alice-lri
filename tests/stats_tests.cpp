@@ -5,7 +5,7 @@
 
 #include "math/LinearRegressor.h"
 
-namespace accurate_ri {
+namespace alice_lri {
 
 class StatsTest : public ::testing::Test {
 protected:
@@ -67,4 +67,4 @@ TEST_F(StatsTest, WeightedBoundsRegression) {
 }
 
 
-} // namespace accurate_ri 
+}

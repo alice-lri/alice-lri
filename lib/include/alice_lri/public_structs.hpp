@@ -1,8 +1,8 @@
 #pragma once
-#include "accurate_ri/AliceArray.hpp"
+#include "alice_lri/AliceArray.hpp"
 
-namespace accurate_ri {
-    struct ACCURATE_RI_API Scanline {
+namespace alice_lri {
+    struct ALICE_LRI_API Scanline {
         double verticalOffset;
         double verticalAngle;
         double horizontalOffset;
@@ -10,12 +10,12 @@ namespace accurate_ri {
         int32_t resolution;
     };
 
-    struct ACCURATE_RI_API Intrinsics {
+    struct ALICE_LRI_API Intrinsics {
         AliceArray<Scanline> scanlines;
         explicit Intrinsics(const int32_t scanlineCount) noexcept : scanlines(scanlineCount) { }
     };
 
-    struct ACCURATE_RI_API RangeImage {
+    struct ALICE_LRI_API RangeImage {
     private:
         AliceArray<double> pixels;
         uint32_t w;
@@ -63,7 +63,7 @@ namespace accurate_ri {
         };
     }
 
-    struct ACCURATE_RI_API Interval {
+    struct ALICE_LRI_API Interval {
         double lower;
         double upper;
 
@@ -75,17 +75,17 @@ namespace accurate_ri {
         void clampBoth(double minValue, double maxValue) noexcept;
     };
 
-    struct ACCURATE_RI_API ValueConfInterval {
+    struct ALICE_LRI_API ValueConfInterval {
         double value;
         Interval ci;
     };
 
-    struct ACCURATE_RI_API ScanlineAngleBounds {
+    struct ALICE_LRI_API ScanlineAngleBounds {
         Interval lowerLine;
         Interval upperLine;
     };
 
-    struct ACCURATE_RI_API DebugScanline {
+    struct ALICE_LRI_API DebugScanline {
         ValueConfInterval verticalOffset;
         ValueConfInterval verticalAngle;
         double horizontalOffset;
@@ -100,11 +100,11 @@ namespace accurate_ri {
         bool horizontalHeuristic;
     };
 
-    enum class ACCURATE_RI_API EndReason {
+    enum class ALICE_LRI_API EndReason {
         ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
     };
 
-    struct ACCURATE_RI_API DebugIntrinsics {
+    struct ALICE_LRI_API DebugIntrinsics {
         AliceArray<DebugScanline> scanlines;
         int32_t verticalIterations = 0;
         int32_t unassignedPoints = 0;

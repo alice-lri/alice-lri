@@ -3,7 +3,7 @@
 #include <ranges>
 #include "utils/logger/Logger.h"
 
-namespace accurate_ri {
+namespace alice_lri {
 
     VerticalScanlinePool::VerticalScanlinePool(
         const double offsetMin, const double offsetMax, const double offsetStep, const double angleMin,
@@ -122,4 +122,4 @@ namespace accurate_ri {
             }
         );
     }
-} // accurate_ri
+}

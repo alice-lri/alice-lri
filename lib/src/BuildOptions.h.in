@@ -5,7 +5,7 @@
 #cmakedefine01 FLAG_USE_VERTICAL_HEURISTICS
 #cmakedefine01 FLAG_USE_HORIZONTAL_HEURISTICS
 
-namespace accurate_ri::BuildOptions {
+namespace alice_lri::BuildOptions {
     constexpr bool USE_HOUGH_CONTINUITY = static_cast<bool>(FLAG_USE_HOUGH_CONTINUITY);
     constexpr bool USE_SCANLINE_CONFLICT_SOLVER = static_cast<bool>(FLAG_USE_SCANLINE_CONFLICT_SOLVER);
     constexpr bool USE_VERTICAL_HEURISTICS = static_cast<bool>(FLAG_USE_VERTICAL_HEURISTICS);

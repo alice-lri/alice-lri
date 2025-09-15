@@ -5,7 +5,7 @@
 #include "hough/HoughStructs.h"
 #include "point/PointArray.h"
 
-namespace accurate_ri {
+namespace alice_lri {
 
     /**
      * @class HoughTransform
@@ -140,4 +140,4 @@ namespace accurate_ri {
 
         HoughCell indicesToCell(const std::pair<int64_t, int64_t> &indices) const;
     };
-} // accurate_ri
+}

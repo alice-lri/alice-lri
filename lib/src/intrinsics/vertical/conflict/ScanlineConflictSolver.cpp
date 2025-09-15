@@ -9,7 +9,7 @@
 #include "utils/logger/Logger.h"
 #include "utils/Utils.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     bool ScanlineConflictSolver::performScanlineConflictResolution(
         VerticalScanlinePool &scanlinePool, const PointArray &points, const VerticalScanlineCandidate &candidate
     ) {
@@ -111,4 +111,4 @@ namespace accurate_ri {
 
         return !conflicting;
     }
-} // accurate_ri
+}

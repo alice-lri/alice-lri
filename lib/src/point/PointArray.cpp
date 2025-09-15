@@ -1,7 +1,7 @@
 #include "PointArray.h"
 #include "PointUtils.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     void PointArray::computeExtraInfo() {
         extraInfo.coordsEps = PointUtils::computeCoordsEps(*this);
 

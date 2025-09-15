@@ -1,6 +1,6 @@
 #include "IntrinsicsEstimator.h"
 
-namespace accurate_ri {
+namespace alice_lri {
 
     Intrinsics IntrinsicsEstimator::estimate(const PointArray &points) {
         const VerticalIntrinsicsEstimation vertical = VerticalIntrinsicsEstimator::estimate(points);
@@ -67,4 +67,4 @@ namespace accurate_ri {
             .horizontalHeuristic = horizontal.heuristic
         };
     }
-} // accurate_ri
+}

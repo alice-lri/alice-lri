@@ -1,7 +1,7 @@
 #pragma once
 #include "point/PointArray.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     enum class SortingCriteria {
         RANGES_XY, THETAS, NONE
     };

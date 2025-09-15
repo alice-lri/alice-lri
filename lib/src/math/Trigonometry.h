@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-namespace accurate_ri::Trigonometry {
+namespace alice_lri::Trigonometry {
     constexpr uint32_t TRIG_TABLE_SIZE = 65536;
 
     double sinIndex(int32_t index);

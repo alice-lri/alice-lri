@@ -1,11 +1,11 @@
 #pragma once
 #include <new>
-#include "accurate_ri/Api.h"
-#include "accurate_ri/AliceString.h"
+#include "alice_lri/Api.h"
+#include "alice_lri/AliceString.h"
 
-namespace accurate_ri {
+namespace alice_lri {
 
-    enum class ACCURATE_RI_API ErrorCode {
+    enum class ALICE_LRI_API ErrorCode {
         NONE = 0,
         MISMATCHED_SIZES,
         EMPTY_POINT_CLOUD,
@@ -13,9 +13,9 @@ namespace accurate_ri {
         INTERNAL_ERROR,
     };
 
-    AliceString ACCURATE_RI_API errorMessage(ErrorCode code);
+    AliceString ALICE_LRI_API errorMessage(ErrorCode code);
 
-    struct ACCURATE_RI_API Status {
+    struct ALICE_LRI_API Status {
         ErrorCode code = ErrorCode::NONE;
         AliceString message = AliceString();
 
@@ -27,7 +27,7 @@ namespace accurate_ri {
     };
 
     template<class T>
-    class ACCURATE_RI_API Result {
+    class ALICE_LRI_API Result {
     private:
         union {
             T value_;
@@ -104,4 +104,4 @@ namespace accurate_ri {
         T* operator->() { return &value(); }
         const T* operator->() const { return &value(); }
     };
-} // namespace accurate_ri
+}

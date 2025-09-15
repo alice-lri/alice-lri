@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(accurate_ri)
+project(alice_lri)
 set(CMAKE_CXX_STANDARD 20)
 
 list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/lib")

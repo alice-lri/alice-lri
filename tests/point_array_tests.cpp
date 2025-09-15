@@ -3,7 +3,7 @@
 #include <Eigen/Core>
 #include <cmath>
 
-namespace accurate_ri {
+namespace alice_lri {
 
 class PointArrayTest : public ::testing::Test {
 protected:
@@ -69,4 +69,4 @@ TEST_F(PointArrayTest, IndexAccess) {
 
 // Add more tests for PointArray functionality
 
-} // namespace accurate_ri 
+}

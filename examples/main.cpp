@@ -1,7 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include <optional>
-#include "accurate_ri/accurate_ri.hpp"
+#include "alice_lri/alice_lri.hpp"
 #include "FileUtils.h"
 
 std::optional<int> secureStoi(const std::string &str) {
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0079_sync/velodyne_points/data/0000000099.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0087_sync/velodyne_points/data/0000000263.bin";
             accurateDigits = std::nullopt;
-            outputPath = "../../Datasets/output/accurate_ri_cpp/intrinsics.json";
+            outputPath = "../../Datasets/output/alice_lri_cpp/intrinsics.json";
             break;
         case 2:
             path = argv[1];
@@ -79,12 +79,12 @@ int main(int argc, char **argv) {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    accurate_ri::AliceArray<double> zeros(10, 0);
-    // const accurate_ri::PointCloud::Double cloud(zeros, zeros, zeros);
-    const accurate_ri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
-    // const accurate_ri::PointCloud::Double cloud;
-    // const accurate_ri::Result<accurate_ri::Intrinsics> intrinsics = accurate_ri::train(cloud);
-    const auto intrinsics = accurate_ri::intrinsicsFromJsonFile(outputPath->data());
+    alice_lri::AliceArray<double> zeros(10, 0);
+    // const alice_lri::PointCloud::Double cloud(zeros, zeros, zeros);
+    const alice_lri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
+    // const alice_lri::PointCloud::Double cloud;
+    // const alice_lri::Result<alice_lri::Intrinsics> intrinsics = alice_lri::train(cloud);
+    const auto intrinsics = alice_lri::intrinsicsFromJsonFile(outputPath->data());
     if (!intrinsics) {
         std::cerr << intrinsics.status().message.c_str();
         return 1;
@@ -95,18 +95,18 @@ int main(int argc, char **argv) {
     std::cout << "Execution time: " << duration.count() << " seconds" << std::endl;
 
     if (outputPath) {
-        const auto status = accurate_ri::intrinsicsToJsonFile(*intrinsics, outputPath->data(), 4);
+        const auto status = alice_lri::intrinsicsToJsonFile(*intrinsics, outputPath->data(), 4);
         if (!status) {
             std::cerr << status.message.c_str();
             return 1;
         }
     }
 
-    const auto jsonStr = accurate_ri::intrinsicsToJsonStr(*intrinsics);
+    const auto jsonStr = alice_lri::intrinsicsToJsonStr(*intrinsics);
     std::cout << jsonStr.c_str() << std::endl;
 
     start = std::chrono::high_resolution_clock::now();
-    const auto ri = accurate_ri::projectToRangeImage(*intrinsics, cloud);
+    const auto ri = alice_lri::projectToRangeImage(*intrinsics, cloud);
     if (!ri) {
         std::cerr << ri.status().message.c_str();
         return 1;
@@ -115,7 +115,7 @@ int main(int argc, char **argv) {
     end = std::chrono::high_resolution_clock::now();
     std::cout << "Project time: " << std::chrono::duration<double>(end - start).count() << "s" << std::endl;
 
-    accurate_ri::unProjectToPointCloud(*intrinsics, *ri);
+    alice_lri::unProjectToPointCloud(*intrinsics, *ri);
 
     return 0;
 }

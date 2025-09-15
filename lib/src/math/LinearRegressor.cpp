@@ -1,7 +1,7 @@
 #include "LinearRegressor.h"
 #include <boost/math/distributions/students_t.hpp>
 
-namespace accurate_ri {
+namespace alice_lri {
 
     LRResult LinearRegressor::fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const bool computeMse) {
         const double n = static_cast<double>(x.size());
@@ -77,4 +77,4 @@ namespace accurate_ri {
             .interceptCi = std::move(interceptCi)
         };
     }
-} // accurate_ri
+}

@@ -50,8 +50,6 @@ message(STATUS "EIGEN3_INCLUDE_DIR: ${Eigen3_INCLUDE_DIRS}")
 find_package(nlohmann_json REQUIRED)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
-message(STATUS "osqp_INCLUDE_DIRS: ${osqp_INCLUDE_DIRS}")
-
 if (ENABLE_PYTHON_DEBUG)
     find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
@@ -59,7 +57,7 @@ if (ENABLE_PYTHON_DEBUG)
     message(STATUS "Python3 library: ${Python3_LIBRARIES}")
 endif ()
 
-add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
+add_library(alice_lri SHARED src/alice_lri.cpp src/utils/logger/Logger.h
         src/utils/Timer.h
         src/point/PointUtils.cpp
         src/point/PointUtils.h
@@ -87,7 +85,7 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         src/intrinsics/horizontal/helper/HorizontalScanlineArray.h
         src/intrinsics/horizontal/helper/HorizontalMath.cpp
         src/intrinsics/horizontal/helper/HorizontalMath.h
-        include/accurate_ri/public_structs.hpp
+        include/alice_lri/public_structs.hpp
         src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.cpp
         src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.h
         src/rangeimage/RangeImageUtils.cpp
@@ -112,51 +110,52 @@ add_library(accurate_ri SHARED src/accurate_ri.cpp src/utils/logger/Logger.h
         src/intrinsics/vertical/VerticalIntrinsicsStructs.h
         src/intrinsics/horizontal/HorizontalIntrinsicsStructs.h
         src/AliceArray.cpp
-        include/accurate_ri/AliceArray.hpp
+        include/alice_lri/AliceArray.hpp
         src/hough/HoughStructs.h
         src/intrinsics/vertical/conflict/ScanlineConflictEvaluator.cpp
         src/intrinsics/vertical/conflict/ScanlineConflictEvaluator.h
         src/math/LinearRegressor.cpp
         src/math/LinearRegressor.h
         src/AliceString.cpp
-        include/accurate_ri/AliceString.h
-        include/accurate_ri/Api.h
-        include/accurate_ri/Result.h
+        include/alice_lri/AliceString.h
+        include/alice_lri/Api.h
+        include/alice_lri/Result.h
         src/Result.cpp
 )
 
-set(_accurate_ri_private_include_dirs
+set(_alice_lri_private_include_dirs
         src
         "${CMAKE_CURRENT_BINARY_DIR}/src"
         ${nlohmann_json_INCLUDE_DIRS}
         ${Eigen3_INCLUDE_DIRS}
 )
 
-set(_accurate_ri_private_libraries
+set(_alice_lri_private_libraries
         nlohmann_json::nlohmann_json
 )
 
 if (ENABLE_PYTHON_DEBUG)
-    list(APPEND _accurate_ri_private_include_dirs ${Python3_INCLUDE_DIRS})
-    list(APPEND _accurate_ri_private_libraries ${Python3_LIBRARIES})
+    list(APPEND _alice_lri_private_include_dirs ${Python3_INCLUDE_DIRS})
+    list(APPEND _alice_lri_private_libraries ${Python3_LIBRARIES})
 endif ()
 
-target_include_directories(accurate_ri
+target_include_directories(alice_lri
         PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
         PRIVATE
-        ${_accurate_ri_private_include_dirs}
+        ${_alice_lri_private_include_dirs}
 )
 
-target_link_libraries(accurate_ri PRIVATE ${_accurate_ri_private_libraries})
+target_link_libraries(alice_lri PRIVATE ${_alice_lri_private_libraries})
 
 # Installation
 include(CMakePackageConfigHelpers)
 include(GNUInstallDirs)
 
-install(TARGETS accurate_ri
-        EXPORT accurate_riTargets
+install(TARGETS alice_lri
+        EXPORT alice_lriTargets
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
         LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
         ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
         INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
@@ -164,26 +163,31 @@ install(TARGETS accurate_ri
 
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
-install(EXPORT accurate_riTargets
-        FILE accurate_riTargets.cmake
-        NAMESPACE accurate_ri::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/accurate_ri
+install(EXPORT alice_lriTargets
+        FILE alice_lriTargets.cmake
+        NAMESPACE alice_lri::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/alice_lri
+)
+
+export(EXPORT alice_lriTargets
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/alice_lriTargets.cmake"
+        NAMESPACE alice_lri::
 )
 
 write_basic_package_version_file(
-        "${CMAKE_CURRENT_BINARY_DIR}/accurate_riConfigVersion.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/alice_lriConfigVersion.cmake"
         VERSION 1.0.0
         COMPATIBILITY SameMajorVersion
 )
 
 configure_package_config_file(
-        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/accurate_riConfig.cmake.in"
-        "${CMAKE_CURRENT_BINARY_DIR}/accurate_riConfig.cmake"
-        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/accurate_ri
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/alice_lriConfig.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/alice_lriConfig.cmake"
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/alice_lri
 )
 
 install(FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/accurate_riConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/accurate_riConfigVersion.cmake"
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/accurate_ri
+        "${CMAKE_CURRENT_BINARY_DIR}/alice_lriConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/alice_lriConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/alice_lri
 )

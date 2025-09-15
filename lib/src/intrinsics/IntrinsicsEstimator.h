@@ -1,10 +1,10 @@
 #pragma once
-#include "accurate_ri/public_structs.hpp"
+#include "alice_lri/public_structs.hpp"
 #include "horizontal/HorizontalIntrinsicsEstimator.h"
 #include "point/PointArray.h"
 #include "vertical/VerticalIntrinsicsEstimator.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     class IntrinsicsEstimator {
 
     public:
@@ -15,4 +15,4 @@ namespace accurate_ri {
         static Scanline makeScanline(const VerticalScanline &vertical, const HorizontalScanline &horizontal);
         static DebugScanline makeDebugScanline(const VerticalScanline &vertical, const HorizontalScanline &horizontal);
     };
-} // accurate_ri
+}

@@ -9,7 +9,7 @@
 #include "utils/Timer.h"
 #include "utils/Utils.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     HoughTransform::HoughTransform(
         const double xMin, const double xMax, const double xStep, const double yMin, const double yMax,
         const double yStep
@@ -174,4 +174,4 @@ namespace accurate_ri {
     double HoughTransform::getYValue(const size_t index) const {
         return yMin + yStep * static_cast<double>(index);
     }
-} // namespace accurate_ri
+}

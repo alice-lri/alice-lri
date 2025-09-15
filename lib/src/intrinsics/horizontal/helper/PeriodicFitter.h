@@ -3,7 +3,7 @@
 #include "math/Stats.h"
 
 
-namespace accurate_ri {
+namespace alice_lri {
     class PeriodicFitter {
     public:
         static LRResult fit(const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, double period, double slopeGuess);

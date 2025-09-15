@@ -9,12 +9,12 @@ echo "🐍 Installing Python package..."
 pip install -e .
 
 # Copy bindings and core shared objects
-mkdir -p accurate_ri/lib
-cp build/lib/*.so accurate_ri/lib/
-cp build/*.so accurate_ri/
+mkdir -p alice_lri/lib
+cp build/lib/*.so alice_lri/lib/
+cp build/*.so alice_lri/
 
 # Generate Python stubs
 echo "📦 Generating Python stubs..."
-pybind11-stubgen accurate_ri._accurate_ri -o .
+pybind11-stubgen alice_lri._alice_lri -o .
 
 echo "✅ Installation and stub generation complete!"

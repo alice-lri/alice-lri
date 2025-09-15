@@ -1,7 +1,7 @@
 #pragma once
 #include <Eigen/Core>
 
-namespace accurate_ri::Utils {
+namespace alice_lri::Utils {
     template<typename T>
     inline int8_t compare(const T &a, const T &b) {
         return (a < b) ? -1 : (a > b) ? 1 : 0;

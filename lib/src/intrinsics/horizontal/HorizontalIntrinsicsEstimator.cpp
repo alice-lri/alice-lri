@@ -17,7 +17,7 @@
 #include "utils/Timer.h"
 #include "utils/Utils.h"
 
-namespace accurate_ri {
+namespace alice_lri {
     HorizontalIntrinsicsEstimation HorizontalIntrinsicsEstimator::estimate(
         const PointArray &points, const VerticalIntrinsicsEstimation &vertical
     ) {
@@ -290,4 +290,4 @@ namespace accurate_ri {
             );
         }
     }
-} // namespace accurate_ri
+}

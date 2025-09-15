@@ -3,7 +3,7 @@
 #include "Constants.h"
 #include "math/Trigonometry.h"
 
-namespace accurate_ri {
+namespace alice_lri {
 
     LRResult PeriodicFitter::fit(
         const Eigen::ArrayXd &x, const Eigen::ArrayXd &y, const double period, const double slopeGuess

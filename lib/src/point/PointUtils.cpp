@@ -4,7 +4,7 @@
 
 constexpr double MIN_COORDS_EPS = 1e-6 / 2;
 
-namespace accurate_ri {
+namespace alice_lri {
     double PointUtils::computeCoordsEps(const PointArray &points) {
         Eigen::ArrayXd sortedX = points.getX();
         Eigen::ArrayXd sortedY = points.getY();
@@ -33,4 +33,4 @@ namespace accurate_ri {
 
         return std::max(minDiff / 2, MIN_COORDS_EPS);
     }
-} // accurate_ri
+}
