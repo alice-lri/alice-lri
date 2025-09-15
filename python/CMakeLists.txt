@@ -22,4 +22,4 @@ set_target_properties(_accurate_ri PROPERTIES
 )
 
 # Install the Python package manually if needed
-install(TARGETS _accurate_ri LIBRARY DESTINATION accurate_ri)
+install(TARGETS _accurate_ri LIBRARY DESTINATION accurate_ri RUNTIME DESTINATION accurate_ri COMPONENT python)

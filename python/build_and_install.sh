@@ -1,5 +1,4 @@
 #!/bin/bash
-# Combined build script for AccurateRI Python package
 set -e
 
 echo "🔧 Setting up Conan dependencies..."
@@ -8,6 +7,11 @@ conan install ../lib -s compiler.cppstd=gnu20 -s build_type=Release -of build/li
 
 echo "🐍 Installing Python package..."
 pip install -e .
+
+# Copy bindings and core shared objects
+mkdir -p accurate_ri/lib
+cp build/lib/*.so accurate_ri/lib/
+cp build/*.so accurate_ri/
 
 # Generate Python stubs
 echo "📦 Generating Python stubs..."

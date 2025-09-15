@@ -35,6 +35,8 @@ cmake.version = ">=3.20"
 build-dir = "build"
 wheel.packages = ["accurate_ri"]
 wheel.py-api = "py3"
+install.components = ["python"]
+
 
 [tool.scikit-build.cmake.define]
 CMAKE_BUILD_TYPE="Release"
