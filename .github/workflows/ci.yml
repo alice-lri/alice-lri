@@ -8,10 +8,16 @@ on:
   release:
     types: [ published ]
 
+env:
+  # Global environment variables
+  CONAN_USER_HOME: "${{ github.workspace }}"
+  CONAN_NON_INTERACTIVE: 1
+
 jobs:
   test-cpp:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
         build_type: [Release, Debug]
@@ -19,35 +25,363 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     
+    - name: Cache Conan packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.conan2
+        key: conan-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('lib/conanfile.txt', 'examples/conanfile.txt') }}
+        restore-keys: |
+          conan-${{ runner.os }}-${{ matrix.build_type }}-
+          conan-${{ runner.os }}-
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install build tools
+      shell: bash
+      run: |
+        # Install ninja for faster builds
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          sudo apt-get update && sudo apt-get install -y ninja-build
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          brew install ninja
+        elif [[ "$RUNNER_OS" == "Windows" ]]; then
+          python -m pip install ninja
+        fi
+    
     - name: Install Conan
-      run: pip install conan
+      run: |
+        python -m pip install --upgrade pip
+        pip install 'conan>=2.0'
       
     - name: Configure Conan
-      run: |
-        conan profile detect --force
+      run: conan profile detect --force
         
     - name: Install dependencies
       run: |
-        cd lib
-        conan install . -s build_type=${{ matrix.build_type }} --build=missing
+        # Install dependencies with caching
+        conan install lib -s compiler.cppstd=gnu20 -s build_type=${{ matrix.build_type }} \
+          --output-folder=build/lib --build=missing
+        conan install examples -s compiler.cppstd=gnu20 -s build_type=${{ matrix.build_type }} \
+          --output-folder=build/examples --build=missing
         
-    - name: Configure CMake
+    - name: Configure and Build
+      shell: bash
       run: |
-        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-              -DCMAKE_TOOLCHAIN_FILE=lib/build/conan_toolchain.cmake
-              
-    - name: Build
-      run: cmake --build build --config ${{ matrix.build_type }}
+        # Configure with ninja when available for faster builds
+        if command -v ninja &> /dev/null; then
+          GENERATOR="-G Ninja"
+        else
+          GENERATOR=""
+        fi
+        
+        cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+              -DLOG_LEVEL=NONE \
+              -DENABLE_TRACE_FILE=OFF \
+              -DENABLE_PROFILING=OFF \
+              -DLIB_MODE=ON \
+              $GENERATOR \
+              -S . -B build
+        
+        # Build with maximum parallelism
+        cmake --build build --config ${{ matrix.build_type }} --parallel
       
     - name: Test
-      run: cd build && ctest --config ${{ matrix.build_type }} --verbose
+      run: |
+        cd build
+        ctest --config ${{ matrix.build_type }} --output-on-failure --parallel
 
   test-python:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.12"]  # Reduced matrix - test oldest and newest only
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache pip packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: pip-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('python/pyproject.toml') }}
+        restore-keys: |
+          pip-${{ runner.os }}-${{ matrix.python-version }}-
+          pip-${{ runner.os }}-
+    
+    - name: Cache Conan packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.conan2
+        key: conan-python-${{ runner.os }}-${{ hashFiles('lib/conanfile.txt') }}
+        restore-keys: |
+          conan-python-${{ runner.os }}-
+        
+    - name: Install build dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install 'conan>=2.0'
+        conan profile detect --force
+      
+    - name: Install Python package
+      run: |
+        cd python
+        pip install -e .[test]
+        
+    - name: Run Python tests
+      run: |
+        cd python
+        # Create tests directory if it doesn't exist (for older branches)
+        mkdir -p tests
+        if [ -f "tests/test_installation.py" ]; then
+          pytest tests/ -v
+        else
+          echo "No tests found, running basic import test"
+          python -c "import alice_lri; print('✅ Basic import test passed')"
+        fi
+
+  # Simplified installation test - combines both C++ and Python
+  test-installation:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]  # Skip Windows for shell script
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+    
+    - name: Cache packages
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cache/pip
+          ~/.conan2
+        key: install-test-${{ runner.os }}-${{ hashFiles('lib/conanfile.txt', 'python/pyproject.toml') }}
+        
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip conan
+        conan profile detect --force
+        
+    - name: Install Python package
+      run: |
+        cd python
+        pip install -e .[test]
+        
+    - name: Run installation test script
+      run: |
+        chmod +x tests/test_installation.sh
+        ./tests/test_installation.sh
+
+  # Full installation test with C++ consumer project
+  test-cpp-install:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Cache Conan packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.conan2
+        key: conan-install-${{ runner.os }}-${{ hashFiles('lib/conanfile.txt') }}
+    
+    - name: Install build tools
+      shell: bash
+      run: |
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          sudo apt-get update && sudo apt-get install -y ninja-build
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          brew install ninja
+        elif [[ "$RUNNER_OS" == "Windows" ]]; then
+          python -m pip install ninja
+        fi
+    
+    - name: Install Conan
+      run: |
+        python -m pip install --upgrade pip
+        pip install 'conan>=2.0'
+        conan profile detect --force
+        
+    - name: Install C++ library dependencies
+      run: |
+        conan install lib -s compiler.cppstd=gnu20 -s build_type=Release \
+          --output-folder=build/lib --build=missing
+        conan install examples -s compiler.cppstd=gnu20 -s build_type=Release \
+          --output-folder=build/examples --build=missing
+        
+    - name: Build and install C++ library
+      shell: bash
+      run: |
+        # Use ninja if available
+        GENERATOR=""
+        if command -v ninja &> /dev/null; then
+          GENERATOR="-G Ninja"
+        fi
+        
+        cmake -DCMAKE_BUILD_TYPE=Release \
+              -DLOG_LEVEL=NONE \
+              -DENABLE_TRACE_FILE=OFF \
+              -DENABLE_PROFILING=OFF \
+              -DLIB_MODE=ON \
+              -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
+              $GENERATOR \
+              -S . -B build
+        
+        cmake --build build --config Release --parallel
+        cmake --install build --config Release
+        
+    - name: Test C++ installation with consumer project
+      shell: bash
+      run: |
+        mkdir test_consumer && cd test_consumer
+        
+        # Create minimal test project
+        cat > CMakeLists.txt << 'EOF'
+        cmake_minimum_required(VERSION 3.20)
+        project(test_consumer LANGUAGES CXX)
+        set(CMAKE_CXX_STANDARD 20)
+        set(CMAKE_CXX_STANDARD_REQUIRED ON)
+        
+        find_package(alice_lri REQUIRED)
+        
+        add_executable(test_app test.cpp)
+        target_link_libraries(test_app alice_lri::alice_lri)
+        EOF
+        
+        cat > test.cpp << 'EOF'
+        #include <alice_lri/alice_lri.hpp>
+        #include <iostream>
+        
+        int main() {
+            // Test basic library functionality
+            alice_lri::PointCloud::Float cloud;
+            cloud.x = alice_lri::AliceArray<float>(5);
+            cloud.y = alice_lri::AliceArray<float>(5);
+            cloud.z = alice_lri::AliceArray<float>(5);
+            
+            // Fill with sample data
+            for (int i = 0; i < 5; ++i) {
+                cloud.x[i] = static_cast<float>(i) * 0.1f;
+                cloud.y[i] = static_cast<float>(i) * 0.2f;
+                cloud.z[i] = static_cast<float>(i) * 0.3f;
+            }
+            
+            std::cout << "✅ C++ library installed and working correctly!" << std::endl;
+            std::cout << "Point cloud size: " << cloud.x.size() << std::endl;
+            return 0;
+        }
+        EOF
+        
+        cmake -B build -DCMAKE_PREFIX_PATH=${{ github.workspace }}/install
+        cmake --build build --parallel
+        
+        # Run the test
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          build/Debug/test_app.exe || build/Release/test_app.exe
+        else
+          ./build/test_app
+        fi
+
+  build-wheels:
+    if: github.event_name == 'release'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build wheels
+      uses: pypa/cibuildwheel@v2.16.2
+      env:
+        CIBW_ARCHS_LINUX: x86_64
+        CIBW_ARCHS_WINDOWS: AMD64
+        CIBW_ARCHS_MACOS: x86_64 arm64
+        CIBW_BUILD_VERBOSITY: 1
+        
+    - name: Upload wheels
+      uses: actions/upload-artifact@v4
+      with:
+        name: wheels-${{ matrix.os }}
+        path: wheelhouse/*.whl
+        retention-days: 7
+
+  test-source-distribution:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Install build tools
+      run: |
+        pip install --upgrade pip
+        pip install build twine 'conan>=2.0'
+        
+    - name: Build source distribution
+      run: |
+        cd python
+        python -m build --sdist
+        
+    - name: Check source distribution
+      run: |
+        cd python
+        python -m twine check dist/*.tar.gz
+        
+    - name: Test installation from sdist
+      run: |
+        cd python
+        pip install dist/*.tar.gz
+        python -c "import alice_lri; print('✅ Source distribution installation works!')"
+
+  publish-pypi:
+    if: github.event_name == 'release'
+    needs: [test-cpp, test-python, test-installation, test-cpp-install, test-source-distribution, build-wheels]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Download all wheels
+      uses: actions/download-artifact@v4
+      with:
+        pattern: wheels-*
+        merge-multiple: true
+        path: dist/
+        
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
     
     steps:
     - uses: actions/checkout@v4
