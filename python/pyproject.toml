@@ -5,12 +5,14 @@ build-backend = "scikit_build_core.build"
 [project]
 name = "alice_lri"
 version = "0.1.0"
-description = "Python bindings for ALICE-LRI"
+description = "LiDAR Range Image processing and intrinsic parameter estimation library"
+readme = "README.md"
 authors = [
     { name = "Samuel Soutullo", email = "s.soutullo@usc.es" }
 ]
 license = { text = "MIT" }
-requires-python = ">=3.7"
+requires-python = ">=3.8"
+keywords = ["lidar", "range-image", "point-cloud", "computer-vision", "robotics"]
 dependencies = [
     "numpy>=1.20.0",
 ]
@@ -24,11 +26,27 @@ optional-dependencies.test = [
     "numpy>=1.20.0",
 ]
 classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "Programming Language :: C++",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
+
+[project.urls]
+Homepage = "https://github.com/samuelss1996/accurate_ri"
+Documentation = "https://github.com/samuelss1996/accurate_ri#readme"
+Repository = "https://github.com/samuelss1996/accurate_ri.git"
+Issues = "https://github.com/samuelss1996/accurate_ri/issues"
 
 [tool.scikit-build]
 cmake.version = ">=3.20"

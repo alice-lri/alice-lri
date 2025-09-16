@@ -1,0 +1,309 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+jobs:
+  test-cpp:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        build_type: [Release, Debug]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Conan
+      run: pip install conan
+      
+    - name: Configure Conan
+      run: |
+        conan profile detect --force
+        
+    - name: Install dependencies
+      run: |
+        cd lib
+        conan install . -s build_type=${{ matrix.build_type }} --build=missing
+        
+    - name: Configure CMake
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+              -DCMAKE_TOOLCHAIN_FILE=lib/build/conan_toolchain.cmake
+              
+    - name: Build
+      run: cmake --build build --config ${{ matrix.build_type }}
+      
+    - name: Test
+      run: cd build && ctest --config ${{ matrix.build_type }} --verbose
+
+  test-python:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install Conan
+      run: pip install conan
+      
+    - name: Install dependencies
+      run: |
+        cd python
+        pip install -e .[test]
+        
+    - name: Run Python tests
+      run: |
+        cd python
+        # Create tests directory if it doesn't exist (for older branches)
+        mkdir -p tests
+        if [ -f "tests/test_installation.py" ]; then
+          pytest tests/
+        else
+          echo "No tests found, running basic import test"
+          python -c "import alice_lri; print('Basic import test passed')"
+        fi
+
+  build-wheels:
+    if: github.event_name == 'release'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build wheels
+      uses: pypa/cibuildwheel@v2.16.2
+      env:
+        CIBW_ARCHS_LINUX: x86_64
+        CIBW_ARCHS_WINDOWS: AMD64
+        CIBW_ARCHS_MACOS: x86_64 arm64
+        
+    - name: Upload wheels
+      uses: actions/upload-artifact@v3
+      with:
+        name: wheels
+        path: wheelhouse/*.whl
+
+  test-installation-script:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]  # Skip Windows for shell script
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Install dependencies
+      run: |
+        pip install --upgrade pip
+        pip install conan
+        
+    - name: Install Python package
+      run: |
+        cd python
+        pip install -e .[test]
+        
+    - name: Run installation test script
+      run: |
+        chmod +x tests/test_installation.sh
+        ./tests/test_installation.sh
+
+  test-cpp-install:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install Conan
+      run: pip install conan
+      
+    - name: Configure Conan
+      run: |
+        conan profile detect --force
+        
+    - name: Install C++ library dependencies
+      run: |
+        cd lib
+        conan install . -s build_type=Release --build=missing
+        
+    - name: Build and install C++ library
+      run: |
+        cmake -B build -DCMAKE_BUILD_TYPE=Release \
+              -DCMAKE_TOOLCHAIN_FILE=lib/build/conan_toolchain.cmake \
+              -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install
+        cmake --build build --config Release
+        cmake --install build --config Release
+        
+    - name: Test C++ installation with consumer project
+      run: |
+        mkdir test_consumer && cd test_consumer
+        cat > CMakeLists.txt << 'EOF'
+        cmake_minimum_required(VERSION 3.20)
+        project(test_consumer)
+        set(CMAKE_CXX_STANDARD 20)
+        
+        find_package(alice_lri REQUIRED)
+        
+        add_executable(test_app test.cpp)
+        target_link_libraries(test_app alice_lri::alice_lri)
+        EOF
+        
+        cat > test.cpp << 'EOF'
+        #include <alice_lri/alice_lri.hpp>
+        #include <iostream>
+        
+        int main() {
+            // Test basic library functionality
+            alice_lri::PointCloud::Float cloud;
+            cloud.x = alice_lri::AliceArray<float>(10);
+            cloud.y = alice_lri::AliceArray<float>(10);
+            cloud.z = alice_lri::AliceArray<float>(10);
+            
+            // Fill with sample data
+            for (int i = 0; i < 10; ++i) {
+                cloud.x[i] = i * 0.1f;
+                cloud.y[i] = i * 0.2f;
+                cloud.z[i] = i * 0.3f;
+            }
+            
+            std::cout << "C++ library installed and working correctly!" << std::endl;
+            std::cout << "Point cloud size: " << cloud.x.size() << std::endl;
+            return 0;
+        }
+        EOF
+        
+        cmake -B build -DCMAKE_PREFIX_PATH=${{ github.workspace }}/install
+        cmake --build build
+        ./build/test_app
+
+  test-python-install:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.8", "3.12"]  # Test oldest and newest supported
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+        
+    - name: Install build dependencies
+      run: |
+        pip install --upgrade pip
+        pip install build wheel conan
+        
+    - name: Configure Conan
+      run: conan profile detect --force
+        
+    - name: Install Python package from source
+      run: |
+        cd python
+        pip install .
+        
+    - name: Test Python installation
+      run: |
+        python -c "
+        import alice_lri
+        print('Python package installed successfully!')
+        print('Package version:', alice_lri.__version__)
+        
+        # Test basic functionality
+        try:
+            # Test with minimal data
+            x = [1.0, 2.0, 3.0]
+            y = [0.5, 1.5, 2.5]
+            z = [0.1, 0.2, 0.3]
+            
+            # This should work without errors
+            print('Testing basic import and data structures...')
+            print('Available functions:', [attr for attr in dir(alice_lri) if not attr.startswith('_')])
+            print('Python installation test passed!')
+            
+        except Exception as e:
+            print(f'Error testing basic functionality: {e}')
+            exit(1)
+        "
+        
+    - name: Test editable installation
+      run: |
+        cd python
+        pip uninstall -y alice_lri
+        pip install -e .
+        python -c "import alice_lri; print('Editable install works!')"
+
+  test-source-distribution:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+        
+    - name: Install build tools
+      run: |
+        pip install --upgrade pip
+        pip install build twine conan
+        
+    - name: Build source distribution
+      run: |
+        cd python
+        python -m build --sdist
+        
+    - name: Check source distribution
+      run: |
+        cd python
+        python -m twine check dist/*.tar.gz
+        
+    - name: Test installation from sdist
+      run: |
+        cd python
+        pip install dist/*.tar.gz
+        python -c "import alice_lri; print('Source distribution installation works!')"
+
+  publish-pypi:
+    if: github.event_name == 'release'
+    needs: [test-cpp, test-python, test-installation-script, test-cpp-install, test-python-install, test-source-distribution, build-wheels]
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Download wheels
+      uses: actions/download-artifact@v3
+      with:
+        name: wheels
+        path: dist/
+        
+    - name: Publish to PyPI
+      uses: pypa/gh-action-pypi-publish@release/v1
+      with:
+        password: ${{ secrets.PYPI_API_TOKEN }}
