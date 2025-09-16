@@ -8,6 +8,10 @@
         "../cmake-build-release/lib/CMakePresets.json",
         "../cmake-build-release-install/lib/CMakePresets.json",
         "../cmake-build-release-debug/lib/CMakePresets.json",
-        "../python/build/lib/CMakePresets.json"
+        "../python/build/lib/CMakePresets.json",
+        "../cmake-build-debug/lib/build/Debug/generators/CMakePresets.json",
+        "../cmake-build-release/lib/build/Release/generators/CMakePresets.json",
+        "../cmake-build-release-debug/lib/build/Release/generators/CMakePresets.json",
+        "../cmake-build-release-install/lib/build/Release/generators/CMakePresets.json"
     ]
 }

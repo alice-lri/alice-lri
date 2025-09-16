@@ -7,7 +7,6 @@
 #include <iostream>
 #include <numeric>
 #include <bits/ostream.tcc>
-#include <boost/preprocessor/list/fold_right.hpp>
 
 template <typename T>
 std::vector<size_t> argsort(const alice_lri::AliceArray<T>& v) {

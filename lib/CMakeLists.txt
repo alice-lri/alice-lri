@@ -50,6 +50,8 @@ message(STATUS "EIGEN3_INCLUDE_DIR: ${Eigen3_INCLUDE_DIRS}")
 find_package(nlohmann_json REQUIRED)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
+find_package(Boost REQUIRED)
+
 if (ENABLE_PYTHON_DEBUG)
     find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
 
@@ -132,6 +134,7 @@ set(_alice_lri_private_include_dirs
 
 set(_alice_lri_private_libraries
         nlohmann_json::nlohmann_json
+        boost::boost
 )
 
 if (ENABLE_PYTHON_DEBUG)

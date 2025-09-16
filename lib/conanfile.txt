@@ -1,6 +1,7 @@
 [requires]
 nlohmann_json/3.11.3
 eigen/3.4.0
+boost/1.88.0
 
 [generators]
 CMakeDeps
