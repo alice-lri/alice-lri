@@ -6,3 +6,6 @@ boost/1.88.0
 [generators]
 CMakeDeps
 CMakeToolchain
+
+[options]
+boost/*:header_only=True

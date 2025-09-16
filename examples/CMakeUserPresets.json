@@ -6,7 +6,7 @@
     "include": [
         "../cmake-build-debug/examples/CMakePresets.json",
         "../cmake-build-release/examples/CMakePresets.json",
-        "../cmake-build-release-install/examples/CMakePresets.json",
-        "../cmake-build-release-debug/examples/CMakePresets.json"
+        "../cmake-build-release-debug/examples/CMakePresets.json",
+        "../cmake-build-release-install/examples/CMakePresets.json"
     ]
 }
