@@ -51,8 +51,18 @@ jobs:
       uses: actions/cache@v4
       with:
         path: /var/cache/apt
-        key: apt-cache-${{ runner.os }}-ninja
+        key: apt-cache-${{ runner.os }}-ninja-ccache
         restore-keys: apt-cache-${{ runner.os }}-
+    
+    - name: Cache Homebrew
+      if: runner.os == 'macOS'
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Caches/Homebrew
+          /usr/local/Homebrew
+        key: brew-${{ runner.os }}-ninja-ccache
+        restore-keys: brew-${{ runner.os }}-
     
     - name: Set up Python
       uses: actions/setup-python@v5
@@ -73,15 +83,19 @@ jobs:
       run: |
         # Install ninja and ccache for faster builds
         if [[ "$RUNNER_OS" == "Linux" ]]; then
-          sudo apt-get update && sudo apt-get install -y ninja-build ccache
-          echo "CC=ccache gcc" >> $GITHUB_ENV
-          echo "CXX=ccache g++" >> $GITHUB_ENV
+          # Check if already installed to avoid unnecessary updates
+          if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y ninja-build ccache
+          fi
         elif [[ "$RUNNER_OS" == "macOS" ]]; then
-          brew install ninja ccache
-          echo "CC=ccache clang" >> $GITHUB_ENV
-          echo "CXX=ccache clang++" >> $GITHUB_ENV
+          # Check if already installed
+          if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
+            brew install ninja ccache
+          fi
         elif [[ "$RUNNER_OS" == "Windows" ]]; then
-          python -m pip install ninja
+          if ! command -v ninja &> /dev/null; then
+            python -m pip install ninja
+          fi
           # ccache not easily available on Windows
         fi
     
@@ -102,6 +116,19 @@ jobs:
       
     - name: Configure Conan
       run: conan profile detect --force
+      
+    - name: Setup ccache after Conan profile detection
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        # Set ccache environment variables AFTER Conan profile detection
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          echo "CC=ccache gcc" >> $GITHUB_ENV
+          echo "CXX=ccache g++" >> $GITHUB_ENV
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          echo "CC=ccache clang" >> $GITHUB_ENV
+          echo "CXX=ccache clang++" >> $GITHUB_ENV
+        fi
         
     - name: Install dependencies
       run: |
@@ -298,19 +325,33 @@ jobs:
           cmake-install-${{ runner.os }}-
           cmake-build-${{ runner.os }}-
     
+    - name: Cache Homebrew
+      if: runner.os == 'macOS'
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/Library/Caches/Homebrew
+          /usr/local/Homebrew
+        key: brew-install-${{ runner.os }}-ninja-ccache
+        restore-keys: |
+          brew-install-${{ runner.os }}-
+          brew-${{ runner.os }}-
+    
     - name: Install build tools
       shell: bash
       run: |
         if [[ "$RUNNER_OS" == "Linux" ]]; then
-          sudo apt-get update && sudo apt-get install -y ninja-build ccache
-          echo "CC=ccache gcc" >> $GITHUB_ENV
-          echo "CXX=ccache g++" >> $GITHUB_ENV
+          if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
+            sudo apt-get update && sudo apt-get install -y ninja-build ccache
+          fi
         elif [[ "$RUNNER_OS" == "macOS" ]]; then
-          brew install ninja ccache
-          echo "CC=ccache clang" >> $GITHUB_ENV
-          echo "CXX=ccache clang++" >> $GITHUB_ENV
+          if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
+            brew install ninja ccache
+          fi
         elif [[ "$RUNNER_OS" == "Windows" ]]; then
-          python -m pip install ninja
+          if ! command -v ninja &> /dev/null; then
+            python -m pip install ninja
+          fi
         fi
     
     - name: Setup ccache
@@ -328,6 +369,19 @@ jobs:
         python -m pip install --upgrade pip
         pip install 'conan>=2.0'
         conan profile detect --force
+        
+    - name: Setup ccache after Conan profile detection
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        # Set ccache environment variables AFTER Conan profile detection
+        if [[ "$RUNNER_OS" == "Linux" ]]; then
+          echo "CC=ccache gcc" >> $GITHUB_ENV
+          echo "CXX=ccache g++" >> $GITHUB_ENV
+        elif [[ "$RUNNER_OS" == "macOS" ]]; then
+          echo "CC=ccache clang" >> $GITHUB_ENV
+          echo "CXX=ccache clang++" >> $GITHUB_ENV
+        fi
         
     - name: Install C++ library dependencies
       run: |
