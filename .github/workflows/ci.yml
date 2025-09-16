@@ -34,22 +34,66 @@ jobs:
           conan-${{ runner.os }}-${{ matrix.build_type }}-
           conan-${{ runner.os }}-
     
+    - name: Cache CMake build directory
+      uses: actions/cache@v4
+      with:
+        path: |
+          build/
+          !build/lib/conan_toolchain.cmake
+          !build/examples/conan_toolchain.cmake
+        key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp', 'CMakeLists.txt', '**/CMakeLists.txt') }}
+        restore-keys: |
+          cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
+          cmake-build-${{ runner.os }}-
+    
+    - name: Cache system package manager
+      if: runner.os == 'Linux'
+      uses: actions/cache@v4
+      with:
+        path: /var/cache/apt
+        key: apt-cache-${{ runner.os }}-ninja
+        restore-keys: apt-cache-${{ runner.os }}-
+    
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
     
+    - name: Cache pip packages  
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/pip
+        key: pip-cpp-${{ runner.os }}-${{ hashFiles('requirements*.txt') }}
+        restore-keys: |
+          pip-cpp-${{ runner.os }}-
+          pip-${{ runner.os }}-
+    
     - name: Install build tools
       shell: bash
       run: |
-        # Install ninja for faster builds
+        # Install ninja and ccache for faster builds
         if [[ "$RUNNER_OS" == "Linux" ]]; then
-          sudo apt-get update && sudo apt-get install -y ninja-build
+          sudo apt-get update && sudo apt-get install -y ninja-build ccache
+          echo "CC=ccache gcc" >> $GITHUB_ENV
+          echo "CXX=ccache g++" >> $GITHUB_ENV
         elif [[ "$RUNNER_OS" == "macOS" ]]; then
-          brew install ninja
+          brew install ninja ccache
+          echo "CC=ccache clang" >> $GITHUB_ENV
+          echo "CXX=ccache clang++" >> $GITHUB_ENV
         elif [[ "$RUNNER_OS" == "Windows" ]]; then
           python -m pip install ninja
+          # ccache not easily available on Windows
         fi
+    
+    - name: Setup ccache
+      if: runner.os != 'Windows'
+      uses: actions/cache@v4
+      with:
+        path: ~/.ccache
+        key: ccache-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp') }}
+        restore-keys: |
+          ccache-${{ runner.os }}-${{ matrix.build_type }}-
+          ccache-${{ runner.os }}-
     
     - name: Install Conan
       run: |
@@ -240,17 +284,44 @@ jobs:
       with:
         path: ~/.conan2
         key: conan-install-${{ runner.os }}-${{ hashFiles('lib/conanfile.txt') }}
+        restore-keys: conan-install-${{ runner.os }}-
+    
+    - name: Cache CMake build directory for installation
+      uses: actions/cache@v4
+      with:
+        path: |
+          build/
+          !build/lib/conan_toolchain.cmake
+          !build/examples/conan_toolchain.cmake
+        key: cmake-install-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp', 'CMakeLists.txt', '**/CMakeLists.txt') }}
+        restore-keys: |
+          cmake-install-${{ runner.os }}-
+          cmake-build-${{ runner.os }}-
     
     - name: Install build tools
       shell: bash
       run: |
         if [[ "$RUNNER_OS" == "Linux" ]]; then
-          sudo apt-get update && sudo apt-get install -y ninja-build
+          sudo apt-get update && sudo apt-get install -y ninja-build ccache
+          echo "CC=ccache gcc" >> $GITHUB_ENV
+          echo "CXX=ccache g++" >> $GITHUB_ENV
         elif [[ "$RUNNER_OS" == "macOS" ]]; then
-          brew install ninja
+          brew install ninja ccache
+          echo "CC=ccache clang" >> $GITHUB_ENV
+          echo "CXX=ccache clang++" >> $GITHUB_ENV
         elif [[ "$RUNNER_OS" == "Windows" ]]; then
           python -m pip install ninja
         fi
+    
+    - name: Setup ccache
+      if: runner.os != 'Windows'
+      uses: actions/cache@v4
+      with:
+        path: ~/.ccache
+        key: ccache-install-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp') }}
+        restore-keys: |
+          ccache-install-${{ runner.os }}-
+          ccache-${{ runner.os }}-
     
     - name: Install Conan
       run: |
