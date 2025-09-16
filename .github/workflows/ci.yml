@@ -89,9 +89,15 @@ jobs:
         cmake --build build --config ${{ matrix.build_type }} --parallel
       
     - name: Test
+      shell: bash
       run: |
         cd build
-        ctest --config ${{ matrix.build_type }} --output-on-failure --parallel
+        # Use --config only on Windows (multi-config generators)
+        if [[ "$RUNNER_OS" == "Windows" ]]; then
+          ctest --config ${{ matrix.build_type }} --output-on-failure --parallel
+        else
+          ctest --output-on-failure --parallel
+        fi
 
   test-python:
     runs-on: ${{ matrix.os }}

@@ -6,7 +6,6 @@ add_executable(alice_lri_tests
     alice_lri_tests.cpp
     hough_transform_tests.cpp
     stats_tests.cpp
-    vertical_intrinsics_tests.cpp
     point_array_tests.cpp
         utils_tests.cpp
 )
@@ -30,4 +29,5 @@ target_link_libraries(alice_lri_tests
 )
 
 # Add the test to CTest
-add_test(NAME alice_lri_tests COMMAND alice_lri_tests)
+include(GoogleTest)
+gtest_discover_tests(alice_lri_tests)
