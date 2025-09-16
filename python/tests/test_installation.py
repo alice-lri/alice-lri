@@ -15,11 +15,14 @@ def test_available_functions():
     """Test that expected functions are available"""
     expected_functions = [
         'train',
-        'project_to_range_image_float',
-        'project_to_range_image_double', 
+        'debug_train',
+        'project_to_range_image',
         'unproject_to_point_cloud',
         'intrinsics_to_json_str',
-        'intrinsics_from_json_str'
+        'intrinsics_from_json_str',
+        'intrinsics_to_json_file',
+        'intrinsics_from_json_file',
+        'error_message'
     ]
     
     available_attrs = [attr for attr in dir(alice_lri) if not attr.startswith('_')]
@@ -29,21 +32,25 @@ def test_available_functions():
         assert hasattr(alice_lri, func), f"Function {func} not found in alice_lri"
 
 
-def test_error_codes():
-    """Test that error codes are available"""
-    assert hasattr(alice_lri, 'ErrorCode')
-    error_code = alice_lri.ErrorCode.NONE
-    assert error_code is not None
-
-
 def test_basic_data_structures():
     """Test that basic data structures can be created"""
     # Test that we can access the module without errors
     # More comprehensive tests would require actual data
     try:
-        # Just test that these don't cause import errors
+        # Test classes from bindings.cpp
         assert hasattr(alice_lri, 'Intrinsics')
         assert hasattr(alice_lri, 'RangeImage')
+        assert hasattr(alice_lri, 'Scanline')
+        assert hasattr(alice_lri, 'DebugIntrinsics')
+        assert hasattr(alice_lri, 'DebugScanline')
+        assert hasattr(alice_lri, 'Interval')
+        assert hasattr(alice_lri, 'ValueConfInterval')
+        assert hasattr(alice_lri, 'ScanlineAngleBounds')
+        
+        # Test enums
+        assert hasattr(alice_lri, 'ErrorCode')
+        assert hasattr(alice_lri, 'EndReason')
+        
         print("Basic data structures are accessible")
     except Exception as e:
         pytest.fail(f"Error accessing basic data structures: {e}")
@@ -52,28 +59,47 @@ def test_basic_data_structures():
 def test_small_data_functionality():
     """Test with minimal data to ensure basic functionality works"""
     try:
-        # Create minimal test data
+        # Create minimal test data - lists of floats as expected by bindings
         x = [1.0, 2.0, 3.0]
         y = [0.5, 1.5, 2.5]
         z = [0.1, 0.2, 0.3]
-        
-        # This test just ensures the function exists and can be called
-        # It may fail with the actual algorithm, but that's expected for minimal data
-        # We're just testing the Python bindings work
         
         # Test that the train function exists and is callable
         assert callable(alice_lri.train)
         print("Train function is callable")
         
-        # Test JSON functions exist
+        # Test creating basic objects
+        # Create a RangeImage
+        ri = alice_lri.RangeImage(10, 10)
+        assert ri.width == 10
+        assert ri.height == 10
+        print("RangeImage creation works")
+        
+        # Create an Intrinsics object
+        intrinsics = alice_lri.Intrinsics(5)  # 5 scanlines
+        print("Intrinsics creation works")
+        
+        # Test JSON functions exist and work
         assert callable(alice_lri.intrinsics_to_json_str)
         assert callable(alice_lri.intrinsics_from_json_str)
-        print("JSON functions are callable")
+        
+        # Test JSON conversion (should work even with empty intrinsics)
+        json_str = alice_lri.intrinsics_to_json_str(intrinsics)
+        assert isinstance(json_str, str)
+        print("JSON serialization works")
+        
+        # Test that we can call train function (may fail with small data, but shouldn't crash)
+        try:
+            result = alice_lri.train(x, y, z)
+            print("Train function executed successfully")
+        except RuntimeError as e:
+            # Expected to fail with small data, but should not be a symbol/import error
+            print(f"Train function callable but failed with small data (expected): {e}")
         
     except Exception as e:
         # Expected to potentially fail with actual computation, 
         # but should not fail due to missing symbols
-        if "symbol" in str(e).lower() or "import" in str(e).lower():
+        if "symbol" in str(e).lower() or "import" in str(e).lower() or "undefined" in str(e).lower():
             pytest.fail(f"Installation error: {e}")
         else:
             print(f"Expected computational error (not an installation issue): {e}")
@@ -82,7 +108,6 @@ def test_small_data_functionality():
 if __name__ == "__main__":
     test_package_import()
     test_available_functions()
-    test_error_codes()
     test_basic_data_structures()
     test_small_data_functionality()
     print("All basic installation tests passed!")
