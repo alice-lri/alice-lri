@@ -34,7 +34,8 @@ int main(int argc, char **argv) {
             // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017973.bin";
             // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000018973.bin";
             // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210716/ouster_points/data/0000000000.bin";
-            path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0002_sync/velodyne_points/data/0000000000.bin";
+            path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211208/ouster_points/data/0000020365.bin";
+            // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0002_sync/velodyne_points/data/0000000000.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000825.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000636.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0046_sync/velodyne_points/data/0000000124.bin";
@@ -80,11 +81,9 @@ int main(int argc, char **argv) {
     auto start = std::chrono::high_resolution_clock::now();
 
     alice_lri::AliceArray<double> zeros(10, 0);
-    // const alice_lri::PointCloud::Double cloud(zeros, zeros, zeros);
     const alice_lri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
-    // const alice_lri::PointCloud::Double cloud;
-    // const alice_lri::Result<alice_lri::Intrinsics> intrinsics = alice_lri::train(cloud);
-    const auto intrinsics = alice_lri::intrinsicsFromJsonFile(outputPath->data());
+    const alice_lri::Result<alice_lri::Intrinsics> intrinsics = alice_lri::train(cloud);
+    // const auto intrinsics = alice_lri::intrinsicsFromJsonFile(outputPath->data());
     if (!intrinsics) {
         std::cerr << intrinsics.status().message.c_str();
         return 1;
