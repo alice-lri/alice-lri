@@ -27,3 +27,5 @@ scripts/cesga/helper/__pycache__/
 cmake-build-release-install/
 
 cmake-build-release-debug/
+
+*.so

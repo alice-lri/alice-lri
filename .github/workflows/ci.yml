@@ -233,6 +233,15 @@ jobs:
         cd python
         pip install -e .[test]
         
+    - name: Copy shared libraries for editable install
+      shell: bash
+      run: |
+        cd python
+        # Copy bindings and core shared objects (like build_and_install.sh)
+        mkdir -p alice_lri/lib
+        cp build/lib/*.so alice_lri/lib/ 2>/dev/null || true
+        cp build/*.so alice_lri/ 2>/dev/null || true
+        
     - name: Run Python tests
       shell: bash
       run: |
@@ -287,6 +296,15 @@ jobs:
       run: |
         cd python
         pip install -e .[test]
+        
+    - name: Copy shared libraries for editable install
+      shell: bash
+      run: |
+        cd python
+        # Copy bindings and core shared objects (like build_and_install.sh)
+        mkdir -p alice_lri/lib
+        cp build/lib/*.so alice_lri/lib/ 2>/dev/null || true
+        cp build/*.so alice_lri/ 2>/dev/null || true
         
     - name: Run installation test script
       run: |
