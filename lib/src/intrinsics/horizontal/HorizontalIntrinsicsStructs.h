@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <cstdint>
 
 struct HorizontalScanline {
     int32_t resolution;
