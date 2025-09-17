@@ -24,7 +24,7 @@ target_include_directories(alice_lri_tests PRIVATE
         ${nlohmann_json_INCLUDE_DIRS}
 )
 
-target_link_libraries(alice_lri_tests gtest::gtest Eigen3::Eigen boost::boost)
+target_link_libraries(alice_lri_tests alice_lri gtest::gtest Eigen3::Eigen boost::boost)
 
 include(GoogleTest)
 gtest_discover_tests(alice_lri_tests)
