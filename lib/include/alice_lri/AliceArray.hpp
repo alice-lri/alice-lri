@@ -176,7 +176,7 @@ namespace alice_lri {
         void resize(uint64_t n) noexcept {
             if (n > size_) {
                 reserve(n);
-                for (uint64_t i = size_; i < n && capacity_ > i; ++i) {
+                for (uint64_t i = size_; i < n; ++i) {
                     new (data_ + i) T();
                 }
             } else if (n < size_) {
