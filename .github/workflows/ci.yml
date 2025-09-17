@@ -1,5 +1,6 @@
 name: Build and Test
 
+# TODO maybe have release and push on differnet files/workflows?
 on:
   push:
     branches: [ main, develop ]
@@ -462,7 +463,7 @@ jobs:
     - name: Install build tools
       run: |
         pip install --upgrade pip
-        pip install build twine 'conan>=2.0'
+        pip install build twine 'conan>=2.0' pybind11-stubgen
         conan profile detect --force
         
     - name: Build source distribution
