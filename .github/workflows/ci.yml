@@ -169,7 +169,7 @@ jobs:
                 -DLOG_LEVEL=NONE \
                 -DENABLE_TRACE_FILE=OFF \
                 -DENABLE_PROFILING=OFF \
-                -DLIB_MODE=OFF \
+                -DINCLUDE_TESTS=ON \
                 $GENERATOR \
                 $SYSROOT_ARG \
                 -S . -B build
@@ -392,7 +392,7 @@ jobs:
                 -DLOG_LEVEL=NONE \
                 -DENABLE_TRACE_FILE=OFF \
                 -DENABLE_PROFILING=OFF \
-                -DLIB_MODE=ON \
+                -DINCLUDE_TESTS=OFF \
                 -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install" \
                 $GENERATOR \
                 -S . -B build

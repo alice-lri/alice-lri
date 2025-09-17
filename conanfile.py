@@ -20,13 +20,13 @@ class AliceLriConan(ConanFile):
         "shared": [True, False],
         "fPIC": [True, False],
         "enable_python_debug": [True, False],
-        "lib_mode": [True, False]
+        "include_tests": [True, False]
     }
     default_options = {
         "shared": False,
         "fPIC": True,
         "enable_python_debug": False,
-        "lib_mode": True
+        "include_tests": True
     }
     
     # Sources
@@ -51,7 +51,7 @@ class AliceLriConan(ConanFile):
         deps = CMakeDeps(self)
         deps.generate()
         tc = CMakeToolchain(self)
-        tc.variables["LIB_MODE"] = self.options.lib_mode
+        tc.variables["INCLUDE_TESTS"] = self.options.include_tests
         tc.variables["ENABLE_PYTHON_DEBUG"] = self.options.enable_python_debug
         tc.generate()
         

@@ -10,7 +10,8 @@ add_subdirectory(examples ${CMAKE_BINARY_DIR}/examples)
 
 enable_testing()
 
-if(NOT LIB_MODE)
+option(INCLUDE_TESTS "Include tests in the build" OFF)
+if(INCLUDE_TESTS)
     add_subdirectory(tests ${CMAKE_BINARY_DIR}/tests)
 endif ()
 

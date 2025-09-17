@@ -59,8 +59,7 @@ install.components = ["python"]
 CMAKE_BUILD_TYPE="Release"
 LOG_LEVEL = "NONE"
 ENABLE_TRACE_FILE="OFF"
-ENABLE_PROFILING="OFF" 
-LIB_MODE="ON"
+ENABLE_PROFILING="OFF"
 PYBUILD_AUTO_CONAN="ON"
 
 [tool.pytest.ini_options]

@@ -31,11 +31,9 @@ if (ENABLE_TRACE_FILE)
     add_definitions(-DENABLE_TRACE_FILE)
 endif ()
 
-option(LIB_MODE "Build in lib mode, hiding unnecessary symbols for ABI compatibility" OFF)
-if (LIB_MODE)
-    set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-    set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
-endif ()
+
+set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
 
 include(${CMAKE_CURRENT_BINARY_DIR}/conan_toolchain.cmake)
 

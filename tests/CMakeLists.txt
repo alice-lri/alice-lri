@@ -11,6 +11,7 @@ add_executable(alice_lri_tests ${ALICE_LRI_SOURCES}
         point_array_tests.cpp
         utils_tests.cpp
 )
+target_compile_definitions(alice_lri_tests PRIVATE ALICE_LRI_WHITE_BOX=1)
 
 find_package(Eigen3 REQUIRED)
 find_package(nlohmann_json REQUIRED)
@@ -24,7 +25,7 @@ target_include_directories(alice_lri_tests PRIVATE
         ${nlohmann_json_INCLUDE_DIRS}
 )
 
-target_link_libraries(alice_lri_tests alice_lri gtest::gtest Eigen3::Eigen boost::boost)
+target_link_libraries(alice_lri_tests gtest::gtest Eigen3::Eigen boost::boost)
 
 include(GoogleTest)
 gtest_discover_tests(alice_lri_tests)
