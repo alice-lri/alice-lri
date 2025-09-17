@@ -71,7 +71,7 @@ namespace alice_lri {
         for (int scanlineIdx = 0; scanlineIdx < scanlinesCount; ++scanlineIdx) {
             const std::vector<int> &scanlineIndices = pointsByScanline[scanlineIdx];
 
-            scanlineSizes.emplace_back(scanlineIndices.size());
+            scanlineSizes.emplace_back(static_cast<int32_t>(scanlineIndices.size()));
             xsByScanline.emplace_back(points.getXs()(scanlineIndices));
             ysByScanline.emplace_back(points.getYs()(scanlineIndices));
             rangesXyByScanline.emplace_back(points.getRangesXy()(scanlineIndices));

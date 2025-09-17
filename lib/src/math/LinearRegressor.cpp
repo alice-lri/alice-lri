@@ -1,4 +1,5 @@
 #include "LinearRegressor.h"
+#include <numbers>
 #include <boost/math/distributions/students_t.hpp>
 
 namespace alice_lri {

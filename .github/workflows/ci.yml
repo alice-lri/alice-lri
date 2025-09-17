@@ -522,6 +522,7 @@ jobs:
           cd python
           # Test that sdist can be installed without manual Conan setup
           pip install dist/*.tar.gz
+          cd ..
           python -c "import alice_lri; print('✅ Source distribution installation works!')"
 
   publish-pypi:

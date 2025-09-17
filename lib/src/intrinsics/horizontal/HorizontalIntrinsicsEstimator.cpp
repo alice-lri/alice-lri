@@ -1,6 +1,7 @@
 #include "HorizontalIntrinsicsEstimator.h"
 #include <Eigen/Dense>
 #include <cmath>
+#include <numbers>
 #include <limits>
 #include <unordered_set>
 #include <vector>
@@ -89,14 +90,12 @@ namespace alice_lri {
             "\tLoss: ", bestLoss
         );
 
-        return std::make_optional<HorizontalScanline>(
-            {
-                .resolution = bestResolution,
-                .offset = bestOffset,
-                .thetaOffset = optimizeResult->thetaOffset,
-                .heuristic = false
-            }
-        );
+        return HorizontalScanline {
+            .resolution = bestResolution,
+            .offset = bestOffset,
+            .thetaOffset = optimizeResult->thetaOffset,
+            .heuristic = false
+        };
     }
 
     std::optional<ResolutionOffsetLoss> HorizontalIntrinsicsEstimator::findOptimalHorizontalParameters(
