@@ -108,7 +108,6 @@ add_library(alice_lri SHARED src/alice_lri.cpp src/utils/logger/Logger.h
         src/intrinsics/vertical/conflict/ScanlineConflictStructs.h
         src/intrinsics/vertical/VerticalIntrinsicsStructs.h
         src/intrinsics/horizontal/HorizontalIntrinsicsStructs.h
-        src/AliceArray.cpp
         include/alice_lri/AliceArray.hpp
         src/hough/HoughStructs.h
         src/intrinsics/vertical/conflict/ScanlineConflictEvaluator.cpp

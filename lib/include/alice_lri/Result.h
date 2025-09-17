@@ -27,7 +27,7 @@ namespace alice_lri {
     };
 
     template<class T>
-    class ALICE_LRI_API Result {
+    class Result {
     private:
         union {
             T value_;

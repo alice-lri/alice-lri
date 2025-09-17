@@ -1,4 +1,5 @@
 #pragma once
+#include "alice_lri/Api.h"
 #include "alice_lri/AliceArray.hpp"
 
 namespace alice_lri {
