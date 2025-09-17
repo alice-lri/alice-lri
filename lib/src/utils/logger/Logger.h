@@ -70,7 +70,13 @@ namespace alice_lri {
         static std::string getTimestamp() {
             std::time_t now = std::time(nullptr);
             std::tm tmNow;
+
+#if defined(_WIN32) || defined(_MSC_VER)
+            localtime_s(&tmNow, &now);
+#else
             localtime_r(&now, &tmNow);
+#endif
+
             char buf[20];
             strftime(buf, sizeof(buf), "%Y-%m-%d %H:%M:%S", &tmNow);
             return std::string(buf);
