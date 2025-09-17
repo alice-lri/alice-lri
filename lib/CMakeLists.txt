@@ -56,70 +56,8 @@ if (ENABLE_PYTHON_DEBUG)
     message(STATUS "Python3 library: ${Python3_LIBRARIES}")
 endif ()
 
-add_library(alice_lri SHARED src/alice_lri.cpp src/utils/logger/Logger.h
-        src/utils/Timer.h
-        src/point/PointUtils.cpp
-        src/point/PointUtils.h
-        src/intrinsics/vertical/VerticalIntrinsicsEstimator.cpp
-        src/intrinsics/vertical/VerticalIntrinsicsEstimator.h
-        src/intrinsics/IntrinsicsEstimator.cpp
-        src/intrinsics/IntrinsicsEstimator.h
-        src/hough/HoughTransform.cpp
-        src/hough/HoughTransform.h
-        src/hash/HashUtils.cpp
-        src/hash/HashUtils.h
-        src/point/PointArray.h
-        src/point/PointArray.cpp
-        src/utils/Utils.h
-        src/intrinsics/vertical/helper/VerticalLogging.h
-        src/utils/json/JsonConverters.cpp
-        src/utils/json/JsonConverters.h
-        src/math/Stats.cpp
-        src/math/Stats.h
-        src/intrinsics/vertical/conflict/ScanlineConflictSolver.cpp
-        src/intrinsics/vertical/conflict/ScanlineConflictSolver.h
-        src/intrinsics/vertical/pool/VerticalScanlinePool.cpp
-        src/intrinsics/vertical/pool/VerticalScanlinePool.h
-        src/intrinsics/horizontal/helper/HorizontalScanlineArray.cpp
-        src/intrinsics/horizontal/helper/HorizontalScanlineArray.h
-        src/intrinsics/horizontal/helper/HorizontalMath.cpp
-        src/intrinsics/horizontal/helper/HorizontalMath.h
-        include/alice_lri/public_structs.hpp
-        src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.cpp
-        src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.h
-        src/rangeimage/RangeImageUtils.cpp
-        src/rangeimage/RangeImageUtils.h
-        src/Constants.h
-        src/intrinsics/horizontal/helper/SegmentedMedianLinearRegressor.cpp
-        src/intrinsics/horizontal/helper/SegmentedMedianLinearRegressor.h
-        src/public_structs.cpp
-        src/intrinsics/vertical/estimation/VerticalScanlineLimits.cpp
-        src/intrinsics/vertical/estimation/VerticalScanlineLimits.h
-        src/intrinsics/vertical/estimation/VerticalScanlineEstimator.cpp
-        src/intrinsics/vertical/estimation/VerticalScanlineEstimator.h
-        src/intrinsics/horizontal/helper/PeriodicFitter.cpp
-        src/intrinsics/horizontal/helper/PeriodicFitter.h
-        src/math/Trigonometry.h
-        src/math/Trigonometry.cpp
-        src/intrinsics/vertical/estimation/VerticalHeuristicsEstimator.cpp
-        src/intrinsics/vertical/estimation/VerticalHeuristicsEstimator.h
-        src/intrinsics/vertical/estimation/VerticalScanlineEstimationStructs.h
-        src/utils/logger/LoggingOverrides.h
-        src/intrinsics/vertical/conflict/ScanlineConflictStructs.h
-        src/intrinsics/vertical/VerticalIntrinsicsStructs.h
-        src/intrinsics/horizontal/HorizontalIntrinsicsStructs.h
-        include/alice_lri/AliceArray.hpp
-        src/hough/HoughStructs.h
-        src/intrinsics/vertical/conflict/ScanlineConflictEvaluator.cpp
-        src/intrinsics/vertical/conflict/ScanlineConflictEvaluator.h
-        src/math/LinearRegressor.cpp
-        src/math/LinearRegressor.h
-        src/AliceString.cpp
-        include/alice_lri/AliceString.h
-        include/alice_lri/Api.h
-        include/alice_lri/Result.h
-        src/Result.cpp
-)
+include(${CMAKE_CURRENT_SOURCE_DIR}/sources.cmake)
+add_library(alice_lri SHARED ${ALICE_LRI_SOURCES})
 
 set(_alice_lri_private_include_dirs
         src
