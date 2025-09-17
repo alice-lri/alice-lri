@@ -1,5 +1,5 @@
 [build-system]
-requires = ["scikit-build-core", "pybind11", "conan>=2.0"]
+requires = ["scikit-build-core", "pybind11", "pybind11-stubgen", "conan>=2.0"]
 build-backend = "scikit_build_core.build"
 
 [project]

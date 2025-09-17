@@ -421,7 +421,7 @@ jobs:
           ./build/test_app
         fi
 
-  build-wheels:
+  build-wheels: #TODO not sure if we should also run on regular push
     if: github.event_name == 'release'
     runs-on: ${{ matrix.os }}
     strategy:
