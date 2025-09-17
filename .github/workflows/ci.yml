@@ -251,22 +251,13 @@ jobs:
           cd python
           pip install -e .[test]
 
-      # TODO should not be necessary anymore
-      - name: Copy shared libraries for editable install
-        shell: bash
-        run: |
-          cd python
-          # Copy bindings and core shared objects (like build_and_install.sh)
-          mkdir -p alice_lri/lib
-          cp build/lib/*.so alice_lri/lib/ 2>/dev/null || true
-          cp build/*.so alice_lri/ 2>/dev/null || true
-
       - name: Run Python tests
         shell: bash
         run: |
-          mkdir -p python/tests
-          if [ -f "python/tests/test_installation.py" ]; then
-            pytest python/tests/ -v
+          cd python
+          mkdir -p tests
+          if [ -f "tests/test_installation.py" ]; then
+            pytest --import-mode=importlib tests/ -v
           else
             echo "No tests found, running basic import test"
             python -c "import alice_lri; print('✅ Basic import test passed')"
@@ -398,7 +389,6 @@ jobs:
                 -DLOG_LEVEL=NONE \
                 -DENABLE_TRACE_FILE=OFF \
                 -DENABLE_PROFILING=OFF \
-                -DLIB_MODE=ON \
                 -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install" \
                 $GENERATOR \
                 -S . -B build
