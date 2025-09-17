@@ -10,7 +10,7 @@ option(PYBUILD_AUTO_CONAN "Run Conan for lib/ during Python build" OFF)
 if(PYBUILD_AUTO_CONAN)
     execute_process(
             COMMAND conan install "${CMAKE_SOURCE_DIR}/lib"
-            -s compiler.cppstd=gnu20
+            -s compiler.cppstd=20
             -s build_type=Release
             -of "${CMAKE_BINARY_DIR}/lib"
             --build=missing

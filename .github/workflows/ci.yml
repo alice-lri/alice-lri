@@ -20,233 +20,254 @@ jobs:
     strategy:
       fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
-        #os: [ubuntu-latest, windows-latest, macos-latest]
-        os: [ubuntu-latest]  # Temporarily Linux-only for faster testing
-        build_type: [Release, Debug]
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        build_type: [ Release, Debug ]
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Cache Conan packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.conan2
-        key: conan-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('lib/conanfile.txt', 'examples/conanfile.txt') }}
-        restore-keys: |
-          conan-${{ runner.os }}-${{ matrix.build_type }}-
-          conan-${{ runner.os }}-
-    
-    - name: Cache CMake build directory
-      uses: actions/cache@v4
-      with:
-        path: |
-          build/
-          !build/lib/conan_toolchain.cmake
-          !build/examples/conan_toolchain.cmake
-        key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp', 'CMakeLists.txt', '**/CMakeLists.txt') }}
-        restore-keys: |
-          cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
-          cmake-build-${{ runner.os }}-
-    
-    - name: Cache system package manager
-      if: runner.os == 'Linux'
-      uses: actions/cache@v4
-      with:
-        path: /var/cache/apt
-        key: apt-cache-${{ runner.os }}-ninja-ccache
-        restore-keys: apt-cache-${{ runner.os }}-
-    
-    - name: Cache Homebrew
-      if: runner.os == 'macOS'
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/Library/Caches/Homebrew
-          /usr/local/Homebrew
-        key: brew-${{ runner.os }}-ninja-ccache
-        restore-keys: brew-${{ runner.os }}-
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Cache pip packages  
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: pip-cpp-${{ runner.os }}-${{ hashFiles('requirements*.txt') }}
-        restore-keys: |
-          pip-cpp-${{ runner.os }}-
-          pip-${{ runner.os }}-
-    
-    - name: Install build tools
-      shell: bash
-      run: |
-        # Install ninja and ccache for faster builds
-        if [[ "$RUNNER_OS" == "Linux" ]]; then
-          # Check if already installed to avoid unnecessary updates
-          if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
-            sudo apt-get update && sudo apt-get install -y ninja-build ccache
+      - uses: actions/checkout@v4
+
+      - name: Cache Conan packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan2
+          key: conan-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('lib/conanfile.txt', 'examples/conanfile.txt') }}
+          restore-keys: |
+            conan-${{ runner.os }}-${{ matrix.build_type }}-
+            conan-${{ runner.os }}-
+
+      - name: Cache CMake build directory
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/
+            !build/lib/conan_toolchain.cmake
+            !build/examples/conan_toolchain.cmake
+          key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp', 'CMakeLists.txt', '**/CMakeLists.txt') }}
+          restore-keys: |
+            cmake-build-${{ runner.os }}-${{ matrix.build_type }}-
+            cmake-build-${{ runner.os }}-
+
+      - name: Cache system package manager
+        if: runner.os == 'Linux'
+        uses: actions/cache@v4
+        with:
+          path: /var/cache/apt
+          key: apt-cache-${{ runner.os }}-ninja-ccache
+          restore-keys: apt-cache-${{ runner.os }}-
+
+      - name: Cache Homebrew
+        if: runner.os == 'macOS'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            /usr/local/Homebrew
+          key: brew-${{ runner.os }}-ninja-ccache
+          restore-keys: brew-${{ runner.os }}-
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-cpp-${{ runner.os }}-${{ hashFiles('requirements*.txt') }}
+          restore-keys: |
+            pip-cpp-${{ runner.os }}-
+            pip-${{ runner.os }}-
+
+      - name: Install build tools
+        shell: bash
+        run: |
+          # Install ninja and ccache for faster builds
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            # Check if already installed to avoid unnecessary updates
+            if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y ninja-build ccache
+            fi
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            # Check if already installed
+            if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
+              brew install ninja ccache
+            fi
+          elif [[ "$RUNNER_OS" == "Windows" ]]; then
+            if ! command -v ninja &> /dev/null; then
+              python -m pip install ninja
+            fi
+            # ccache not easily available on Windows
           fi
-        elif [[ "$RUNNER_OS" == "macOS" ]]; then
-          # Check if already installed
-          if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
-            brew install ninja ccache
+
+      - name: Setup ccache
+        if: runner.os != 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-${{ matrix.build_type }}-
+            ccache-${{ runner.os }}-
+
+      - name: Install Conan
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install 'conan>=2.0'
+
+      - name: Configure Conan
+        shell: bash
+        run: conan profile detect --force
+
+      - name: Setup ccache after Conan profile detection
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          # Set ccache environment variables AFTER Conan profile detection
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            echo "CC=ccache gcc" >> $GITHUB_ENV
+            echo "CXX=ccache g++" >> $GITHUB_ENV
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            echo "CC=ccache clang" >> $GITHUB_ENV
+            echo "CXX=ccache clang++" >> $GITHUB_ENV
           fi
-        elif [[ "$RUNNER_OS" == "Windows" ]]; then
-          if ! command -v ninja &> /dev/null; then
-            python -m pip install ninja
+
+      - name: Install dependencies
+        shell: bash
+        run: |
+          # Install dependencies with caching
+          conan install lib -s compiler.cppstd=20 -s build_type=${{ matrix.build_type }} \
+            --output-folder=build/lib --build=missing
+          conan install examples -s compiler.cppstd=20 -s build_type=${{ matrix.build_type }} \
+            --output-folder=build/examples --build=missing
+
+      - name: Configure and Build
+        shell: bash
+        run: |
+          # Configure with ninja when available for faster builds
+          if command -v ninja &> /dev/null; then
+            GENERATOR="-G Ninja"
+          else
+            GENERATOR=""
           fi
-          # ccache not easily available on Windows
-        fi
-    
-    - name: Setup ccache
-      if: runner.os != 'Windows'
-      uses: actions/cache@v4
-      with:
-        path: ~/.ccache
-        key: ccache-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp') }}
-        restore-keys: |
-          ccache-${{ runner.os }}-${{ matrix.build_type }}-
-          ccache-${{ runner.os }}-
-    
-    - name: Install Conan
-      run: |
-        python -m pip install --upgrade pip
-        pip install 'conan>=2.0'
-      
-    - name: Configure Conan
-      run: conan profile detect --force
-      
-    - name: Setup ccache after Conan profile detection
-      if: runner.os != 'Windows'
-      shell: bash
-      run: |
-        # Set ccache environment variables AFTER Conan profile detection
-        if [[ "$RUNNER_OS" == "Linux" ]]; then
-          echo "CC=ccache gcc" >> $GITHUB_ENV
-          echo "CXX=ccache g++" >> $GITHUB_ENV
-        elif [[ "$RUNNER_OS" == "macOS" ]]; then
-          echo "CC=ccache clang" >> $GITHUB_ENV
-          echo "CXX=ccache clang++" >> $GITHUB_ENV
-        fi
-        
-    - name: Install dependencies
-      run: |
-        # Install dependencies with caching
-        conan install lib -s compiler.cppstd=gnu20 -s build_type=${{ matrix.build_type }} \
-          --output-folder=build/lib --build=missing
-        conan install examples -s compiler.cppstd=gnu20 -s build_type=${{ matrix.build_type }} \
-          --output-folder=build/examples --build=missing
-        
-    - name: Configure and Build
-      shell: bash
-      run: |
-        # Configure with ninja when available for faster builds
-        if command -v ninja &> /dev/null; then
-          GENERATOR="-G Ninja"
-        else
-          GENERATOR=""
-        fi
-        
-        cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
-              -DLOG_LEVEL=NONE \
-              -DENABLE_TRACE_FILE=OFF \
-              -DENABLE_PROFILING=OFF \
-              -DLIB_MODE=ON \
-              $GENERATOR \
-              -S . -B build
-        
-        # Build with maximum parallelism
-        cmake --build build --config ${{ matrix.build_type }} --parallel
-      
-    - name: Test
-      shell: bash
-      run: |
-        cd build
-        # Use --config only on Windows (multi-config generators)
-        if [[ "$RUNNER_OS" == "Windows" ]]; then
-          ctest --config ${{ matrix.build_type }} --output-on-failure --parallel
-        else
-          ctest --output-on-failure --parallel
-        fi
+          # Set correct macOS sysroot if on macOS
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
+          else
+            SYSROOT_ARG=""
+          fi
+          cmake -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+                -DLOG_LEVEL=NONE \
+                -DENABLE_TRACE_FILE=OFF \
+                -DENABLE_PROFILING=OFF \
+                -DLIB_MODE=ON \
+                $GENERATOR \
+                $SYSROOT_ARG \
+                -S . -B build
+          
+          # Build with maximum parallelism
+          cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Test
+        shell: bash
+        run: |
+          cd build
+          # Use --config only on Windows (multi-config generators)
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            ctest --config ${{ matrix.build_type }} --output-on-failure --parallel
+          else
+            ctest --output-on-failure --parallel
+          fi
 
   test-python:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        #os: [ubuntu-latest, windows-latest, macos-latest]
-        os: [ubuntu-latest]  # Temporarily Linux-only for faster testing
-        python-version: ["3.8", "3.12"]  # Reduced matrix - test oldest and newest only
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
+        python-version: [ "3.8", "3.12" ]  # Reduced matrix - test oldest and newest only
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: ${{ matrix.python-version }}
-    
-    - name: Cache pip packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.cache/pip
-        key: pip-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('python/pyproject.toml') }}
-        restore-keys: |
-          pip-${{ runner.os }}-${{ matrix.python-version }}-
-          pip-${{ runner.os }}-
-    
-    - name: Cache Conan packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.conan2
-        key: conan-python-${{ runner.os }}-${{ hashFiles('lib/conanfile.txt') }}
-        restore-keys: |
-          conan-python-${{ runner.os }}-
-        
-    - name: Install build dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install 'conan>=2.0'
-        conan profile detect --force
-        
-    - name: Install Conan dependencies (like build_and_install.sh)
-      shell: bash
-      run: |
-        cd python
-        rm -rf build
-        mkdir -p build/lib
-        conan install ../lib -s compiler.cppstd=gnu20 -s build_type=Release \
-          --output-folder=build/lib --build=missing
-      
-    - name: Install Python package
-      run: |
-        cd python
-        pip install -e .[test]
-        
-    - name: Copy shared libraries for editable install
-      shell: bash
-      run: |
-        cd python
-        # Copy bindings and core shared objects (like build_and_install.sh)
-        mkdir -p alice_lri/lib
-        cp build/lib/*.so alice_lri/lib/ 2>/dev/null || true
-        cp build/*.so alice_lri/ 2>/dev/null || true
-        
-    - name: Run Python tests
-      shell: bash
-      run: |
-        cd python
-        # Create tests directory if it doesn't exist (for older branches)
-        mkdir -p tests
-        if [ -f "tests/test_installation.py" ]; then
-          pytest tests/ -v
-        else
-          echo "No tests found, running basic import test"
-          python -c "import alice_lri; print('✅ Basic import test passed')"
-        fi
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Cache pip packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: pip-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('python/pyproject.toml') }}
+          restore-keys: |
+            pip-${{ runner.os }}-${{ matrix.python-version }}-
+            pip-${{ runner.os }}-
+
+      - name: Cache Conan packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan2
+          key: conan-python-${{ runner.os }}-${{ hashFiles('lib/conanfile.txt') }}
+          restore-keys: |
+            conan-python-${{ runner.os }}-
+
+      - name: Install build dependencies
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install 'conan>=2.0'
+          conan profile detect --force
+
+      - name: Install Conan dependencies (like build_and_install.sh)
+        shell: bash
+        run: |
+          cd python
+          rm -rf build
+          mkdir -p build/lib
+          conan install ../lib -s compiler.cppstd=20 -s build_type=Release \
+            --output-folder=build/lib --build=missing
+
+      - name: Configure for Build
+        shell: bash
+        run: |
+          # Set correct macOS sysroot if on macOS
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
+          else
+            SYSROOT_ARG=""
+          fi
+
+      - name: Install Python package
+        shell: bash
+        run: |
+          cd python
+          pip install -e .[test]
+
+      - name: Copy shared libraries for editable install
+        shell: bash
+        run: |
+          cd python
+          # Copy bindings and core shared objects (like build_and_install.sh)
+          mkdir -p alice_lri/lib
+          cp build/lib/*.so alice_lri/lib/ 2>/dev/null || true
+          cp build/*.so alice_lri/ 2>/dev/null || true
+
+      - name: Run Python tests
+        shell: bash
+        run: |
+          cd python
+          # Create tests directory if it doesn't exist (for older branches)
+          mkdir -p tests
+          if [ -f "tests/test_installation.py" ]; then
+            pytest tests/ -v
+          else
+            echo "No tests found, running basic import test"
+            python -c "import alice_lri; print('✅ Basic import test passed')"
+          fi
 
   # Full installation test with C++ consumer project (all platforms)
   test-cpp-install:
@@ -254,173 +275,180 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        #os: [ubuntu-latest, windows-latest, macos-latest]
-        os: [ubuntu-latest]  # Temporarily Linux-only for faster testing
+        os: [ ubuntu-latest, windows-latest, macos-latest ]
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-    
-    - name: Cache Conan packages
-      uses: actions/cache@v4
-      with:
-        path: ~/.conan2
-        key: conan-install-${{ runner.os }}-${{ hashFiles('lib/conanfile.txt') }}
-        restore-keys: conan-install-${{ runner.os }}-
-    
-    - name: Cache CMake build directory for installation
-      uses: actions/cache@v4
-      with:
-        path: |
-          build/
-          !build/lib/conan_toolchain.cmake
-          !build/examples/conan_toolchain.cmake
-        key: cmake-install-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp', 'CMakeLists.txt', '**/CMakeLists.txt') }}
-        restore-keys: |
-          cmake-install-${{ runner.os }}-
-          cmake-build-${{ runner.os }}-
-    
-    - name: Cache Homebrew
-      if: runner.os == 'macOS'
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/Library/Caches/Homebrew
-          /usr/local/Homebrew
-        key: brew-install-${{ runner.os }}-ninja-ccache
-        restore-keys: |
-          brew-install-${{ runner.os }}-
-          brew-${{ runner.os }}-
-    
-    - name: Install build tools
-      shell: bash
-      run: |
-        if [[ "$RUNNER_OS" == "Linux" ]]; then
-          if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
-            sudo apt-get update && sudo apt-get install -y ninja-build ccache
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Cache Conan packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.conan2
+          key: conan-install-${{ runner.os }}-${{ hashFiles('lib/conanfile.txt') }}
+          restore-keys: conan-install-${{ runner.os }}-
+
+      - name: Cache CMake build directory for installation
+        uses: actions/cache@v4
+        with:
+          path: |
+            build/
+            !build/lib/conan_toolchain.cmake
+            !build/examples/conan_toolchain.cmake
+          key: cmake-install-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp', 'CMakeLists.txt', '**/CMakeLists.txt') }}
+          restore-keys: |
+            cmake-install-${{ runner.os }}-
+            cmake-build-${{ runner.os }}-
+
+      - name: Cache Homebrew
+        if: runner.os == 'macOS'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/Homebrew
+            /usr/local/Homebrew
+          key: brew-install-${{ runner.os }}-ninja-ccache
+          restore-keys: |
+            brew-install-${{ runner.os }}-
+            brew-${{ runner.os }}-
+
+      - name: Install build tools
+        shell: bash
+        run: |
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y ninja-build ccache
+            fi
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
+              brew install ninja ccache
+            fi
+          elif [[ "$RUNNER_OS" == "Windows" ]]; then
+            if ! command -v ninja &> /dev/null; then
+              python -m pip install ninja
+            fi
           fi
-        elif [[ "$RUNNER_OS" == "macOS" ]]; then
-          if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
-            brew install ninja ccache
+
+      - name: Setup ccache
+        if: runner.os != 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: ~/.ccache
+          key: ccache-install-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp') }}
+          restore-keys: |
+            ccache-install-${{ runner.os }}-
+            ccache-${{ runner.os }}-
+
+      - name: Install Conan
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install 'conan>=2.0'
+          conan profile detect --force
+
+      - name: Setup ccache after Conan profile detection
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          # Set ccache environment variables AFTER Conan profile detection
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            echo "CC=ccache gcc" >> $GITHUB_ENV
+            echo "CXX=ccache g++" >> $GITHUB_ENV
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            echo "CC=ccache clang" >> $GITHUB_ENV
+            echo "CXX=ccache clang++" >> $GITHUB_ENV
           fi
-        elif [[ "$RUNNER_OS" == "Windows" ]]; then
-          if ! command -v ninja &> /dev/null; then
-            python -m pip install ninja
+
+      - name: Install C++ library dependencies
+        shell: bash
+        run: |
+          conan install lib -s compiler.cppstd=20 -s build_type=Release \
+            --output-folder=build/lib --build=missing
+          conan install examples -s compiler.cppstd=20 -s build_type=Release \
+            --output-folder=build/examples --build=missing
+
+      - name: Build and install C++ library
+        shell: bash
+        run: |
+          # Use ninja if available
+          GENERATOR=""
+          if command -v ninja &> /dev/null; then
+            GENERATOR="-G Ninja"
           fi
-        fi
-    
-    - name: Setup ccache
-      if: runner.os != 'Windows'
-      uses: actions/cache@v4
-      with:
-        path: ~/.ccache
-        key: ccache-install-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp') }}
-        restore-keys: |
-          ccache-install-${{ runner.os }}-
-          ccache-${{ runner.os }}-
-    
-    - name: Install Conan
-      run: |
-        python -m pip install --upgrade pip
-        pip install 'conan>=2.0'
-        conan profile detect --force
-        
-    - name: Setup ccache after Conan profile detection
-      if: runner.os != 'Windows'
-      shell: bash
-      run: |
-        # Set ccache environment variables AFTER Conan profile detection
-        if [[ "$RUNNER_OS" == "Linux" ]]; then
-          echo "CC=ccache gcc" >> $GITHUB_ENV
-          echo "CXX=ccache g++" >> $GITHUB_ENV
-        elif [[ "$RUNNER_OS" == "macOS" ]]; then
-          echo "CC=ccache clang" >> $GITHUB_ENV
-          echo "CXX=ccache clang++" >> $GITHUB_ENV
-        fi
-        
-    - name: Install C++ library dependencies
-      run: |
-        conan install lib -s compiler.cppstd=gnu20 -s build_type=Release \
-          --output-folder=build/lib --build=missing
-        conan install examples -s compiler.cppstd=gnu20 -s build_type=Release \
-          --output-folder=build/examples --build=missing
-        
-    - name: Build and install C++ library
-      shell: bash
-      run: |
-        # Use ninja if available
-        GENERATOR=""
-        if command -v ninja &> /dev/null; then
-          GENERATOR="-G Ninja"
-        fi
-        
-        cmake -DCMAKE_BUILD_TYPE=Release \
-              -DLOG_LEVEL=NONE \
-              -DENABLE_TRACE_FILE=OFF \
-              -DENABLE_PROFILING=OFF \
-              -DLIB_MODE=ON \
-              -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
-              $GENERATOR \
-              -S . -B build
-        
-        cmake --build build --config Release --parallel
-        cmake --install build --config Release
-        
-    - name: Test C++ installation with consumer project
-      shell: bash
-      run: |
-        mkdir test_consumer && cd test_consumer
-        
-        # Create minimal test project
-        cat > CMakeLists.txt << 'EOF'
-        cmake_minimum_required(VERSION 3.20)
-        project(test_consumer LANGUAGES CXX)
-        set(CMAKE_CXX_STANDARD 20)
-        set(CMAKE_CXX_STANDARD_REQUIRED ON)
-        
-        find_package(alice_lri REQUIRED)
-        
-        add_executable(test_app test.cpp)
-        target_link_libraries(test_app alice_lri::alice_lri)
-        EOF
-        
-        cat > test.cpp << 'EOF'
-        #include <alice_lri/alice_lri.hpp>
-        #include <iostream>
-        
-        int main() {
-            // Test basic library functionality
-            alice_lri::PointCloud::Float cloud;
-            cloud.x = alice_lri::AliceArray<float>(5);
-            cloud.y = alice_lri::AliceArray<float>(5);
-            cloud.z = alice_lri::AliceArray<float>(5);
-            
-            // Fill with sample data
-            for (int i = 0; i < 5; ++i) {
-                cloud.x[i] = static_cast<float>(i) * 0.1f;
-                cloud.y[i] = static_cast<float>(i) * 0.2f;
-                cloud.z[i] = static_cast<float>(i) * 0.3f;
-            }
-            
-            std::cout << "✅ C++ library installed and working correctly!" << std::endl;
-            std::cout << "Point cloud size: " << cloud.x.size() << std::endl;
-            return 0;
-        }
-        EOF
-        
-        cmake -B build -DCMAKE_PREFIX_PATH=${{ github.workspace }}/install
-        cmake --build build --parallel
-        
-        # Run the test
-        if [[ "$RUNNER_OS" == "Windows" ]]; then
-          build/Debug/test_app.exe || build/Release/test_app.exe
-        else
-          ./build/test_app
-        fi
+          # Set correct macOS sysroot if on macOS
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
+          else
+            SYSROOT_ARG=""
+          fi
+          cmake -DCMAKE_BUILD_TYPE=Release \
+                -DLOG_LEVEL=NONE \
+                -DENABLE_TRACE_FILE=OFF \
+                -DENABLE_PROFILING=OFF \
+                -DLIB_MODE=ON \
+                -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
+                $GENERATOR \
+                -S . -B build
+          
+          cmake --build build --config Release --parallel
+          cmake --install build --config Release
+
+      - name: Test C++ installation with consumer project
+        shell: bash
+        run: |
+          mkdir test_consumer && cd test_consumer
+          
+          # Create minimal test project
+          cat > CMakeLists.txt << 'EOF'
+          cmake_minimum_required(VERSION 3.20)
+          project(test_consumer LANGUAGES CXX)
+          set(CMAKE_CXX_STANDARD 20)
+          set(CMAKE_CXX_STANDARD_REQUIRED ON)
+          
+          find_package(alice_lri REQUIRED)
+          
+          add_executable(test_app test.cpp)
+          target_link_libraries(test_app alice_lri::alice_lri)
+          EOF
+          
+          cat > test.cpp << 'EOF'
+          #include <alice_lri/alice_lri.hpp>
+          #include <iostream>
+          
+          int main() {
+              // Test basic library functionality
+              alice_lri::PointCloud::Float cloud;
+              cloud.x = alice_lri::AliceArray<float>(5);
+              cloud.y = alice_lri::AliceArray<float>(5);
+              cloud.z = alice_lri::AliceArray<float>(5);
+          
+              // Fill with sample data
+              for (int i = 0; i < 5; ++i) {
+                  cloud.x[i] = static_cast<float>(i) * 0.1f;
+                  cloud.y[i] = static_cast<float>(i) * 0.2f;
+                  cloud.z[i] = static_cast<float>(i) * 0.3f;
+              }
+          
+              std::cout << "✅ C++ library installed and working correctly!" << std::endl;
+              std::cout << "Point cloud size: " << cloud.x.size() << std::endl;
+              return 0;
+          }
+          EOF
+          
+          cmake -B build -DCMAKE_PREFIX_PATH=${{ github.workspace }}/install
+          cmake --build build --parallel
+          
+          # Run the test
+          if [[ "$RUNNER_OS" == "Windows" ]]; then
+            build/Debug/test_app.exe || build/Release/test_app.exe
+          else
+            ./build/test_app
+          fi
 
   build-wheels: #TODO not sure if we should also run on regular push
     if: github.event_name == 'release'
@@ -428,76 +456,79 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        #os: [ubuntu-latest, windows-latest, macos-latest]
-        os: [ubuntu-latest]  # Temporarily Linux-only for faster testing
-    
+        os: [ ubuntu-latest, windows-latest, macos-latest ] #TODO not sure if all the OS are required
+
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Build wheels
-      uses: pypa/cibuildwheel@v2.16.2
-      env:
-        CIBW_ARCHS_LINUX: x86_64
-        CIBW_ARCHS_WINDOWS: AMD64
-        CIBW_ARCHS_MACOS: x86_64 arm64
-        CIBW_BUILD_VERBOSITY: 1
-        
-    - name: Upload wheels
-      uses: actions/upload-artifact@v4
-      with:
-        name: wheels-${{ matrix.os }}
-        path: wheelhouse/*.whl
-        retention-days: 7
+      - uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.2
+        env:
+          CIBW_ARCHS_LINUX: x86_64
+          CIBW_ARCHS_WINDOWS: AMD64
+          CIBW_ARCHS_MACOS: x86_64 arm64
+          CIBW_BUILD_VERBOSITY: 1
+
+      - name: Upload wheels
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
+          retention-days: 7
 
   test-source-distribution:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: "3.11"
-        
-    - name: Install build tools
-      run: |
-        pip install --upgrade pip
-        pip install build twine 'conan>=2.0' pybind11-stubgen
-        conan profile detect --force
-        
-    - name: Build source distribution
-      run: |
-        cd python
-        ./install_dev_and_stubs.sh
-        python -m build --sdist
-        
-    - name: Check source distribution
-      run: |
-        cd python
-        python -m twine check dist/*.tar.gz
-        
-    - name: Test installation from sdist
-      run: |
-        cd python
-        # Test that sdist can be installed without manual Conan setup
-        pip install dist/*.tar.gz
-        python -c "import alice_lri; print('✅ Source distribution installation works!')"
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        shell: bash
+        run: |
+          pip install --upgrade pip
+          pip install build twine 'conan>=2.0' pybind11-stubgen
+          conan profile detect --force
+
+      - name: Build source distribution
+        shell: bash
+        run: |
+          cd python
+          ./install_dev_and_stubs.sh
+          python -m build --sdist
+
+      - name: Check source distribution
+        shell: bash
+        run: |
+          cd python
+          python -m twine check dist/*.tar.gz
+
+      - name: Test installation from sdist
+        shell: bash
+        run: |
+          cd python
+          # Test that sdist can be installed without manual Conan setup
+          pip install dist/*.tar.gz
+          python -c "import alice_lri; print('✅ Source distribution installation works!')"
 
   publish-pypi:
     if: github.event_name == 'release'
-    needs: [test-cpp, test-python, test-cpp-install, build-wheels, test-source-distribution]
+    needs: [ test-cpp, test-python, test-cpp-install, build-wheels, test-source-distribution ]
     runs-on: ubuntu-latest
     
     steps:
-    - name: Download all wheels
-      uses: actions/download-artifact@v4
-      with:
-        pattern: wheels-*
-        merge-multiple: true
-        path: dist/
-        
-    - name: Publish to PyPI
-      uses: pypa/gh-action-pypi-publish@release/v1
-      with:
-        password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Download all wheels
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}
