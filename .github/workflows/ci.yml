@@ -178,9 +178,9 @@ jobs:
         shell: bash
         run: |
           cd build
-          # Use --config only on Windows (multi-config generators)
+          # Use -C only on Windows (multi-config generators)
           if [[ "$RUNNER_OS" == "Windows" ]]; then
-            ctest --config ${{ matrix.build_type }} --output-on-failure --parallel
+            ctest -C ${{ matrix.build_type }} --output-on-failure --parallel
           else
             ctest --output-on-failure --parallel
           fi
@@ -251,6 +251,7 @@ jobs:
           cd python
           pip install -e .[test]
 
+      # TODO should not be necessary anymore
       - name: Copy shared libraries for editable install
         shell: bash
         run: |
@@ -263,11 +264,9 @@ jobs:
       - name: Run Python tests
         shell: bash
         run: |
-          cd python
-          # Create tests directory if it doesn't exist (for older branches)
-          mkdir -p tests
-          if [ -f "tests/test_installation.py" ]; then
-            pytest tests/ -v
+          mkdir -p python/tests
+          if [ -f "python/tests/test_installation.py" ]; then
+            pytest python/tests/ -v
           else
             echo "No tests found, running basic import test"
             python -c "import alice_lri; print('✅ Basic import test passed')"
@@ -400,7 +399,7 @@ jobs:
                 -DENABLE_TRACE_FILE=OFF \
                 -DENABLE_PROFILING=OFF \
                 -DLIB_MODE=ON \
-                -DCMAKE_INSTALL_PREFIX=${{ github.workspace }}/install \
+                -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install" \
                 $GENERATOR \
                 -S . -B build
           
@@ -449,7 +448,7 @@ jobs:
           }
           EOF
           
-          cmake -B build -DCMAKE_PREFIX_PATH=${{ github.workspace }}/install
+          cmake -B build -DCMAKE_PREFIX_PATH="${{ github.workspace }}/install"
           cmake --build build --parallel
           
           # Run the test
