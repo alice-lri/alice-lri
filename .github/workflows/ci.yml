@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
-        os: [  windows-latest ]
+        os: [ ubuntu-latest, windows-latest ]
         build_type: [ Release ]
     
     steps:
@@ -166,6 +166,7 @@ jobs:
                 -DLOG_LEVEL=NONE \
                 -DENABLE_TRACE_FILE=OFF \
                 -DENABLE_PROFILING=OFF \
+                -DLIB_MODE=OFF \
                 $GENERATOR \
                 $SYSROOT_ARG \
                 -S . -B build
@@ -189,7 +190,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [  windows-latest ]
+        os: [ ubuntu-latest, windows-latest ]
         python-version: [ "3.12" ]
     
     steps:
@@ -268,7 +269,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [  windows-latest ]
+        os: [ ubuntu-latest, windows-latest ]
     
     steps:
       - uses: actions/checkout@v4
@@ -454,7 +455,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [  windows-latest ] #TODO not sure if all the OS are required
+        os: [ ubuntu-latest, windows-latest ] #TODO not sure if all the OS are required
 
     steps:
       - uses: actions/checkout@v4

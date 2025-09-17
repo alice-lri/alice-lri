@@ -8,6 +8,6 @@
         "../cmake-build-release/examples/CMakePresets.json",
         "../cmake-build-release-debug/examples/CMakePresets.json",
         "../cmake-build-release-install/examples/CMakePresets.json",
-        "../build-windows/examples/CMakePresets.json"
+        "../build/examples/CMakePresets.json"
     ]
 }
