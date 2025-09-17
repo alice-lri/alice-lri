@@ -24,13 +24,6 @@ endif()
 # Find pybind11
 find_package(pybind11 REQUIRED)
 
-# Ensure the inner library installs into the Python package structure
-set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/python_install" CACHE PATH "" FORCE)
-
-# Force its library dir to be under alice_lri/lib inside the wheel
-set(CMAKE_INSTALL_LIBDIR "alice_lri/lib" CACHE PATH "Library install dir" FORCE)
-set(CMAKE_INSTALL_BINDIR "alice_lri/lib" CACHE PATH "Binary install dir" FORCE)
-
 # Add the core library
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib ${CMAKE_BINARY_DIR}/lib)
 
@@ -40,8 +33,7 @@ target_link_libraries(_alice_lri PRIVATE alice_lri)
 target_include_directories(_alice_lri PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
 
 set_target_properties(_alice_lri PROPERTIES
-        BUILD_RPATH "$ORIGIN/lib"
-        INSTALL_RPATH "$ORIGIN/lib"
+        INSTALL_RPATH "$ORIGIN"
         BUILD_RPATH_USE_ORIGIN ON
 )
 
@@ -50,7 +42,7 @@ install(TARGETS _alice_lri
         COMPONENT python)
 
 install(TARGETS alice_lri
-        LIBRARY DESTINATION alice_lri/lib COMPONENT python
-        ARCHIVE DESTINATION alice_lri/lib COMPONENT python
-        RUNTIME DESTINATION alice_lri/lib COMPONENT python
+        LIBRARY DESTINATION alice_lri COMPONENT python
+        ARCHIVE DESTINATION alice_lri COMPONENT python
+        RUNTIME DESTINATION alice_lri COMPONENT python
 )

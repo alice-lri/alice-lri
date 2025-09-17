@@ -166,7 +166,6 @@ jobs:
                 -DLOG_LEVEL=NONE \
                 -DENABLE_TRACE_FILE=OFF \
                 -DENABLE_PROFILING=OFF \
-                -DLIB_MODE=ON \
                 $GENERATOR \
                 $SYSROOT_ARG \
                 -S . -B build
@@ -249,7 +248,7 @@ jobs:
         shell: bash
         run: |
           cd python
-          pip install -e .[test]
+          pip install -e .[test] -v
 
       - name: Run Python tests
         shell: bash
@@ -389,6 +388,7 @@ jobs:
                 -DLOG_LEVEL=NONE \
                 -DENABLE_TRACE_FILE=OFF \
                 -DENABLE_PROFILING=OFF \
+                -DLIB_MODE=ON \
                 -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install" \
                 $GENERATOR \
                 -S . -B build
