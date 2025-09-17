@@ -46,7 +46,7 @@ namespace alice_lri {
 
         const double sizeOverTwo = static_cast<double>(y.size()) / 2;
         double logLikelihood = -std::log(ssr) * sizeOverTwo;
-        logLikelihood -= (1 + std::log(M_PI / sizeOverTwo)) * sizeOverTwo;
+        logLikelihood -= (1 + std::log(std::numbers::pi / sizeOverTwo)) * sizeOverTwo;
         logLikelihood += 0.5 * weights.log().sum();
 
         const int df = static_cast<int>(y.size()) - 2;

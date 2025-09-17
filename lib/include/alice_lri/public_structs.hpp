@@ -100,7 +100,7 @@ namespace alice_lri {
         bool horizontalHeuristic;
     };
 
-    enum class ALICE_LRI_API EndReason {
+    enum class EndReason {
         ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
     };
 

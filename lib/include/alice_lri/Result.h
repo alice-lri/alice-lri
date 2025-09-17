@@ -5,7 +5,7 @@
 
 namespace alice_lri {
 
-    enum class ALICE_LRI_API ErrorCode {
+    enum class ErrorCode {
         NONE = 0,
         MISMATCHED_SIZES,
         EMPTY_POINT_CLOUD,

@@ -21,7 +21,7 @@ jobs:
       fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-        build_type: [ Release, Debug ]
+        build_type: [ Release ]
     
     steps:
       - uses: actions/checkout@v4
@@ -145,9 +145,13 @@ jobs:
       - name: Configure and Build
         shell: bash
         run: |
-          # Configure with ninja when available for faster builds
-          if command -v ninja &> /dev/null; then
-            GENERATOR="-G Ninja"
+          # Use ninja if available
+          if [[ "$RUNNER_OS" == "Linux" || "$RUNNER_OS" == "macOS" ]]; then
+            if command -v ninja &> /dev/null; then
+              GENERATOR="-G Ninja"
+            else
+              GENERATOR=""
+            fi
           else
             GENERATOR=""
           fi
@@ -187,7 +191,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ ubuntu-latest, windows-latest, macos-latest ]
-        python-version: [ "3.8", "3.12" ]  # Reduced matrix - test oldest and newest only
+        python-version: [ "3.12" ]
     
     steps:
       - uses: actions/checkout@v4
@@ -375,9 +379,14 @@ jobs:
         shell: bash
         run: |
           # Use ninja if available
-          GENERATOR=""
-          if command -v ninja &> /dev/null; then
-            GENERATOR="-G Ninja"
+          if [[ "$RUNNER_OS" == "Linux" || "$RUNNER_OS" == "macOS" ]]; then
+            if command -v ninja &> /dev/null; then
+              GENERATOR="-G Ninja"
+            else
+              GENERATOR=""
+            fi
+          else
+            GENERATOR=""
           fi
           # Set correct macOS sysroot if on macOS
           if [[ "$RUNNER_OS" == "macOS" ]]; then

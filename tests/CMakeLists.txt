@@ -1,3 +1,4 @@
+include(${CMAKE_CURRENT_BINARY_DIR}/conan_toolchain.cmake)
 find_package(GTest REQUIRED)
 
 # Add test executable

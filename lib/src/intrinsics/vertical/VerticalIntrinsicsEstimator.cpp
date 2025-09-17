@@ -16,7 +16,7 @@ namespace alice_lri {
         const double offsetMax = std::min(points.getRanges().minCoeff(), Constant::MAX_OFFSET) - Constant::OFFSET_STEP;
         const double offsetMin = -offsetMax;
 
-        constexpr double angleMax = M_PI / 2 - Constant::ANGLE_STEP;
+        constexpr double angleMax = std::numbers::pi / 2 - Constant::ANGLE_STEP;
         constexpr double angleMin = -angleMax;
 
         VerticalScanlinePool scanlinePool(

@@ -136,7 +136,7 @@ namespace alice_lri {
     ) {
         LOG_DEBUG("Candidate resolution: ", resolution);
 
-        const double thetaStep = 2 * M_PI / resolution;
+        const double thetaStep = 2 * std::numbers::pi / resolution;
         const Eigen::ArrayXd &invRangesXy = scanlineArray.getInvRangesXy(scanlineIdx);
 
         const Eigen::ArrayXd diffToIdeal = HorizontalMath::computeDiffToIdeal(
@@ -260,9 +260,9 @@ namespace alice_lri {
     ResolutionOffsetLoss HorizontalIntrinsicsEstimator::computeHeuristicValues(
         const Eigen::ArrayXd &thetas, const Eigen::ArrayXd &ranges, const int32_t resolution, const double offset
     ) {
-        const double thetaStep = 2 * M_PI / resolution;
+        const double thetaStep = Constant::TWO_PI / resolution;
         Eigen::ArrayXd correctedThetas = thetas - offset / ranges;
-        Utils::positiveFmodInplace(correctedThetas, 2 * M_PI);
+        Utils::positiveFmodInplace(correctedThetas, Constant::TWO_PI);
 
         const Eigen::ArrayXd idealThetas = (correctedThetas / thetaStep).floor() * thetaStep;
         const Eigen::ArrayXd diffToIdeal = correctedThetas - idealThetas;

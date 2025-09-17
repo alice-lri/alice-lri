@@ -35,9 +35,6 @@ option(LIB_MODE "Build in lib mode, hiding unnecessary symbols for ABI compatibi
 if (LIB_MODE)
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
-else()
-    set(ENABLE_PYTHON_DEBUG ON)
-    add_definitions(-DENABLE_PYTHON_DEBUG)
 endif ()
 
 include(${CMAKE_CURRENT_BINARY_DIR}/conan_toolchain.cmake)
@@ -151,6 +148,12 @@ target_include_directories(alice_lri
 )
 
 target_link_libraries(alice_lri PRIVATE ${_alice_lri_private_libraries})
+target_compile_definitions(alice_lri PRIVATE ALICE_LRI_EXPORTS)
+if(WIN32)
+    set_target_properties(alice_lri PROPERTIES
+        WINDOWS_EXPORT_ALL_SYMBOLS OFF
+    )
+endif()
 
 # Installation
 include(CMakePackageConfigHelpers)

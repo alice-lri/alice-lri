@@ -10,3 +10,8 @@ conan install examples -s compiler.cppstd=20 -s build_type=Debug -of cmake-build
 conan install examples -s compiler.cppstd=20 -s build_type=Release -of cmake-build-release/examples --build=missing
 conan install examples -s compiler.cppstd=20 -s build_type=Release -of cmake-build-release-debug/examples --build=missing
 conan install examples -s compiler.cppstd=20 -s build_type=Release -of cmake-build-release-install/examples --build=missing
+
+conan install tests -s compiler.cppstd=20 -s build_type=Debug -of cmake-build-debug/tests --build=missing
+conan install tests -s compiler.cppstd=20 -s build_type=Release -of cmake-build-release/tests --build=missing
+conan install tests -s compiler.cppstd=20 -s build_type=Release -of cmake-build-release-debug/tests --build=missing
+conan install tests -s compiler.cppstd=20 -s build_type=Release -of cmake-build-release-install/tests --build=missing

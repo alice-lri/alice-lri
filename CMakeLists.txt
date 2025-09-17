@@ -11,7 +11,7 @@ add_subdirectory(examples ${CMAKE_BINARY_DIR}/examples)
 enable_testing()
 
 if(NOT LIB_MODE)
-    add_subdirectory(tests)
+    add_subdirectory(tests ${CMAKE_BINARY_DIR}/tests)
 endif ()
 
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")

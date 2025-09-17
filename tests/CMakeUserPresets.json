@@ -1,0 +1,13 @@
+{
+    "version": 4,
+    "vendor": {
+        "conan": {}
+    },
+    "include": [
+        "../cmake-build-debug/tests/CMakePresets.json",
+        "../cmake-build-release/tests/CMakePresets.json",
+        "../cmake-build-release-debug/tests/CMakePresets.json",
+        "../cmake-build-release-install/tests/CMakePresets.json",
+        "../build-windows/tests/CMakePresets.json"
+    ]
+}
