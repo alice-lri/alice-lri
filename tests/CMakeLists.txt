@@ -25,8 +25,7 @@ target_include_directories(alice_lri_tests PRIVATE
 # Link with the library and Google Test
 target_link_libraries(alice_lri_tests
         alice_lri
-        gtest
-        gtest_main
+        gtest::gtest
         Eigen3::Eigen  # Link with Eigen if necessary
 )
 
