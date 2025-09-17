@@ -6,7 +6,7 @@ set(HEADER_FILES
     FileUtils.h
 )
 
-include(${CMAKE_BINARY_DIR}/examples/conan_toolchain.cmake)
+include(${CMAKE_CURRENT_BINARY_DIR}/conan_toolchain.cmake)
 find_package(SQLiteCpp REQUIRED)
 
 find_package(nlohmann_json REQUIRED)

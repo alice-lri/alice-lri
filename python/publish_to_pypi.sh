@@ -4,10 +4,7 @@ set -e
 echo "🧹 Cleaning previous builds..."
 rm -rf dist/ build/ *.egg-info/
 
-echo "🔧 Setting up Conan dependencies..."
-rm -rf build
-mkdir -p build/lib
-conan install ../lib -s compiler.cppstd=gnu20 -s build_type=Release -of build/lib --build=missing
+./install_dev_and_stubs.sh
 
 echo "📦 Building wheel..."
 python -m build --wheel

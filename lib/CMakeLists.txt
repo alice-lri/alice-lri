@@ -1,6 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(libalice_lri VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
-option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
 
+option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
 if (LOG_LEVEL STREQUAL "DEBUG")
     add_definitions(-DLOG_LEVEL=1)
 elseif (LOG_LEVEL STREQUAL "INFO")
@@ -19,7 +21,6 @@ option(FLAG_USE_HOUGH_CONTINUITY "Set BuildOption USE_HOUGH_CONTINUITY" ON)
 option(FLAG_USE_SCANLINE_CONFLICT_SOLVER "Set BuildOption USE_SCANLINE_CONFLICT_SOLVER" ON)
 option(FLAG_USE_VERTICAL_HEURISTICS "Set BuildOption USE_VERTICAL_HEURISTICS" ON)
 option(FLAG_USE_HORIZONTAL_HEURISTICS "Set BuildOption USE_HORIZONTAL_HEURISTICS" ON)
-
 configure_file("src/BuildOptions.h.in" "src/BuildOptions.h")
 
 if (ENABLE_PROFILING)
@@ -31,7 +32,6 @@ if (ENABLE_TRACE_FILE)
 endif ()
 
 option(LIB_MODE "Build in lib mode, hiding unnecessary symbols for ABI compatibility" OFF)
-
 if (LIB_MODE)
     set(CMAKE_CXX_VISIBILITY_PRESET hidden)
     set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
@@ -40,7 +40,7 @@ else()
     add_definitions(-DENABLE_PYTHON_DEBUG)
 endif ()
 
-include(${CMAKE_BINARY_DIR}/lib/conan_toolchain.cmake)
+include(${CMAKE_CURRENT_BINARY_DIR}/conan_toolchain.cmake)
 
 find_package(Eigen3 REQUIRED)
 include_directories(Eigen3_INCLUDE_DIRS)
