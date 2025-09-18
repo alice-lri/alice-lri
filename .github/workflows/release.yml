@@ -60,11 +60,13 @@ jobs:
           merge-multiple: true
           path: dist/
 
+      # TODO probably only when release is published
       - name: Publish to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
 
+      # TODO probably only when release is published
       - name: Prepare and submit ConanCenter PR # TODO probably this needs fixing
         shell: bash
         env:

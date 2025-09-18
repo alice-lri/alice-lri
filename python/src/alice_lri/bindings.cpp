@@ -3,10 +3,7 @@
 #include <pybind11/numpy.h>
 #include <string>
 #include <vector>
-#include <alice_lri/public_structs.hpp>
-#include <alice_lri/alice_lri.hpp>
-#include <alice_lri/Result.h>
-#include <alice_lri/AliceString.h>
+#include <alice_lri/Core.hpp>
 #include <sstream>
 #include <iostream>
 
