@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(libalice_lri VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 
+# Build Options
 option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
 if (LOG_LEVEL STREQUAL "DEBUG")
     add_definitions(-DLOG_LEVEL=1)
@@ -31,31 +32,17 @@ if (ENABLE_TRACE_FILE)
     add_definitions(-DENABLE_TRACE_FILE)
 endif ()
 
-
-set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-set(CMAKE_VISIBILITY_INLINES_HIDDEN ON)
-
+# Dependencies
 include(${CMAKE_CURRENT_BINARY_DIR}/conan_toolchain.cmake)
 
 find_package(Eigen3 REQUIRED)
 include_directories(Eigen3_INCLUDE_DIRS)
-
 message(STATUS "EIGEN3_INCLUDE_DIR: ${Eigen3_INCLUDE_DIRS}")
 
 find_package(nlohmann_json REQUIRED)
 set(JSON_BuildTests OFF CACHE INTERNAL "")
 
 find_package(Boost REQUIRED)
-
-if (ENABLE_PYTHON_DEBUG)
-    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
-
-    message(STATUS "Python3 include dir: ${Python3_INCLUDE_DIRS}")
-    message(STATUS "Python3 library: ${Python3_LIBRARIES}")
-endif ()
-
-include(${CMAKE_CURRENT_SOURCE_DIR}/sources.cmake)
-add_library(alice_lri SHARED ${ALICE_LRI_SOURCES})
 
 set(_alice_lri_private_include_dirs
         src
@@ -70,9 +57,18 @@ set(_alice_lri_private_libraries
 )
 
 if (ENABLE_PYTHON_DEBUG)
+    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+    message(STATUS "Python3 include dir: ${Python3_INCLUDE_DIRS}")
+    message(STATUS "Python3 library: ${Python3_LIBRARIES}")
+
     list(APPEND _alice_lri_private_include_dirs ${Python3_INCLUDE_DIRS})
     list(APPEND _alice_lri_private_libraries ${Python3_LIBRARIES})
 endif ()
+
+# Target library definition
+include(${CMAKE_CURRENT_SOURCE_DIR}/sources.cmake)
+add_library(alice_lri SHARED ${ALICE_LRI_SOURCES})
 
 target_include_directories(alice_lri
         PUBLIC
@@ -84,11 +80,21 @@ target_include_directories(alice_lri
 
 target_link_libraries(alice_lri PRIVATE ${_alice_lri_private_libraries})
 target_compile_definitions(alice_lri PRIVATE ALICE_LRI_EXPORTS)
-if(WIN32)
+
+set_target_properties(alice_lri PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+)
+
+set_target_properties(alice_lri PROPERTIES
+        CXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+)
+if (WIN32)
     set_target_properties(alice_lri PROPERTIES
-        WINDOWS_EXPORT_ALL_SYMBOLS OFF
+            WINDOWS_EXPORT_ALL_SYMBOLS OFF
     )
-endif()
+endif ()
 
 # Installation
 include(CMakePackageConfigHelpers)
@@ -117,7 +123,7 @@ export(EXPORT alice_lriTargets
 
 write_basic_package_version_file(
         "${CMAKE_CURRENT_BINARY_DIR}/alice_lriConfigVersion.cmake"
-        VERSION 1.0.0
+        VERSION ${PROJECT_VERSION}
         COMPATIBILITY SameMajorVersion
 )
 

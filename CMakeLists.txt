@@ -2,16 +2,12 @@ cmake_minimum_required(VERSION 3.20)
 project(alice_lri)
 set(CMAKE_CXX_STANDARD 20)
 
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/lib")
-list(APPEND CMAKE_PREFIX_PATH "${CMAKE_BINARY_DIR}/examples")
-
 add_subdirectory(lib ${CMAKE_BINARY_DIR}/lib)
 add_subdirectory(examples ${CMAKE_BINARY_DIR}/examples)
 
-enable_testing()
-
 option(INCLUDE_TESTS "Include tests in the build" OFF)
 if(INCLUDE_TESTS)
+    enable_testing()
     add_subdirectory(tests ${CMAKE_BINARY_DIR}/tests)
 endif ()
 
