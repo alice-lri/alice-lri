@@ -64,3 +64,34 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Prepare and submit ConanCenter PR # TODO probably this needs fixing
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        run: |
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+
+          # Clone your fork
+          git clone "https://github.com/${GITHUB_ACTOR}/conan-center-index.git"
+          cd conan-center-index
+          git remote add upstream https://github.com/conan-io/conan-center-index.git
+          git fetch upstream
+
+          BRANCH="add-alice_lri-0.1.0"
+          git checkout -b "$BRANCH" upstream/master
+
+          mkdir -p recipes/alice_lri/all
+          cp ../lib/conanfile.py recipes/alice_lri/all/conanfile.py
+
+          git add recipes/alice_lri/all/conanfile.py
+          git commit -m "Add alice_lri 0.1.0 recipe"
+          git push origin "$BRANCH"
+
+          # Create PR using GitHub CLI
+          echo $GH_TOKEN | gh auth login --with-token
+          gh pr create --title "Add alice_lri 0.1.0" \
+            --body "Submitting alice_lri 0.1.0 to ConanCenter" \
+            --base master --head "$BRANCH"
