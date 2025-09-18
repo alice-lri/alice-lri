@@ -1,7 +1,7 @@
 #pragma once
 #include <new>
-#include "alice_lri/Api.h"
-#include "alice_lri/AliceString.h"
+#include "alice_lri/ApiGuards.hpp"
+#include "util/AliceString.hpp"
 
 namespace alice_lri {
 

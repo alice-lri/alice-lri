@@ -1,7 +1,7 @@
 #pragma once
 #include <optional>
 #include <string>
-#include "alice_lri/alice_lri.hpp"
+#include "alice_lri/Core.hpp"
 
 namespace FileUtils {
     struct Points {

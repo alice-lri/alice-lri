@@ -2,7 +2,7 @@
 #include <fstream>
 #include <iostream>
 #include <optional>
-#include "alice_lri/alice_lri.hpp"
+#include "alice_lri/Core.hpp"
 #include "FileUtils.h"
 #include <SQLiteCpp/SQLiteCpp.h>
 #include <nlohmann/json.hpp>

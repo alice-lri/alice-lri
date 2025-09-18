@@ -1,7 +1,7 @@
 #pragma once
 #include <cstdint>
 
-#include "Api.h"
+#include "alice_lri/ApiGuards.hpp"
 
 namespace alice_lri {
 

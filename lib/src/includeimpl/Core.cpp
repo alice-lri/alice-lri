@@ -1,6 +1,6 @@
-#include "alice_lri/alice_lri.hpp"
+#include "alice_lri/Core.hpp"
 
-#include "alice_lri/Result.h"
+#include "alice_lri/Result.hpp"
 #include "intrinsics/IntrinsicsEstimator.h"
 #include "rangeimage/RangeImageUtils.h"
 #include "utils/json/JsonConverters.h"

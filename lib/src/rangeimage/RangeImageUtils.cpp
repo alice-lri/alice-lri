@@ -3,7 +3,7 @@
 #include <numeric>
 #include <span>
 #include <Eigen/Core>
-#include "alice_lri/public_structs.hpp"
+#include "alice_lri/Structs.hpp"
 #include "utils/logger/Logger.h"
 #include "utils/Timer.h"
 #include "utils/Utils.h"

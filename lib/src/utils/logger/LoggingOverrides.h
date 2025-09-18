@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <vector>
 #include <Eigen/Core>
-#include "alice_lri/public_structs.hpp"
+#include "alice_lri/Structs.hpp"
 
 template<typename T>
 std::ostream &operator<<(std::ostream &os, const std::unordered_set<T> &set) {

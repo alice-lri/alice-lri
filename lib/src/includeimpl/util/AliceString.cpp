@@ -1,4 +1,5 @@
-#include "alice_lri/AliceString.h"
+#include "alice_lri/util/AliceString.hpp"
+
 #include <string>
 
 namespace alice_lri {

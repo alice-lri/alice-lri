@@ -3,7 +3,7 @@ project(libalice_lri VERSION 0.1.0 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 
 # Build Options
-option(LOG_LEVEL "Set log level (DEBUG, INFO, WARN, ERROR, NONE)" "INFO")
+set(LOG_LEVEL "WARN" CACHE STRING "Set log level (DEBUG, INFO, WARN, ERROR, NONE)")
 if (LOG_LEVEL STREQUAL "DEBUG")
     add_definitions(-DLOG_LEVEL=1)
 elseif (LOG_LEVEL STREQUAL "INFO")
@@ -24,10 +24,12 @@ option(FLAG_USE_VERTICAL_HEURISTICS "Set BuildOption USE_VERTICAL_HEURISTICS" ON
 option(FLAG_USE_HORIZONTAL_HEURISTICS "Set BuildOption USE_HORIZONTAL_HEURISTICS" ON)
 configure_file("src/BuildOptions.h.in" "src/BuildOptions.h")
 
+option(ENABLE_PROFILING "Enable measuring execution time of functions" OFF)
 if (ENABLE_PROFILING)
     add_definitions(-DENABLE_PROFILING)
 endif ()
 
+option(ENABLE_TRACE_FILE "Enable writing trace file for debugging" OFF)
 if (ENABLE_TRACE_FILE)
     add_definitions(-DENABLE_TRACE_FILE)
 endif ()

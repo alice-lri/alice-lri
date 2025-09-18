@@ -1,5 +1,5 @@
 #pragma once
-#include "alice_lri/public_structs.hpp"
+#include "alice_lri/Structs.hpp"
 #include "horizontal/HorizontalIntrinsicsEstimator.h"
 #include "point/PointArray.h"
 #include "vertical/VerticalIntrinsicsEstimator.h"

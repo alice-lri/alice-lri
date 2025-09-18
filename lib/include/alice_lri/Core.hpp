@@ -1,7 +1,7 @@
 #pragma once
-#include "alice_lri/AliceString.h"
-#include "alice_lri/public_structs.hpp"
-#include "alice_lri/Result.h"
+#include "util/AliceString.hpp"
+#include "alice_lri/Structs.hpp"
+#include "alice_lri/Result.hpp"
 
 namespace alice_lri {
     ALICE_LRI_API Result<Intrinsics> train(const PointCloud::Float &points) noexcept;

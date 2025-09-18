@@ -1,4 +1,4 @@
-#include "alice_lri/Result.h"
+#include "alice_lri/Result.hpp"
 
 namespace alice_lri {
     AliceString errorMessage(const ErrorCode code) {

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "alice_lri/alice_lri.hpp"
+#include "alice_lri/Core.hpp"
 #include <vector>
 
 class ALICELRIAPITest : public ::testing::Test {

@@ -1,7 +1,7 @@
 #include <chrono>
 #include <iostream>
 #include <optional>
-#include "alice_lri/alice_lri.hpp"
+#include "alice_lri/Core.hpp"
 #include "FileUtils.h"
 
 std::optional<int> secureStoi(const std::string &str) {

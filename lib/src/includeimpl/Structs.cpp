@@ -1,5 +1,5 @@
 #include <algorithm>
-#include <alice_lri/public_structs.hpp>
+#include <alice_lri/Structs.hpp>
 
 #include "utils/Utils.h"
 

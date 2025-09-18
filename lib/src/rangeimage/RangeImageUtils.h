@@ -1,5 +1,5 @@
 #pragma once
-#include "alice_lri/public_structs.hpp"
+#include "alice_lri/Structs.hpp"
 
 namespace alice_lri::RangeImageUtils {
     RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points);

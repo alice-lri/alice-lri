@@ -7,7 +7,7 @@
 #include <algorithm>
 #include <iomanip>
 #include <map>
-#include "alice_lri/alice_lri.hpp"
+#include "alice_lri/Core.hpp"
 #include "FileUtils.h"
 
 struct TimingResult {
