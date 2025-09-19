@@ -3,7 +3,7 @@ requires = ["scikit-build-core", "pybind11", "conan>=2.0"]
 build-backend = "scikit_build_core.build"
 
 [project]
-name = "alice_lri"
+name = "alice-lri"
 version = "0.1.0"
 description = "LiDAR Range Image processing and intrinsic parameter estimation library"
 readme = "README.md"
@@ -57,7 +57,7 @@ install.components = ["python"]
 
 [tool.scikit-build.cmake.define]
 CMAKE_BUILD_TYPE="Release"
-LOG_LEVEL = "NONE"
+LOG_LEVEL = "WARN"
 ENABLE_TRACE_FILE="OFF"
 ENABLE_PROFILING="OFF"
 PYBUILD_AUTO_CONAN="ON"
