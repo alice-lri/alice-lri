@@ -26,11 +26,6 @@ namespace alice_lri {
             ScanlineLimits &scanlineLimits
         );
 
-        std::optional<VerticalScanlineEstimation> performStatisticalFit(
-            const PointArray &points, const VerticalScanlinePool &scanlinePool, const VerticalBounds &errorBounds,
-            const ScanlineLimits &scanlineLimits
-        );
-
         static std::optional<Eigen::ArrayXi> refinePointsToFitIndices(
             const PointArray &points, const ScanlineLimits &scanlineLimits, FitConvergenceState state
         );
