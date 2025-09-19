@@ -3,6 +3,7 @@ on:
   release:
     types: [ created ]
 
+#TODO maybe use older ubuntu for generating (or even better manylinux2014 docker container)
 jobs:
   build-wheels:
     runs-on: ${{ matrix.os }}

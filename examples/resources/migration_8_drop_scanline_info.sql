@@ -1,0 +1,1 @@
+DROP TABLE main.dataset_scanline_info;
