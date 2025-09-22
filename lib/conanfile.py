@@ -3,16 +3,9 @@ import os
 from conan import ConanFile
 from conan.tools.cmake import CMake, cmake_layout, CMakeToolchain, CMakeDeps
 
-def get_cmake_version(cmake_path):
-    with open(cmake_path, "r") as f:
-        content = f.read()
-    match = re.search(r'project\([^\)]*VERSION\s+([0-9]+\.[0-9]+\.[0-9]+)', content)
-    if match:
-        return match.group(1)
-    raise RuntimeError("Version not found in CMakeLists.txt")
-
 class AliceLriConan(ConanFile):
     name = "alice_lri"
+    version = "0.1.0"
     license = "MIT"
     author = "Samuel Soutullo <s.soutullo@usc.es>"
     url = "https://github.com/samuelss1996/accurate_ri"
@@ -33,9 +26,6 @@ class AliceLriConan(ConanFile):
         "shared": True,
         "boost/*:header_only": True
     }
-
-    def set_version(self):
-        self.version = get_cmake_version("CMakeLists.txt")
 
     def build(self):
         cmake = CMake(self)
