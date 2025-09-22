@@ -22,7 +22,7 @@ namespace alice_lri {
             return std::nullopt;
         }
 
-        bool requiresHeuristics = false;
+        bool requiresHeuristics = true;
         if (scanlineLimits.indices.size() > 2) {
             ScanlineFitResult scanlineFit = tryFitScanline(points, scanlinePool, errorBounds, scanlineLimits);
 

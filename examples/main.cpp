@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
             // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210901/ouster_points/data/0000017973.bin";
             // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211209/ouster_points/data/0000018973.bin";
             // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20210716/ouster_points/data/0000000000.bin";
-            path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211208/ouster_points/data/0000020365.bin";
+            // path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211208/ouster_points/data/0000020365.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0002_sync/velodyne_points/data/0000000000.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000825.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000636.bin";
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0093_sync/velodyne_points/data/0000000217.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000465.bin";
             // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0079_sync/velodyne_points/data/0000000099.bin";
-            // path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0087_sync/velodyne_points/data/0000000263.bin";
+            path = "../../Datasets/LiDAR/kitti/2011_10_03/2011_10_03_drive_0042_sync/velodyne_points/data/0000000335.bin";
             accurateDigits = std::nullopt;
             outputPath = "../../Datasets/output/alice_lri_cpp/intrinsics.json";
             break;
