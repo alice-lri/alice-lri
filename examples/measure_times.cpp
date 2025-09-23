@@ -98,7 +98,7 @@ private:
             std::cout << "Processing: " << filePath << std::endl;
             
             // Load the point cloud
-            FileUtils::Points points = FileUtils::loadBinaryFile(filePath, std::nullopt);
+            FileUtils::Points points = FileUtils::loadBinaryFile(filePath);
             const alice_lri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
             
             std::cout << "  Loaded " << cloud.x.size() << " points" << std::endl;

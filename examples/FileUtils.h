@@ -8,5 +8,5 @@ namespace FileUtils {
         alice_lri::AliceArray<double> x, y, z;
     };
 
-    Points loadBinaryFile(const std::string &filename, const std::optional<int>& accurateDigits);
+    Points loadBinaryFile(const std::string &filename);
 }

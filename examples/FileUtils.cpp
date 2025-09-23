@@ -7,15 +7,8 @@
 #include <vector>
 
 namespace FileUtils {
-    double roundToDigits(const double value, const std::optional<int> digits) {
-        if (!digits.has_value()) {
-            return value;
-        }
 
-        return std::rint(value * std::pow(10, digits.value())) / std::pow(10, digits.value());
-    }
-
-    Points loadBinaryFile(const std::string &filename, const std::optional<int> &accurateDigits) {
+    Points loadBinaryFile(const std::string &filename) {
         std::ifstream file(filename, std::ios::binary);
         if (!file) {
             throw std::runtime_error("Cannot open file: " + filename);
@@ -50,9 +43,9 @@ namespace FileUtils {
                 continue;
             }
 
-            result.x.emplace_back(roundToDigits(x, accurateDigits));
-            result.y.emplace_back(roundToDigits(y, accurateDigits));
-            result.z.emplace_back(roundToDigits(z, accurateDigits));
+            result.x.emplace_back(x);
+            result.y.emplace_back(y);
+            result.z.emplace_back(z);
         }
 
         result.x.shrink_to_fit();

@@ -172,7 +172,7 @@ int main(const int argc, const char **argv) {
 
         std::cout << "Processing frame: " << framePath << std::endl;
 
-        FileUtils::Points points = FileUtils::loadBinaryFile(framePath.string(), std::nullopt);
+        FileUtils::Points points = FileUtils::loadBinaryFile(framePath.string());
 
         const alice_lri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
 
