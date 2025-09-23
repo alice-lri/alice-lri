@@ -11,6 +11,7 @@ conan install tests -s compiler.cppstd=20 -s build_type=Release -of build/tests 
 cd build || exit
 cmake -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=INFO ..
 cmake --build . --config Release
+cd ..
 
 read -rp "Build complete. Run the example? (y/n) " RUN_REPLY
 echo
