@@ -74,7 +74,7 @@ void storeResult(
     for (int scanlineIdx = 0; scanlineIdx < result.scanlines.size(); ++scanlineIdx) {
         SQLite::Statement scanlineQuery(
             db, R"(
-            INSERT INTO intrinsics_result_scanline_info(intrinsics_result_id, scanline_idx, points_count, vertical_offset,
+            INSERT INTO intrinsics_scanline_result(intrinsics_result_id, scanline_idx, points_count, vertical_offset,
                                                         vertical_angle, vertical_ci_offset_lower, vertical_ci_offset_upper,
                                                         vertical_ci_angle_lower, vertical_ci_angle_upper,
                                                         vertical_theoretical_angle_bottom_lower,
@@ -130,7 +130,7 @@ int main(const int argc, const char **argv) {
     const SQLite::Database db(dbPath, SQLite::OPEN_READWRITE);
 
     int64_t experimentId = -1;
-    SQLite::Statement experimentIdQuery(db, "select max(id) from experiment");
+    SQLite::Statement experimentIdQuery(db, "select max(id) from intrinsics_experiment");
 
     while (experimentIdQuery.executeStep()) {
         experimentId = experimentIdQuery.getColumn(0);
