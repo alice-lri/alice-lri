@@ -15,7 +15,7 @@ protected:
 
 TEST_F(ALICELRIAPITest, ExecuteWithEmptyData) {
     const alice_lri::PointCloud::Double empty;
-    auto result = alice_lri::train(empty);
+    auto result = alice_lri::estimateIntrinsics(empty);
 
     assert(!result.ok());
     assert(result.status().code == alice_lri::ErrorCode::EMPTY_POINT_CLOUD);

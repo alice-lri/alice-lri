@@ -1,6 +1,4 @@
-#include <alice_lri/alice_lri.hpp>
-#include <alice_lri/AliceArray.hpp>
-#include <alice_lri/Result.h>
+#include "alice_lri/Core.hpp"
 #include <iostream>
 #include <cassert>
 
@@ -47,15 +45,15 @@ int main() {
         
         // Test 5: Attempt to call main API (may fail with sample data, but should not crash)
         try {
-            auto result = alice_lri::train(cloud);
+            auto result = alice_lri::estimateIntrinsics(cloud);
             if (result.ok()) {
-                std::cout << "✓ Train function executed successfully" << std::endl;
+                std::cout << "✓ estimate_intrinsics function executed successfully" << std::endl;
             } else {
-                std::cout << "✓ Train function handled error gracefully: " 
+                std::cout << "✓ estimate_intrinsics function handled error gracefully: "
                          << result.status().message.c_str() << std::endl;
             }
         } catch (const std::exception& e) {
-            std::cout << "✓ Train function threw exception (expected with sample data): " 
+            std::cout << "✓ estimate_intrinsics function threw exception (expected with sample data): "
                      << e.what() << std::endl;
         }
         

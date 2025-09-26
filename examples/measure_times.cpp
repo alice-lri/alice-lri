@@ -13,7 +13,7 @@
 struct TimingResult {
     std::string dataset;
     std::string filename;
-    double trainTime;
+    double estimationTime;
     double projectTime;
     double unprojectTime;
 };
@@ -103,19 +103,19 @@ private:
             
             std::cout << "  Loaded " << cloud.x.size() << " points" << std::endl;
             
-            // Measure training time
+            // Measure estmiati time
             auto start = std::chrono::high_resolution_clock::now();
-            auto intrinsics = alice_lri::train(cloud);
+            auto intrinsics = alice_lri::estimateIntrinsics(cloud);
 
             if (!intrinsics) {
                 std::cerr << intrinsics.status().message.c_str() << std::endl;
-                throw std::runtime_error("Could not train intrinsics for file: " + filePath);
+                throw std::runtime_error("Could not estimate intrinsics for file: " + filePath);
             }
 
             auto end = std::chrono::high_resolution_clock::now();
-            result.trainTime = std::chrono::duration<double>(end - start).count();
+            result.estimationTime = std::chrono::duration<double>(end - start).count();
             
-            std::cout << "  Train time: " << std::fixed << std::setprecision(6) << result.trainTime << "s" << std::endl;
+            std::cout << "  Estimate time: " << std::fixed << std::setprecision(6) << result.estimationTime << "s" << std::endl;
             
             // Measure projection time
             start = std::chrono::high_resolution_clock::now();
@@ -136,7 +136,7 @@ private:
             
         } catch (const std::exception& e) {
             std::cerr << "Error processing " << filePath << ": " << e.what() << std::endl;
-            result.trainTime = -1.0;
+            result.estimationTime = -1.0;
             result.projectTime = -1.0;
             result.unprojectTime = -1.0;
         }
@@ -172,7 +172,7 @@ public:
                     std::string displayPath = sequence + frame;
                     TimingResult result = measureFrame(dataset.name, fullPath, displayPath);
 
-                    if (result.trainTime >= 0) {  // Only add valid results
+                    if (result.estimationTime >= 0) {  // Only add valid results
                         results.push_back(result);
                     } else {
                         throw std::runtime_error("Problem measuring times for file: " + fullPath);
@@ -196,7 +196,7 @@ public:
         std::cout << std::left;
         std::cout << std::setw(10) << "Dataset" 
                   << std::setw(60) << "Filename"
-                  << std::setw(12) << "Train(s)"
+                  << std::setw(12) << "Estimate(s)"
                   << std::setw(12) << "Project(s)"
                   << std::setw(12) << "Unproject(s)" << std::endl;
         std::cout << std::string(100, '-') << std::endl;
@@ -204,7 +204,7 @@ public:
         for (const auto& result : results) {
             std::cout << std::setw(10) << result.dataset
                       << std::setw(60) << result.filename
-                      << std::setw(12) << std::fixed << std::setprecision(6) << result.trainTime
+                      << std::setw(12) << std::fixed << std::setprecision(6) << result.estimationTime
                       << std::setw(12) << std::fixed << std::setprecision(6) << result.projectTime
                       << std::setw(12) << std::fixed << std::setprecision(6) << result.unprojectTime << std::endl;
         }
@@ -223,19 +223,19 @@ public:
         std::cout << std::left;
         std::cout << std::setw(15) << "Dataset"
                   << std::setw(8) << "Count"
-                  << std::setw(15) << "Mean Train(s)"
+                  << std::setw(15) << "Mean Estimate(s)"
                   << std::setw(15) << "Mean Project(s)"
                   << std::setw(15) << "Mean Unproject(s)"
                   << std::setw(15) << "Total Mean(s)" << std::endl;
         std::cout << std::string(100, '-') << std::endl;
         
         for (const auto& [datasetName, datasetResults] : datasetGroups) {
-            double meanTrain = 0.0, meanProject = 0.0, meanUnproject = 0.0;
+            double meanEstimation = 0.0, meanProject = 0.0, meanUnproject = 0.0;
             int validCount = 0;
             
             for (const auto& result : datasetResults) {
-                if (result.trainTime >= 0) {
-                    meanTrain += result.trainTime;
+                if (result.estimationTime >= 0) {
+                    meanEstimation += result.estimationTime;
                     meanProject += result.projectTime;
                     meanUnproject += result.unprojectTime;
                     validCount++;
@@ -243,14 +243,14 @@ public:
             }
             
             if (validCount > 0) {
-                meanTrain /= validCount;
+                meanEstimation /= validCount;
                 meanProject /= validCount;
                 meanUnproject /= validCount;
-                double totalMean = meanTrain + meanProject + meanUnproject;
+                double totalMean = meanEstimation + meanProject + meanUnproject;
                 
                 std::cout << std::setw(15) << datasetName
                           << std::setw(8) << validCount
-                          << std::setw(15) << std::fixed << std::setprecision(6) << meanTrain
+                          << std::setw(15) << std::fixed << std::setprecision(6) << meanEstimation
                           << std::setw(15) << std::fixed << std::setprecision(6) << meanProject
                           << std::setw(15) << std::fixed << std::setprecision(6) << meanUnproject
                           << std::setw(15) << std::fixed << std::setprecision(6) << totalMean << std::endl;
@@ -266,15 +266,15 @@ public:
         }
         
         // Write header
-        file << "dataset,filename,train_time_s,project_time_s,unproject_time_s,total_time_s\n";
+        file << "dataset,filename,estimate_time_s,project_time_s,unproject_time_s,total_time_s\n";
         
         // Write data
         for (const auto& result : results) {
-            if (result.trainTime >= 0) {  // Only write valid results
-                double totalTime = result.trainTime + result.projectTime + result.unprojectTime;
+            if (result.estimationTime >= 0) {  // Only write valid results
+                double totalTime = result.estimationTime + result.projectTime + result.unprojectTime;
                 file << result.dataset << ","
                      << result.filename << ","
-                     << std::fixed << std::setprecision(6) << result.trainTime << ","
+                     << std::fixed << std::setprecision(6) << result.estimationTime << ","
                      << std::fixed << std::setprecision(6) << result.projectTime << ","
                      << std::fixed << std::setprecision(6) << result.unprojectTime << ","
                      << std::fixed << std::setprecision(6) << totalTime << "\n";
@@ -288,7 +288,7 @@ public:
 
 int main(int argc, char** argv) {
     std::cout << "ALICE-LRI Timing Benchmark" << std::endl;
-    std::cout << "Measuring train, project, and unproject times" << std::endl;
+    std::cout << "Measuring estimate, project, and unproject times" << std::endl;
     std::cout << "Datasets: KITTI and DurLAR" << std::endl;
     std::cout << std::string(100, '=') << std::endl;
     

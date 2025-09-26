@@ -49,7 +49,7 @@ std::string endReasonToString(const alice_lri::EndReason &endReason) {
 
 void storeResult(
     const SQLite::Database &db, const int64_t experimentId, const int64_t frameId,
-    const alice_lri::DebugIntrinsics &result
+    const alice_lri::IntrinsicsDetailed &result
 ) {
     SQLite::Statement frameQuery(
         db, R"(
@@ -177,13 +177,13 @@ int main(const int argc, const char **argv) {
         const alice_lri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
 
         auto start = std::chrono::high_resolution_clock::now();
-        auto result = alice_lri::debugTrain(cloud);
+        auto result = alice_lri::estimateIntrinsicsDetailed(cloud);
         auto end = std::chrono::high_resolution_clock::now();
         std::chrono::duration<double> duration = end - start;
 
         if (!result) {
             std::cerr << result.status().message.c_str();
-            throw std::runtime_error("Could not train intrinsics for file: " + framePath.string());
+            throw std::runtime_error("Could not estimate intrinsics for file: " + framePath.string());
         }
 
         storeResult(db, experimentId, frame.id, *result);

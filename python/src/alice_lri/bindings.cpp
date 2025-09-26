@@ -100,23 +100,23 @@ PYBIND11_MODULE(_alice_lri, m) {
             return oss.str();
         });
 
-    py::class_<alice_lri::DebugScanline>(m, "DebugScanline")
+    py::class_<alice_lri::ScanlineDetailed>(m, "ScanlineDetailed")
         .def(py::init<>())
-        .def_readwrite("vertical_offset", &alice_lri::DebugScanline::verticalOffset)
-        .def_readwrite("vertical_angle", &alice_lri::DebugScanline::verticalAngle)
-        .def_readwrite("horizontal_offset", &alice_lri::DebugScanline::horizontalOffset)
-        .def_readwrite("azimuthal_offset", &alice_lri::DebugScanline::azimuthalOffset)
-        .def_readwrite("resolution", &alice_lri::DebugScanline::resolution)
-        .def_readwrite("uncertainty", &alice_lri::DebugScanline::uncertainty)
-        .def_readwrite("hough_votes", &alice_lri::DebugScanline::houghVotes)
-        .def_readwrite("hough_hash", &alice_lri::DebugScanline::houghHash)
-        .def_readwrite("points_count", &alice_lri::DebugScanline::pointsCount)
-        .def_readwrite("theoretical_angle_bounds", &alice_lri::DebugScanline::theoreticalAngleBounds)
-        .def_readwrite("vertical_heuristic", &alice_lri::DebugScanline::verticalHeuristic)
-        .def_readwrite("horizontal_heuristic", &alice_lri::DebugScanline::horizontalHeuristic)
-        .def("__repr__", [](const alice_lri::DebugScanline& self) {
+        .def_readwrite("vertical_offset", &alice_lri::ScanlineDetailed::verticalOffset)
+        .def_readwrite("vertical_angle", &alice_lri::ScanlineDetailed::verticalAngle)
+        .def_readwrite("horizontal_offset", &alice_lri::ScanlineDetailed::horizontalOffset)
+        .def_readwrite("azimuthal_offset", &alice_lri::ScanlineDetailed::azimuthalOffset)
+        .def_readwrite("resolution", &alice_lri::ScanlineDetailed::resolution)
+        .def_readwrite("uncertainty", &alice_lri::ScanlineDetailed::uncertainty)
+        .def_readwrite("hough_votes", &alice_lri::ScanlineDetailed::houghVotes)
+        .def_readwrite("hough_hash", &alice_lri::ScanlineDetailed::houghHash)
+        .def_readwrite("points_count", &alice_lri::ScanlineDetailed::pointsCount)
+        .def_readwrite("theoretical_angle_bounds", &alice_lri::ScanlineDetailed::theoreticalAngleBounds)
+        .def_readwrite("vertical_heuristic", &alice_lri::ScanlineDetailed::verticalHeuristic)
+        .def_readwrite("horizontal_heuristic", &alice_lri::ScanlineDetailed::horizontalHeuristic)
+        .def("__repr__", [](const alice_lri::ScanlineDetailed& self) {
             std::ostringstream oss;
-            oss << "DebugScanline(vertical_offset=" << self.verticalOffset.value
+            oss << "ScanlineDetailed(vertical_offset=" << self.verticalOffset.value
                 << ", vertical_angle=" << self.verticalAngle.value
                 << ", horizontal_offset=" << self.horizontalOffset
                 << ", azimuthal_offset=" << self.azimuthalOffset
@@ -131,19 +131,19 @@ PYBIND11_MODULE(_alice_lri, m) {
             return oss.str();
         });
 
-    py::class_<alice_lri::DebugIntrinsics>(m, "DebugIntrinsics")
+    py::class_<alice_lri::IntrinsicsDetailed>(m, "IntrinsicsDetailed")
         .def(py::init<int32_t>())
         .def(py::init<int32_t, int32_t, int32_t, int32_t, alice_lri::EndReason>())
-        .def_property_readonly("scanlines", [](const alice_lri::DebugIntrinsics& self) {
+        .def_property_readonly("scanlines", [](const alice_lri::IntrinsicsDetailed& self) {
             return std::vector(self.scanlines.begin(), self.scanlines.end());
         })
-        .def_readwrite("vertical_iterations", &alice_lri::DebugIntrinsics::verticalIterations)
-        .def_readwrite("unassigned_points", &alice_lri::DebugIntrinsics::unassignedPoints)
-        .def_readwrite("points_count", &alice_lri::DebugIntrinsics::pointsCount)
-        .def_readwrite("end_reason", &alice_lri::DebugIntrinsics::endReason)
-        .def("__repr__", [](const alice_lri::DebugIntrinsics& self) {
+        .def_readwrite("vertical_iterations", &alice_lri::IntrinsicsDetailed::verticalIterations)
+        .def_readwrite("unassigned_points", &alice_lri::IntrinsicsDetailed::unassignedPoints)
+        .def_readwrite("points_count", &alice_lri::IntrinsicsDetailed::pointsCount)
+        .def_readwrite("end_reason", &alice_lri::IntrinsicsDetailed::endReason)
+        .def("__repr__", [](const alice_lri::IntrinsicsDetailed& self) {
             std::ostringstream oss;
-            oss << "DebugIntrinsics(scanlines=[" << self.scanlines.size() << "], vertical_iterations=" << self.verticalIterations
+            oss << "IntrinsicsDetailed(scanlines=[" << self.scanlines.size() << "], vertical_iterations=" << self.verticalIterations
                 << ", unassigned_points=" << self.unassignedPoints
                 << ", points_count=" << self.pointsCount
                 << ", end_reason=" << static_cast<int>(self.endReason) << ")";
@@ -196,13 +196,13 @@ PYBIND11_MODULE(_alice_lri, m) {
         });
 
     // Main API functions with vector inputs for convenience
-    m.def("train", [&unwrap_result](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
+    m.def("estimate_intrinsics", [&unwrap_result](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
         // Convert std::vector to AliceArray
         alice_lri::PointCloud::Float cloud;
         cloud.x = alice_lri::AliceArray<float>(x.data(), x.size());
         cloud.y = alice_lri::AliceArray<float>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<float>(z.data(), z.size());
-        return unwrap_result(alice_lri::train(cloud));
+        return unwrap_result(alice_lri::estimateIntrinsics(cloud));
     }, py::arg("x"), py::arg("y"), py::arg("z"), 
        "Estimate intrinsics from float vectors\n\n"
        "Parameters:\n"
@@ -212,33 +212,33 @@ PYBIND11_MODULE(_alice_lri, m) {
        "Returns:\n"
        "  Intrinsics");
 
-    m.def("train", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
+    m.def("estimate_intrinsics", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
         // Convert std::vector to AliceArray
         alice_lri::PointCloud::Double cloud;
         cloud.x = alice_lri::AliceArray<double>(x.data(), x.size());
         cloud.y = alice_lri::AliceArray<double>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
-        return unwrap_result(alice_lri::train(cloud));
+        return unwrap_result(alice_lri::estimateIntrinsics(cloud));
     }, py::arg("x"), py::arg("y"), py::arg("z"),
        "Estimate intrinsics from double vectors");
 
-    m.def("debug_train", [&unwrap_result](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
+    m.def("estimate_intrinsics_detailed", [&unwrap_result](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
         // Convert std::vector to AliceArray
         alice_lri::PointCloud::Float cloud;
         cloud.x = alice_lri::AliceArray<float>(x.data(), x.size());
         cloud.y = alice_lri::AliceArray<float>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<float>(z.data(), z.size());
-        return unwrap_result(alice_lri::debugTrain(cloud));
-    }, "Estimate intrinsics from float vectors with debug info");
+        return unwrap_result(alice_lri::estimateIntrinsicsDetailed(cloud));
+    }, "Estimate intrinsics from float vectors with algorithm execution info");
 
-    m.def("debug_train", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
+    m.def("estimate_intrinsics_detailed", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
         // Convert std::vector to AliceArray
         alice_lri::PointCloud::Double cloud;
         cloud.x = alice_lri::AliceArray<double>(x.data(), x.size());
         cloud.y = alice_lri::AliceArray<double>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
-        return unwrap_result(alice_lri::debugTrain(cloud));
-    }, "Estimate intrinsics from double vectors with debug info");
+        return unwrap_result(alice_lri::estimateIntrinsicsDetailed(cloud));
+    }, "Estimate intrinsics from double vectors with algorithm execution info");
 
     m.def("project_to_range_image", [&unwrap_result](const alice_lri::Intrinsics& intr, const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
         // Convert std::vector to AliceArray

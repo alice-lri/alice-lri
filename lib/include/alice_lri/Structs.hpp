@@ -86,7 +86,7 @@ namespace alice_lri {
         Interval upperLine;
     };
 
-    struct ALICE_LRI_API DebugScanline {
+    struct ALICE_LRI_API ScanlineDetailed {
         ValueConfInterval verticalOffset;
         ValueConfInterval verticalAngle;
         double horizontalOffset;
@@ -105,18 +105,18 @@ namespace alice_lri {
         ALL_ASSIGNED, MAX_ITERATIONS, NO_MORE_PEAKS
     };
 
-    struct ALICE_LRI_API DebugIntrinsics {
-        AliceArray<DebugScanline> scanlines;
+    struct ALICE_LRI_API IntrinsicsDetailed {
+        AliceArray<ScanlineDetailed> scanlines;
         int32_t verticalIterations = 0;
         int32_t unassignedPoints = 0;
         int32_t pointsCount = 0;
         EndReason endReason = EndReason::MAX_ITERATIONS;
 
-        explicit DebugIntrinsics(const int32_t scanlineCount) noexcept {
+        explicit IntrinsicsDetailed(const int32_t scanlineCount) noexcept {
             scanlines.resize(scanlineCount);
         }
 
-        DebugIntrinsics(
+        IntrinsicsDetailed(
             const int32_t scanlineCount, const int32_t verticalIterations, const int32_t unassignedPoints,
             const int32_t pointsCount, const EndReason endReason
         ) noexcept : verticalIterations(verticalIterations), unassignedPoints(unassignedPoints),

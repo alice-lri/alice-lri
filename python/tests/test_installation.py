@@ -14,8 +14,8 @@ def test_package_import():
 def test_available_functions():
     """Test that expected functions are available"""
     expected_functions = [
-        'train',
-        'debug_train',
+        'estimate_intrinsics',
+        'estimate_intrinsics_detailed',
         'project_to_range_image',
         'unproject_to_point_cloud',
         'intrinsics_to_json_str',
@@ -64,9 +64,9 @@ def test_small_data_functionality():
         y = [0.5, 1.5, 2.5]
         z = [0.1, 0.2, 0.3]
         
-        # Test that the train function exists and is callable
-        assert callable(alice_lri.train)
-        print("Train function is callable")
+        # Test that the estimate_intrinsics function exists and is callable
+        assert callable(alice_lri.estimate_intrinsics)
+        print("estimate_intrinsics function is callable")
         
         # Test creating basic objects
         # Create a RangeImage
@@ -88,13 +88,13 @@ def test_small_data_functionality():
         assert isinstance(json_str, str)
         print("JSON serialization works")
         
-        # Test that we can call train function (may fail with small data, but shouldn't crash)
+        # Test that we can call estimate_intrinsics function (may fail with small data, but shouldn't crash)
         try:
-            result = alice_lri.train(x, y, z)
-            print("Train function executed successfully")
+            result = alice_lri.estimate_intrinsics(x, y, z)
+            print("estimate_intrinsics function executed successfully")
         except RuntimeError as e:
             # Expected to fail with small data, but should not be a symbol/import error
-            print(f"Train function callable but failed with small data (expected): {e}")
+            print(f"estimate_intrinsics function callable but failed with small data (expected): {e}")
         
     except Exception as e:
         # Expected to potentially fail with actual computation, 

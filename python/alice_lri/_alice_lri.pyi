@@ -2,94 +2,9 @@
 Python bindings for the ALICE-LRI C++ library
 """
 from __future__ import annotations
-import collections.abc
 import numpy
-import numpy.typing
 import typing
-__all__: list[str] = ['ALL_ASSIGNED', 'DebugIntrinsics', 'DebugScanline', 'EMPTY_POINT_CLOUD', 'EndReason', 'ErrorCode', 'INTERNAL_ERROR', 'Interval', 'Intrinsics', 'MAX_ITERATIONS', 'MISMATCHED_SIZES', 'NONE', 'NO_MORE_PEAKS', 'RANGES_XY_ZERO', 'RangeImage', 'Scanline', 'ScanlineAngleBounds', 'ValueConfInterval', 'debug_train', 'error_message', 'intrinsics_from_json_file', 'intrinsics_from_json_str', 'intrinsics_to_json_file', 'intrinsics_to_json_str', 'project_to_range_image', 'train', 'unproject_to_point_cloud']
-class DebugIntrinsics:
-    end_reason: EndReason
-    @typing.overload
-    def __init__(self, arg0: typing.SupportsInt) -> None:
-        ...
-    @typing.overload
-    def __init__(self, arg0: typing.SupportsInt, arg1: typing.SupportsInt, arg2: typing.SupportsInt, arg3: typing.SupportsInt, arg4: EndReason) -> None:
-        ...
-    def __repr__(self) -> str:
-        ...
-    @property
-    def points_count(self) -> int:
-        ...
-    @points_count.setter
-    def points_count(self, arg0: typing.SupportsInt) -> None:
-        ...
-    @property
-    def scanlines(self) -> list[DebugScanline]:
-        ...
-    @property
-    def unassigned_points(self) -> int:
-        ...
-    @unassigned_points.setter
-    def unassigned_points(self, arg0: typing.SupportsInt) -> None:
-        ...
-    @property
-    def vertical_iterations(self) -> int:
-        ...
-    @vertical_iterations.setter
-    def vertical_iterations(self, arg0: typing.SupportsInt) -> None:
-        ...
-class DebugScanline:
-    horizontal_heuristic: bool
-    theoretical_angle_bounds: ScanlineAngleBounds
-    vertical_angle: ValueConfInterval
-    vertical_heuristic: bool
-    vertical_offset: ValueConfInterval
-    def __init__(self) -> None:
-        ...
-    def __repr__(self) -> str:
-        ...
-    @property
-    def azimuthal_offset(self) -> float:
-        ...
-    @azimuthal_offset.setter
-    def azimuthal_offset(self, arg0: typing.SupportsFloat) -> None:
-        ...
-    @property
-    def horizontal_offset(self) -> float:
-        ...
-    @horizontal_offset.setter
-    def horizontal_offset(self, arg0: typing.SupportsFloat) -> None:
-        ...
-    @property
-    def hough_hash(self) -> int:
-        ...
-    @hough_hash.setter
-    def hough_hash(self, arg0: typing.SupportsInt) -> None:
-        ...
-    @property
-    def hough_votes(self) -> int:
-        ...
-    @hough_votes.setter
-    def hough_votes(self, arg0: typing.SupportsInt) -> None:
-        ...
-    @property
-    def points_count(self) -> int:
-        ...
-    @points_count.setter
-    def points_count(self, arg0: typing.SupportsInt) -> None:
-        ...
-    @property
-    def resolution(self) -> int:
-        ...
-    @resolution.setter
-    def resolution(self, arg0: typing.SupportsInt) -> None:
-        ...
-    @property
-    def uncertainty(self) -> float:
-        ...
-    @uncertainty.setter
-    def uncertainty(self, arg0: typing.SupportsFloat) -> None:
-        ...
+__all__: list[str] = ['ALL_ASSIGNED', 'EMPTY_POINT_CLOUD', 'EndReason', 'ErrorCode', 'INTERNAL_ERROR', 'Interval', 'Intrinsics', 'IntrinsicsDetailed', 'MAX_ITERATIONS', 'MISMATCHED_SIZES', 'NONE', 'NO_MORE_PEAKS', 'RANGES_XY_ZERO', 'RangeImage', 'Scanline', 'ScanlineAngleBounds', 'ScanlineDetailed', 'ValueConfInterval', 'error_message', 'estimate_intrinsics', 'estimate_intrinsics_detailed', 'intrinsics_from_json_file', 'intrinsics_from_json_str', 'intrinsics_to_json_file', 'intrinsics_to_json_str', 'project_to_range_image', 'unproject_to_point_cloud']
 class EndReason:
     """
     Members:
@@ -112,7 +27,7 @@ class EndReason:
         ...
     def __index__(self) -> int:
         ...
-    def __init__(self, value: typing.SupportsInt) -> None:
+    def __init__(self, value: int) -> None:
         ...
     def __int__(self) -> int:
         ...
@@ -120,7 +35,7 @@ class EndReason:
         ...
     def __repr__(self) -> str:
         ...
-    def __setstate__(self, state: typing.SupportsInt) -> None:
+    def __setstate__(self, state: int) -> None:
         ...
     def __str__(self) -> str:
         ...
@@ -158,7 +73,7 @@ class ErrorCode:
         ...
     def __index__(self) -> int:
         ...
-    def __init__(self, value: typing.SupportsInt) -> None:
+    def __init__(self, value: int) -> None:
         ...
     def __int__(self) -> int:
         ...
@@ -166,7 +81,7 @@ class ErrorCode:
         ...
     def __repr__(self) -> str:
         ...
-    def __setstate__(self, state: typing.SupportsInt) -> None:
+    def __setstate__(self, state: int) -> None:
         ...
     def __str__(self) -> str:
         ...
@@ -177,38 +92,44 @@ class ErrorCode:
     def value(self) -> int:
         ...
 class Interval:
+    lower: float
+    upper: float
     def __init__(self) -> None:
         ...
     def __repr__(self) -> str:
         ...
     def any_contained(self, arg0: Interval) -> bool:
         ...
-    def clamp_both(self, arg0: typing.SupportsFloat, arg1: typing.SupportsFloat) -> None:
+    def clamp_both(self, arg0: float, arg1: float) -> None:
         ...
     def diff(self) -> float:
         ...
-    @property
-    def lower(self) -> float:
-        ...
-    @lower.setter
-    def lower(self, arg0: typing.SupportsFloat) -> None:
-        ...
-    @property
-    def upper(self) -> float:
-        ...
-    @upper.setter
-    def upper(self, arg0: typing.SupportsFloat) -> None:
-        ...
 class Intrinsics:
-    def __init__(self, arg0: typing.SupportsInt) -> None:
+    def __init__(self, arg0: int) -> None:
         ...
     def __repr__(self) -> str:
         ...
     @property
     def scanlines(self) -> list[Scanline]:
         ...
+class IntrinsicsDetailed:
+    end_reason: EndReason
+    points_count: int
+    unassigned_points: int
+    vertical_iterations: int
+    @typing.overload
+    def __init__(self, arg0: int) -> None:
+        ...
+    @typing.overload
+    def __init__(self, arg0: int, arg1: int, arg2: int, arg3: int, arg4: EndReason) -> None:
+        ...
+    def __repr__(self) -> str:
+        ...
+    @property
+    def scanlines(self) -> list[ScanlineDetailed]:
+        ...
 class RangeImage:
-    def __array__(self) -> numpy.typing.NDArray[numpy.float64]:
+    def __array__(self) -> numpy.ndarray[numpy.float64]:
         ...
     def __getitem__(self, arg0: tuple) -> float:
         ...
@@ -216,18 +137,18 @@ class RangeImage:
     def __init__(self) -> None:
         ...
     @typing.overload
-    def __init__(self, width: typing.SupportsInt, height: typing.SupportsInt) -> None:
+    def __init__(self, width: int, height: int) -> None:
         ...
     @typing.overload
-    def __init__(self, width: typing.SupportsInt, height: typing.SupportsInt, initial_value: typing.SupportsFloat) -> None:
-        ...
-    @typing.overload
-    def __repr__(self) -> str:
+    def __init__(self, width: int, height: int, initial_value: float) -> None:
         ...
     @typing.overload
     def __repr__(self) -> str:
         ...
-    def __setitem__(self, arg0: tuple, arg1: typing.SupportsFloat) -> None:
+    @typing.overload
+    def __repr__(self) -> str:
+        ...
+    def __setitem__(self, arg0: tuple, arg1: float) -> None:
         ...
     @property
     def height(self) -> int:
@@ -236,39 +157,14 @@ class RangeImage:
     def width(self) -> int:
         ...
 class Scanline:
+    azimuthal_offset: float
+    horizontal_offset: float
+    resolution: int
+    vertical_angle: float
+    vertical_offset: float
     def __init__(self) -> None:
         ...
     def __repr__(self) -> str:
-        ...
-    @property
-    def azimuthal_offset(self) -> float:
-        ...
-    @azimuthal_offset.setter
-    def azimuthal_offset(self, arg0: typing.SupportsFloat) -> None:
-        ...
-    @property
-    def horizontal_offset(self) -> float:
-        ...
-    @horizontal_offset.setter
-    def horizontal_offset(self, arg0: typing.SupportsFloat) -> None:
-        ...
-    @property
-    def resolution(self) -> int:
-        ...
-    @resolution.setter
-    def resolution(self, arg0: typing.SupportsInt) -> None:
-        ...
-    @property
-    def vertical_angle(self) -> float:
-        ...
-    @vertical_angle.setter
-    def vertical_angle(self, arg0: typing.SupportsFloat) -> None:
-        ...
-    @property
-    def vertical_offset(self) -> float:
-        ...
-    @vertical_offset.setter
-    def vertical_offset(self, arg0: typing.SupportsFloat) -> None:
         ...
 class ScanlineAngleBounds:
     lower_line: Interval
@@ -277,60 +173,36 @@ class ScanlineAngleBounds:
         ...
     def __repr__(self) -> str:
         ...
-class ValueConfInterval:
-    ci: Interval
+class ScanlineDetailed:
+    azimuthal_offset: float
+    horizontal_heuristic: bool
+    horizontal_offset: float
+    hough_hash: int
+    hough_votes: int
+    points_count: int
+    resolution: int
+    theoretical_angle_bounds: ScanlineAngleBounds
+    uncertainty: float
+    vertical_angle: ValueConfInterval
+    vertical_heuristic: bool
+    vertical_offset: ValueConfInterval
     def __init__(self) -> None:
         ...
     def __repr__(self) -> str:
         ...
-    @property
-    def value(self) -> float:
+class ValueConfInterval:
+    ci: Interval
+    value: float
+    def __init__(self) -> None:
         ...
-    @value.setter
-    def value(self, arg0: typing.SupportsFloat) -> None:
+    def __repr__(self) -> str:
         ...
-@typing.overload
-def debug_train(arg0: collections.abc.Sequence[typing.SupportsFloat], arg1: collections.abc.Sequence[typing.SupportsFloat], arg2: collections.abc.Sequence[typing.SupportsFloat]) -> DebugIntrinsics:
-    """
-    Estimate intrinsics from float vectors with debug info
-    """
-@typing.overload
-def debug_train(arg0: collections.abc.Sequence[typing.SupportsFloat], arg1: collections.abc.Sequence[typing.SupportsFloat], arg2: collections.abc.Sequence[typing.SupportsFloat]) -> DebugIntrinsics:
-    """
-    Estimate intrinsics from double vectors with debug info
-    """
 def error_message(arg0: ErrorCode) -> str:
     """
     Get error message for error code
     """
-def intrinsics_from_json_file(path: str) -> Intrinsics:
-    """
-    Load intrinsics from JSON file
-    """
-def intrinsics_from_json_str(json: str) -> Intrinsics:
-    """
-    Create intrinsics from JSON string
-    """
-def intrinsics_to_json_file(intrinsics: Intrinsics, output_path: str, indent: typing.SupportsInt = -1) -> None:
-    """
-    Write intrinsics to JSON file
-    """
-def intrinsics_to_json_str(intrinsics: Intrinsics, indent: typing.SupportsInt = -1) -> str:
-    """
-    Convert intrinsics to JSON string
-    """
 @typing.overload
-def project_to_range_image(arg0: Intrinsics, arg1: collections.abc.Sequence[typing.SupportsFloat], arg2: collections.abc.Sequence[typing.SupportsFloat], arg3: collections.abc.Sequence[typing.SupportsFloat]) -> RangeImage:
-    """
-    Project float cloud to range image
-    """
-@typing.overload
-def project_to_range_image(arg0: Intrinsics, arg1: collections.abc.Sequence[typing.SupportsFloat], arg2: collections.abc.Sequence[typing.SupportsFloat], arg3: collections.abc.Sequence[typing.SupportsFloat]) -> RangeImage:
-    """
-    Project double cloud to range image
-    """
-@typing.overload
-def train(x: collections.abc.Sequence[typing.SupportsFloat], y: collections.abc.Sequence[typing.SupportsFloat], z: collections.abc.Sequence[typing.SupportsFloat]) -> Intrinsics:
+def estimate_intrinsics(x: list[float], y: list[float], z: list[float]) -> Intrinsics:
     """
     Estimate intrinsics from float vectors
     
@@ -342,9 +214,45 @@ def train(x: collections.abc.Sequence[typing.SupportsFloat], y: collections.abc.
       Intrinsics
     """
 @typing.overload
-def train(x: collections.abc.Sequence[typing.SupportsFloat], y: collections.abc.Sequence[typing.SupportsFloat], z: collections.abc.Sequence[typing.SupportsFloat]) -> Intrinsics:
+def estimate_intrinsics(x: list[float], y: list[float], z: list[float]) -> Intrinsics:
     """
     Estimate intrinsics from double vectors
+    """
+@typing.overload
+def estimate_intrinsics_detailed(arg0: list[float], arg1: list[float], arg2: list[float]) -> IntrinsicsDetailed:
+    """
+    Estimate intrinsics from float vectors with algorithm execution info
+    """
+@typing.overload
+def estimate_intrinsics_detailed(arg0: list[float], arg1: list[float], arg2: list[float]) -> IntrinsicsDetailed:
+    """
+    Estimate intrinsics from double vectors with algorithm execution info
+    """
+def intrinsics_from_json_file(path: str) -> Intrinsics:
+    """
+    Load intrinsics from JSON file
+    """
+def intrinsics_from_json_str(json: str) -> Intrinsics:
+    """
+    Create intrinsics from JSON string
+    """
+def intrinsics_to_json_file(intrinsics: Intrinsics, output_path: str, indent: int = -1) -> None:
+    """
+    Write intrinsics to JSON file
+    """
+def intrinsics_to_json_str(intrinsics: Intrinsics, indent: int = -1) -> str:
+    """
+    Convert intrinsics to JSON string
+    """
+@typing.overload
+def project_to_range_image(arg0: Intrinsics, arg1: list[float], arg2: list[float], arg3: list[float]) -> RangeImage:
+    """
+    Project float cloud to range image
+    """
+@typing.overload
+def project_to_range_image(arg0: Intrinsics, arg1: list[float], arg2: list[float], arg3: list[float]) -> RangeImage:
+    """
+    Project double cloud to range image
     """
 def unproject_to_point_cloud(arg0: Intrinsics, arg1: RangeImage) -> tuple:
     """

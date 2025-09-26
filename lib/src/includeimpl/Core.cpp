@@ -49,7 +49,7 @@ namespace alice_lri {
     }
 
     template <typename Scalar>
-    Result<Intrinsics> train(
+    Result<Intrinsics> estimateIntrinsics(
         const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
     ) noexcept {
         PROFILE_SCOPE("TOTAL");
@@ -67,7 +67,7 @@ namespace alice_lri {
     }
 
     template <typename Scalar>
-    Result<DebugIntrinsics> debugTrain(
+    Result<IntrinsicsDetailed> estimateIntrinsicsDetailed(
         const AliceArray<Scalar> &x, const AliceArray<Scalar> &y, const AliceArray<Scalar> &z
     ) noexcept {
         try {
@@ -75,38 +75,38 @@ namespace alice_lri {
             const Result<PointArray> pointsResult = validateAndBuildPointArray(x, y, z);
 
             if (!pointsResult) {
-                return Result<DebugIntrinsics>(pointsResult.status());
+                return Result<IntrinsicsDetailed>(pointsResult.status());
             }
 
             return Result(IntrinsicsEstimator::debugEstimate(*pointsResult));
         } catch (const std::exception &e) {
-            return Result<DebugIntrinsics>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+            return Result<IntrinsicsDetailed>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }
     }
 
-    Result<Intrinsics> train(const PointCloud::Float &points) noexcept {
-        const auto result = train(points.x, points.y, points.z);
+    Result<Intrinsics> estimateIntrinsics(const PointCloud::Float &points) noexcept {
+        const auto result = estimateIntrinsics(points.x, points.y, points.z);
         PRINT_PROFILE_REPORT();
 
         return result;
     }
 
-    Result<Intrinsics> train(const PointCloud::Double &points) noexcept {
-        const auto result = train(points.x, points.y, points.z);
+    Result<Intrinsics> estimateIntrinsics(const PointCloud::Double &points) noexcept {
+        const auto result = estimateIntrinsics(points.x, points.y, points.z);
         PRINT_PROFILE_REPORT();
 
         return result;
     }
 
-    Result<DebugIntrinsics> debugTrain(const PointCloud::Float &points) noexcept {
-        const auto result = debugTrain(points.x, points.y, points.z);
+    Result<IntrinsicsDetailed> estimateIntrinsicsDetailed(const PointCloud::Float &points) noexcept {
+        const auto result = estimateIntrinsicsDetailed(points.x, points.y, points.z);
         PRINT_PROFILE_REPORT();
 
         return result;
     }
 
-    Result<DebugIntrinsics> debugTrain(const PointCloud::Double &points) noexcept {
-        const auto result = debugTrain(points.x, points.y, points.z);
+    Result<IntrinsicsDetailed> estimateIntrinsicsDetailed(const PointCloud::Double &points) noexcept {
+        const auto result = estimateIntrinsicsDetailed(points.x, points.y, points.z);
         PRINT_PROFILE_REPORT();
 
         return result;

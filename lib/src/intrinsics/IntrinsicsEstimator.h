@@ -9,10 +9,10 @@ namespace alice_lri {
 
     public:
         static Intrinsics estimate(const PointArray &points);
-        static DebugIntrinsics debugEstimate(const PointArray &points);
+        static IntrinsicsDetailed debugEstimate(const PointArray &points);
 
     private:
         static Scanline makeScanline(const VerticalScanline &vertical, const HorizontalScanline &horizontal);
-        static DebugScanline makeDebugScanline(const VerticalScanline &vertical, const HorizontalScanline &horizontal);
+        static ScanlineDetailed makeDebugScanline(const VerticalScanline &vertical, const HorizontalScanline &horizontal);
     };
 }
