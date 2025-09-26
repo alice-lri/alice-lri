@@ -22,28 +22,21 @@ namespace alice_lri {
             return std::nullopt;
         }
 
+        bool requiresHeuristics = true;
         if (scanlineLimits.indices.size() > 2) {
-            const auto statisticFit = performStatisticalFit(points, scanlinePool, errorBounds, scanlineLimits);
-            if (statisticFit) {
-                return *statisticFit;
+            ScanlineFitResult scanlineFit = tryFitScanline(points, scanlinePool, errorBounds, scanlineLimits);
+
+            if (scanlineFit.success && scanlineFit.validCi) {
+                return scanlineFitToEstimation(points, scanlineFit);
             }
+
+            requiresHeuristics = !scanlineFit.validCi;
         }
 
         if constexpr (BuildOptions::USE_VERTICAL_HEURISTICS) {
-            return VerticalHeuristicsEstimator::estimate(points, scanlinePool, scanlineLimits);
-        }
-
-        return std::nullopt;
-    }
-
-    std::optional<VerticalScanlineEstimation> VerticalScanlineEstimator::performStatisticalFit(
-        const PointArray &points, const VerticalScanlinePool &scanlinePool, const VerticalBounds &errorBounds,
-        const ScanlineLimits &scanlineLimits
-    ) {
-        ScanlineFitResult scanlineFit = tryFitScanline(points, scanlinePool, errorBounds, scanlineLimits);
-
-        if (scanlineFit.success && scanlineFit.validCi) {
-            return scanlineFitToEstimation(points, scanlineFit);
+            if (requiresHeuristics) {
+                return VerticalHeuristicsEstimator::estimate(points, scanlinePool, scanlineLimits);
+            }
         }
 
         return std::nullopt;
