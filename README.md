@@ -1,4 +1,4 @@
-# AccurateRI (ALICE-LRI)
+# ALICE-LRI
 
 A high-performance C++ library with Python bindings for LiDAR Range Image processing and intrinsic parameter estimation.
 
