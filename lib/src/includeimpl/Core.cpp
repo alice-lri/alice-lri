@@ -78,7 +78,7 @@ namespace alice_lri {
                 return Result<IntrinsicsDetailed>(pointsResult.status());
             }
 
-            return Result(IntrinsicsEstimator::debugEstimate(*pointsResult));
+            return Result(IntrinsicsEstimator::estimateDetailed(*pointsResult));
         } catch (const std::exception &e) {
             return Result<IntrinsicsDetailed>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }

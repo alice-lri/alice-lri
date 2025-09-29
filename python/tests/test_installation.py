@@ -4,7 +4,7 @@ Test basic functionality of the alice_lri Python package
 import pytest
 import alice_lri
 
-
+#TODO UPDATE
 def test_package_import():
     """Test that the package can be imported"""
     assert alice_lri.__version__ is not None

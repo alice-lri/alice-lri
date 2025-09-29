@@ -19,7 +19,7 @@ namespace alice_lri {
         return intrinsics;
     }
 
-    IntrinsicsDetailed IntrinsicsEstimator::debugEstimate(const PointArray &points) {
+    IntrinsicsDetailed IntrinsicsEstimator::estimateDetailed(const PointArray &points) {
         const VerticalIntrinsicsEstimation vertical = VerticalIntrinsicsEstimator::estimate(points);
         const HorizontalIntrinsicsEstimation horizontal = HorizontalIntrinsicsEstimator::estimate(points, vertical);
 
@@ -31,7 +31,7 @@ namespace alice_lri {
             const auto& verticalScanline = vertical.scanlinesAssignations.scanlines[i];
             const auto& horizontalScanline = horizontal.scanlines[i];
 
-            intrinsics.scanlines[i] = makeDebugScanline(verticalScanline, horizontalScanline);
+            intrinsics.scanlines[i] = makeDetailedScanline(verticalScanline, horizontalScanline);
         }
 
         return intrinsics;
@@ -49,7 +49,7 @@ namespace alice_lri {
         };
     }
 
-    ScanlineDetailed IntrinsicsEstimator::makeDebugScanline(
+    ScanlineDetailed IntrinsicsEstimator::makeDetailedScanline(
         const VerticalScanline &vertical, const HorizontalScanline &horizontal
     ) {
         return ScanlineDetailed {

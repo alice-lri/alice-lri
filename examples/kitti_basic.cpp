@@ -2,7 +2,7 @@
 #include <iostream>
 #include <optional>
 #include "alice_lri/Core.hpp"
-#include "FileUtils.h"
+#include "utils/FileUtils.h"
 
 int main(int argc, char **argv) {
     FileUtils::Points points = FileUtils::loadBinaryFile("resources/kitti_frame.bin");
