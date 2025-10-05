@@ -180,7 +180,7 @@ PYBIND11_MODULE(_alice_lri, m) {
                 throw py::index_error("Index out of bounds");
             ri(row, col) = value;
         }, py::is_operator())
-        .def("__array__", [](py::object self) {
+        .def("__array__", [](py::object self, py::kwargs kwargs) {
             auto& ri = self.cast<const alice_lri::RangeImage&>();
             return py::array_t<double>(
                 {ri.height(), ri.width()},                        // shape
