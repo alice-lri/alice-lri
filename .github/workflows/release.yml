@@ -32,7 +32,7 @@ jobs:
           if [[ "$RUNNER_OS" == "Linux" ]]; then
             # Check if already installed to avoid unnecessary updates
             if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
-              sudo apt-get update && sudo apt-get install -y ninja-build ccache
+              sudo apt-get update && sudo apt-get install -y ninja-build ccache build-essential
             fi
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
             # Check if already installed
