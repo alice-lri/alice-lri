@@ -81,8 +81,8 @@ vcpkg install alice-lri
 
 #### Building from source
 ```bash
-git clone https://github.com/samuelss1996/accurate_ri.git
-cd accurate_ri
+git clone https://github.com/alice-lri/alice-lri.git
+cd alice-lri
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 make install
@@ -113,6 +113,6 @@ If you use this library in your research, please cite:
   title={AccurateRI: High-Performance LiDAR Range Image Processing},
   author={Samuel Soutullo},
   year={2024},
-  url={https://github.com/samuelss1996/accurate_ri}
+  url={https://github.com/alice-lri/alice-lri}
 }
 ```
