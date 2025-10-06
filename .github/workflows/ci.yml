@@ -410,7 +410,7 @@ jobs:
           EOF
           
           cat > test.cpp << 'EOF'
-          #include <alice_lri/alice_lri.hpp>
+          #include <alice_lri/Core.hpp>
           #include <iostream>
           
           int main() {
