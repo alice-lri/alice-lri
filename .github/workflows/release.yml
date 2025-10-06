@@ -40,53 +40,20 @@ jobs:
           path: wheelhouse/*.whl
           retention-days: 7
 
-      - name: Find wheel file
-        id: find_wheel
-        shell: bash
-        run: echo "WHEEL_PATH=$(ls wheelhouse/*.whl)" >> $GITHUB_ENV
-
-      - name: Get wheel filename
-        id: wheel_name
-        shell: bash
-        run: echo "WHEEL_NAME=$(basename $WHEEL_PATH)" >> $GITHUB_ENV
-
       - name: Create C++ tarball
         shell: bash
         run: |
           CPP_TARBALL_NAME="alice-lri-${{ env.VERSION }}-cpp-lib.tar.gz"
-          tar -czf "$CPP_TARBALL_NAME" -C cpp .  # Adjust path if your C++ code is in a subfolder like "cpp"
+          tar -czf "$CPP_TARBALL_NAME" -C lib . 
           echo "CPP_TARBALL_PATH=$CPP_TARBALL_NAME" >> $GITHUB_ENV
 
-      - name: Create draft release via GitHub CLI
-        shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo $GH_TOKEN | gh auth login --with-token
-          gh release create "v${{ env.VERSION }}" \
-            --title "Release v${{ env.VERSION }}" \
-            --notes "Automated draft release for version v${{ env.VERSION }}" \
-            --draft
-
-      - name: Attach wheel to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create GitHub release and upload artifact
+        uses: softprops/action-gh-release@v2
         with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ env.WHEEL_PATH }}
-          asset_name: ${{ env.WHEEL_NAME }}
-          asset_content_type: application/octet-stream
-
-      - name: Attach C++ tarball to release
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ github.event.release.upload_url }}
-          asset_path: ${{ env.CPP_TARBALL_PATH }}
-          asset_name: ${{ env.CPP_TARBALL_NAME }}
-          asset_content_type: application/gzip
+          draft: true
+          files: |
+            wheelhouse/*.whl
+            ${{ env.CPP_TARBALL_PATH }}
 
   publish-pypi:
     runs-on: ubuntu-latest
