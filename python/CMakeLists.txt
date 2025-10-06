@@ -7,6 +7,17 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Opt-in: Only the Python build turns this ON via pyproject.toml
 option(PYBUILD_AUTO_CONAN "Run Conan for lib/ during Python build" OFF)
 if (PYBUILD_AUTO_CONAN)
+    execute_process(COMMAND conan profile show RESULT_VARIABLE _profile_show_res)
+
+    if (NOT _profile_show_res EQUAL 0)
+        message(STATUS "No Conan profile found. Running 'conan profile detect'.")
+        execute_process(COMMAND conan profile detect RESULT_VARIABLE _profile_res)
+
+        if (NOT _profile_res EQUAL 0)
+            message(FATAL_ERROR "Conan profile detect failed (code ${_profile_res}).")
+        endif ()
+    endif ()
+
     execute_process(
             WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib"
             COMMAND conan install .
