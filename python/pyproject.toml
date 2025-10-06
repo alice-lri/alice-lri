@@ -42,10 +42,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/samuelss1996/accurate_ri"
-Documentation = "https://github.com/samuelss1996/accurate_ri#readme"
-Repository = "https://github.com/samuelss1996/accurate_ri.git"
-Issues = "https://github.com/samuelss1996/accurate_ri/issues"
+Homepage = "https://github.com/alice-lri/alice-lri"
+Documentation = "https://github.com/alice-lri/alice-lri#readme"
+Repository = "https://github.com/alice-lri/alice-lri.git"
+Issues = "https://github.com/alice-lri/alice-lri/issues"
 
 [tool.scikit-build]
 cmake.version = ">=3.20"

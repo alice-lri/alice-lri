@@ -8,7 +8,7 @@ class AliceLriConan(ConanFile):
     version = "0.1.0"
     license = "MIT"
     author = "Samuel Soutullo <s.soutullo@usc.es>"
-    url = "https://github.com/samuelss1996/accurate_ri"
+    url = "https://github.com/alice-lri/alice-lri"
     description = "LiDAR Range Image processing and intrinsic parameter estimation library"
     topics = ("lidar", "range-image", "point-cloud", "computer-vision", "robotics")
     settings = "os", "compiler", "build_type", "arch"
