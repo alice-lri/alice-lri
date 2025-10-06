@@ -19,8 +19,8 @@ jobs:
 
       - name: Extract version from tag
         id: extract_version
+        shell: bash
         run: |
-          # Extract version from tag, assuming the tag is in the format vX.Y.Z
           VERSION=${GITHUB_REF#refs/tags/v}
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Tag Version: $VERSION"
@@ -31,7 +31,8 @@ jobs:
           CIBW_ARCHS_LINUX: x86_64
           CIBW_ARCHS_WINDOWS: AMD64
           CIBW_BUILD_VERBOSITY: 1
-          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+        with:
+          package-dir: './python'
 
       - name: Upload wheels as workflow artifacts
         uses: actions/upload-artifact@v4
@@ -54,10 +55,11 @@ jobs:
         shell: bash
         run: |
           CPP_TARBALL_NAME="alice-lri-${{ env.VERSION }}-cpp-lib.tar.gz"
-          tar -czf "$CPP_TARBALL_NAME" -C lib .
+          tar -czf "$CPP_TARBALL_NAME" -C cpp .  # Adjust path if your C++ code is in a subfolder like "cpp"
           echo "CPP_TARBALL_PATH=$CPP_TARBALL_NAME" >> $GITHUB_ENV
 
       - name: Create draft release via GitHub CLI
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -100,6 +102,3 @@ jobs:
 
       - name: Publish wheels to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
-          packages-dir: dist/
