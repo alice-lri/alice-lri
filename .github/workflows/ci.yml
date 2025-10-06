@@ -2,9 +2,9 @@ name: Build and Test
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ master, develop ]
   pull_request:
-    branches: [ main ]
+    branches: [ master ]
 
 env:
   # Global environment variables
@@ -27,7 +27,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.conan2
-          key: conan-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('lib/conanfile.txt', 'examples/conanfile.txt', 'tests/conanfile.txt') }}
+          key: conan-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('lib/conanfile.py', 'tests/conanfile.txt') }}
           restore-keys: |
             conan-${{ runner.os }}-${{ matrix.build_type }}-
             conan-${{ runner.os }}-
@@ -38,7 +38,6 @@ jobs:
           path: |
             build/
             !build/lib/conan_toolchain.cmake
-            !build/examples/conan_toolchain.cmake
             !build/tests/conan_toolchain.cmake
           key: cmake-build-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp', 'CMakeLists.txt', '**/CMakeLists.txt') }}
           restore-keys: |
@@ -137,8 +136,6 @@ jobs:
           # Install dependencies with caching
           conan install lib -s compiler.cppstd=20 -s build_type=${{ matrix.build_type }} \
             --output-folder=build/lib --build=missing
-          conan install examples -s compiler.cppstd=20 -s build_type=${{ matrix.build_type }} \
-            --output-folder=build/examples --build=missing
           conan install tests -s compiler.cppstd=20 -s build_type=${{ matrix.build_type }} \
             --output-folder=build/tests --build=missing
 
@@ -214,7 +211,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.conan2
-          key: conan-python-${{ runner.os }}-${{ hashFiles('lib/conanfile.txt') }}
+          key: conan-python-${{ runner.os }}-${{ hashFiles('lib/conanfile.py') }}
           restore-keys: |
             conan-python-${{ runner.os }}-
 
@@ -283,7 +280,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.conan2
-          key: conan-install-${{ runner.os }}-${{ hashFiles('lib/conanfile.txt') }}
+          key: conan-install-${{ runner.os }}-${{ hashFiles('lib/conanfile.py') }}
           restore-keys: conan-install-${{ runner.os }}-
 
       - name: Cache CMake build directory for installation
@@ -292,7 +289,6 @@ jobs:
           path: |
             build/
             !build/lib/conan_toolchain.cmake
-            !build/examples/conan_toolchain.cmake
           key: cmake-install-${{ runner.os }}-${{ hashFiles('**/*.cpp', '**/*.h', '**/*.hpp', 'CMakeLists.txt', '**/CMakeLists.txt') }}
           restore-keys: |
             cmake-install-${{ runner.os }}-
@@ -362,8 +358,6 @@ jobs:
         run: |
           conan install lib -s compiler.cppstd=20 -s build_type=Release \
             --output-folder=build/lib --build=missing
-          conan install examples -s compiler.cppstd=20 -s build_type=Release \
-            --output-folder=build/examples --build=missing
 
       - name: Build and install C++ library
         shell: bash
