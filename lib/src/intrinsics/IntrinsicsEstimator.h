@@ -1,5 +1,5 @@
 #pragma once
-#include "alice_lri/public_structs.hpp"
+#include "alice_lri/Structs.hpp"
 #include "horizontal/HorizontalIntrinsicsEstimator.h"
 #include "point/PointArray.h"
 #include "vertical/VerticalIntrinsicsEstimator.h"
@@ -9,10 +9,10 @@ namespace alice_lri {
 
     public:
         static Intrinsics estimate(const PointArray &points);
-        static DebugIntrinsics debugEstimate(const PointArray &points);
+        static IntrinsicsDetailed estimateDetailed(const PointArray &points);
 
     private:
         static Scanline makeScanline(const VerticalScanline &vertical, const HorizontalScanline &horizontal);
-        static DebugScanline makeDebugScanline(const VerticalScanline &vertical, const HorizontalScanline &horizontal);
+        static ScanlineDetailed makeDetailedScanline(const VerticalScanline &vertical, const HorizontalScanline &horizontal);
     };
 }

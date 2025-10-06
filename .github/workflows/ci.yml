@@ -1,13 +1,10 @@
 name: Build and Test
 
-# TODO maybe have release and push on differnet files/workflows?
 on:
   push:
     branches: [ main, develop ]
   pull_request:
     branches: [ main ]
-  release:
-    types: [ published ]
 
 env:
   # Global environment variables
@@ -452,33 +449,7 @@ jobs:
             ./build/test_app
           fi
 
-  build-wheels: #TODO not sure if we should also run on regular push
-    if: github.event_name == 'release'
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ ubuntu-latest, windows-latest ] #TODO not sure if all the OS are required
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.16.2
-        env:
-          CIBW_ARCHS_LINUX: x86_64
-          CIBW_ARCHS_WINDOWS: AMD64
-          CIBW_ARCHS_MACOS: x86_64 arm64
-          CIBW_BUILD_VERBOSITY: 1
-
-      - name: Upload wheels
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-${{ matrix.os }}
-          path: wheelhouse/*.whl
-          retention-days: 7
-
-  test-source-distribution:
+  test-python-source-distribution:
     runs-on: ubuntu-latest
     
     steps:
@@ -518,20 +489,47 @@ jobs:
           cd ..
           python -c "import alice_lri; print('✅ Source distribution installation works!')"
 
-  publish-pypi:
-    if: github.event_name == 'release'
-    needs: [ test-cpp, test-python, test-cpp-install, build-wheels, test-source-distribution ]
+  create-draft-release:
+    needs:
+      - test-cpp
+      - test-python
+      - test-cpp-install
+      - test-python-source-distribution
+    if: github.ref == 'refs/heads/master' && success()
     runs-on: ubuntu-latest
-    
     steps:
-      - name: Download all wheels
-        uses: actions/download-artifact@v4
-        with:
-          pattern: wheels-*
-          merge-multiple: true
-          path: dist/
+      - uses: actions/checkout@v4
 
-      - name: Publish to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          password: ${{ secrets.PYPI_API_TOKEN }}
+      - name: Extract version from CMakeLists.txt
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(grep -Po 'project\\(.*VERSION\\s*\\K[0-9]+\\.[0-9]+\\.[0-9]+' lib/CMakeLists.txt)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Ensure git tag exists for release
+        shell: bash
+        run: |
+          TAG="v${{ steps.get_version.outputs.version }}"
+          # Fetch all tags from origin
+          git fetch --tags
+          # Check if tag exists
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists. Failing job." >&2
+            exit 1
+          else
+            echo "Creating and pushing tag $TAG."
+            git tag "$TAG"
+            git push origin "$TAG"
+          fi
+
+      - name: Create draft release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo $GH_TOKEN | gh auth login --with-token
+          gh release create "v${{ steps.get_version.outputs.version }}" \
+            --title "v${{ steps.get_version.outputs.version }}" \
+            --notes "Automated draft release for version ${{ steps.get_version.outputs.version }}" \
+            --draft
+

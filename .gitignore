@@ -29,3 +29,9 @@ cmake-build-release-install/
 cmake-build-release-debug/
 
 *.so
+
+examples/CMakeUserPresets.json
+
+lib/CMakeUserPresets.json
+
+tests/CMakeUserPresets.json

@@ -1,10 +1,10 @@
-# AccurateRI (ALICE-LRI)
+# ALICE-LRI
 
 A high-performance C++ library with Python bindings for LiDAR Range Image processing and intrinsic parameter estimation.
 
 ## Features
 
-- **Intrinsic Parameter Training**: Estimate LiDAR intrinsic parameters from point cloud data
+- **Intrinsic Parameter Estimation**: Estimate LiDAR intrinsic parameters from point cloud data
 - **Range Image Projection**: Convert 3D point clouds to 2D range images
 - **Point Cloud Reconstruction**: Unproject range images back to 3D point clouds
 - **Cross-platform**: Supports Windows, Linux, and macOS
@@ -23,38 +23,14 @@ x = [1.0, 2.0, 3.0]
 y = [0.5, 1.5, 2.5] 
 z = [0.1, 0.2, 0.3]
 
-# Train intrinsic parameters
-intrinsics = alice_lri.train(x, y, z)
+# Estimate intrinsic parameters
+intrinsics = alice_lri.estimate_intrinsics(x, y, z)
 
 # Project to range image
-range_image = alice_lri.project_to_range_image_float(intrinsics, x, y, z)
+range_image = alice_lri.project_to_range_image(intrinsics, x, y, z)
 
 # Reconstruct point cloud
 reconstructed_x, reconstructed_y, reconstructed_z = alice_lri.unproject_to_point_cloud(intrinsics, range_image)
-```
-
-### C++
-
-```cpp
-#include <alice_lri/alice_lri.hpp>
-
-int main() {
-    // Create point cloud
-    alice_lri::PointCloud::Float cloud;
-    // ... populate cloud data
-    
-    // Train intrinsics
-    auto result = alice_lri::train(cloud);
-    if (!result.ok()) {
-        // Handle error
-        return 1;
-    }
-    
-    // Project to range image
-    auto range_image = alice_lri::projectToRangeImage(*result, cloud);
-    
-    return 0;
-}
 ```
 
 ## Installation

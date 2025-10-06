@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "alice_lri/AliceArray.hpp"
+#include "alice_lri/util/AliceArray.hpp"
 #include <memory>
 
 namespace alice_lri {

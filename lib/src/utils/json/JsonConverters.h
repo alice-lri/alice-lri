@@ -1,6 +1,6 @@
 #pragma once
 #include <nlohmann/json.hpp>
-#include "alice_lri/public_structs.hpp"
+#include "alice_lri/Structs.hpp"
 
 namespace alice_lri {
     nlohmann::json scanlineToJson(const Scanline& scanline);

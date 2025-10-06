@@ -6,20 +6,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # Opt-in: Only the Python build turns this ON via pyproject.toml
 option(PYBUILD_AUTO_CONAN "Run Conan for lib/ during Python build" OFF)
-
-if(PYBUILD_AUTO_CONAN)
+if (PYBUILD_AUTO_CONAN)
     execute_process(
-            COMMAND conan install "${CMAKE_SOURCE_DIR}/lib"
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib"
+            COMMAND conan install .
             -s compiler.cppstd=20
             -s build_type=Release
             -of "${CMAKE_BINARY_DIR}/lib"
             --build=missing
             RESULT_VARIABLE _conan_res
     )
-    if(NOT _conan_res EQUAL 0)
+    if (NOT _conan_res EQUAL 0)
         message(FATAL_ERROR "Conan install failed (code ${_conan_res}).")
-    endif()
-endif()
+    endif ()
+endif ()
 
 # Find pybind11
 find_package(pybind11 REQUIRED)

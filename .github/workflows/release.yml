@@ -1,0 +1,97 @@
+name: Release
+on:
+  release:
+    types: [created, published]
+
+jobs:
+  build-and-attach:
+    if: github.event.action == 'created'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build wheels
+        uses: pypa/cibuildwheel@v2.16.2
+        env:
+          CIBW_ARCHS_LINUX: x86_64
+          CIBW_ARCHS_WINDOWS: AMD64
+          CIBW_BUILD_VERBOSITY: 1
+          CIBW_MANYLINUX_X86_64_IMAGE: manylinux2014
+
+      - name: Upload wheels as workflow artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
+          retention-days: 7
+
+      - name: Find wheel file
+        id: find_wheel
+        shell: bash
+        run: echo "WHEEL_PATH=$(ls wheelhouse/*.whl)" >> $GITHUB_ENV
+
+      - name: Get wheel filename
+        id: wheel_name
+        shell: bash
+        run: echo "WHEEL_NAME=$(basename $WHEEL_PATH)" >> $GITHUB_ENV
+
+      - name: Extract C++ project name and version from conanfile.py
+        shell: bash
+        run: |
+          CPP_PROJECT_NAME=$(grep '^    name =' lib/conanfile.py | sed "s/.*name = '\([^']*\)'.*/\1/")
+          if [ -z "$CPP_PROJECT_NAME" ]; then
+            CPP_PROJECT_NAME=$(grep '^    name =' lib/conanfile.py | sed 's/.*name = "\([^"]*\)".*/\1/')
+          fi
+          CPP_PROJECT_VERSION=$(grep '^    version =' lib/conanfile.py | sed "s/.*version = '\([^']*\)'.*/\1/")
+          if [ -z "$CPP_PROJECT_VERSION" ]; then
+            CPP_PROJECT_VERSION=$(grep '^    version =' lib/conanfile.py | sed 's/.*version = "\([^"]*\)".*/\1/')
+          fi
+          CPP_TARBALL_NAME="${CPP_PROJECT_NAME}-${CPP_PROJECT_VERSION}-cpp.tar.gz"
+          echo "CPP_PROJECT_NAME=$CPP_PROJECT_NAME" >> $GITHUB_ENV
+          echo "CPP_PROJECT_VERSION=$CPP_PROJECT_VERSION" >> $GITHUB_ENV
+          echo "CPP_TARBALL_NAME=$CPP_TARBALL_NAME" >> $GITHUB_ENV
+
+      - name: Create C++ tarball
+        shell: bash
+        run: |
+          tar -czf "$CPP_TARBALL_NAME" -C lib .
+          echo "CPP_TARBALL_PATH=$CPP_TARBALL_NAME" >> $GITHUB_ENV
+
+      - name: Attach wheel to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ env.WHEEL_PATH }}
+          asset_name: ${{ env.WHEEL_NAME }}
+          asset_content_type: application/octet-stream
+
+      - name: Attach C++ tarball to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: ${{ env.CPP_TARBALL_PATH }}
+          asset_name: ${{ env.CPP_TARBALL_NAME }}
+          asset_content_type: application/gzip
+
+  publish-pypi:
+    if: github.event.action == 'published'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all wheels
+        uses: actions/download-artifact@v4
+        with:
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist/
+
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_API_TOKEN }}

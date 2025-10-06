@@ -2,7 +2,7 @@
 #include <optional>
 #include <vector>
 #include <Eigen/Core>
-#include "alice_lri/public_structs.hpp"
+#include "alice_lri/Structs.hpp"
 #include "hough/HoughStructs.h"
 
 namespace alice_lri {

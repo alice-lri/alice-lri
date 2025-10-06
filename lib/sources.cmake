@@ -1,5 +1,5 @@
 set(ALICE_LRI_SOURCES
-        ${CMAKE_CURRENT_LIST_DIR}/src/alice_lri.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/includeimpl/Core.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/utils/logger/Logger.h
         ${CMAKE_CURRENT_LIST_DIR}/src/utils/Timer.h
         ${CMAKE_CURRENT_LIST_DIR}/src/point/PointUtils.cpp
@@ -28,7 +28,7 @@ set(ALICE_LRI_SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/horizontal/helper/HorizontalScanlineArray.h
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/horizontal/helper/HorizontalMath.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/horizontal/helper/HorizontalMath.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/alice_lri/public_structs.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/include/alice_lri/Structs.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/horizontal/HorizontalIntrinsicsEstimator.h
         ${CMAKE_CURRENT_LIST_DIR}/src/rangeimage/RangeImageUtils.cpp
@@ -36,7 +36,7 @@ set(ALICE_LRI_SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/src/Constants.h
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/horizontal/helper/SegmentedMedianLinearRegressor.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/horizontal/helper/SegmentedMedianLinearRegressor.h
-        ${CMAKE_CURRENT_LIST_DIR}/src/public_structs.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/includeimpl/Structs.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/vertical/estimation/VerticalScanlineLimits.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/vertical/estimation/VerticalScanlineLimits.h
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/vertical/estimation/VerticalScanlineEstimator.cpp
@@ -52,15 +52,15 @@ set(ALICE_LRI_SOURCES
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/vertical/conflict/ScanlineConflictStructs.h
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/vertical/VerticalIntrinsicsStructs.h
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/horizontal/HorizontalIntrinsicsStructs.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/alice_lri/AliceArray.hpp
         ${CMAKE_CURRENT_LIST_DIR}/src/hough/HoughStructs.h
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/vertical/conflict/ScanlineConflictEvaluator.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/intrinsics/vertical/conflict/ScanlineConflictEvaluator.h
         ${CMAKE_CURRENT_LIST_DIR}/src/math/LinearRegressor.cpp
         ${CMAKE_CURRENT_LIST_DIR}/src/math/LinearRegressor.h
-        ${CMAKE_CURRENT_LIST_DIR}/src/AliceString.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/include/alice_lri/AliceString.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/alice_lri/Api.h
-        ${CMAKE_CURRENT_LIST_DIR}/include/alice_lri/Result.h
-        ${CMAKE_CURRENT_LIST_DIR}/src/Result.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/includeimpl/util/AliceString.cpp
+        ${CMAKE_CURRENT_LIST_DIR}/include/alice_lri/ApiGuards.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/include/alice_lri/Result.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/include/alice_lri/util/AliceString.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/include/alice_lri/util/AliceArray.hpp
+        ${CMAKE_CURRENT_LIST_DIR}/src/includeimpl/Result.cpp
 )

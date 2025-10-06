@@ -1,1 +1,0 @@
-ALTER TABLE experiment ADD COLUMN commit_hash text;

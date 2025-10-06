@@ -1,7 +1,0 @@
-[requires]
-sqlitecpp/3.3.2
-eigen/3.4.0
-
-[generators]
-CMakeDeps
-CMakeToolchain
