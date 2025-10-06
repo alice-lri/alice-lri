@@ -1,4 +1,6 @@
 # ALICE-LRI
+<!-- TODO add CI badges -->
+<!-- TODO update this readme -->
 
 A high-performance C++ library with Python bindings for LiDAR Range Image processing and intrinsic parameter estimation.
 
