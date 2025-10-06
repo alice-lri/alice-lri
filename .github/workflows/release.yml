@@ -25,6 +25,11 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Tag Version: $VERSION"
 
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
       - name: Install build tools
         shell: bash
         run: |
@@ -45,6 +50,16 @@ jobs:
             fi
             # ccache not easily available on Windows
           fi
+
+      - name: Install Conan
+        shell: bash
+        run: |
+          python -m pip install --upgrade pip
+          pip install 'conan>=2.0'
+
+      - name: Configure Conan
+        shell: bash
+        run: conan profile detect --force
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.0
