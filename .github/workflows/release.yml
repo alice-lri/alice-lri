@@ -1,17 +1,29 @@
 name: Release
+
 on:
+  push:
+    tags:
+      - 'v*'
   release:
-    types: [created, published]
+    types: [published]
 
 jobs:
   build-and-attach:
-    if: github.event.action == 'created'
+    if: github.event_name == 'push'
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: extract_version
+        run: |
+          # Extract version from tag, assuming the tag is in the format vX.Y.Z
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Tag Version: $VERSION"
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.16.2
@@ -38,27 +50,22 @@ jobs:
         shell: bash
         run: echo "WHEEL_NAME=$(basename $WHEEL_PATH)" >> $GITHUB_ENV
 
-      - name: Extract C++ project name and version from conanfile.py
-        shell: bash
-        run: |
-          CPP_PROJECT_NAME=$(grep '^    name =' lib/conanfile.py | sed "s/.*name = '\([^']*\)'.*/\1/")
-          if [ -z "$CPP_PROJECT_NAME" ]; then
-            CPP_PROJECT_NAME=$(grep '^    name =' lib/conanfile.py | sed 's/.*name = "\([^"]*\)".*/\1/')
-          fi
-          CPP_PROJECT_VERSION=$(grep '^    version =' lib/conanfile.py | sed "s/.*version = '\([^']*\)'.*/\1/")
-          if [ -z "$CPP_PROJECT_VERSION" ]; then
-            CPP_PROJECT_VERSION=$(grep '^    version =' lib/conanfile.py | sed 's/.*version = "\([^"]*\)".*/\1/')
-          fi
-          CPP_TARBALL_NAME="${CPP_PROJECT_NAME}-${CPP_PROJECT_VERSION}-cpp.tar.gz"
-          echo "CPP_PROJECT_NAME=$CPP_PROJECT_NAME" >> $GITHUB_ENV
-          echo "CPP_PROJECT_VERSION=$CPP_PROJECT_VERSION" >> $GITHUB_ENV
-          echo "CPP_TARBALL_NAME=$CPP_TARBALL_NAME" >> $GITHUB_ENV
-
       - name: Create C++ tarball
         shell: bash
         run: |
+          CPP_TARBALL_NAME="alice-lri-${{ env.VERSION }}-cpp-lib.tar.gz"
           tar -czf "$CPP_TARBALL_NAME" -C lib .
           echo "CPP_TARBALL_PATH=$CPP_TARBALL_NAME" >> $GITHUB_ENV
+
+      - name: Create draft release via GitHub CLI
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo $GH_TOKEN | gh auth login --with-token
+          gh release create "v${{ env.VERSION }}" \
+            --title "Release v${{ env.VERSION }}" \
+            --notes "Automated draft release for version v${{ env.VERSION }}" \
+            --draft
 
       - name: Attach wheel to release
         uses: actions/upload-release-asset@v1
@@ -81,8 +88,8 @@ jobs:
           asset_content_type: application/gzip
 
   publish-pypi:
-    if: github.event.action == 'published'
     runs-on: ubuntu-latest
+    if: github.event_name == 'release'
     steps:
       - name: Download all wheels
         uses: actions/download-artifact@v4
@@ -91,7 +98,8 @@ jobs:
           merge-multiple: true
           path: dist/
 
-      - name: Publish to PyPI
+      - name: Publish wheels to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           password: ${{ secrets.PYPI_API_TOKEN }}
+          packages-dir: dist/
