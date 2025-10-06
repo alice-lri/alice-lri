@@ -25,10 +25,26 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Tag Version: $VERSION"
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.13'
+      - name: Install build tools
+        shell: bash
+        run: |
+          # Install ninja and ccache for faster builds
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            # Check if already installed to avoid unnecessary updates
+            if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
+              sudo apt-get update && sudo apt-get install -y ninja-build ccache
+            fi
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            # Check if already installed
+            if ! command -v ninja &> /dev/null || ! command -v ccache &> /dev/null; then
+              brew install ninja ccache
+            fi
+          elif [[ "$RUNNER_OS" == "Windows" ]]; then
+            if ! command -v ninja &> /dev/null; then
+              python -m pip install ninja
+            fi
+            # ccache not easily available on Windows
+          fi
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.0
