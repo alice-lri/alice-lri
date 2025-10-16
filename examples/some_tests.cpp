@@ -9,6 +9,9 @@ int main(int argc, char **argv) {
     std::string path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211208/ouster_points/data/0000020365.bin";
     // std::string path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0002_sync/velodyne_points/data/0000000000.bin";
 
+    alice_lri::AliceArray<double> arr = {1.0, 2.0, 3.0};
+    std::cout << "Array size: " << arr.size() << ", capacity: " << arr.capacity() << std::endl;
+
     FileUtils::Points points = FileUtils::loadBinaryFile(path);
 
     auto start = std::chrono::high_resolution_clock::now();
