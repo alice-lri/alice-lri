@@ -1,10 +1,22 @@
+
 # ALICE-LRI
 <!-- TODO add CI badges -->
 <!-- TODO update this readme -->
 
+
 ALICE-LRI is a C++ and Python library for lossless range image generation and reconstruction from spinning 3D LiDAR point clouds. It achieves losslessness by automatically estimating all intrinsic sensor parameters from data, so you do not need calibration files or manufacturer metadata. This enables accurate, sensor-agnostic projection to range images and full recovery of 3D LiDAR data.
 
-## Features
+This repository is the **core library** of the ALICE-LRI ecosystem, providing the main C++ and Python implementation. It is part of a family of repositories grouped in the [ALICE-LRI GitHub Organization](https://github.com/alice-lri), which together enable reproducible research, experiments, and applications based on ALICE-LRI.
+
+## Organization and Related Repositories
+
+- [ALICE-LRI GitHub Organization](https://github.com/alice-lri): Main organization hosting the ALICE-LRI ecosystem and related projects.
+- [ALICE-LRI Experiments](https://github.com/alice-lri/alice-lri-experiments): Code, scripts, and configuration to reproduce experiments for the ALICE-LRI paper. Includes this core library as a submodule.
+- [RTST-Modified](https://github.com/alice-lri/rtst-modified): Fork of the original RTST compression algorithm, used for evaluation and comparison in experiments.
+
+You can find more details and usage examples in the related repositories above.
+
+## ALICE-LRI Features
 
 - **Intrinsic Parameter Estimation**: Estimate LiDAR intrinsic parameters from point cloud data.
 - **Range Image Projection**: Convert 3D point clouds to 2D range images with no loss of information.
@@ -49,7 +61,7 @@ int main() {
     alice_lri::AliceArray<double> z = {7.0, 8.0, 9.0};
 
     // Create PointCloud::Double using std::move to avoid unnecessary copies
-    const alice_lri::PointCloud::Double cloud(std::move(x), std::move(y), std::move(z));
+    const alice_lri::PointCloud::Double cloud{std::move(x), std::move(y), std::move(z)};
     
     // Estimate intrinsics
     auto result = alice_lri::estimateIntrinsics(cloud);
@@ -125,12 +137,27 @@ find_package(alice_lri REQUIRED)
 target_link_libraries(YOUR_TARGET alice_lri::alice_lri)
 ```
 
+
 ##### With g++ (or similar compilers)
 
 If you are compiling manually, link with `-lalice_lri`:
 ```bash
 g++ your_source.cpp -lalice_lri -o your_program
 ```
+
+#### Controlling Log Levels
+
+ALICE-LRI supports configurable log levels at build time. By default, the log level is set to `WARN`, which means only warnings and errors will be printed (recommended for most users; normal operation will not print anything unless something abnormal happens).
+
+You can change the log level when building with CMake by passing the `-DLOG_LEVEL` flag:
+```bash
+cmake -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=DEBUG -B build
+```
+Valid options are: `DEBUG`, `INFO`, `WARN`, `ERROR`, `NONE`.
+
+For Python, you can control the log level by editing the `pyproject.toml` file in the `python/` directory before building or installing from source. The default is also `WARN`.
+
+**Recommended:** Keep the default `WARN` level unless you need more verbose output for debugging or development.
 
 ## License
 
