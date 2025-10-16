@@ -1,0 +1,7 @@
+sphinx
+sphinx-autodoc-typehints
+sphinxcontrib-napoleon
+breathe
+furo
+exhale
+sphinx-autobuild

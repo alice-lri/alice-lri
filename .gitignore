@@ -35,3 +35,9 @@ examples/CMakeUserPresets.json
 lib/CMakeUserPresets.json
 
 tests/CMakeUserPresets.json
+
+docs/_build/
+
+docs/api/
+
+docs/doxygen/
