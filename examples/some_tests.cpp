@@ -7,7 +7,6 @@
 int main(int argc, char **argv) {
     std::optional<std::string> outputPath = std::nullopt;
     std::string path = "../../Datasets/LiDAR/durlar/dataset/DurLAR/DurLAR_20211208/ouster_points/data/0000020365.bin";
-    // std::string path = "../../Datasets/LiDAR/kitti/2011_09_26/2011_09_26_drive_0002_sync/velodyne_points/data/0000000000.bin";
 
     alice_lri::AliceArray<double> arr = {1.0, 2.0, 3.0};
     std::cout << "Array size: " << arr.size() << ", capacity: " << arr.capacity() << std::endl;
@@ -16,7 +15,7 @@ int main(int argc, char **argv) {
 
     auto start = std::chrono::high_resolution_clock::now();
 
-    const alice_lri::PointCloud::Double cloud(std::move(points.x), std::move(points.y), std::move(points.z));
+    const alice_lri::PointCloud::Double cloud{std::move(points.x), std::move(points.y), std::move(points.z)};
     const alice_lri::Result<alice_lri::Intrinsics> intrinsics = alice_lri::estimateIntrinsics(cloud);
 
     if (!intrinsics) {
