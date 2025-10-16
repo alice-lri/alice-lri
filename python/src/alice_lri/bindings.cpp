@@ -13,12 +13,21 @@ PYBIND11_MODULE(_alice_lri, m) {
     m.doc() = "Python bindings for the ALICE-LRI C++ library";
 
     // Error handling
-    py::enum_<alice_lri::ErrorCode>(m, "ErrorCode")
-        .value("NONE", alice_lri::ErrorCode::NONE)
-        .value("MISMATCHED_SIZES", alice_lri::ErrorCode::MISMATCHED_SIZES)
-        .value("EMPTY_POINT_CLOUD", alice_lri::ErrorCode::EMPTY_POINT_CLOUD)
-        .value("RANGES_XY_ZERO", alice_lri::ErrorCode::RANGES_XY_ZERO)
-        .value("INTERNAL_ERROR", alice_lri::ErrorCode::INTERNAL_ERROR)
+    py::enum_<alice_lri::ErrorCode>(m, "ErrorCode", R"doc(
+        Error codes for Alice LRI operations.
+        
+        Values:
+            NONE (int): No error.
+            MISMATCHED_SIZES (int): Input arrays have mismatched sizes.
+            EMPTY_POINT_CLOUD (int): Point cloud is empty.
+            RANGES_XY_ZERO (int): At least one point has a range of zero in the XY plane.
+            INTERNAL_ERROR (int): Internal error occurred.
+    )doc")
+        .value("NONE", alice_lri::ErrorCode::NONE, "No error.")
+        .value("MISMATCHED_SIZES", alice_lri::ErrorCode::MISMATCHED_SIZES, "Input arrays have mismatched sizes.")
+        .value("EMPTY_POINT_CLOUD", alice_lri::ErrorCode::EMPTY_POINT_CLOUD, "Point cloud is empty.")
+        .value("RANGES_XY_ZERO", alice_lri::ErrorCode::RANGES_XY_ZERO, "At least one point has a range of zero in the XY plane.")
+        .value("INTERNAL_ERROR", alice_lri::ErrorCode::INTERNAL_ERROR, "Internal error occurred.")
         .export_values();
 
     // Helper function to unwrap Result<T> and throw exceptions
@@ -30,20 +39,35 @@ PYBIND11_MODULE(_alice_lri, m) {
     };
 
     // Enums
-    py::enum_<alice_lri::EndReason>(m, "EndReason")
-        .value("ALL_ASSIGNED", alice_lri::EndReason::ALL_ASSIGNED)
-        .value("MAX_ITERATIONS", alice_lri::EndReason::MAX_ITERATIONS)
-        .value("NO_MORE_PEAKS", alice_lri::EndReason::NO_MORE_PEAKS)
+    py::enum_<alice_lri::EndReason>(m, "EndReason", R"doc(
+        Reason for ending the iterative vertical fitting process.
+        
+        Values:
+            ALL_ASSIGNED (int): All points assigned. This is the normal termination condition.
+            MAX_ITERATIONS (int): Maximum number of iterations reached.
+            NO_MORE_PEAKS (int): No more peaks found in the Hough accumulator.
+    )doc")
+        .value("ALL_ASSIGNED", alice_lri::EndReason::ALL_ASSIGNED, "All points assigned. This is the normal termination condition.")
+        .value("MAX_ITERATIONS", alice_lri::EndReason::MAX_ITERATIONS, "Maximum number of iterations reached.")
+        .value("NO_MORE_PEAKS", alice_lri::EndReason::NO_MORE_PEAKS, "No more peaks found in the Hough accumulator.")
         .export_values();
 
     // Core structs
-    py::class_<alice_lri::Scanline>(m, "Scanline")
-        .def(py::init<>())
-        .def_readwrite("vertical_offset", &alice_lri::Scanline::verticalOffset)
-        .def_readwrite("vertical_angle", &alice_lri::Scanline::verticalAngle)
-        .def_readwrite("horizontal_offset", &alice_lri::Scanline::horizontalOffset)
-        .def_readwrite("azimuthal_offset", &alice_lri::Scanline::azimuthalOffset)
-        .def_readwrite("resolution", &alice_lri::Scanline::resolution)
+    py::class_<alice_lri::Scanline>(m, "Scanline", R"doc(
+        Represents a single scanline with intrinsic parameters.
+        Members:
+            vertical_offset (float): Vertical spatial offset of the scanline.
+            vertical_angle (float): Vertical angle of the scanline.
+            horizontal_offset (float): Horizontal spatial offset of the scanline.
+            azimuthal_offset (float): Azimuthal offset of the scanline.
+            resolution (int): Horizontal resolution of the scanline.
+    )doc")
+        .def(py::init<>(), "Default constructor.")
+        .def_readwrite("vertical_offset", &alice_lri::Scanline::verticalOffset, "Vertical spatial offset.")
+        .def_readwrite("vertical_angle", &alice_lri::Scanline::verticalAngle, "Vertical angle.")
+        .def_readwrite("horizontal_offset", &alice_lri::Scanline::horizontalOffset, "Horizontal spatial offset.")
+        .def_readwrite("azimuthal_offset", &alice_lri::Scanline::azimuthalOffset, "Azimuthal offset.")
+        .def_readwrite("resolution", &alice_lri::Scanline::resolution, "Horizontal resolution.")
         .def("__repr__", [](const alice_lri::Scanline& self) {
             std::ostringstream oss;
             oss << "Scanline(vertical_offset=" << self.verticalOffset
@@ -54,44 +78,69 @@ PYBIND11_MODULE(_alice_lri, m) {
             return oss.str();
         });
 
-    py::class_<alice_lri::Intrinsics>(m, "Intrinsics")
-        .def(py::init<int32_t>())
+    py::class_<alice_lri::Intrinsics>(m, "Intrinsics", R"doc(
+        Contains intrinsic parameters for a sensor, including all scanlines.
+        Args:
+            scanline_count (int): Number of scanlines.
+        Attributes:
+            scanlines (list of Scanline): Array of scanlines describing the sensor geometry.
+    )doc")
+        .def(py::init<int32_t>(), py::arg("scanline_count"), "Construct with a given number of scanlines.")
         .def_property_readonly("scanlines", [](const alice_lri::Intrinsics& self) {
             return std::vector(self.scanlines.begin(), self.scanlines.end());
-        })
+        }, "List of scanlines.")
         .def("__repr__", [](const alice_lri::Intrinsics& self) {
             std::ostringstream oss;
             oss << "Intrinsics(scanlines=[...])";
             return oss.str();
         });
 
-    py::class_<alice_lri::Interval>(m, "Interval")
-        .def(py::init<>())
-        .def_readwrite("lower", &alice_lri::Interval::lower)
-        .def_readwrite("upper", &alice_lri::Interval::upper)
-        .def("diff", &alice_lri::Interval::diff)
-        .def("any_contained", &alice_lri::Interval::anyContained)
-        .def("clamp_both", &alice_lri::Interval::clampBoth)
+    py::class_<alice_lri::Interval>(m, "Interval", R"doc(
+        Represents a numeric interval [lower, upper].
+        Members:
+            lower (float): Lower bound of the interval.
+            upper (float): Upper bound of the interval.
+        Methods:
+            diff() -> float: Get the width of the interval (upper - lower).
+            any_contained(other: Interval) -> bool: Check if any part of another interval is contained in this interval.
+            clamp_both(min_value: float, max_value: float): Clamp both bounds to [min_value, max_value].
+    )doc")
+        .def(py::init<>(), "Default constructor.")
+        .def_readwrite("lower", &alice_lri::Interval::lower, "Lower bound.")
+        .def_readwrite("upper", &alice_lri::Interval::upper, "Upper bound.")
+        .def("diff", &alice_lri::Interval::diff, "Get the width of the interval (upper - lower).")
+        .def("any_contained", &alice_lri::Interval::anyContained, "Check if any part of another interval is contained in this interval.")
+        .def("clamp_both", &alice_lri::Interval::clampBoth, "Clamp both bounds to [minValue, maxValue].")
         .def("__repr__", [](const alice_lri::Interval& self) {
             std::ostringstream oss;
             oss << "Interval(lower=" << self.lower << ", upper=" << self.upper << ")";
             return oss.str();
         });
 
-    py::class_<alice_lri::ValueConfInterval>(m, "ValueConfInterval")
-        .def(py::init<>())
-        .def_readwrite("value", &alice_lri::ValueConfInterval::value)
-        .def_readwrite("ci", &alice_lri::ValueConfInterval::ci)
+    py::class_<alice_lri::ValueConfInterval>(m, "ValueConfInterval", R"doc(
+        Value with associated confidence interval.
+        Members:
+            value (float): The value.
+            ci (Interval): Confidence interval for the value.
+    )doc")
+        .def(py::init<>(), "Default constructor.")
+        .def_readwrite("value", &alice_lri::ValueConfInterval::value, "The value.")
+        .def_readwrite("ci", &alice_lri::ValueConfInterval::ci, "Confidence interval.")
         .def("__repr__", [](const alice_lri::ValueConfInterval& self) {
             std::ostringstream oss;
             oss << "ValueConfInterval(value=" << self.value << ", ci=Interval(lower=" << self.ci.lower << ", upper=" << self.ci.upper << "))";
             return oss.str();
         });
 
-    py::class_<alice_lri::ScanlineAngleBounds>(m, "ScanlineAngleBounds")
-        .def(py::init<>())
-        .def_readwrite("lower_line", &alice_lri::ScanlineAngleBounds::lowerLine)
-        .def_readwrite("upper_line", &alice_lri::ScanlineAngleBounds::upperLine)
+    py::class_<alice_lri::ScanlineAngleBounds>(m, "ScanlineAngleBounds", R"doc(
+        Angle bounds for a scanline.
+        Members:
+            lower_line (Interval): Lower angle interval.
+            upper_line (Interval): Upper angle interval.
+    )doc")
+        .def(py::init<>(), "Default constructor.")
+        .def_readwrite("lower_line", &alice_lri::ScanlineAngleBounds::lowerLine, "Lower angle interval.")
+        .def_readwrite("upper_line", &alice_lri::ScanlineAngleBounds::upperLine, "Upper angle interval.")
         .def("__repr__", [](const alice_lri::ScanlineAngleBounds& self) {
             std::ostringstream oss;
             oss << "ScanlineAngleBounds(" <<
@@ -100,20 +149,35 @@ PYBIND11_MODULE(_alice_lri, m) {
             return oss.str();
         });
 
-    py::class_<alice_lri::ScanlineDetailed>(m, "ScanlineDetailed")
-        .def(py::init<>())
-        .def_readwrite("vertical_offset", &alice_lri::ScanlineDetailed::verticalOffset)
-        .def_readwrite("vertical_angle", &alice_lri::ScanlineDetailed::verticalAngle)
-        .def_readwrite("horizontal_offset", &alice_lri::ScanlineDetailed::horizontalOffset)
-        .def_readwrite("azimuthal_offset", &alice_lri::ScanlineDetailed::azimuthalOffset)
-        .def_readwrite("resolution", &alice_lri::ScanlineDetailed::resolution)
-        .def_readwrite("uncertainty", &alice_lri::ScanlineDetailed::uncertainty)
-        .def_readwrite("hough_votes", &alice_lri::ScanlineDetailed::houghVotes)
-        .def_readwrite("hough_hash", &alice_lri::ScanlineDetailed::houghHash)
-        .def_readwrite("points_count", &alice_lri::ScanlineDetailed::pointsCount)
-        .def_readwrite("theoretical_angle_bounds", &alice_lri::ScanlineDetailed::theoreticalAngleBounds)
-        .def_readwrite("vertical_heuristic", &alice_lri::ScanlineDetailed::verticalHeuristic)
-        .def_readwrite("horizontal_heuristic", &alice_lri::ScanlineDetailed::horizontalHeuristic)
+    py::class_<alice_lri::ScanlineDetailed>(m, "ScanlineDetailed", R"doc(
+        Detailed scanline information with uncertainty and voting statistics.
+        Members:
+            vertical_offset (ValueConfInterval): Vertical spatial offset with confidence interval.
+            vertical_angle (ValueConfInterval): Vertical angle with confidence interval.
+            horizontal_offset (float): Horizontal spatial offset.
+            azimuthal_offset (float): Azimuthal offset.
+            resolution (int): Horizontal resolution of the scanline.
+            uncertainty (float): Estimated uncertainty.
+            hough_votes (int): Number of Hough transform votes.
+            hough_hash (int): Hash value for Hough voting.
+            points_count (int): Number of points assigned to this scanline.
+            theoretical_angle_bounds (ScanlineAngleBounds): Theoretical angle bounds for the scanline.
+            vertical_heuristic (bool): Whether vertical heuristic was used.
+            horizontal_heuristic (bool): Whether horizontal heuristic was used.
+    )doc")
+        .def(py::init<>(), "Default constructor.")
+        .def_readwrite("vertical_offset", &alice_lri::ScanlineDetailed::verticalOffset, "Vertical offset with confidence interval.")
+        .def_readwrite("vertical_angle", &alice_lri::ScanlineDetailed::verticalAngle, "Vertical angle with confidence interval.")
+        .def_readwrite("horizontal_offset", &alice_lri::ScanlineDetailed::horizontalOffset, "Horizontal offset.")
+        .def_readwrite("azimuthal_offset", &alice_lri::ScanlineDetailed::azimuthalOffset, "Azimuthal offset.")
+        .def_readwrite("resolution", &alice_lri::ScanlineDetailed::resolution, "Number of points in the scanline.")
+        .def_readwrite("uncertainty", &alice_lri::ScanlineDetailed::uncertainty, "Estimated uncertainty.")
+        .def_readwrite("hough_votes", &alice_lri::ScanlineDetailed::houghVotes, "Number of Hough transform votes.")
+        .def_readwrite("hough_hash", &alice_lri::ScanlineDetailed::houghHash, "Hash value for Hough voting.")
+        .def_readwrite("points_count", &alice_lri::ScanlineDetailed::pointsCount, "Number of points assigned to this scanline.")
+        .def_readwrite("theoretical_angle_bounds", &alice_lri::ScanlineDetailed::theoreticalAngleBounds, "Theoretical angle bounds.")
+        .def_readwrite("vertical_heuristic", &alice_lri::ScanlineDetailed::verticalHeuristic, "Whether vertical heuristic was used.")
+        .def_readwrite("horizontal_heuristic", &alice_lri::ScanlineDetailed::horizontalHeuristic, "Whether horizontal heuristic was used.")
         .def("__repr__", [](const alice_lri::ScanlineDetailed& self) {
             std::ostringstream oss;
             oss << "ScanlineDetailed(vertical_offset=" << self.verticalOffset.value
@@ -131,16 +195,32 @@ PYBIND11_MODULE(_alice_lri, m) {
             return oss.str();
         });
 
-    py::class_<alice_lri::IntrinsicsDetailed>(m, "IntrinsicsDetailed")
-        .def(py::init<int32_t>())
-        .def(py::init<int32_t, int32_t, int32_t, int32_t, alice_lri::EndReason>())
+    py::class_<alice_lri::IntrinsicsDetailed>(m, "IntrinsicsDetailed", R"doc(
+        Detailed intrinsic parameters, including scanline details and statistics.
+        Args:
+            scanline_count (int): Number of scanlines.
+            vertical_iterations (int): Number of vertical iterations performed.
+            unassigned_points (int): Number of unassigned points.
+            points_count (int): Total number of points.
+            end_reason (EndReason): Reason for ending the process.
+        Attributes:
+            scanlines (list of ScanlineDetailed): List of detailed scanlines.
+            vertical_iterations (int): Number of vertical iterations performed.
+            unassigned_points (int): Number of unassigned points.
+            points_count (int): Total number of points.
+            end_reason (EndReason): Reason for ending the process.
+    )doc")
+        .def(py::init<int32_t>(), py::arg("scanline_count"), "Construct with a given number of scanlines.")
+        .def(py::init<int32_t, int32_t, int32_t, int32_t, alice_lri::EndReason>(),
+            py::arg("scanline_count"), py::arg("vertical_iterations"), py::arg("unassigned_points"), py::arg("points_count"), py::arg("end_reason"),
+            "Full constructor with all statistics.")
         .def_property_readonly("scanlines", [](const alice_lri::IntrinsicsDetailed& self) {
             return std::vector(self.scanlines.begin(), self.scanlines.end());
-        })
-        .def_readwrite("vertical_iterations", &alice_lri::IntrinsicsDetailed::verticalIterations)
-        .def_readwrite("unassigned_points", &alice_lri::IntrinsicsDetailed::unassignedPoints)
-        .def_readwrite("points_count", &alice_lri::IntrinsicsDetailed::pointsCount)
-        .def_readwrite("end_reason", &alice_lri::IntrinsicsDetailed::endReason)
+        }, "List of detailed scanlines.")
+        .def_readwrite("vertical_iterations", &alice_lri::IntrinsicsDetailed::verticalIterations, "Number of vertical iterations performed.")
+        .def_readwrite("unassigned_points", &alice_lri::IntrinsicsDetailed::unassignedPoints, "Number of unassigned points.")
+        .def_readwrite("points_count", &alice_lri::IntrinsicsDetailed::pointsCount, "Total number of points.")
+        .def_readwrite("end_reason", &alice_lri::IntrinsicsDetailed::endReason, "Reason for ending the process.")
         .def("__repr__", [](const alice_lri::IntrinsicsDetailed& self) {
             std::ostringstream oss;
             oss << "IntrinsicsDetailed(scanlines=[" << self.scanlines.size() << "], vertical_iterations=" << self.verticalIterations
@@ -151,12 +231,29 @@ PYBIND11_MODULE(_alice_lri, m) {
         });
 
     // RangeImage class
-    py::class_<alice_lri::RangeImage>(m, "RangeImage")
-        .def(py::init<>())
-        .def(py::init<uint32_t, uint32_t>(), py::arg("width"), py::arg("height"))
-        .def(py::init<uint32_t, uint32_t, double>(), py::arg("width"), py::arg("height"), py::arg("initial_value"))
-        .def_property_readonly("width", &alice_lri::RangeImage::width)
-        .def_property_readonly("height", &alice_lri::RangeImage::height)
+    py::class_<alice_lri::RangeImage>(m, "RangeImage", R"doc(
+        Represents a 2D range image with pixel data.
+        Args:
+            width (int): Image width.
+            height (int): Image height.
+            initial_value (float, optional): Initial value for all pixels (if provided).
+        Attributes:
+            width (int): Image width.
+            height (int): Image height.
+        Note:
+            The (width, height) constructor only reserves space for pixels but does not initialize them.
+            The (width, height, initial_value) constructor initializes all pixels to the given value.
+        Methods:
+            width() -> int: Get image width.
+            height() -> int: Get image height.
+            size() -> int: Get total number of pixels.
+            data() -> pointer: Get pointer to pixel data.
+    )doc")
+        .def(py::init<>(), "Default constructor (empty image).")
+        .def(py::init<uint32_t, uint32_t>(), py::arg("width"), py::arg("height"), "Construct with width and height. Reserves space for pixels but does not initialize them.")
+        .def(py::init<uint32_t, uint32_t, double>(), py::arg("width"), py::arg("height"), py::arg("initial_value"), "Construct with width, height, and initial pixel value.")
+        .def_property_readonly("width", &alice_lri::RangeImage::width, "Get image width.")
+        .def_property_readonly("height", &alice_lri::RangeImage::height, "Get image height.")
         .def("__repr__", [](const alice_lri::RangeImage& self) {
             std::ostringstream oss;
             oss << "RangeImage(width=" << self.width() << ", height=" << self.height() << ")";
@@ -203,14 +300,17 @@ PYBIND11_MODULE(_alice_lri, m) {
         cloud.y = alice_lri::AliceArray<float>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<float>(z.data(), z.size());
         return unwrap_result(alice_lri::estimateIntrinsics(cloud));
-    }, py::arg("x"), py::arg("y"), py::arg("z"), 
-       "Estimate intrinsics from float vectors\n\n"
-       "Parameters:\n"
-       "  x: List of x coordinates\n" 
-       "  y: List of y coordinates\n"
-       "  z: List of z coordinates\n"
-       "Returns:\n"
-       "  Intrinsics");
+    }, py::arg("x"), py::arg("y"), py::arg("z"),
+       R"doc(
+        Estimate sensor intrinsics from float vectors.
+
+        Args:
+            x (list of float): X coordinates.
+            y (list of float): Y coordinates.
+            z (list of float): Z coordinates.
+        Returns:
+            Intrinsics: Estimated sensor intrinsics.
+    )doc");
 
     m.def("estimate_intrinsics", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
         // Convert std::vector to AliceArray
@@ -220,7 +320,16 @@ PYBIND11_MODULE(_alice_lri, m) {
         cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
         return unwrap_result(alice_lri::estimateIntrinsics(cloud));
     }, py::arg("x"), py::arg("y"), py::arg("z"),
-       "Estimate intrinsics from double vectors");
+       R"doc(
+        Estimate sensor intrinsics from double vectors.
+
+        Args:
+            x (list of float): X coordinates.
+            y (list of float): Y coordinates.
+            z (list of float): Z coordinates.
+        Returns:
+            Intrinsics: Estimated sensor intrinsics.
+    )doc");
 
     m.def("estimate_intrinsics_detailed", [&unwrap_result](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
         // Convert std::vector to AliceArray
@@ -229,7 +338,16 @@ PYBIND11_MODULE(_alice_lri, m) {
         cloud.y = alice_lri::AliceArray<float>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<float>(z.data(), z.size());
         return unwrap_result(alice_lri::estimateIntrinsicsDetailed(cloud));
-    }, "Estimate intrinsics from float vectors with algorithm execution info");
+    }, R"doc(
+        Estimate detailed sensor intrinsics from float vectors, including algorithm execution info.
+
+        Args:
+            x (list of float): X coordinates.
+            y (list of float): Y coordinates.
+            z (list of float): Z coordinates.
+        Returns:
+            IntrinsicsDetailed: Detailed estimated intrinsics and statistics.
+    )doc");
 
     m.def("estimate_intrinsics_detailed", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
         // Convert std::vector to AliceArray
@@ -238,7 +356,16 @@ PYBIND11_MODULE(_alice_lri, m) {
         cloud.y = alice_lri::AliceArray<double>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
         return unwrap_result(alice_lri::estimateIntrinsicsDetailed(cloud));
-    }, "Estimate intrinsics from double vectors with algorithm execution info");
+    }, R"doc(
+        Estimate detailed sensor intrinsics from double vectors, including algorithm execution info.
+
+        Args:
+            x (list of float): X coordinates.
+            y (list of float): Y coordinates.
+            z (list of float): Z coordinates.
+        Returns:
+            IntrinsicsDetailed: Detailed estimated intrinsics and statistics.
+    )doc");
 
     m.def("project_to_range_image", [&unwrap_result](const alice_lri::Intrinsics& intr, const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
         // Convert std::vector to AliceArray
@@ -247,7 +374,17 @@ PYBIND11_MODULE(_alice_lri, m) {
         cloud.y = alice_lri::AliceArray<float>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<float>(z.data(), z.size());
         return unwrap_result(alice_lri::projectToRangeImage(intr, cloud));
-    }, "Project float cloud to range image");
+    }, R"doc(
+        Project a float point cloud to a range image using given intrinsics.
+
+        Args:
+            intr (Intrinsics): Sensor intrinsics.
+            x (list of float): X coordinates.
+            y (list of float): Y coordinates.
+            z (list of float): Z coordinates.
+        Returns:
+            RangeImage: Projected range image.
+    )doc");
 
     m.def("project_to_range_image", [&unwrap_result](const alice_lri::Intrinsics& intr, const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
         // Convert std::vector to AliceArray
@@ -256,7 +393,17 @@ PYBIND11_MODULE(_alice_lri, m) {
         cloud.y = alice_lri::AliceArray<double>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
         return unwrap_result(alice_lri::projectToRangeImage(intr, cloud));
-    }, "Project double cloud to range image");
+    }, R"doc(
+        Project a double point cloud to a range image using given intrinsics.
+
+        Args:
+            intr (Intrinsics): Sensor intrinsics.
+            x (list of float): X coordinates.
+            y (list of float): Y coordinates.
+            z (list of float): Z coordinates.
+        Returns:
+            RangeImage: Projected range image.
+    )doc");
 
     m.def("unproject_to_point_cloud", [](const alice_lri::Intrinsics& intr, const alice_lri::RangeImage& ri) {
         auto cloud = alice_lri::unProjectToPointCloud(intr, ri);
@@ -265,31 +412,81 @@ PYBIND11_MODULE(_alice_lri, m) {
         std::vector<double> y_vec(cloud.y.begin(), cloud.y.end());
         std::vector<double> z_vec(cloud.z.begin(), cloud.z.end());
         return py::make_tuple(x_vec, y_vec, z_vec);
-    }, "Unproject range image to 3D point cloud");
+    }, R"doc(
+        Unproject a range image to a 3D point cloud using given intrinsics.
+
+        Args:
+            intr (Intrinsics): Sensor intrinsics.
+            ri (RangeImage): Input range image.
+        Returns:
+            tuple: (x, y, z) coordinate lists (all float).
+    )doc");
 
     // JSON functions
     m.def("intrinsics_to_json_str", [](const alice_lri::Intrinsics& intrinsics, int32_t indent = -1) {
         auto result = alice_lri::intrinsicsToJsonStr(intrinsics, indent);
         return std::string(result.c_str());
-    }, py::arg("intrinsics"), py::arg("indent") = -1, "Convert intrinsics to JSON string");
+    }, py::arg("intrinsics"), py::arg("indent") = -1,
+       R"doc(
+        Convert intrinsics to a JSON string.
+
+        Args:
+            intrinsics (Intrinsics): Intrinsics to serialize.
+            indent (int, optional): Indentation for pretty printing (-1 for compact).
+        Returns:
+            str: JSON string.
+    )doc");
     
     m.def("intrinsics_from_json_str", [&unwrap_result](const std::string& json) {
         return unwrap_result(alice_lri::intrinsicsFromJsonStr(alice_lri::AliceString(json.c_str())));
-    }, py::arg("json"), "Create intrinsics from JSON string");
+    }, py::arg("json"),
+       R"doc(
+        Create intrinsics from a JSON string.
+
+        Args:
+            json (str): JSON string.
+        Returns:
+            Intrinsics: Parsed intrinsics.
+    )doc");
 
     m.def("intrinsics_to_json_file", [](const alice_lri::Intrinsics& intrinsics, const std::string& output_path, int32_t indent = -1) {
         const auto status = alice_lri::intrinsicsToJsonFile(intrinsics, output_path.c_str(), indent);
         if (!status) {
             throw std::runtime_error(std::string(status.message.c_str()));
         }
-    }, py::arg("intrinsics"), py::arg("output_path"), py::arg("indent") = -1, "Write intrinsics to JSON file");
+    }, py::arg("intrinsics"), py::arg("output_path"), py::arg("indent") = -1,
+       R"doc(
+        Write intrinsics to a JSON file.
+
+        Args:
+            intrinsics (Intrinsics): Intrinsics to write.
+            output_path (str): Output file path.
+            indent (int, optional): Indentation for pretty printing (-1 for compact).
+        Raises:
+            RuntimeError: If writing fails.
+    )doc");
 
     m.def("intrinsics_from_json_file", [&unwrap_result](const std::string& path) {
         return unwrap_result(alice_lri::intrinsicsFromJsonFile(path.c_str()));
-    }, py::arg("path"), "Load intrinsics from JSON file");
+    }, py::arg("path"),
+       R"doc(
+        Load intrinsics from a JSON file.
+
+        Args:
+            path (str): Path to JSON file.
+        Returns:
+            Intrinsics: Parsed intrinsics.
+    )doc");
 
     m.def("error_message", [](alice_lri::ErrorCode code) {
         auto result = alice_lri::errorMessage(code);
         return std::string(result.c_str());
-    }, "Get error message for error code");
+    }, R"doc(
+        Get a human-readable error message for an error code.
+
+        Args:
+            code (ErrorCode): Error code.
+        Returns:
+            str: Error message.
+    )doc");
 }
