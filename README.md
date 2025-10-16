@@ -38,7 +38,7 @@ reconstructed_x, reconstructed_y, reconstructed_z = alice_lri.unproject_to_point
 ### C++
 
 ```cpp
-#include <alice_lri/alice_lri.hpp>
+#include <alice_lri/Core.hpp>
 
 int main() {
     // Create point cloud
@@ -61,40 +61,63 @@ int main() {
 
 ## Installation
 
-### Python Package
-
+### Python
+You only need Python >= 3.8 and pip:
 ```bash
 pip install alice-lri
 ```
 
-### C++ Library
+### C++
+Pre-built C++ binaries are not available. To use the C++ library, see the "Installation from Source" section below.
 
-#### Using Conan
-```bash
-conan install alice_lri/0.1.0@
-```
+## Installation from Source
 
-#### Using vcpkg
-```bash
-vcpkg install alice-lri
-```
+### Build Dependencies
+- **C++20** compatible compiler with **CMake** >= 3.20
+- **Python** >= 3.8 and **pip** (for Python bindings)
+- **Conan** >= 2.0 (can be installed with `pip install conan`)
+- Other dependencies are automatically managed by Conan and pip.
 
-#### Building from source
+### Python
+You can install the Python package from source:
 ```bash
 git clone https://github.com/alice-lri/alice-lri.git
-cd alice-lri
-mkdir build && cd build
-cmake .. -DCMAKE_BUILD_TYPE=Release
-make install
+cd alice-lri/python
+pip install .
 ```
 
-## Dependencies
+### C++
 
-- **C++20** compatible compiler
-- **Eigen3** >= 3.4.0
-- **nlohmann/json** >= 3.11.3
-- **Python** >= 3.7 (for Python bindings)
-- **pybind11** (for Python bindings)
+
+#### Building and installing the C++ library
+```bash
+git clone https://github.com/alice-lri/alice-lri.git
+cd alice-lri/lib
+conan install . -s compiler.cppstd=20 -s build_type=Release -of build/ --build=missing
+cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release
+sudo make install
+```
+By default, this will install the library and headers to standard system locations (e.g., `/usr/local/lib`, `/usr/local/include` on Linux).
+
+#### Using ALICE-LRI in your C++ project
+
+##### With CMake
+
+You can link ALICE-LRI in your CMake project as follows:
+```cmake
+# ...
+find_package(alice_lri REQUIRED)
+# ...
+target_link_libraries(YOUR_TARGET alice_lri::alice_lri)
+```
+
+##### With g++ (or similar compilers)
+
+If you are compiling manually, link with `-lalice_lri`:
+```bash
+g++ your_source.cpp -lalice_lri -o your_program
+```
 
 ## License
 
@@ -109,10 +132,5 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 If you use this library in your research, please cite:
 
 ```bibtex
-@software{alice_lri_2024,
-  title={AccurateRI: High-Performance LiDAR Range Image Processing},
-  author={Samuel Soutullo},
-  year={2024},
-  url={https://github.com/alice-lri/alice-lri}
-}
+TODO
 ```
