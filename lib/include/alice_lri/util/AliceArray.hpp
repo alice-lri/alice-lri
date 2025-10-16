@@ -1,6 +1,7 @@
 #pragma once
 #include <cstdint>
 #include <cstdlib>
+#include <initializer_list>
 
 namespace alice_lri {
     template<class T>
@@ -17,9 +18,8 @@ namespace alice_lri {
             }
             
             T* new_data = static_cast<T*>(malloc(new_capacity * sizeof(T)));
-            if (!new_data) return; // Handle allocation failure gracefully
-            
-            // Move/copy existing elements manually
+            if (!new_data) return;
+
             for (uint64_t i = 0; i < size_; ++i) {
                 new (new_data + i) T(static_cast<T&&>(data_[i])); // Manual move
                 data_[i].~T();
@@ -31,15 +31,12 @@ namespace alice_lri {
         }
         
     public:
-        // Default constructor
         AliceArray() noexcept = default;
         
-        // Size constructor
         explicit AliceArray(uint64_t n) noexcept {
             resize(n);
         }
         
-        // Size + value constructor
         AliceArray(uint64_t n, const T& initialValue) noexcept {
             resize(n);
             for (uint64_t i = 0; i < size_; ++i) {
@@ -47,7 +44,6 @@ namespace alice_lri {
             }
         }
         
-        // Data constructor
         AliceArray(const T* data, uint64_t n) noexcept {
             if (data && n > 0) {
                 reserve(n);
@@ -57,7 +53,6 @@ namespace alice_lri {
             }
         }
         
-        // Copy constructor
         AliceArray(const AliceArray& other) noexcept {
             if (other.size_ > 0) {
                 reserve(other.size_);
@@ -66,8 +61,15 @@ namespace alice_lri {
                 }
             }
         }
+
+        template<typename U>
+        AliceArray(std::initializer_list<U> init) noexcept {
+            reserve(init.size());
+            for (const auto& v : init) {
+                push_back(static_cast<T>(v));
+            }
+        }
         
-        // Copy assignment
         AliceArray& operator=(const AliceArray& other) noexcept {
             if (this != &other) {
                 clear();
@@ -81,15 +83,13 @@ namespace alice_lri {
             return *this;
         }
         
-        // Move constructor
-        AliceArray(AliceArray&& other) noexcept 
+        AliceArray(AliceArray&& other) noexcept
             : data_(other.data_), size_(other.size_), capacity_(other.capacity_) {
             other.data_ = nullptr;
             other.size_ = 0;
             other.capacity_ = 0;
         }
         
-        // Move assignment
         AliceArray& operator=(AliceArray&& other) noexcept {
             if (this != &other) {
                 clear();
@@ -106,13 +106,11 @@ namespace alice_lri {
             return *this;
         }
         
-        // Destructor
         ~AliceArray() noexcept {
             clear();
             free(data_);
         }
         
-        // Size and capacity
         [[nodiscard]] uint64_t size() const noexcept {
             return size_;
         }
@@ -125,7 +123,6 @@ namespace alice_lri {
             return capacity_;
         }
         
-        // Data access
         T* data() noexcept {
             return data_;
         }
@@ -142,8 +139,7 @@ namespace alice_lri {
             return data_[i];
         }
         
-        // Iterators (just pointers)
-        T* begin() noexcept { 
+        T* begin() noexcept {
             return data_; 
         }
         
