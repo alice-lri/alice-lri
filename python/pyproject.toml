@@ -38,12 +38,12 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: C++",
     "License :: OSI Approved :: MIT License",
-    "Operating System :: OS Independent",
+    "Operating System :: OS Independent", # TODO update this if needed
 ]
 
 [project.urls]
-Homepage = "https://github.com/alice-lri/alice-lri"
-Documentation = "https://github.com/alice-lri/alice-lri#readme"
+Homepage = "https://alice-lri.github.io/"
+Documentation = "https://alice-lri.github.io/alice-lri/"
 Repository = "https://github.com/alice-lri/alice-lri.git"
 Issues = "https://github.com/alice-lri/alice-lri/issues"
 
