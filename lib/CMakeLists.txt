@@ -1,5 +1,142 @@
-add_library(accurate_ri SHARED src/accurate_ri.cpp)
-target_include_directories(accurate_ri PUBLIC include)
+cmake_minimum_required(VERSION 3.20)
+project(libalice_lri VERSION 0.1.0 LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 20)
 
-install(TARGETS accurate_ri DESTINATION lib)
-install(DIRECTORY include/ DESTINATION include)
+# Build Options
+set(LOG_LEVEL "WARN" CACHE STRING "Set log level (DEBUG, INFO, WARN, ERROR, NONE)")
+if (LOG_LEVEL STREQUAL "DEBUG")
+    add_definitions(-DLOG_LEVEL=1)
+elseif (LOG_LEVEL STREQUAL "INFO")
+    add_definitions(-DLOG_LEVEL=2)
+elseif (LOG_LEVEL STREQUAL "WARN")
+    add_definitions(-DLOG_LEVEL=3)
+elseif (LOG_LEVEL STREQUAL "ERROR")
+    add_definitions(-DLOG_LEVEL=4)
+elseif (LOG_LEVEL STREQUAL "NONE")
+    add_definitions(-DLOG_LEVEL=5)
+else ()
+    message(FATAL_ERROR "Invalid LOG_LEVEL: Choose DEBUG, INFO, WARN, ERROR, or NONE")
+endif ()
+
+option(FLAG_USE_HOUGH_CONTINUITY "Set BuildOption USE_HOUGH_CONTINUITY" ON)
+option(FLAG_USE_SCANLINE_CONFLICT_SOLVER "Set BuildOption USE_SCANLINE_CONFLICT_SOLVER" ON)
+option(FLAG_USE_VERTICAL_HEURISTICS "Set BuildOption USE_VERTICAL_HEURISTICS" ON)
+option(FLAG_USE_HORIZONTAL_HEURISTICS "Set BuildOption USE_HORIZONTAL_HEURISTICS" ON)
+configure_file("src/BuildOptions.h.in" "src/BuildOptions.h")
+
+option(ENABLE_PROFILING "Enable measuring execution time of functions" OFF)
+if (ENABLE_PROFILING)
+    add_definitions(-DENABLE_PROFILING)
+endif ()
+
+option(ENABLE_TRACE_FILE "Enable writing trace file for debugging" OFF)
+if (ENABLE_TRACE_FILE)
+    add_definitions(-DENABLE_TRACE_FILE)
+endif ()
+
+# Dependencies
+include(${CMAKE_CURRENT_BINARY_DIR}/conan_toolchain.cmake)
+
+find_package(Eigen3 REQUIRED)
+include_directories(Eigen3_INCLUDE_DIRS)
+message(STATUS "EIGEN3_INCLUDE_DIR: ${Eigen3_INCLUDE_DIRS}")
+
+find_package(nlohmann_json REQUIRED)
+set(JSON_BuildTests OFF CACHE INTERNAL "")
+
+find_package(Boost REQUIRED)
+
+set(_alice_lri_private_include_dirs
+        src
+        "${CMAKE_CURRENT_BINARY_DIR}/src"
+        ${nlohmann_json_INCLUDE_DIRS}
+        ${Eigen3_INCLUDE_DIRS}
+)
+
+set(_alice_lri_private_libraries
+        nlohmann_json::nlohmann_json
+        boost::boost
+)
+
+if (ENABLE_PYTHON_DEBUG)
+    find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+    message(STATUS "Python3 include dir: ${Python3_INCLUDE_DIRS}")
+    message(STATUS "Python3 library: ${Python3_LIBRARIES}")
+
+    list(APPEND _alice_lri_private_include_dirs ${Python3_INCLUDE_DIRS})
+    list(APPEND _alice_lri_private_libraries ${Python3_LIBRARIES})
+endif ()
+
+# Target library definition
+include(${CMAKE_CURRENT_SOURCE_DIR}/sources.cmake)
+add_library(alice_lri SHARED ${ALICE_LRI_SOURCES})
+
+target_include_directories(alice_lri
+        PUBLIC
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:include>
+        PRIVATE
+        ${_alice_lri_private_include_dirs}
+)
+
+target_link_libraries(alice_lri PRIVATE ${_alice_lri_private_libraries})
+target_compile_definitions(alice_lri PRIVATE ALICE_LRI_EXPORTS)
+
+set_target_properties(alice_lri PROPERTIES
+        VERSION ${PROJECT_VERSION}
+        SOVERSION ${PROJECT_VERSION_MAJOR}
+)
+
+set_target_properties(alice_lri PROPERTIES
+        CXX_VISIBILITY_PRESET hidden
+        VISIBILITY_INLINES_HIDDEN ON
+)
+if (WIN32)
+    set_target_properties(alice_lri PROPERTIES
+            WINDOWS_EXPORT_ALL_SYMBOLS OFF
+    )
+endif ()
+
+# Installation
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+
+install(TARGETS alice_lri
+        EXPORT alice_lriTargets
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+
+install(EXPORT alice_lriTargets
+        FILE alice_lriTargets.cmake
+        NAMESPACE alice_lri::
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/alice_lri
+)
+
+export(EXPORT alice_lriTargets
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/alice_lriTargets.cmake"
+        NAMESPACE alice_lri::
+)
+
+write_basic_package_version_file(
+        "${CMAKE_CURRENT_BINARY_DIR}/alice_lriConfigVersion.cmake"
+        VERSION ${PROJECT_VERSION}
+        COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/cmake/alice_lriConfig.cmake.in"
+        "${CMAKE_CURRENT_BINARY_DIR}/alice_lriConfig.cmake"
+        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/alice_lri
+)
+
+install(FILES
+        "${CMAKE_CURRENT_BINARY_DIR}/alice_lriConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/alice_lriConfigVersion.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/alice_lri
+)

@@ -1,0 +1,36 @@
+#include "PointUtils.h"
+#include <algorithm>
+#include <cmath>
+
+constexpr double MIN_COORDS_EPS = 1e-6 / 2;
+
+namespace alice_lri {
+    double PointUtils::computeCoordsEps(const PointArray &points) {
+        Eigen::ArrayXd sortedX = points.getX();
+        Eigen::ArrayXd sortedY = points.getY();
+        Eigen::ArrayXd sortedZ = points.getZ();
+
+        std::ranges::sort(sortedX);
+        std::ranges::sort(sortedY);
+        std::ranges::sort(sortedZ);
+
+        double minDiff = std::numeric_limits<double>::infinity();
+
+        for (int32_t i = 1; i < sortedX.size(); i++) {
+            const double diffX = sortedX[i] - sortedX[i - 1];
+            minDiff = diffX > 0 ? std::min(minDiff, diffX) : minDiff;
+
+            const double diffY = sortedY[i] - sortedY[i - 1];
+            minDiff = diffY > 0 ? std::min(minDiff, diffY) : minDiff;
+
+            const double diffZ = sortedZ[i] - sortedZ[i - 1];
+            minDiff = diffZ > 0 ? std::min(minDiff, diffZ) : minDiff;
+        }
+
+        if (minDiff == std::numeric_limits<double>::infinity()) {
+            return MIN_COORDS_EPS;
+        }
+
+        return std::max(minDiff / 2, MIN_COORDS_EPS);
+    }
+}

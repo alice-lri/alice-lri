@@ -1,0 +1,79 @@
+[build-system]
+requires = ["scikit-build-core", "pybind11", "conan>=2.0"]
+build-backend = "scikit_build_core.build"
+
+[project]
+name = "alice-lri"
+version = "0.1.0"
+description = "LiDAR Range Image processing and intrinsic parameter estimation library"
+readme = "README.md"
+authors = [
+    { name = "Samuel Soutullo", email = "s.soutullo@usc.es" }
+]
+license = { text = "MIT" }
+requires-python = ">=3.8"
+keywords = ["lidar", "range-image", "point-cloud", "computer-vision", "robotics"]
+dependencies = [
+    "numpy>=1.20.0",
+]
+optional-dependencies.dev = [
+    "pytest>=6.0",
+    "mypy>=0.900",
+]
+optional-dependencies.test = [
+    "pytest>=6.0",
+    "numpy>=1.20.0",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Developers",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: C++",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX :: Linux",
+]
+
+[project.urls]
+Homepage = "https://alice-lri.github.io/"
+Documentation = "https://alice-lri.github.io/alice-lri/"
+Repository = "https://github.com/alice-lri/alice-lri.git"
+Issues = "https://github.com/alice-lri/alice-lri/issues"
+
+[tool.scikit-build]
+cmake.version = ">=3.20"
+build-dir = "build"
+wheel.packages = ["alice_lri"]
+wheel.py-api = "py3"
+install.components = ["python"]
+
+
+[tool.scikit-build.cmake.define]
+CMAKE_BUILD_TYPE="Release"
+LOG_LEVEL = "WARN"
+ENABLE_TRACE_FILE="OFF"
+ENABLE_PROFILING="OFF"
+PYBUILD_AUTO_CONAN="ON"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+]
+markers = [
+    "installation: marks tests as installation tests",
+    "integration: marks tests as integration tests",
+]

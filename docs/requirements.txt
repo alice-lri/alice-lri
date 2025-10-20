@@ -1,0 +1,11 @@
+sphinx
+sphinx-autodoc-typehints
+sphinxcontrib-napoleon
+breathe
+furo
+exhale
+sphinx-autobuild
+myst-parser
+sphinx-copybutton
+sphinx-design
+pybind11-stubgen

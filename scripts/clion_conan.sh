@@ -1,0 +1,11 @@
+#!/bin/bash
+
+conan install ../lib -s compiler.cppstd=20 -s build_type=Debug -of ../cmake-build-debug/lib --build=missing
+conan install ../lib -s compiler.cppstd=20 -s build_type=Release -of ../cmake-build-release/lib --build=missing
+conan install ../lib -s compiler.cppstd=20 -s build_type=Release -of ../cmake-build-release-debug/lib --build=missing
+conan install ../lib -s compiler.cppstd=20 -s build_type=Release -of ../cmake-build-release-install/lib --build=missing
+
+conan install ../tests -s compiler.cppstd=20 -s build_type=Debug -of ../cmake-build-debug/tests --build=missing
+conan install ../tests -s compiler.cppstd=20 -s build_type=Release -of ../cmake-build-release/tests --build=missing
+conan install ../tests -s compiler.cppstd=20 -s build_type=Release -of ../cmake-build-release-debug/tests --build=missing
+conan install ../tests -s compiler.cppstd=20 -s build_type=Release -of ../cmake-build-release-install/tests --build=missing

@@ -1,0 +1,17 @@
+#pragma once
+#include <cstdint>
+#include <numbers>
+
+namespace alice_lri::Constant {
+    constexpr double TWO_PI = 2.0 * std::numbers::pi;
+
+    constexpr uint64_t VERTICAL_MAX_ITERATIONS = 10000;
+    constexpr double MAX_OFFSET = 0.5;
+    constexpr double OFFSET_STEP = 1e-3;
+    constexpr double ANGLE_STEP = 1e-4;
+    constexpr uint64_t VERTICAL_MAX_FIT_ATTEMPTS = 10;
+
+    constexpr int32_t MAX_RESOLUTION = 10000;
+    constexpr double INV_RANGES_SEGMENT_THRESHOLD = 1e-2;
+    constexpr int32_t HORIZONTAL_MIN_POINTS_PER_SCANLINE = 16;
+}
