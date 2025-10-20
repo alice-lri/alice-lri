@@ -1,8 +1,10 @@
 
 # ALICE-LRI
-<!-- TODO add CI badges -->
-<!-- TODO update this readme -->
 
+[![Release](https://github.com/alice-lri/alice-lri/actions/workflows/release.yml/badge.svg)](https://github.com/alice-lri/alice-lri/actions/workflows/release.yml)
+[![Documentation](https://img.shields.io/badge/docs-online-blue.svg)](https://alice-lri.github.io/alice-lri/)
+[![PyPI](https://img.shields.io/pypi/v/alice-lri.svg)](https://pypi.org/project/alice-lri/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ALICE-LRI is a C++ and Python library for lossless range image generation and reconstruction from spinning 3D LiDAR point clouds. It achieves losslessness by automatically estimating all intrinsic sensor parameters from data, so you do not need calibration files or manufacturer metadata. This enables accurate, sensor-agnostic projection to range images and full recovery of 3D LiDAR data.
 
@@ -158,6 +160,19 @@ Valid options are: `DEBUG`, `INFO`, `WARN`, `ERROR`, `NONE`.
 For Python, you can control the log level by editing the `pyproject.toml` file in the `python/` directory before building or installing from source. The default is also `WARN`.
 
 **Recommended:** Keep the default `WARN` level unless you need more verbose output for debugging or development.
+
+## Documentation
+
+Full documentation is available online at:
+
+**[https://alice-lri.github.io/alice-lri/](https://alice-lri.github.io/alice-lri/)**
+
+The documentation includes:
+- Installation guide
+- Getting started tutorials
+- Python API reference
+- C++ API reference
+- Advanced usage examples
 
 ## License
 

@@ -30,11 +30,16 @@ This folder contains the documentation sources for the ALICE-LRI project. Docume
 - `Doxyfile`: Doxygen configuration for C++ API docs
 - `conf.py`: Sphinx configuration
 - `index.rst`: Main documentation index
+- `installation.rst`: Installation guide
+- `getting_started.rst`: Getting started guide
 - `python_api.rst`: Python API reference
+- `python_api_advanced.rst`: Advanced Python API reference
 - `cpp_api.rst`: C++ API reference
+- `cpp_api_advanced.rst`: Advanced C++ API reference
 - `requirements.txt`: Python doc dependencies
 
+## Online Documentation
 
-TODO: Make doc CI trigger on release instead of every push to master
-TODO: Make GitHub pages work and link to it from here
-TODO: Add documentation badge and/or link
+The documentation is automatically built and deployed to GitHub Pages when a release is published:
+
+**[https://alice-lri.github.io/alice-lri/](https://alice-lri.github.io/alice-lri/)**
