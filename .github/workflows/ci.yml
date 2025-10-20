@@ -161,8 +161,13 @@ jobs:
           else
             GENERATOR=""
           fi
-          # Set correct macOS sysroot if on macOS (use env var set earlier)
+          # Set correct macOS sysroot if on macOS
           if [[ "$RUNNER_OS" == "macOS" ]]; then
+            # Ensure SDKROOT is set (from env var saved earlier)
+            if [[ -z "$SDKROOT" ]]; then
+              export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            fi
+            echo "Using macOS SDK: $SDKROOT"
             SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
           else
             SYSROOT_ARG=""
@@ -262,6 +267,11 @@ jobs:
         shell: bash
         run: |
           cd python
+          # Ensure SDKROOT is available for pip build on macOS
+          if [[ "$RUNNER_OS" == "macOS" ]] && [[ -z "$SDKROOT" ]]; then
+            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            echo "Using macOS SDK for Python build: $SDKROOT"
+          fi
           pip install -e .[test] -v
 
       - name: Run Python tests
@@ -397,8 +407,13 @@ jobs:
           else
             GENERATOR=""
           fi
-          # Set correct macOS sysroot if on macOS (use env var set earlier)
+          # Set correct macOS sysroot if on macOS
           if [[ "$RUNNER_OS" == "macOS" ]]; then
+            # Ensure SDKROOT is set (from env var saved earlier)
+            if [[ -z "$SDKROOT" ]]; then
+              export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            fi
+            echo "Using macOS SDK: $SDKROOT"
             SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
           else
             SYSROOT_ARG=""
@@ -410,6 +425,7 @@ jobs:
                 -DINCLUDE_TESTS=OFF \
                 -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install" \
                 $GENERATOR \
+                $SYSROOT_ARG \
                 -S . -B build
           
           cmake --build build --config Release --parallel
@@ -528,6 +544,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set macOS SDK path
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+          echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
+          echo "Using macOS SDK: $SDKROOT"
+
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.0
         env:
@@ -537,6 +561,7 @@ jobs:
           CIBW_ARCHS_LINUX: "x86_64"
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_BEFORE_BUILD: "pip install conan && conan profile detect"
+          CIBW_ENVIRONMENT_MACOS: "SDKROOT=${{ env.SDKROOT }}"
         with:
           package-dir: './python'
 
