@@ -133,6 +133,11 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: |
+          # Set macOS SDK path before Conan install
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
+          fi
           # Install dependencies with caching
           conan install lib -s compiler.cppstd=20 -s build_type=${{ matrix.build_type }} \
             --output-folder=build/lib --build=missing
@@ -152,9 +157,8 @@ jobs:
           else
             GENERATOR=""
           fi
-          # Set correct macOS sysroot if on macOS
+          # Set correct macOS sysroot if on macOS (use env var set earlier)
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
           else
             SYSROOT_ARG=""
@@ -225,6 +229,11 @@ jobs:
       - name: Install Conan dependencies (like build_and_install.sh)
         shell: bash
         run: |
+          # Set macOS SDK path before Conan install
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
+          fi
           cd python
           rm -rf build
           mkdir -p build/lib
@@ -234,9 +243,8 @@ jobs:
       - name: Configure for Build
         shell: bash
         run: |
-          # Set correct macOS sysroot if on macOS
+          # macOS sysroot already set in env from previous step
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
           else
             SYSROOT_ARG=""
@@ -356,6 +364,11 @@ jobs:
       - name: Install C++ library dependencies
         shell: bash
         run: |
+          # Set macOS SDK path before Conan install
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
+          fi
           conan install lib -s compiler.cppstd=20 -s build_type=Release \
             --output-folder=build/lib --build=missing
 
@@ -372,9 +385,8 @@ jobs:
           else
             GENERATOR=""
           fi
-          # Set correct macOS sysroot if on macOS
+          # Set correct macOS sysroot if on macOS (use env var set earlier)
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
           else
             SYSROOT_ARG=""
