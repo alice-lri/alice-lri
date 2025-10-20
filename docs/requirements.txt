@@ -8,3 +8,4 @@ sphinx-autobuild
 myst-parser
 sphinx-copybutton
 sphinx-design
+pybind11-stubgen

@@ -4,15 +4,17 @@ This folder contains the documentation sources for the ALICE-LRI project. Docume
 
 ## Documentation Generation Steps
 
-1. **Install Python package and generate stubs:**
-   ```bash
-   ../python/install_dev_and_stubs.sh
-   ```
-2. **Install dependencies:**
+1. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    sudo apt-get install doxygen
    ```
+
+2. **Install Python package and generate stubs:**
+   ```bash
+   ../python/install_dev_and_stubs.sh
+   ```
+
 3. **Build Doxygen XML:**
    ```bash
    doxygen Doxyfile

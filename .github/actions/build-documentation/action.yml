@@ -13,20 +13,20 @@ runs:
       shell: bash
       run: |
         python -m pip install --upgrade pip
-        pip install 'conan>=2.0'
+        pip install 'conan>=2.0' pybind11-stubgen
         conan profile detect --force
+        
+    - name: Install documentation dependencies
+      shell: bash
+      run: |
+        pip install -r docs/requirements.txt
+        sudo apt-get update && sudo apt-get install -y doxygen
 
     - name: Install Python package and generate stubs
       shell: bash
       run: |
         cd python
         ./install_dev_and_stubs.sh
-
-    - name: Install documentation dependencies
-      shell: bash
-      run: |
-        pip install -r docs/requirements.txt
-        sudo apt-get update && sudo apt-get install -y doxygen
 
     - name: Build Doxygen XML
       shell: bash
