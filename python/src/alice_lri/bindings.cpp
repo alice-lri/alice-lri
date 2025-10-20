@@ -15,13 +15,6 @@ PYBIND11_MODULE(_alice_lri, m) {
     // Error handling
     py::enum_<alice_lri::ErrorCode>(m, "ErrorCode", R"doc(
         Error codes for Alice LRI operations.
-        
-        Values:
-            NONE (int): No error.
-            MISMATCHED_SIZES (int): Input arrays have mismatched sizes.
-            EMPTY_POINT_CLOUD (int): Point cloud is empty.
-            RANGES_XY_ZERO (int): At least one point has a range of zero in the XY plane.
-            INTERNAL_ERROR (int): Internal error occurred.
     )doc")
         .value("NONE", alice_lri::ErrorCode::NONE, "No error.")
         .value("MISMATCHED_SIZES", alice_lri::ErrorCode::MISMATCHED_SIZES, "Input arrays have mismatched sizes.")
@@ -41,11 +34,6 @@ PYBIND11_MODULE(_alice_lri, m) {
     // Enums
     py::enum_<alice_lri::EndReason>(m, "EndReason", R"doc(
         Reason for ending the iterative vertical fitting process.
-        
-        Values:
-            ALL_ASSIGNED (int): All points assigned. This is the normal termination condition.
-            MAX_ITERATIONS (int): Maximum number of iterations reached.
-            NO_MORE_PEAKS (int): No more peaks found in the Hough accumulator.
     )doc")
         .value("ALL_ASSIGNED", alice_lri::EndReason::ALL_ASSIGNED, "All points assigned. This is the normal termination condition.")
         .value("MAX_ITERATIONS", alice_lri::EndReason::MAX_ITERATIONS, "Maximum number of iterations reached.")
@@ -55,7 +43,8 @@ PYBIND11_MODULE(_alice_lri, m) {
     // Core structs
     py::class_<alice_lri::Scanline>(m, "Scanline", R"doc(
         Represents a single scanline with intrinsic parameters.
-        Members:
+
+        Attributes:
             vertical_offset (float): Vertical spatial offset of the scanline.
             vertical_angle (float): Vertical angle of the scanline.
             horizontal_offset (float): Horizontal spatial offset of the scanline.
@@ -80,8 +69,10 @@ PYBIND11_MODULE(_alice_lri, m) {
 
     py::class_<alice_lri::Intrinsics>(m, "Intrinsics", R"doc(
         Contains intrinsic parameters for a sensor, including all scanlines.
+
         Args:
             scanline_count (int): Number of scanlines.
+
         Attributes:
             scanlines (list of Scanline): Array of scanlines describing the sensor geometry.
     )doc")
@@ -97,13 +88,10 @@ PYBIND11_MODULE(_alice_lri, m) {
 
     py::class_<alice_lri::Interval>(m, "Interval", R"doc(
         Represents a numeric interval [lower, upper].
-        Members:
+
+        Attributes:
             lower (float): Lower bound of the interval.
             upper (float): Upper bound of the interval.
-        Methods:
-            diff() -> float: Get the width of the interval (upper - lower).
-            any_contained(other: Interval) -> bool: Check if any part of another interval is contained in this interval.
-            clamp_both(min_value: float, max_value: float): Clamp both bounds to [min_value, max_value].
     )doc")
         .def(py::init<>(), "Default constructor.")
         .def_readwrite("lower", &alice_lri::Interval::lower, "Lower bound.")
@@ -119,7 +107,8 @@ PYBIND11_MODULE(_alice_lri, m) {
 
     py::class_<alice_lri::ValueConfInterval>(m, "ValueConfInterval", R"doc(
         Value with associated confidence interval.
-        Members:
+
+        Attributes:
             value (float): The value.
             ci (Interval): Confidence interval for the value.
     )doc")
@@ -134,7 +123,8 @@ PYBIND11_MODULE(_alice_lri, m) {
 
     py::class_<alice_lri::ScanlineAngleBounds>(m, "ScanlineAngleBounds", R"doc(
         Angle bounds for a scanline.
-        Members:
+
+        Attributes:
             lower_line (Interval): Lower angle interval.
             upper_line (Interval): Upper angle interval.
     )doc")
@@ -151,7 +141,8 @@ PYBIND11_MODULE(_alice_lri, m) {
 
     py::class_<alice_lri::ScanlineDetailed>(m, "ScanlineDetailed", R"doc(
         Detailed scanline information with uncertainty and voting statistics.
-        Members:
+
+        Attributes:
             vertical_offset (ValueConfInterval): Vertical spatial offset with confidence interval.
             vertical_angle (ValueConfInterval): Vertical angle with confidence interval.
             horizontal_offset (float): Horizontal spatial offset.
@@ -197,12 +188,14 @@ PYBIND11_MODULE(_alice_lri, m) {
 
     py::class_<alice_lri::IntrinsicsDetailed>(m, "IntrinsicsDetailed", R"doc(
         Detailed intrinsic parameters, including scanline details and statistics.
+
         Args:
             scanline_count (int): Number of scanlines.
             vertical_iterations (int): Number of vertical iterations performed.
             unassigned_points (int): Number of unassigned points.
             points_count (int): Total number of points.
             end_reason (EndReason): Reason for ending the process.
+
         Attributes:
             scanlines (list of ScanlineDetailed): List of detailed scanlines.
             vertical_iterations (int): Number of vertical iterations performed.
@@ -233,21 +226,19 @@ PYBIND11_MODULE(_alice_lri, m) {
     // RangeImage class
     py::class_<alice_lri::RangeImage>(m, "RangeImage", R"doc(
         Represents a 2D range image with pixel data.
+
         Args:
             width (int): Image width.
             height (int): Image height.
             initial_value (float, optional): Initial value for all pixels (if provided).
+
         Attributes:
             width (int): Image width.
             height (int): Image height.
+
         Note:
             The (width, height) constructor only reserves space for pixels but does not initialize them.
             The (width, height, initial_value) constructor initializes all pixels to the given value.
-        Methods:
-            width() -> int: Get image width.
-            height() -> int: Get image height.
-            size() -> int: Get total number of pixels.
-            data() -> pointer: Get pointer to pixel data.
     )doc")
         .def(py::init<>(), "Default constructor (empty image).")
         .def(py::init<uint32_t, uint32_t>(), py::arg("width"), py::arg("height"), "Construct with width and height. Reserves space for pixels but does not initialize them.")
@@ -292,26 +283,6 @@ PYBIND11_MODULE(_alice_lri, m) {
             return oss.str();
         });
 
-    // Main API functions with vector inputs for convenience
-    m.def("estimate_intrinsics", [&unwrap_result](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
-        // Convert std::vector to AliceArray
-        alice_lri::PointCloud::Float cloud;
-        cloud.x = alice_lri::AliceArray<float>(x.data(), x.size());
-        cloud.y = alice_lri::AliceArray<float>(y.data(), y.size());
-        cloud.z = alice_lri::AliceArray<float>(z.data(), z.size());
-        return unwrap_result(alice_lri::estimateIntrinsics(cloud));
-    }, py::arg("x"), py::arg("y"), py::arg("z"),
-       R"doc(
-        Estimate sensor intrinsics from float vectors.
-
-        Args:
-            x (list of float): X coordinates.
-            y (list of float): Y coordinates.
-            z (list of float): Z coordinates.
-        Returns:
-            Intrinsics: Estimated sensor intrinsics.
-    )doc");
-
     m.def("estimate_intrinsics", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
         // Convert std::vector to AliceArray
         alice_lri::PointCloud::Double cloud;
@@ -321,7 +292,7 @@ PYBIND11_MODULE(_alice_lri, m) {
         return unwrap_result(alice_lri::estimateIntrinsics(cloud));
     }, py::arg("x"), py::arg("y"), py::arg("z"),
        R"doc(
-        Estimate sensor intrinsics from double vectors.
+        Estimate sensor intrinsics from point cloud coordinates given as float vectors.
 
         Args:
             x (list of float): X coordinates.
@@ -331,24 +302,6 @@ PYBIND11_MODULE(_alice_lri, m) {
             Intrinsics: Estimated sensor intrinsics.
     )doc");
 
-    m.def("estimate_intrinsics_detailed", [&unwrap_result](const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
-        // Convert std::vector to AliceArray
-        alice_lri::PointCloud::Float cloud;
-        cloud.x = alice_lri::AliceArray<float>(x.data(), x.size());
-        cloud.y = alice_lri::AliceArray<float>(y.data(), y.size());
-        cloud.z = alice_lri::AliceArray<float>(z.data(), z.size());
-        return unwrap_result(alice_lri::estimateIntrinsicsDetailed(cloud));
-    }, R"doc(
-        Estimate detailed sensor intrinsics from float vectors, including algorithm execution info.
-
-        Args:
-            x (list of float): X coordinates.
-            y (list of float): Y coordinates.
-            z (list of float): Z coordinates.
-        Returns:
-            IntrinsicsDetailed: Detailed estimated intrinsics and statistics.
-    )doc");
-
     m.def("estimate_intrinsics_detailed", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
         // Convert std::vector to AliceArray
         alice_lri::PointCloud::Double cloud;
@@ -356,8 +309,8 @@ PYBIND11_MODULE(_alice_lri, m) {
         cloud.y = alice_lri::AliceArray<double>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
         return unwrap_result(alice_lri::estimateIntrinsicsDetailed(cloud));
-    }, R"doc(
-        Estimate detailed sensor intrinsics from double vectors, including algorithm execution info.
+    }, py::arg("x"), py::arg("y"), py::arg("z"), R"doc(
+        Estimate detailed sensor intrinsics (including algorithm execution info) from point cloud coordinates given as float vectors.
 
         Args:
             x (list of float): X coordinates.
@@ -367,37 +320,21 @@ PYBIND11_MODULE(_alice_lri, m) {
             IntrinsicsDetailed: Detailed estimated intrinsics and statistics.
     )doc");
 
-    m.def("project_to_range_image", [&unwrap_result](const alice_lri::Intrinsics& intr, const std::vector<float>& x, const std::vector<float>& y, const std::vector<float>& z) {
-        // Convert std::vector to AliceArray
-        alice_lri::PointCloud::Float cloud;
-        cloud.x = alice_lri::AliceArray<float>(x.data(), x.size());
-        cloud.y = alice_lri::AliceArray<float>(y.data(), y.size());
-        cloud.z = alice_lri::AliceArray<float>(z.data(), z.size());
-        return unwrap_result(alice_lri::projectToRangeImage(intr, cloud));
-    }, R"doc(
-        Project a float point cloud to a range image using given intrinsics.
-
-        Args:
-            intr (Intrinsics): Sensor intrinsics.
-            x (list of float): X coordinates.
-            y (list of float): Y coordinates.
-            z (list of float): Z coordinates.
-        Returns:
-            RangeImage: Projected range image.
-    )doc");
-
-    m.def("project_to_range_image", [&unwrap_result](const alice_lri::Intrinsics& intr, const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
+    m.def("project_to_range_image", [&unwrap_result](
+        const alice_lri::Intrinsics& intrinsics, const std::vector<double>& x, const std::vector<double>& y,
+        const std::vector<double>& z
+    ) {
         // Convert std::vector to AliceArray
         alice_lri::PointCloud::Double cloud;
         cloud.x = alice_lri::AliceArray<double>(x.data(), x.size());
         cloud.y = alice_lri::AliceArray<double>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
-        return unwrap_result(alice_lri::projectToRangeImage(intr, cloud));
-    }, R"doc(
-        Project a double point cloud to a range image using given intrinsics.
+        return unwrap_result(alice_lri::projectToRangeImage(intrinsics, cloud));
+    }, py::arg("intrinsics"), py::arg("x"), py::arg("y"), py::arg("z"), R"doc(
+        Project a point cloud to a range image using given intrinsics.
 
         Args:
-            intr (Intrinsics): Sensor intrinsics.
+            intrinsics (Intrinsics): Sensor intrinsics (see estimate_intrinsics).
             x (list of float): X coordinates.
             y (list of float): Y coordinates.
             z (list of float): Z coordinates.
@@ -405,21 +342,21 @@ PYBIND11_MODULE(_alice_lri, m) {
             RangeImage: Projected range image.
     )doc");
 
-    m.def("unproject_to_point_cloud", [](const alice_lri::Intrinsics& intr, const alice_lri::RangeImage& ri) {
-        auto cloud = alice_lri::unProjectToPointCloud(intr, ri);
+    m.def("unproject_to_point_cloud", [](const alice_lri::Intrinsics& intrinsics, const alice_lri::RangeImage& ri) {
+        auto cloud = alice_lri::unProjectToPointCloud(intrinsics, ri);
         // Convert AliceArray to std::vector for Python convenience
         std::vector<double> x_vec(cloud.x.begin(), cloud.x.end());
         std::vector<double> y_vec(cloud.y.begin(), cloud.y.end());
         std::vector<double> z_vec(cloud.z.begin(), cloud.z.end());
         return py::make_tuple(x_vec, y_vec, z_vec);
-    }, R"doc(
+    }, py::arg("intrinsics"), py::arg("ri"), R"doc(
         Unproject a range image to a 3D point cloud using given intrinsics.
 
         Args:
-            intr (Intrinsics): Sensor intrinsics.
+            intrinsics (Intrinsics): Sensor intrinsics.
             ri (RangeImage): Input range image.
         Returns:
-            tuple: (x, y, z) coordinate lists (all float).
+            tuple: (x, y, z) coordinate lists.
     )doc");
 
     // JSON functions
@@ -481,7 +418,7 @@ PYBIND11_MODULE(_alice_lri, m) {
     m.def("error_message", [](alice_lri::ErrorCode code) {
         auto result = alice_lri::errorMessage(code);
         return std::string(result.c_str());
-    }, R"doc(
+    }, py::arg("code"), R"doc(
         Get a human-readable error message for an error code.
 
         Args:

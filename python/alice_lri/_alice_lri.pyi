@@ -9,11 +9,6 @@ class EndReason:
     """
     
             Reason for ending the iterative vertical fitting process.
-            
-            Values:
-                ALL_ASSIGNED (int): All points assigned. This is the normal termination condition.
-                MAX_ITERATIONS (int): Maximum number of iterations reached.
-                NO_MORE_PEAKS (int): No more peaks found in the Hough accumulator.
         
     
     Members:
@@ -58,13 +53,6 @@ class ErrorCode:
     """
     
             Error codes for Alice LRI operations.
-            
-            Values:
-                NONE (int): No error.
-                MISMATCHED_SIZES (int): Input arrays have mismatched sizes.
-                EMPTY_POINT_CLOUD (int): Point cloud is empty.
-                RANGES_XY_ZERO (int): At least one point has a range of zero in the XY plane.
-                INTERNAL_ERROR (int): Internal error occurred.
         
     
     Members:
@@ -115,13 +103,10 @@ class Interval:
     """
     
             Represents a numeric interval [lower, upper].
-            Members:
+    
+            Attributes:
                 lower (float): Lower bound of the interval.
                 upper (float): Upper bound of the interval.
-            Methods:
-                diff() -> float: Get the width of the interval (upper - lower).
-                any_contained(other: Interval) -> bool: Check if any part of another interval is contained in this interval.
-                clamp_both(min_value: float, max_value: float): Clamp both bounds to [min_value, max_value].
         
     """
     def __init__(self) -> None:
@@ -162,8 +147,10 @@ class Intrinsics:
     """
     
             Contains intrinsic parameters for a sensor, including all scanlines.
+    
             Args:
                 scanline_count (int): Number of scanlines.
+    
             Attributes:
                 scanlines (list of Scanline): Array of scanlines describing the sensor geometry.
         
@@ -183,12 +170,14 @@ class IntrinsicsDetailed:
     """
     
             Detailed intrinsic parameters, including scanline details and statistics.
+    
             Args:
                 scanline_count (int): Number of scanlines.
                 vertical_iterations (int): Number of vertical iterations performed.
                 unassigned_points (int): Number of unassigned points.
                 points_count (int): Total number of points.
                 end_reason (EndReason): Reason for ending the process.
+    
             Attributes:
                 scanlines (list of ScanlineDetailed): List of detailed scanlines.
                 vertical_iterations (int): Number of vertical iterations performed.
@@ -250,21 +239,19 @@ class RangeImage:
     """
     
             Represents a 2D range image with pixel data.
+    
             Args:
                 width (int): Image width.
                 height (int): Image height.
                 initial_value (float, optional): Initial value for all pixels (if provided).
+    
             Attributes:
                 width (int): Image width.
                 height (int): Image height.
+    
             Note:
                 The (width, height) constructor only reserves space for pixels but does not initialize them.
                 The (width, height, initial_value) constructor initializes all pixels to the given value.
-            Methods:
-                width() -> int: Get image width.
-                height() -> int: Get image height.
-                size() -> int: Get total number of pixels.
-                data() -> pointer: Get pointer to pixel data.
         
     """
     def __array__(self, **kwargs) -> numpy.ndarray[numpy.float64]:
@@ -308,7 +295,8 @@ class Scanline:
     """
     
             Represents a single scanline with intrinsic parameters.
-            Members:
+    
+            Attributes:
                 vertical_offset (float): Vertical spatial offset of the scanline.
                 vertical_angle (float): Vertical angle of the scanline.
                 horizontal_offset (float): Horizontal spatial offset of the scanline.
@@ -366,7 +354,8 @@ class ScanlineAngleBounds:
     """
     
             Angle bounds for a scanline.
-            Members:
+    
+            Attributes:
                 lower_line (Interval): Lower angle interval.
                 upper_line (Interval): Upper angle interval.
         
@@ -397,7 +386,8 @@ class ScanlineDetailed:
     """
     
             Detailed scanline information with uncertainty and voting statistics.
-            Members:
+    
+            Attributes:
                 vertical_offset (ValueConfInterval): Vertical spatial offset with confidence interval.
                 vertical_angle (ValueConfInterval): Vertical angle with confidence interval.
                 horizontal_offset (float): Horizontal spatial offset.
@@ -518,7 +508,8 @@ class ValueConfInterval:
     """
     
             Value with associated confidence interval.
-            Members:
+    
+            Attributes:
                 value (float): The value.
                 ci (Interval): Confidence interval for the value.
         
@@ -545,7 +536,7 @@ class ValueConfInterval:
     @value.setter
     def value(self, arg0: float) -> None:
         ...
-def error_message(arg0: ErrorCode) -> str:
+def error_message(code: ErrorCode) -> str:
     """
             Get a human-readable error message for an error code.
     
@@ -554,10 +545,9 @@ def error_message(arg0: ErrorCode) -> str:
             Returns:
                 str: Error message.
     """
-@typing.overload
 def estimate_intrinsics(x: list[float], y: list[float], z: list[float]) -> Intrinsics:
     """
-            Estimate sensor intrinsics from float vectors.
+            Estimate sensor intrinsics from point cloud coordinates given as float vectors.
     
             Args:
                 x (list of float): X coordinates.
@@ -566,34 +556,9 @@ def estimate_intrinsics(x: list[float], y: list[float], z: list[float]) -> Intri
             Returns:
                 Intrinsics: Estimated sensor intrinsics.
     """
-@typing.overload
-def estimate_intrinsics(x: list[float], y: list[float], z: list[float]) -> Intrinsics:
+def estimate_intrinsics_detailed(x: list[float], y: list[float], z: list[float]) -> IntrinsicsDetailed:
     """
-            Estimate sensor intrinsics from double vectors.
-    
-            Args:
-                x (list of float): X coordinates.
-                y (list of float): Y coordinates.
-                z (list of float): Z coordinates.
-            Returns:
-                Intrinsics: Estimated sensor intrinsics.
-    """
-@typing.overload
-def estimate_intrinsics_detailed(arg0: list[float], arg1: list[float], arg2: list[float]) -> IntrinsicsDetailed:
-    """
-            Estimate detailed sensor intrinsics from float vectors, including algorithm execution info.
-    
-            Args:
-                x (list of float): X coordinates.
-                y (list of float): Y coordinates.
-                z (list of float): Z coordinates.
-            Returns:
-                IntrinsicsDetailed: Detailed estimated intrinsics and statistics.
-    """
-@typing.overload
-def estimate_intrinsics_detailed(arg0: list[float], arg1: list[float], arg2: list[float]) -> IntrinsicsDetailed:
-    """
-            Estimate detailed sensor intrinsics from double vectors, including algorithm execution info.
+            Estimate detailed sensor intrinsics (including algorithm execution info) from point cloud coordinates given as float vectors.
     
             Args:
                 x (list of float): X coordinates.
@@ -641,41 +606,27 @@ def intrinsics_to_json_str(intrinsics: Intrinsics, indent: int = -1) -> str:
             Returns:
                 str: JSON string.
     """
-@typing.overload
-def project_to_range_image(arg0: Intrinsics, arg1: list[float], arg2: list[float], arg3: list[float]) -> RangeImage:
+def project_to_range_image(intrinsics: Intrinsics, x: list[float], y: list[float], z: list[float]) -> RangeImage:
     """
-            Project a float point cloud to a range image using given intrinsics.
+            Project a point cloud to a range image using given intrinsics.
     
             Args:
-                intr (Intrinsics): Sensor intrinsics.
+                intrinsics (Intrinsics): Sensor intrinsics (see estimate_intrinsics).
                 x (list of float): X coordinates.
                 y (list of float): Y coordinates.
                 z (list of float): Z coordinates.
             Returns:
                 RangeImage: Projected range image.
     """
-@typing.overload
-def project_to_range_image(arg0: Intrinsics, arg1: list[float], arg2: list[float], arg3: list[float]) -> RangeImage:
-    """
-            Project a double point cloud to a range image using given intrinsics.
-    
-            Args:
-                intr (Intrinsics): Sensor intrinsics.
-                x (list of float): X coordinates.
-                y (list of float): Y coordinates.
-                z (list of float): Z coordinates.
-            Returns:
-                RangeImage: Projected range image.
-    """
-def unproject_to_point_cloud(arg0: Intrinsics, arg1: RangeImage) -> tuple:
+def unproject_to_point_cloud(intrinsics: Intrinsics, ri: RangeImage) -> tuple:
     """
             Unproject a range image to a 3D point cloud using given intrinsics.
     
             Args:
-                intr (Intrinsics): Sensor intrinsics.
+                intrinsics (Intrinsics): Sensor intrinsics.
                 ri (RangeImage): Input range image.
             Returns:
-                tuple: (x, y, z) coordinate lists (all float).
+                tuple: (x, y, z) coordinate lists.
     """
 ALL_ASSIGNED: EndReason  # value = <EndReason.ALL_ASSIGNED: 0>
 EMPTY_POINT_CLOUD: ErrorCode  # value = <ErrorCode.EMPTY_POINT_CLOUD: 2>

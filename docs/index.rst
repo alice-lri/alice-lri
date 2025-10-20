@@ -1,9 +1,78 @@
-Welcome to ALICE-LRI documentation!
-===================================
+ALICE-LRI
+=========
+
+Lossless range image generation and reconstruction for spinning 3D LiDAR point clouds.
+
+ALICE-LRI automatically estimates LiDAR intrinsic parameters from data—no calibration files or vendor metadata needed. This enables accurate, sensor-agnostic projection to range images and full recovery of 3D LiDAR data.
+
+Features
+--------
+
+- Intrinsic parameter estimation from raw point clouds
+- Range image projection and point cloud reconstruction
+- Native C++ API with Python bindings
+- Cross-platform support (Linux, macOS, Windows)
+
+Get Started
+-----------
+
+New here? Start with installation, examples, logging, and integration tips:
+
+.. grid:: 1 2 2 2
+   :gutter: 2
+
+   .. grid-item-card:: Installation
+      :link: installation.html
+      :text-align: left
+
+      Install from PyPI or build from source. Link the C++ library with CMake or g++, configure logging.
+
+   .. grid-item-card:: Getting Started
+      :link: getting_started.html
+      :text-align: left
+
+      Quick intro, features, and your first Python and C++ examples.
+
+API Reference
+-------------
+
+When you're ready to dive deeper, browse the auto-generated references:
+
+.. grid:: 1 2 2 2
+   :gutter: 2
+
+   .. grid-item-card:: Python API
+      :link: python_api.html
+      :text-align: left
+
+      Modules, functions, and types available from the Python package.
+
+   .. grid-item-card:: C++ API
+      :link: cpp_api.html
+      :text-align: left
+
+      Classes, functions, and namespaces generated from headers and sources.
+
+Project Info
+------------
+
+- **License:** MIT — see the :file:`LICENSE` file in the repository.
+- **Contributing:** See :file:`CONTRIBUTING.md` for the code of conduct and submission process.
+
+Citation
+--------
+
+If you use this library in your research, please cite:
+
+.. code-block:: bibtex
+
+   TODO
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
-   :caption: Contents:
 
+   installation
+   getting_started
    python_api
    cpp_api

@@ -5,3 +5,6 @@ breathe
 furo
 exhale
 sphinx-autobuild
+myst-parser
+sphinx-copybutton
+sphinx-design

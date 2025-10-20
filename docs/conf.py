@@ -7,10 +7,16 @@ release = '0.1.0'
 # -- General configuration ---------------------------------------------------
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary',
     'sphinx.ext.napoleon',
     'sphinx.ext.viewcode',
     'sphinx.ext.todo',
+    'sphinx.ext.intersphinx',
+    'sphinx.ext.autosectionlabel',
     'breathe',
+    'myst_parser',
+    'sphinx_copybutton',
+    'sphinx_design',
 ]
 
 autodoc_typehints = 'description'
@@ -34,10 +40,34 @@ exhale_args = determine_exhale_args()
 html_theme = "furo"
 html_static_path = ['_static']
 
-# -- Paths -------------------------------------------------------------------
-import os
-import sys
-sys.path.insert(0, os.path.abspath('../python'))
+# Furo theme options: show repository link and improve navigation
+html_title = "ALICE-LRI Documentation"
+html_theme_options = {
+    "source_repository": "https://github.com/alice-lri/alice-lri",
+    "source_branch": "master",
+    "source_directory": "docs/",
+    "top_of_page_buttons": ["view", "edit", "github"],
+}
+
+# MyST (Markdown) configuration
+source_suffix = {
+    '.rst': 'restructuredtext',
+    '.md': 'markdown',
+}
+myst_enable_extensions = [
+    "colon_fence",
+    "deflist",
+    "attrs_block",
+]
+
+# Intersphinx for cross-project links (optional but handy)
+intersphinx_mapping = {
+    'python': ('https://docs.python.org/3', None),
+}
+
+# Autosectionlabel: prefix labels with document path to avoid collisions
+autosectionlabel_prefix_document = True
+autosummary_generate = True
 
 # -- Options for todo extension ----------------------------------------------
 todo_include_todos = True

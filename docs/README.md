@@ -4,20 +4,24 @@ This folder contains the documentation sources for the ALICE-LRI project. Docume
 
 ## Local Build Instructions
 
-1. **Install dependencies:**
+1. **Install Python package and generate stubs:**
+   ```bash
+   ../python/install_dev_and_stubs.sh
+   ```
+2. **Install dependencies:**
    ```bash
    pip install -r requirements.txt
    sudo apt-get install doxygen
    ```
-2. **Build Doxygen XML:**
+3. **Build Doxygen XML:**
    ```bash
    doxygen Doxyfile
    ```
-3. **Build Sphinx HTML:**
+4. **Build Sphinx HTML:**
    ```bash
    sphinx-build -b html . _build/html
    ```
-4. **Preview:**
+5. **Preview:**
    ```bash
    python3 -m http.server -d _build/html
    ```
