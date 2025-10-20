@@ -1,20 +1,7 @@
 Getting Started
 ===============
 
-Welcome to ALICE-LRI! This guide provides a quick introduction, example code in Python and C++, and links to installation and API references.
-
-What is ALICE-LRI?
--------------------
-ALICE-LRI is a C++ and Python library for lossless range image generation and reconstruction from spinning 3D LiDAR point clouds. It estimates LiDAR intrinsics from data—no calibration files required—enabling accurate, sensor-agnostic projection and reconstruction.
-
-Features
---------
-
-- Intrinsic parameter estimation from point cloud data
-- Range image projection with no loss of information
-- Point cloud reconstruction from range images (recover original data up to numerical precision)
-- Cross-platform (Linux, macOS, Windows)
-- Dual interface (native C++ API and Python bindings)
+This guide helps you get up and running with ALICE-LRI quickly. You'll learn how to install the library and run your first examples in Python and C++.
 
 Installation
 ------------
@@ -41,7 +28,7 @@ Quick Python Example
    range_image = alice_lri.project_to_range_image(intrinsics, x, y, z)
 
    # Reconstruct point cloud
-   reconstructed_x, reconstructed_y, reconstructed_z = alice_lri.unproject_to_point_cloud(intrinsics, range_image)
+   rx, ry, rz = alice_lri.unproject_to_point_cloud(intrinsics, range_image)
 
 Quick C++ Example
 -----------------
@@ -78,7 +65,7 @@ Quick C++ Example
 Next Steps
 ----------
 
-- Explore the :doc:`python_api` and :doc:`cpp_api`.
+- Explore the :doc:`python_api` and :doc:`cpp_api` for complete API references.
 
 Project Info
 ------------

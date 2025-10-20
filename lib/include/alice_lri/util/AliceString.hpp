@@ -12,7 +12,7 @@ namespace alice_lri {
     /**
      * @brief String class for Alice LRI library. Owns its data, is mutable, and always null-terminated.
      *
-     * This class is a thin wrapper around std::string, providing explicit memory management and ABI compatibility.
+     * This class is a thin PIMPL wrapper around std::string, providing explicit memory management and ABI compatibility.
      */
     class ALICE_LRI_API AliceString {
     private:

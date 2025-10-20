@@ -44,7 +44,7 @@ intrinsics = alice_lri.estimate_intrinsics(x, y, z)
 range_image = alice_lri.project_to_range_image(intrinsics, x, y, z)
 
 # Reconstruct point cloud
-reconstructed_x, reconstructed_y, reconstructed_z = alice_lri.unproject_to_point_cloud(intrinsics, range_image)
+rx, ry, rz = alice_lri.unproject_to_point_cloud(intrinsics, range_image)
 ```
 
 ### C++

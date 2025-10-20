@@ -11,6 +11,9 @@ namespace alice_lri {
     /**
      * @brief Dynamic array implementation for Alice LRI library.
      * @tparam T Element type.
+     *
+     * This class provides a dynamic array with explicit memory management and ABI compatibility.
+     * It avoids std::vector to prevent ABI boundary issues when used across library boundaries.
      */
     template<class T>
     class AliceArray {

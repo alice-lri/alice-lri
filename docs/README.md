@@ -37,7 +37,6 @@ This folder contains the documentation sources for the ALICE-LRI project. Docume
 ## CI/CD
 Documentation is automatically built and deployed to GitHub Pages on every push to `main` via GitHub Actions (`.github/workflows/docs.yml`).
 
-TODO: More beautiful doc page: split main page (quick start from README), C++ API, Python API, etc.
 TODO: Fix ALICE_LRI_API thing in docs
 TODO: Make doc CI trigger on release instead of every push to master
 TODO: Make GitHub pages work
