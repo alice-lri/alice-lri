@@ -79,27 +79,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        shell: bash
-        run: |
-          cd docs
-          pip install -r requirements.txt
-
-      - name: Build Doxygen XML
-        shell: bash
-        run: |
-          cd docs
-          doxygen Doxyfile
-
-      - name: Build Sphinx HTML
-        shell: bash
-        run: |
-          cd docs
-          sphinx-build -b html . _build/html
+      - name: Build documentation
+        uses: ./.github/actions/build-documentation
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v4
