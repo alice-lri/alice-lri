@@ -19,7 +19,7 @@ if (PYBUILD_AUTO_CONAN)
     endif ()
 
     execute_process(
-            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/../lib"
+            WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/lib"
             COMMAND conan install .
             -s compiler.cppstd=20
             -s build_type=Release
@@ -36,12 +36,12 @@ endif ()
 find_package(pybind11 REQUIRED)
 
 # Add the core library
-add_subdirectory(${CMAKE_SOURCE_DIR}/../lib ${CMAKE_BINARY_DIR}/lib)
+add_subdirectory(${CMAKE_SOURCE_DIR}/lib ${CMAKE_BINARY_DIR}/lib)
 
 # Create Python module
 pybind11_add_module(_alice_lri src/alice_lri/bindings.cpp)
 target_link_libraries(_alice_lri PRIVATE alice_lri)
-target_include_directories(_alice_lri PRIVATE ${CMAKE_SOURCE_DIR}/../lib/include)
+target_include_directories(_alice_lri PRIVATE ${CMAKE_SOURCE_DIR}/lib/include)
 
 set_target_properties(_alice_lri PROPERTIES
         INSTALL_RPATH "$ORIGIN"
