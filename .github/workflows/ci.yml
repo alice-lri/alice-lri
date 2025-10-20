@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
-        os: [ macos-latest ]
+        os: [ ubuntu-latest, windows-latest ]
         build_type: [ Release ]
     
     steps:
@@ -115,15 +115,7 @@ jobs:
 
       - name: Configure Conan
         shell: bash
-        run: |
-          conan profile detect --force
-          # Override the default C++ standard to C++20 for macOS
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            PROFILE_PATH=$(conan profile path default)
-            sed -i.bak 's/compiler.cppstd=gnu17/compiler.cppstd=20/' "$PROFILE_PATH"
-            echo "Updated Conan profile to use C++20:"
-            cat "$PROFILE_PATH"
-          fi
+        run: conan profile detect --force
 
       - name: Setup ccache after Conan profile detection
         if: runner.os != 'Windows'
@@ -141,20 +133,11 @@ jobs:
       - name: Install dependencies
         shell: bash
         run: |
-          # Set macOS SDK path before Conan install
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-            echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
-            # Configure Conan with the correct SDK path
-            CONAN_CMAKE_OSX_SYSROOT="-c tools.cmake.cmaketoolchain:extra_variables={'CMAKE_OSX_SYSROOT':'$SDKROOT'}"
-          else
-            CONAN_CMAKE_OSX_SYSROOT=""
-          fi
           # Install dependencies with caching
           conan install lib -s compiler.cppstd=20 -s build_type=${{ matrix.build_type }} \
-            --output-folder=build/lib --build=missing $CONAN_CMAKE_OSX_SYSROOT
+            --output-folder=build/lib --build=missing
           conan install tests -s compiler.cppstd=20 -s build_type=${{ matrix.build_type }} \
-            --output-folder=build/tests --build=missing $CONAN_CMAKE_OSX_SYSROOT
+            --output-folder=build/tests --build=missing
 
       - name: Configure and Build
         shell: bash
@@ -171,15 +154,8 @@ jobs:
           fi
           # Set correct macOS sysroot if on macOS
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            # Ensure SDKROOT is set (from env var saved earlier)
-            if [[ -z "$SDKROOT" ]]; then
-              export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-            fi
-            echo "Using macOS SDK: $SDKROOT"
-            # Force CMAKE_OSX_SYSROOT as a cache variable with :PATH type to override Conan
-            # Also create an initial cache file to set it before Conan's toolchain is loaded
-            echo "set(CMAKE_OSX_SYSROOT \"$SDKROOT\" CACHE PATH \"macOS SDK path\" FORCE)" > cmake_init.txt
-            SYSROOT_ARG="-C cmake_init.txt"
+            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
           else
             SYSROOT_ARG=""
           fi
@@ -211,7 +187,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-latest ]
+        os: [ ubuntu-latest, windows-latest ]
         python-version: [ "3.12" ]
     
     steps:
@@ -245,37 +221,22 @@ jobs:
           python -m pip install --upgrade pip
           pip install 'conan>=2.0'
           conan profile detect --force
-          # Override the default C++ standard to C++20 for macOS
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            PROFILE_PATH=$(conan profile path default)
-            sed -i.bak 's/compiler.cppstd=gnu17/compiler.cppstd=20/' "$PROFILE_PATH"
-            echo "Updated Conan profile to use C++20:"
-            cat "$PROFILE_PATH"
-          fi
 
       - name: Install Conan dependencies (like build_and_install.sh)
         shell: bash
         run: |
-          # Set macOS SDK path before Conan install
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-            echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
-            # Configure Conan with the correct SDK path
-            CONAN_CMAKE_OSX_SYSROOT="-c tools.cmake.cmaketoolchain:extra_variables={'CMAKE_OSX_SYSROOT':'$SDKROOT'}"
-          else
-            CONAN_CMAKE_OSX_SYSROOT=""
-          fi
           cd python
           rm -rf build
           mkdir -p build/lib
           conan install ../lib -s compiler.cppstd=20 -s build_type=Release \
-            --output-folder=build/lib --build=missing $CONAN_CMAKE_OSX_SYSROOT
+            --output-folder=build/lib --build=missing
 
       - name: Configure for Build
         shell: bash
         run: |
-          # macOS sysroot already set in env from previous step
+          # Set correct macOS sysroot if on macOS
           if [[ "$RUNNER_OS" == "macOS" ]]; then
+            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
           else
             SYSROOT_ARG=""
@@ -285,17 +246,6 @@ jobs:
         shell: bash
         run: |
           cd python
-          # Ensure SDKROOT is available for pip build on macOS
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            if [[ -z "$SDKROOT" ]]; then
-              export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-            fi
-            echo "Using macOS SDK for Python build: $SDKROOT"
-            # Create cmake_init.txt for scikit-build-core to use
-            echo "set(CMAKE_OSX_SYSROOT \"$SDKROOT\" CACHE PATH \"macOS SDK path\" FORCE)" > cmake_init.txt
-            # Pass it via CMAKE_ARGS which scikit-build-core respects
-            export CMAKE_ARGS="-C ${PWD}/cmake_init.txt"
-          fi
           pip install -e .[test] -v
 
       - name: Run Python tests
@@ -316,7 +266,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-latest ]
+        os: [ ubuntu-latest, windows-latest ]
     
     steps:
       - uses: actions/checkout@v4
@@ -389,13 +339,6 @@ jobs:
           python -m pip install --upgrade pip
           pip install 'conan>=2.0'
           conan profile detect --force
-          # Override the default C++ standard to C++20 for macOS
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            PROFILE_PATH=$(conan profile path default)
-            sed -i.bak 's/compiler.cppstd=gnu17/compiler.cppstd=20/' "$PROFILE_PATH"
-            echo "Updated Conan profile to use C++20:"
-            cat "$PROFILE_PATH"
-          fi
 
       - name: Setup ccache after Conan profile detection
         if: runner.os != 'Windows'
@@ -413,17 +356,8 @@ jobs:
       - name: Install C++ library dependencies
         shell: bash
         run: |
-          # Set macOS SDK path before Conan install
-          if [[ "$RUNNER_OS" == "macOS" ]]; then
-            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-            echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
-            # Configure Conan with the correct SDK path
-            CONAN_CMAKE_OSX_SYSROOT="-c tools.cmake.cmaketoolchain:extra_variables={'CMAKE_OSX_SYSROOT':'$SDKROOT'}"
-          else
-            CONAN_CMAKE_OSX_SYSROOT=""
-          fi
           conan install lib -s compiler.cppstd=20 -s build_type=Release \
-            --output-folder=build/lib --build=missing $CONAN_CMAKE_OSX_SYSROOT
+            --output-folder=build/lib --build=missing
 
       - name: Build and install C++ library
         shell: bash
@@ -440,15 +374,8 @@ jobs:
           fi
           # Set correct macOS sysroot if on macOS
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            # Ensure SDKROOT is set (from env var saved earlier)
-            if [[ -z "$SDKROOT" ]]; then
-              export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-            fi
-            echo "Using macOS SDK: $SDKROOT"
-            # Force CMAKE_OSX_SYSROOT as a cache variable with :PATH type to override Conan
-            # Also create an initial cache file to set it before Conan's toolchain is loaded
-            echo "set(CMAKE_OSX_SYSROOT \"$SDKROOT\" CACHE PATH \"macOS SDK path\" FORCE)" > cmake_init.txt
-            SYSROOT_ARG="-C cmake_init.txt"
+            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
           else
             SYSROOT_ARG=""
           fi
@@ -459,7 +386,6 @@ jobs:
                 -DINCLUDE_TESTS=OFF \
                 -DCMAKE_INSTALL_PREFIX="${{ github.workspace }}/install" \
                 $GENERATOR \
-                $SYSROOT_ARG \
                 -S . -B build
           
           cmake --build build --config Release --parallel
@@ -517,74 +443,64 @@ jobs:
             ./build/test_app
           fi
 
-  # TEMPORARILY DISABLED FOR MACOS TESTING
-  # test-python-source-distribution:
-  #   runs-on: ubuntu-latest
-  #   
-  #   steps:
-  #     - uses: actions/checkout@v4
-  # 
-  #     - name: Set up Python
-  #       uses: actions/setup-python@v5
-  #       with:
-  #         python-version: "3.11"
-  # 
-  #     - name: Install build tools
-  #       shell: bash
-  #       run: |
-  #         pip install --upgrade pip
-  #         pip install build twine 'conan>=2.0' pybind11-stubgen
-  #         conan profile detect --force
-  # 
-  #     - name: Build source distribution
-  #       shell: bash
-  #       run: |
-  #         cd python
-  #         ./install_dev_and_stubs.sh
-  #         python -m build --sdist
-  # 
-  #     - name: Check source distribution
-  #       shell: bash
-  #       run: |
-  #         cd python
-  #         python -m twine check dist/*.tar.gz
-  # 
-  #     - name: Test installation from sdist
-  #       shell: bash
-  #       run: |
-  #         cd python
-  #         # Test that sdist can be installed without manual Conan setup
-  #         pip install dist/*.tar.gz
-  #         cd ..
-  #         python -c "import alice_lri; print('✅ Source distribution installation works!')"
+  test-python-source-distribution:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
 
-  # TEMPORARILY DISABLED FOR MACOS TESTING
-  # test-documentation:
-  #   runs-on: ubuntu-latest
-  # 
-  #   steps:
-  #     - uses: actions/checkout@v4
-  # 
-  #     - name: Build documentation
-  #       uses: ./.github/actions/build-documentation
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        shell: bash
+        run: |
+          pip install --upgrade pip
+          pip install build twine 'conan>=2.0' pybind11-stubgen
+          conan profile detect --force
+
+      - name: Build source distribution
+        shell: bash
+        run: |
+          cd python
+          ./install_dev_and_stubs.sh
+          python -m build --sdist
+
+      - name: Check source distribution
+        shell: bash
+        run: |
+          cd python
+          python -m twine check dist/*.tar.gz
+
+      - name: Test installation from sdist
+        shell: bash
+        run: |
+          cd python
+          # Test that sdist can be installed without manual Conan setup
+          pip install dist/*.tar.gz
+          cd ..
+          python -c "import alice_lri; print('✅ Source distribution installation works!')"
+
+  test-documentation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build documentation
+        uses: ./.github/actions/build-documentation
 
   test-wheel-build:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ macos-latest ]
+        os: [ ubuntu-latest, windows-latest ]
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Set macOS SDK path
-        if: runner.os == 'macOS'
-        shell: bash
-        run: |
-          SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
-          echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
-          echo "Using macOS SDK: $SDKROOT"
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.0
@@ -595,13 +511,6 @@ jobs:
           CIBW_ARCHS_LINUX: "x86_64"
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_BEFORE_BUILD: "pip install conan && conan profile detect"
-          CIBW_BEFORE_BUILD_MACOS: >
-            pip install conan &&
-            conan profile detect &&
-            PROFILE_PATH=$(conan profile path default) &&
-            sed -i.bak 's/compiler.cppstd=gnu17/compiler.cppstd=20/' "$PROFILE_PATH" &&
-            echo 'set(CMAKE_OSX_SYSROOT \"'$(xcrun --sdk macosx --show-sdk-path)'\" CACHE PATH \"macOS SDK path\" FORCE)' > {project}/cmake_init.txt
-          CIBW_ENVIRONMENT_MACOS: "SDKROOT=$(xcrun --sdk macosx --show-sdk-path) CMAKE_ARGS='-C {project}/cmake_init.txt'"
         with:
           package-dir: './python'
 

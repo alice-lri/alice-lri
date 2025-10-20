@@ -4,13 +4,6 @@ project(alice_lri_python_bindings LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Force CMAKE_OSX_SYSROOT if set via command line (macOS fix)
-# This must come AFTER project() but BEFORE any subdirectories to override Conan's toolchain
-if(DEFINED CACHE{CMAKE_OSX_SYSROOT} AND APPLE)
-    set(CMAKE_OSX_SYSROOT "${CMAKE_OSX_SYSROOT}" CACHE PATH "macOS SDK path" FORCE)
-    message(STATUS "Forcing CMAKE_OSX_SYSROOT to: ${CMAKE_OSX_SYSROOT}")
-endif()
-
 # Opt-in: Only the Python build turns this ON via pyproject.toml
 option(PYBUILD_AUTO_CONAN "Run Conan for lib/ during Python build" OFF)
 if (PYBUILD_AUTO_CONAN)

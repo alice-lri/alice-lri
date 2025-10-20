@@ -37,13 +37,6 @@ endif ()
 # Dependencies
 include(${CMAKE_CURRENT_BINARY_DIR}/conan_toolchain.cmake)
 
-# Force CMAKE_OSX_SYSROOT if set via command line (macOS fix)
-# This must come AFTER including Conan's toolchain to override it
-if(DEFINED CACHE{CMAKE_OSX_SYSROOT} AND APPLE)
-    set(CMAKE_OSX_SYSROOT "${CMAKE_OSX_SYSROOT}" CACHE PATH "macOS SDK path" FORCE)
-    message(STATUS "Forcing CMAKE_OSX_SYSROOT to: ${CMAKE_OSX_SYSROOT}")
-endif()
-
 find_package(Eigen3 REQUIRED)
 include_directories(Eigen3_INCLUDE_DIRS)
 message(STATUS "EIGEN3_INCLUDE_DIR: ${Eigen3_INCLUDE_DIRS}")
