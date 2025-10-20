@@ -137,12 +137,16 @@ jobs:
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
+            # Configure Conan with the correct SDK path
+            CONAN_CMAKE_OSX_SYSROOT="-c tools.cmake.cmaketoolchain:extra_variables={'CMAKE_OSX_SYSROOT':'$SDKROOT'}"
+          else
+            CONAN_CMAKE_OSX_SYSROOT=""
           fi
           # Install dependencies with caching
           conan install lib -s compiler.cppstd=20 -s build_type=${{ matrix.build_type }} \
-            --output-folder=build/lib --build=missing
+            --output-folder=build/lib --build=missing $CONAN_CMAKE_OSX_SYSROOT
           conan install tests -s compiler.cppstd=20 -s build_type=${{ matrix.build_type }} \
-            --output-folder=build/tests --build=missing
+            --output-folder=build/tests --build=missing $CONAN_CMAKE_OSX_SYSROOT
 
       - name: Configure and Build
         shell: bash
@@ -233,12 +237,16 @@ jobs:
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
+            # Configure Conan with the correct SDK path
+            CONAN_CMAKE_OSX_SYSROOT="-c tools.cmake.cmaketoolchain:extra_variables={'CMAKE_OSX_SYSROOT':'$SDKROOT'}"
+          else
+            CONAN_CMAKE_OSX_SYSROOT=""
           fi
           cd python
           rm -rf build
           mkdir -p build/lib
           conan install ../lib -s compiler.cppstd=20 -s build_type=Release \
-            --output-folder=build/lib --build=missing
+            --output-folder=build/lib --build=missing $CONAN_CMAKE_OSX_SYSROOT
 
       - name: Configure for Build
         shell: bash
@@ -368,9 +376,13 @@ jobs:
           if [[ "$RUNNER_OS" == "macOS" ]]; then
             export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             echo "SDKROOT=$SDKROOT" >> $GITHUB_ENV
+            # Configure Conan with the correct SDK path
+            CONAN_CMAKE_OSX_SYSROOT="-c tools.cmake.cmaketoolchain:extra_variables={'CMAKE_OSX_SYSROOT':'$SDKROOT'}"
+          else
+            CONAN_CMAKE_OSX_SYSROOT=""
           fi
           conan install lib -s compiler.cppstd=20 -s build_type=Release \
-            --output-folder=build/lib --build=missing
+            --output-folder=build/lib --build=missing $CONAN_CMAKE_OSX_SYSROOT
 
       - name: Build and install C++ library
         shell: bash
