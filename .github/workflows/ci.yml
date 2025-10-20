@@ -17,7 +17,7 @@ jobs:
     strategy:
       fail-fast: false  # Don't cancel other jobs if one fails
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ macos-latest ]
         build_type: [ Release ]
     
     steps:
@@ -187,7 +187,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ macos-latest ]
         python-version: [ "3.12" ]
     
     steps:
@@ -266,7 +266,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ macos-latest ]
     
     steps:
       - uses: actions/checkout@v4
@@ -443,61 +443,63 @@ jobs:
             ./build/test_app
           fi
 
-  test-python-source-distribution:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - uses: actions/checkout@v4
+  # TEMPORARILY DISABLED FOR MACOS TESTING
+  # test-python-source-distribution:
+  #   runs-on: ubuntu-latest
+  #   
+  #   steps:
+  #     - uses: actions/checkout@v4
+  # 
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.11"
+  # 
+  #     - name: Install build tools
+  #       shell: bash
+  #       run: |
+  #         pip install --upgrade pip
+  #         pip install build twine 'conan>=2.0' pybind11-stubgen
+  #         conan profile detect --force
+  # 
+  #     - name: Build source distribution
+  #       shell: bash
+  #       run: |
+  #         cd python
+  #         ./install_dev_and_stubs.sh
+  #         python -m build --sdist
+  # 
+  #     - name: Check source distribution
+  #       shell: bash
+  #       run: |
+  #         cd python
+  #         python -m twine check dist/*.tar.gz
+  # 
+  #     - name: Test installation from sdist
+  #       shell: bash
+  #       run: |
+  #         cd python
+  #         # Test that sdist can be installed without manual Conan setup
+  #         pip install dist/*.tar.gz
+  #         cd ..
+  #         python -c "import alice_lri; print('✅ Source distribution installation works!')"
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install build tools
-        shell: bash
-        run: |
-          pip install --upgrade pip
-          pip install build twine 'conan>=2.0' pybind11-stubgen
-          conan profile detect --force
-
-      - name: Build source distribution
-        shell: bash
-        run: |
-          cd python
-          ./install_dev_and_stubs.sh
-          python -m build --sdist
-
-      - name: Check source distribution
-        shell: bash
-        run: |
-          cd python
-          python -m twine check dist/*.tar.gz
-
-      - name: Test installation from sdist
-        shell: bash
-        run: |
-          cd python
-          # Test that sdist can be installed without manual Conan setup
-          pip install dist/*.tar.gz
-          cd ..
-          python -c "import alice_lri; print('✅ Source distribution installation works!')"
-
-  test-documentation:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build documentation
-        uses: ./.github/actions/build-documentation
+  # TEMPORARILY DISABLED FOR MACOS TESTING
+  # test-documentation:
+  #   runs-on: ubuntu-latest
+  # 
+  #   steps:
+  #     - uses: actions/checkout@v4
+  # 
+  #     - name: Build documentation
+  #       uses: ./.github/actions/build-documentation
 
   test-wheel-build:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
+        os: [ macos-latest ]
 
     steps:
       - uses: actions/checkout@v4
