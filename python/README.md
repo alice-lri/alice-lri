@@ -52,4 +52,7 @@ MIT License - see [LICENSE](../LICENSE)
 
 ## Citation
 
-If you use this library in your research, please cite the ALICE-LRI paper (see the main repository for citation details).
+If you use this library in your research, please cite the ALICE-LRI paper.
+
+TODO: Add BibTeX citation
+
