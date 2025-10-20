@@ -286,9 +286,15 @@ jobs:
         run: |
           cd python
           # Ensure SDKROOT is available for pip build on macOS
-          if [[ "$RUNNER_OS" == "macOS" ]] && [[ -z "$SDKROOT" ]]; then
-            export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            if [[ -z "$SDKROOT" ]]; then
+              export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
+            fi
             echo "Using macOS SDK for Python build: $SDKROOT"
+            # Create cmake_init.txt for scikit-build-core to use
+            echo "set(CMAKE_OSX_SYSROOT \"$SDKROOT\" CACHE PATH \"macOS SDK path\" FORCE)" > cmake_init.txt
+            # Pass it via CMAKE_ARGS which scikit-build-core respects
+            export CMAKE_ARGS="-C ${PWD}/cmake_init.txt"
           fi
           pip install -e .[test] -v
 
@@ -589,7 +595,13 @@ jobs:
           CIBW_ARCHS_LINUX: "x86_64"
           CIBW_ARCHS_MACOS: "x86_64 arm64"
           CIBW_BEFORE_BUILD: "pip install conan && conan profile detect"
-          CIBW_ENVIRONMENT_MACOS: "SDKROOT=${{ env.SDKROOT }}"
+          CIBW_BEFORE_BUILD_MACOS: >
+            pip install conan &&
+            conan profile detect &&
+            PROFILE_PATH=$(conan profile path default) &&
+            sed -i.bak 's/compiler.cppstd=gnu17/compiler.cppstd=20/' "$PROFILE_PATH" &&
+            echo 'set(CMAKE_OSX_SYSROOT \"'$(xcrun --sdk macosx --show-sdk-path)'\" CACHE PATH \"macOS SDK path\" FORCE)' > {project}/cmake_init.txt
+          CIBW_ENVIRONMENT_MACOS: "SDKROOT=$(xcrun --sdk macosx --show-sdk-path) CMAKE_ARGS='-C {project}/cmake_init.txt'"
         with:
           package-dir: './python'
 
