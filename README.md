@@ -97,11 +97,11 @@ Pre-built C++ binaries are not available. To use the C++ library, see the "Insta
 - **C++20** compatible compiler with **CMake** >= 3.20
 - **Python** >= 3.8 and **pip** (for Python bindings)
 - **Conan** >= 2.0 (can be installed with `pip install conan`)
-  - If this is your first time using Conan, you will probably need to run `conan profile detect` after installing it to create a default profile.
-- Other dependencies are automatically managed by Conan and pip.
+  - First time using Conan? Run `conan profile detect` after installing to create a default profile.
+
+Other dependencies are automatically managed by Conan and pip.
 
 ### Python
-You can install the Python package from source:
 ```bash
 git clone https://github.com/alice-lri/alice-lri.git
 cd alice-lri
@@ -124,9 +124,9 @@ cd build
 sudo make install
 sudo ldconfig # Update shared library cache on Linux
 ```
-By default, this will install the library and headers to standard system locations (e.g., `/usr/local/lib`, `/usr/local/include` on Linux).
+By default, this installs the library and headers to standard system locations (e.g., `/usr/local/lib`, `/usr/local/include` on Linux).
 
-#### Using ALICE-LRI in your C++ project
+#### Using ALICE-LRI in Your C++ Project
 After installing, you no longer need access to the source code. You can link against the installed library.
 
 ##### With CMake

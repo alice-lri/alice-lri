@@ -21,9 +21,9 @@ Installation from Source
 Build Dependencies
 ^^^^^^^^^^^^^^^^^^
 
-- C++20 compatible compiler with CMake >= 3.20
-- Python >= 3.8 and pip (for Python bindings)
-- Conan >= 2.0 (can be installed with ``pip install conan``)
+- **C++20** compatible compiler with **CMake** >= 3.20
+- **Python** >= 3.8 and **pip** (for Python bindings)
+- **Conan** >= 2.0 (can be installed with ``pip install conan``)
 
   - First time using Conan? Run ``conan profile detect`` after installing to create a default profile.
 
@@ -66,10 +66,14 @@ After installing, you no longer need access to the source code. You can link aga
 With CMake
 ^^^^^^^^^^
 
+You can link ALICE-LRI in your CMake project from anywhere as follows:
+
 .. code-block:: cmake
 
-   find_package(alice_lri REQUIRED)
-   target_link_libraries(YOUR_TARGET alice_lri::alice_lri)
+    # ...
+    find_package(alice_lri REQUIRED)
+    # ...
+    target_link_libraries(YOUR_TARGET alice_lri::alice_lri)
 
 With g++ (or similar compilers)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -83,15 +87,16 @@ If you compile manually, link with ``-lalice_lri``:
 Controlling Log Levels
 -----------------------
 
-ALICE-LRI supports configurable log levels at build time. By default, the log level is ``WARN`` (only warnings and errors are printed).
+ALICE-LRI supports configurable log levels at build time. By default, the log level is set to ``WARN``, which means only warnings and errors will be printed (recommended for most users; normal operation will not print anything unless something abnormal happens).
 
-Change the log level when building the C++ library with CMake:
+You can change the log level when building with CMake by passing the ``-DLOG_LEVEL`` flag:
+
 
 .. code-block:: bash
 
    cmake -DCMAKE_BUILD_TYPE=Release -DLOG_LEVEL=DEBUG -B build
 
-Valid options: ``DEBUG``, ``INFO``, ``WARN``, ``ERROR``, ``NONE``.
+Valid options are: ``DEBUG``, ``INFO``, ``WARN``, ``ERROR``, ``NONE``.
 
 For Python, you can control the default log level by editing ``pyproject.toml`` in the ``python/`` directory before building or installing from source. The default is also ``WARN``.
 
