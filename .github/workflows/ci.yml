@@ -168,7 +168,10 @@ jobs:
               export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             fi
             echo "Using macOS SDK: $SDKROOT"
-            SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
+            # Force CMAKE_OSX_SYSROOT as a cache variable with :PATH type to override Conan
+            # Also create an initial cache file to set it before Conan's toolchain is loaded
+            echo "set(CMAKE_OSX_SYSROOT \"$SDKROOT\" CACHE PATH \"macOS SDK path\" FORCE)" > cmake_init.txt
+            SYSROOT_ARG="-C cmake_init.txt"
           else
             SYSROOT_ARG=""
           fi
@@ -414,7 +417,10 @@ jobs:
               export SDKROOT=$(xcrun --sdk macosx --show-sdk-path)
             fi
             echo "Using macOS SDK: $SDKROOT"
-            SYSROOT_ARG="-DCMAKE_OSX_SYSROOT=$SDKROOT"
+            # Force CMAKE_OSX_SYSROOT as a cache variable with :PATH type to override Conan
+            # Also create an initial cache file to set it before Conan's toolchain is loaded
+            echo "set(CMAKE_OSX_SYSROOT \"$SDKROOT\" CACHE PATH \"macOS SDK path\" FORCE)" > cmake_init.txt
+            SYSROOT_ARG="-C cmake_init.txt"
           else
             SYSROOT_ARG=""
           fi
