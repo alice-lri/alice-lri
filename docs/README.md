@@ -2,7 +2,7 @@
 
 This folder contains the documentation sources for the ALICE-LRI project. Documentation is built using Sphinx (for Python and site), Doxygen (for C++), and Breathe/Exhale (for C++/Python integration).
 
-## Local Build Instructions
+## Documentation Generation Steps
 
 1. **Install Python package and generate stubs:**
    ```bash
@@ -34,10 +34,7 @@ This folder contains the documentation sources for the ALICE-LRI project. Docume
 - `cpp_api.rst`: C++ API reference
 - `requirements.txt`: Python doc dependencies
 
-## CI/CD
-Documentation is automatically built and deployed to GitHub Pages on every push to `main` via GitHub Actions (`.github/workflows/docs.yml`).
 
-TODO: Fix ALICE_LRI_API thing in docs
 TODO: Make doc CI trigger on release instead of every push to master
-TODO: Make GitHub pages work
+TODO: Make GitHub pages work and link to it from here
 TODO: Add documentation badge and/or link
