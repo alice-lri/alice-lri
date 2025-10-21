@@ -6,11 +6,12 @@ This package provides the official Python bindings for the ALICE-LRI core C++ li
 
 ## Features
 
-- **Intrinsic Parameter Estimation**: Estimate LiDAR intrinsic parameters directly from point cloud data.
-- **Range Image Projection**: Convert 3D point clouds to 2D range images with no loss of information.
-- **Point Cloud Reconstruction**: Unproject range images back to 3D point clouds, recovering the original data up to numerical precision.
-- **No Calibration Files Needed**: Works without manufacturer metadata or calibration files.
-- **Fast and Cross-platform**: Powered by a C++ backend, works on Linux, Windows, and macOS.
+- **Automatic Intrinsic Estimation**: Estimate LiDAR intrinsic parameters from point cloud data. No calibration files or manufacturer metadata needed.
+- **Lossless Range Image Projection**: Convert 3D point clouds to 2D range images with zero information loss.
+- **Point Cloud Reconstruction**: Unproject range images back to 3D point clouds, recovering original data up to numerical precision.
+- **JSON Serialization**: Save and load intrinsic parameters to/from JSON files or strings for easy storage and sharing.
+- **Cross-Platform**: Supports Windows, Linux, and macOS (macOS requires building from source).
+- **Dual Interface**: Native C++ API and Python bindings for maximum flexibility.
 
 ## Installation
 
