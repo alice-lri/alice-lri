@@ -24,7 +24,7 @@ You can find more details and usage examples in the related repositories above.
 - **Lossless Range Image Projection**: Convert 3D point clouds to 2D range images with zero information loss.
 - **Point Cloud Reconstruction**: Unproject range images back to 3D point clouds, recovering original data up to numerical precision.
 - **JSON Serialization**: Save and load intrinsic parameters to/from JSON files or strings for easy storage and sharing.
-- **Cross-Platform**: Supports Windows, Linux, and macOS.
+- **Cross-Platform**: Supports Windows, Linux, and macOS (macOS requires building from source).
 - **Dual Interface**: Native C++ API and Python bindings for maximum flexibility.
 
 
@@ -89,6 +89,8 @@ You only need Python >= 3.8 and pip:
 ```bash
 pip install alice-lri
 ```
+
+> **Platform Support:** The `pip install` command works out-of-the-box on **Windows** and **Linux**. If you're on **macOS**, you'll need to follow the "Installation from Source" instructions below instead.
 
 ### C++
 Pre-built C++ binaries are not available. To use the C++ library, see the "Installation from Source" section below.
