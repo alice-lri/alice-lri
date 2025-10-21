@@ -75,7 +75,7 @@ jobs:
       - name: Publish wheels to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
           
-  build-and-deploy-docs:
+  deploy-documentation:
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
     permissions:
@@ -86,20 +86,6 @@ jobs:
       group: "pages"
       cancel-in-progress: false
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Build documentation
-        uses: ./.github/actions/build-documentation
-
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: docs/_build/html
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Deploy documentation
+        uses: ./.github/actions/deploy-documentation
         

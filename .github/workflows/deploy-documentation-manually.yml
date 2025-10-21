@@ -1,0 +1,26 @@
+name: deploy-documentation-manually
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: |
+          ⚠️ **Use this only for small documentation fixes**
+          (e.g., correcting typos, updating minor examples, or adjusting formatting).
+          Do **not** use this for release-related changes — those are deployed automatically.
+        required: true
+        default: "Fix small typo or formatting issue"
+
+jobs:
+  deploy-documentation:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: "pages"
+      cancel-in-progress: false
+    steps:
+      - name: Deploy documentation
+        uses: ./.github/actions/deploy-documentation
