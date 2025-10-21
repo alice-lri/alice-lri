@@ -33,6 +33,7 @@ if (PYBUILD_AUTO_CONAN)
 endif ()
 
 # Find pybind11
+set(PYBIND11_FINDPYTHON ON)
 find_package(pybind11 REQUIRED)
 
 # Add the core library
