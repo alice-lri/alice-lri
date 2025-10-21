@@ -10,6 +10,11 @@ Python
 
    pip install alice-lri
 
+.. important::
+   **Platform Support:** The ``pip install`` command works out-of-the-box on **Windows** and **Linux**. 
+   
+   If you're on **macOS**, the package isn't available on PyPI yet, so you'll need to follow the "Installation from Source" instructions below instead.
+
 C++
 ---
 
