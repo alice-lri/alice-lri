@@ -4,28 +4,16 @@ on:
   push:
     tags:
       - 'v*'
-  release:
-    types: [published]
 
 jobs:
-  build-and-attach:
-    if: github.event_name == 'push'
+  build-wheels:
     runs-on: ${{ matrix.os }}
-    permissions:
-      contents: write
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v4
 
-      - name: Extract version from tag
-        id: extract_version
-        shell: bash
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Tag Version: $VERSION"
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v3.2.1
@@ -38,51 +26,83 @@ jobs:
         with:
           package-dir: './python'
 
+      - name: Upload wheels as artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheels-${{ matrix.os }}
+          path: wheelhouse/*.whl
+          retention-days: 7
+
+  build-cpp-tarball:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from tag
+        id: extract_version
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "Tag Version: $VERSION"
+
       - name: Create C++ tarball
         shell: bash
         run: |
           CPP_TARBALL_NAME="alice-lri-${{ env.VERSION }}-cpp-lib.tar.gz"
           tar -czf "$CPP_TARBALL_NAME" -C lib . 
-          echo "CPP_TARBALL_PATH=$CPP_TARBALL_NAME" >> $GITHUB_ENV
+          echo "CPP_TARBALL_NAME=$CPP_TARBALL_NAME" >> $GITHUB_ENV
 
-      - name: Create GitHub release and upload artifact
+      - name: Upload C++ tarball as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cpp-tarball
+          path: ${{ env.CPP_TARBALL_NAME }}
+          retention-days: 7
+
+  create-release:
+    runs-on: ubuntu-latest
+    needs: [build-wheels, build-cpp-tarball]
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          pattern: "*"
+          merge-multiple: true
+          path: release-assets/
+
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          draft: true
-          files: |
-            wheelhouse/*.whl
-            ${{ env.CPP_TARBALL_PATH }}
+          draft: false
+          files: release-assets/*
 
   publish-pypi:
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
+    needs: create-release
+    if: false  # Temporarily disabled
     permissions:
       id-token: write
     steps:
-      - name: Extract version from release tag
-        id: extract_version
-        shell: bash
-        run: |
-          VERSION="${{ github.event.release.tag_name }}"
-          VERSION="${VERSION#v}"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "Release Version: $VERSION"
 
-      - name: Download wheels from release
-        uses: dsaltares/fetch-gh-release-asset@master
+      - name: Download all wheels
+        uses: actions/download-artifact@v4
         with:
-          version: "tags/v${{ env.VERSION }}"
-          file: ".*\\.whl"
-          regex: true
-          target: "dist/"
-          token: ${{ secrets.GITHUB_TOKEN }}
+          pattern: wheels-*
+          merge-multiple: true
+          path: dist/
 
       - name: Publish wheels to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-          
+
   deploy-documentation:
     runs-on: ubuntu-latest
-    if: github.event_name == 'release'
+    needs: create-release
     permissions:
       contents: read
       pages: write
