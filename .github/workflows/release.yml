@@ -38,13 +38,6 @@ jobs:
         with:
           package-dir: './python'
 
-      - name: Upload wheels as workflow artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheels-${{ env.VERSION }}-${{ matrix.os }}
-          path: wheelhouse/*.whl
-          retention-days: 7
-
       - name: Create C++ tarball
         shell: bash
         run: |
@@ -75,12 +68,14 @@ jobs:
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Release Version: $VERSION"
 
-      - name: Download all wheels
-        uses: actions/download-artifact@v4
+      - name: Download wheels from release
+        uses: dsaltares/fetch-gh-release-asset@master
         with:
-          pattern: wheels-${{ env.VERSION }}-*
-          merge-multiple: true
-          path: dist/
+          version: "tags/v${{ env.VERSION }}"
+          file: ".*\\.whl"
+          regex: true
+          target: "dist/"
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Publish wheels to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
