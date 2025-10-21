@@ -33,6 +33,11 @@ if (PYBUILD_AUTO_CONAN)
 endif ()
 
 # Find pybind11
+if(POLICY CMP0148)
+    cmake_policy(SET CMP0148 NEW)
+endif()
+set(PYBIND11_FINDPYTHON ON)
+find_package(Python COMPONENTS Interpreter Development REQUIRED)
 find_package(pybind11 REQUIRED)
 
 # Add the core library
