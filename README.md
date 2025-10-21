@@ -167,13 +167,6 @@ Full documentation is available online at:
 
 **[https://alice-lri.github.io/alice-lri/](https://alice-lri.github.io/alice-lri/)**
 
-The documentation includes:
-- Installation guide
-- Getting started tutorials
-- Python API reference
-- C++ API reference
-- Advanced usage examples
-
 ## License
 
 MIT License - see [LICENSE](LICENSE) file.
