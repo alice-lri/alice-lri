@@ -86,6 +86,8 @@ jobs:
       group: "pages"
       cancel-in-progress: false
     steps:
+      - uses: actions/checkout@v4
+
       - name: Deploy documentation
         uses: ./.github/actions/deploy-documentation
         
