@@ -28,10 +28,18 @@ jobs:
         with:
           package-dir: './python'
 
+      - name: Sanitize artifact name
+        id: sanitize
+        shell: bash
+        run: |
+          PYTHON_VER="${{ matrix.python }}"
+          SAFE_PYTHON_VER="${PYTHON_VER/-*/}"
+          echo "safe_name=${SAFE_PYTHON_VER}" >> $GITHUB_OUTPUT
+
       - name: Upload wheels as artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: wheels-${{ matrix.os }}
+          name: wheels-${{ matrix.os }}-${{ steps.sanitize.outputs.safe_name }}
           path: wheelhouse/*.whl
           retention-days: 7
 
@@ -117,4 +125,3 @@ jobs:
 
       - name: Deploy documentation
         uses: ./.github/actions/deploy-documentation
-        
