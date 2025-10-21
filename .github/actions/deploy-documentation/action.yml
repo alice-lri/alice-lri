@@ -5,8 +5,6 @@ description: "Builds and deploys the documentation to GitHub Pages."
 runs:
   using: "composite"
   steps:
-    - uses: actions/checkout@v4
-
     - name: Build documentation
       uses: ./.github/actions/build-documentation
 
