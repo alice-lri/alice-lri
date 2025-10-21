@@ -30,12 +30,13 @@ classifiers = [
     "Intended Audience :: Developers",
     "Topic :: Scientific/Engineering",
     "Topic :: Software Development :: Libraries :: Python Modules",
-    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: C++",
     "License :: OSI Approved :: MIT License",
     "Operating System :: Microsoft :: Windows",
@@ -52,7 +53,6 @@ Issues = "https://github.com/alice-lri/alice-lri/issues"
 cmake.version = ">=3.20"
 build-dir = "build"
 wheel.packages = ["alice_lri"]
-wheel.py-api = "py3"
 install.components = ["python"]
 
 
