@@ -63,6 +63,8 @@ jobs:
   publish-pypi:
     runs-on: ubuntu-latest
     if: github.event_name == 'release'
+    permissions:
+      id-token: write
     steps:
       - name: Download all wheels
         uses: actions/download-artifact@v4
