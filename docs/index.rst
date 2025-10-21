@@ -60,6 +60,7 @@ When you're ready to dive deeper, browse the auto-generated references:
 Project Info
 ------------
 
+- **Repository:** `https://github.com/alice-lri/alice-lri <https://github.com/alice-lri/alice-lri>`_
 - **License:** MIT — see the :file:`LICENSE` file in the repository.
 - **Contributing:** See :file:`CONTRIBUTING.md` for the code of conduct and submission process.
 
