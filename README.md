@@ -20,11 +20,13 @@ You can find more details and usage examples in the related repositories above.
 
 ## ALICE-LRI Features
 
-- **Intrinsic Parameter Estimation**: Estimate LiDAR intrinsic parameters from point cloud data.
-- **Range Image Projection**: Convert 3D point clouds to 2D range images with no loss of information.
-- **Point Cloud Reconstruction**: Unproject range images back to 3D point clouds, recovering the original data up to numerical precision.
-- **Cross-platform**: Supports Windows, Linux, and macOS.
-- **Dual Interface**: Native C++ API and Python bindings.
+- **Automatic Intrinsic Estimation**: Estimate LiDAR intrinsic parameters from point cloud data. No calibration files or manufacturer metadata needed.
+- **Lossless Range Image Projection**: Convert 3D point clouds to 2D range images with zero information loss.
+- **Point Cloud Reconstruction**: Unproject range images back to 3D point clouds, recovering original data up to numerical precision.
+- **JSON Serialization**: Save and load intrinsic parameters to/from JSON files or strings for easy storage and sharing.
+- **Cross-Platform**: Supports Windows, Linux, and macOS.
+- **Dual Interface**: Native C++ API and Python bindings for maximum flexibility.
+
 
 ## Quick Start
 
