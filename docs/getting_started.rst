@@ -62,16 +62,20 @@ Quick C++ Example
         return 0;
     }
 
+Working with JSON
+-----------------
+
+Both Python and C++ APIs support serialization and deserialization of intrinsic parameters to/from JSON format. This is useful for saving estimated intrinsics for later use or sharing them.
+
+**Python**: Use ``intrinsics_to_json_file()`` and ``intrinsics_from_json_file()`` (or the string variants). See the :doc:`python_api_advanced` for full details.
+
+**C++**: Use ``intrinsicsToJsonFile()`` and ``intrinsicsFromJsonFile()`` (or the string variants). See the :doc:`cpp_api_advanced` for full details.
+
 Next Steps
 ----------
 
-- Explore the :doc:`python_api` and :doc:`cpp_api` for complete API references.
-
-Project Info
-------------
-
-- **License:** MIT — see the :file:`LICENSE` file in the repository.
-- **Contributing:** See :file:`CONTRIBUTING.md` for the code of conduct and submission process.
+- :doc:`python_api` - Complete Python API reference.
+- :doc:`cpp_api` - Complete C++ API reference.
  
 Citation
 --------

@@ -11,11 +11,12 @@ ALICE-LRI is a C++ and Python library for lossless range image generation and re
 Features
 --------
 
-- **Intrinsic parameter estimation** from raw point cloud data
-- **Range image projection** with no loss of information
-- **Point cloud reconstruction** from range images (recover original data up to numerical precision)
-- **Cross-platform** support (Linux, macOS, Windows)
-- **Dual interface**: native C++ API and Python bindings
+- **Automatic Intrinsic Estimation**: Estimate LiDAR intrinsic parameters from point cloud data. No calibration files or manufacturer metadata needed.
+- **Lossless Range Image Projection**: Convert 3D point clouds to 2D range images with zero information loss.
+- **Point Cloud Reconstruction**: Unproject range images back to 3D point clouds, recovering original data up to numerical precision.
+- **JSON Serialization**: Save and load intrinsic parameters to/from JSON files or strings for easy storage and sharing.
+- **Cross-Platform**: Supports Windows, Linux, and macOS.
+- **Dual Interface**: Native C++ API and Python bindings for maximum flexibility.
 
 Get Started
 -----------
