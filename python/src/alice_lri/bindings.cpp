@@ -43,20 +43,13 @@ PYBIND11_MODULE(_alice_lri, m) {
     // Core structs
     py::class_<alice_lri::Scanline>(m, "Scanline", R"doc(
         Represents a single scanline with intrinsic parameters.
-
-        Attributes:
-            vertical_offset (float): Vertical spatial offset of the scanline.
-            vertical_angle (float): Vertical angle of the scanline.
-            horizontal_offset (float): Horizontal spatial offset of the scanline.
-            azimuthal_offset (float): Azimuthal offset of the scanline.
-            resolution (int): Horizontal resolution of the scanline.
     )doc")
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("vertical_offset", &alice_lri::Scanline::verticalOffset, "Vertical spatial offset.")
-        .def_readwrite("vertical_angle", &alice_lri::Scanline::verticalAngle, "Vertical angle.")
-        .def_readwrite("horizontal_offset", &alice_lri::Scanline::horizontalOffset, "Horizontal spatial offset.")
-        .def_readwrite("azimuthal_offset", &alice_lri::Scanline::azimuthalOffset, "Azimuthal offset.")
-        .def_readwrite("resolution", &alice_lri::Scanline::resolution, "Horizontal resolution.")
+        .def_readwrite("vertical_offset", &alice_lri::Scanline::verticalOffset, "Vertical spatial offset of the scanline.")
+        .def_readwrite("vertical_angle", &alice_lri::Scanline::verticalAngle, "Vertical angle of the scanline.")
+        .def_readwrite("horizontal_offset", &alice_lri::Scanline::horizontalOffset, "Horizontal spatial offset of the scanline.")
+        .def_readwrite("azimuthal_offset", &alice_lri::Scanline::azimuthalOffset, "Azimuthal offset of the scanline.")
+        .def_readwrite("resolution", &alice_lri::Scanline::resolution, "Horizontal resolution of the scanline.")
         .def("__repr__", [](const alice_lri::Scanline& self) {
             std::ostringstream oss;
             oss << "Scanline(vertical_offset=" << self.verticalOffset
@@ -72,14 +65,11 @@ PYBIND11_MODULE(_alice_lri, m) {
 
         Args:
             scanline_count (int): Number of scanlines.
-
-        Attributes:
-            scanlines (list of Scanline): Array of scanlines describing the sensor geometry.
     )doc")
         .def(py::init<int32_t>(), py::arg("scanline_count"), "Construct with a given number of scanlines.")
         .def_property_readonly("scanlines", [](const alice_lri::Intrinsics& self) {
             return std::vector(self.scanlines.begin(), self.scanlines.end());
-        }, "List of scanlines.")
+        }, "Array of scanlines describing the sensor geometry.")
         .def("__repr__", [](const alice_lri::Intrinsics& self) {
             std::ostringstream oss;
             oss << "Intrinsics(scanlines=[...])";
@@ -88,17 +78,13 @@ PYBIND11_MODULE(_alice_lri, m) {
 
     py::class_<alice_lri::Interval>(m, "Interval", R"doc(
         Represents a numeric interval [lower, upper].
-
-        Attributes:
-            lower (float): Lower bound of the interval.
-            upper (float): Upper bound of the interval.
     )doc")
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("lower", &alice_lri::Interval::lower, "Lower bound.")
-        .def_readwrite("upper", &alice_lri::Interval::upper, "Upper bound.")
+        .def_readwrite("lower", &alice_lri::Interval::lower, "Lower bound of the interval.")
+        .def_readwrite("upper", &alice_lri::Interval::upper, "Upper bound of the interval.")
         .def("diff", &alice_lri::Interval::diff, "Get the width of the interval (upper - lower).")
-        .def("any_contained", &alice_lri::Interval::anyContained, "Check if any part of another interval is contained in this interval.")
-        .def("clamp_both", &alice_lri::Interval::clampBoth, "Clamp both bounds to [minValue, maxValue].")
+        .def("any_contained", &alice_lri::Interval::anyContained, py::arg("other"), "Check if any part of another interval is contained in this interval.")
+        .def("clamp_both", &alice_lri::Interval::clampBoth, py::arg("min_value"), py::arg("max_value"), "Clamp both bounds to [min_value, max_value].")
         .def("__repr__", [](const alice_lri::Interval& self) {
             std::ostringstream oss;
             oss << "Interval(lower=" << self.lower << ", upper=" << self.upper << ")";
@@ -107,14 +93,10 @@ PYBIND11_MODULE(_alice_lri, m) {
 
     py::class_<alice_lri::ValueConfInterval>(m, "ValueConfInterval", R"doc(
         Value with associated confidence interval.
-
-        Attributes:
-            value (float): The value.
-            ci (Interval): Confidence interval for the value.
     )doc")
         .def(py::init<>(), "Default constructor.")
         .def_readwrite("value", &alice_lri::ValueConfInterval::value, "The value.")
-        .def_readwrite("ci", &alice_lri::ValueConfInterval::ci, "Confidence interval.")
+        .def_readwrite("ci", &alice_lri::ValueConfInterval::ci, "Confidence interval for the value.")
         .def("__repr__", [](const alice_lri::ValueConfInterval& self) {
             std::ostringstream oss;
             oss << "ValueConfInterval(value=" << self.value << ", ci=Interval(lower=" << self.ci.lower << ", upper=" << self.ci.upper << "))";
@@ -123,10 +105,6 @@ PYBIND11_MODULE(_alice_lri, m) {
 
     py::class_<alice_lri::ScanlineAngleBounds>(m, "ScanlineAngleBounds", R"doc(
         Angle bounds for a scanline.
-
-        Attributes:
-            lower_line (Interval): Lower angle interval.
-            upper_line (Interval): Upper angle interval.
     )doc")
         .def(py::init<>(), "Default constructor.")
         .def_readwrite("lower_line", &alice_lri::ScanlineAngleBounds::lowerLine, "Lower angle interval.")
@@ -141,32 +119,18 @@ PYBIND11_MODULE(_alice_lri, m) {
 
     py::class_<alice_lri::ScanlineDetailed>(m, "ScanlineDetailed", R"doc(
         Detailed scanline information with uncertainty and voting statistics.
-
-        Attributes:
-            vertical_offset (ValueConfInterval): Vertical spatial offset with confidence interval.
-            vertical_angle (ValueConfInterval): Vertical angle with confidence interval.
-            horizontal_offset (float): Horizontal spatial offset.
-            azimuthal_offset (float): Azimuthal offset.
-            resolution (int): Horizontal resolution of the scanline.
-            uncertainty (float): Estimated uncertainty.
-            hough_votes (int): Number of Hough transform votes.
-            hough_hash (int): Hash value for Hough voting.
-            points_count (int): Number of points assigned to this scanline.
-            theoretical_angle_bounds (ScanlineAngleBounds): Theoretical angle bounds for the scanline.
-            vertical_heuristic (bool): Whether vertical heuristic was used.
-            horizontal_heuristic (bool): Whether horizontal heuristic was used.
     )doc")
         .def(py::init<>(), "Default constructor.")
-        .def_readwrite("vertical_offset", &alice_lri::ScanlineDetailed::verticalOffset, "Vertical offset with confidence interval.")
+        .def_readwrite("vertical_offset", &alice_lri::ScanlineDetailed::verticalOffset, "Vertical spatial offset with confidence interval.")
         .def_readwrite("vertical_angle", &alice_lri::ScanlineDetailed::verticalAngle, "Vertical angle with confidence interval.")
-        .def_readwrite("horizontal_offset", &alice_lri::ScanlineDetailed::horizontalOffset, "Horizontal offset.")
+        .def_readwrite("horizontal_offset", &alice_lri::ScanlineDetailed::horizontalOffset, "Horizontal spatial offset.")
         .def_readwrite("azimuthal_offset", &alice_lri::ScanlineDetailed::azimuthalOffset, "Azimuthal offset.")
-        .def_readwrite("resolution", &alice_lri::ScanlineDetailed::resolution, "Number of points in the scanline.")
+        .def_readwrite("resolution", &alice_lri::ScanlineDetailed::resolution, "Horizontal resolution of the scanline.")
         .def_readwrite("uncertainty", &alice_lri::ScanlineDetailed::uncertainty, "Estimated uncertainty.")
         .def_readwrite("hough_votes", &alice_lri::ScanlineDetailed::houghVotes, "Number of Hough transform votes.")
         .def_readwrite("hough_hash", &alice_lri::ScanlineDetailed::houghHash, "Hash value for Hough voting.")
         .def_readwrite("points_count", &alice_lri::ScanlineDetailed::pointsCount, "Number of points assigned to this scanline.")
-        .def_readwrite("theoretical_angle_bounds", &alice_lri::ScanlineDetailed::theoreticalAngleBounds, "Theoretical angle bounds.")
+        .def_readwrite("theoretical_angle_bounds", &alice_lri::ScanlineDetailed::theoreticalAngleBounds, "Theoretical angle bounds for the scanline.")
         .def_readwrite("vertical_heuristic", &alice_lri::ScanlineDetailed::verticalHeuristic, "Whether vertical heuristic was used.")
         .def_readwrite("horizontal_heuristic", &alice_lri::ScanlineDetailed::horizontalHeuristic, "Whether horizontal heuristic was used.")
         .def("__repr__", [](const alice_lri::ScanlineDetailed& self) {
@@ -191,13 +155,6 @@ PYBIND11_MODULE(_alice_lri, m) {
 
         Args:
             scanline_count (int): Number of scanlines.
-            vertical_iterations (int): Number of vertical iterations performed.
-            unassigned_points (int): Number of unassigned points.
-            points_count (int): Total number of points.
-            end_reason (EndReason): Reason for ending the process.
-
-        Attributes:
-            scanlines (list of ScanlineDetailed): List of detailed scanlines.
             vertical_iterations (int): Number of vertical iterations performed.
             unassigned_points (int): Number of unassigned points.
             points_count (int): Total number of points.
@@ -232,10 +189,6 @@ PYBIND11_MODULE(_alice_lri, m) {
             height (int): Image height.
             initial_value (float, optional): Initial value for all pixels (if provided).
 
-        Attributes:
-            width (int): Image width.
-            height (int): Image height.
-
         Note:
             The (width, height) constructor only reserves space for pixels but does not initialize them.
             The (width, height, initial_value) constructor initializes all pixels to the given value.
@@ -243,8 +196,8 @@ PYBIND11_MODULE(_alice_lri, m) {
         .def(py::init<>(), "Default constructor (empty image).")
         .def(py::init<uint32_t, uint32_t>(), py::arg("width"), py::arg("height"), "Construct with width and height. Reserves space for pixels but does not initialize them.")
         .def(py::init<uint32_t, uint32_t, double>(), py::arg("width"), py::arg("height"), py::arg("initial_value"), "Construct with width, height, and initial pixel value.")
-        .def_property_readonly("width", &alice_lri::RangeImage::width, "Get image width.")
-        .def_property_readonly("height", &alice_lri::RangeImage::height, "Get image height.")
+        .def_property_readonly("width", &alice_lri::RangeImage::width, "Image width.")
+        .def_property_readonly("height", &alice_lri::RangeImage::height, "Image height.")
         .def("__repr__", [](const alice_lri::RangeImage& self) {
             std::ostringstream oss;
             oss << "RangeImage(width=" << self.width() << ", height=" << self.height() << ")";

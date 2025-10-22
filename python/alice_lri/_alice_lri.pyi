@@ -105,10 +105,6 @@ class Interval:
     """
     
             Represents a numeric interval [lower, upper].
-    
-            Attributes:
-                lower (float): Lower bound of the interval.
-                upper (float): Upper bound of the interval.
         
     """
     def __init__(self) -> None:
@@ -117,13 +113,13 @@ class Interval:
         """
     def __repr__(self) -> str:
         ...
-    def any_contained(self, arg0: Interval) -> bool:
+    def any_contained(self, other: Interval) -> bool:
         """
         Check if any part of another interval is contained in this interval.
         """
-    def clamp_both(self, arg0: typing.SupportsFloat, arg1: typing.SupportsFloat) -> None:
+    def clamp_both(self, min_value: typing.SupportsFloat, max_value: typing.SupportsFloat) -> None:
         """
-        Clamp both bounds to [minValue, maxValue].
+        Clamp both bounds to [min_value, max_value].
         """
     def diff(self) -> float:
         """
@@ -132,7 +128,7 @@ class Interval:
     @property
     def lower(self) -> float:
         """
-        Lower bound.
+        Lower bound of the interval.
         """
     @lower.setter
     def lower(self, arg0: typing.SupportsFloat) -> None:
@@ -140,7 +136,7 @@ class Interval:
     @property
     def upper(self) -> float:
         """
-        Upper bound.
+        Upper bound of the interval.
         """
     @upper.setter
     def upper(self, arg0: typing.SupportsFloat) -> None:
@@ -152,9 +148,6 @@ class Intrinsics:
     
             Args:
                 scanline_count (int): Number of scanlines.
-    
-            Attributes:
-                scanlines (list of Scanline): Array of scanlines describing the sensor geometry.
         
     """
     def __init__(self, scanline_count: typing.SupportsInt) -> None:
@@ -166,7 +159,7 @@ class Intrinsics:
     @property
     def scanlines(self) -> list[Scanline]:
         """
-        List of scanlines.
+        Array of scanlines describing the sensor geometry.
         """
 class IntrinsicsDetailed:
     """
@@ -175,13 +168,6 @@ class IntrinsicsDetailed:
     
             Args:
                 scanline_count (int): Number of scanlines.
-                vertical_iterations (int): Number of vertical iterations performed.
-                unassigned_points (int): Number of unassigned points.
-                points_count (int): Total number of points.
-                end_reason (EndReason): Reason for ending the process.
-    
-            Attributes:
-                scanlines (list of ScanlineDetailed): List of detailed scanlines.
                 vertical_iterations (int): Number of vertical iterations performed.
                 unassigned_points (int): Number of unassigned points.
                 points_count (int): Total number of points.
@@ -247,10 +233,6 @@ class RangeImage:
                 height (int): Image height.
                 initial_value (float, optional): Initial value for all pixels (if provided).
     
-            Attributes:
-                width (int): Image width.
-                height (int): Image height.
-    
             Note:
                 The (width, height) constructor only reserves space for pixels but does not initialize them.
                 The (width, height, initial_value) constructor initializes all pixels to the given value.
@@ -286,24 +268,17 @@ class RangeImage:
     @property
     def height(self) -> int:
         """
-        Get image height.
+        Image height.
         """
     @property
     def width(self) -> int:
         """
-        Get image width.
+        Image width.
         """
 class Scanline:
     """
     
             Represents a single scanline with intrinsic parameters.
-    
-            Attributes:
-                vertical_offset (float): Vertical spatial offset of the scanline.
-                vertical_angle (float): Vertical angle of the scanline.
-                horizontal_offset (float): Horizontal spatial offset of the scanline.
-                azimuthal_offset (float): Azimuthal offset of the scanline.
-                resolution (int): Horizontal resolution of the scanline.
         
     """
     def __init__(self) -> None:
@@ -315,7 +290,7 @@ class Scanline:
     @property
     def azimuthal_offset(self) -> float:
         """
-        Azimuthal offset.
+        Azimuthal offset of the scanline.
         """
     @azimuthal_offset.setter
     def azimuthal_offset(self, arg0: typing.SupportsFloat) -> None:
@@ -323,7 +298,7 @@ class Scanline:
     @property
     def horizontal_offset(self) -> float:
         """
-        Horizontal spatial offset.
+        Horizontal spatial offset of the scanline.
         """
     @horizontal_offset.setter
     def horizontal_offset(self, arg0: typing.SupportsFloat) -> None:
@@ -331,7 +306,7 @@ class Scanline:
     @property
     def resolution(self) -> int:
         """
-        Horizontal resolution.
+        Horizontal resolution of the scanline.
         """
     @resolution.setter
     def resolution(self, arg0: typing.SupportsInt) -> None:
@@ -339,7 +314,7 @@ class Scanline:
     @property
     def vertical_angle(self) -> float:
         """
-        Vertical angle.
+        Vertical angle of the scanline.
         """
     @vertical_angle.setter
     def vertical_angle(self, arg0: typing.SupportsFloat) -> None:
@@ -347,7 +322,7 @@ class Scanline:
     @property
     def vertical_offset(self) -> float:
         """
-        Vertical spatial offset.
+        Vertical spatial offset of the scanline.
         """
     @vertical_offset.setter
     def vertical_offset(self, arg0: typing.SupportsFloat) -> None:
@@ -356,10 +331,6 @@ class ScanlineAngleBounds:
     """
     
             Angle bounds for a scanline.
-    
-            Attributes:
-                lower_line (Interval): Lower angle interval.
-                upper_line (Interval): Upper angle interval.
         
     """
     def __init__(self) -> None:
@@ -388,20 +359,6 @@ class ScanlineDetailed:
     """
     
             Detailed scanline information with uncertainty and voting statistics.
-    
-            Attributes:
-                vertical_offset (ValueConfInterval): Vertical spatial offset with confidence interval.
-                vertical_angle (ValueConfInterval): Vertical angle with confidence interval.
-                horizontal_offset (float): Horizontal spatial offset.
-                azimuthal_offset (float): Azimuthal offset.
-                resolution (int): Horizontal resolution of the scanline.
-                uncertainty (float): Estimated uncertainty.
-                hough_votes (int): Number of Hough transform votes.
-                hough_hash (int): Hash value for Hough voting.
-                points_count (int): Number of points assigned to this scanline.
-                theoretical_angle_bounds (ScanlineAngleBounds): Theoretical angle bounds for the scanline.
-                vertical_heuristic (bool): Whether vertical heuristic was used.
-                horizontal_heuristic (bool): Whether horizontal heuristic was used.
         
     """
     def __init__(self) -> None:
@@ -429,7 +386,7 @@ class ScanlineDetailed:
     @property
     def horizontal_offset(self) -> float:
         """
-        Horizontal offset.
+        Horizontal spatial offset.
         """
     @horizontal_offset.setter
     def horizontal_offset(self, arg0: typing.SupportsFloat) -> None:
@@ -461,7 +418,7 @@ class ScanlineDetailed:
     @property
     def resolution(self) -> int:
         """
-        Number of points in the scanline.
+        Horizontal resolution of the scanline.
         """
     @resolution.setter
     def resolution(self, arg0: typing.SupportsInt) -> None:
@@ -469,7 +426,7 @@ class ScanlineDetailed:
     @property
     def theoretical_angle_bounds(self) -> ScanlineAngleBounds:
         """
-        Theoretical angle bounds.
+        Theoretical angle bounds for the scanline.
         """
     @theoretical_angle_bounds.setter
     def theoretical_angle_bounds(self, arg0: ScanlineAngleBounds) -> None:
@@ -501,7 +458,7 @@ class ScanlineDetailed:
     @property
     def vertical_offset(self) -> ValueConfInterval:
         """
-        Vertical offset with confidence interval.
+        Vertical spatial offset with confidence interval.
         """
     @vertical_offset.setter
     def vertical_offset(self, arg0: ValueConfInterval) -> None:
@@ -510,10 +467,6 @@ class ValueConfInterval:
     """
     
             Value with associated confidence interval.
-    
-            Attributes:
-                value (float): The value.
-                ci (Interval): Confidence interval for the value.
         
     """
     def __init__(self) -> None:
@@ -525,7 +478,7 @@ class ValueConfInterval:
     @property
     def ci(self) -> Interval:
         """
-        Confidence interval.
+        Confidence interval for the value.
         """
     @ci.setter
     def ci(self, arg0: Interval) -> None:
