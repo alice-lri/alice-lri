@@ -41,8 +41,10 @@ html_theme = "furo"
 html_static_path = ['_static']
 
 # Furo theme options: show repository link and improve navigation
-html_title = "ALICE-LRI Documentation"
+html_title = "Documentation"
 html_theme_options = {
+    "light_logo": "logo.svg",
+    "dark_logo": "logo-dark.svg",
     "source_repository": "https://github.com/alice-lri/alice-lri",
     "source_branch": "master",
     "source_directory": "docs/",
