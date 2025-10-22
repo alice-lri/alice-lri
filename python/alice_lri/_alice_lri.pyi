@@ -2,7 +2,9 @@
 Python bindings for the ALICE-LRI C++ library
 """
 from __future__ import annotations
+import collections.abc
 import numpy
+import numpy.typing
 import typing
 __all__: list[str] = ['ALL_ASSIGNED', 'EMPTY_POINT_CLOUD', 'EndReason', 'ErrorCode', 'INTERNAL_ERROR', 'Interval', 'Intrinsics', 'IntrinsicsDetailed', 'MAX_ITERATIONS', 'MISMATCHED_SIZES', 'NONE', 'NO_MORE_PEAKS', 'RANGES_XY_ZERO', 'RangeImage', 'Scanline', 'ScanlineAngleBounds', 'ScanlineDetailed', 'ValueConfInterval', 'error_message', 'estimate_intrinsics', 'estimate_intrinsics_detailed', 'intrinsics_from_json_file', 'intrinsics_from_json_str', 'intrinsics_to_json_file', 'intrinsics_to_json_str', 'project_to_range_image', 'unproject_to_point_cloud']
 class EndReason:
@@ -31,7 +33,7 @@ class EndReason:
         ...
     def __index__(self) -> int:
         ...
-    def __init__(self, value: int) -> None:
+    def __init__(self, value: typing.SupportsInt) -> None:
         ...
     def __int__(self) -> int:
         ...
@@ -39,7 +41,7 @@ class EndReason:
         ...
     def __repr__(self) -> str:
         ...
-    def __setstate__(self, state: int) -> None:
+    def __setstate__(self, state: typing.SupportsInt) -> None:
         ...
     def __str__(self) -> str:
         ...
@@ -81,7 +83,7 @@ class ErrorCode:
         ...
     def __index__(self) -> int:
         ...
-    def __init__(self, value: int) -> None:
+    def __init__(self, value: typing.SupportsInt) -> None:
         ...
     def __int__(self) -> int:
         ...
@@ -89,7 +91,7 @@ class ErrorCode:
         ...
     def __repr__(self) -> str:
         ...
-    def __setstate__(self, state: int) -> None:
+    def __setstate__(self, state: typing.SupportsInt) -> None:
         ...
     def __str__(self) -> str:
         ...
@@ -119,7 +121,7 @@ class Interval:
         """
         Check if any part of another interval is contained in this interval.
         """
-    def clamp_both(self, arg0: float, arg1: float) -> None:
+    def clamp_both(self, arg0: typing.SupportsFloat, arg1: typing.SupportsFloat) -> None:
         """
         Clamp both bounds to [minValue, maxValue].
         """
@@ -133,7 +135,7 @@ class Interval:
         Lower bound.
         """
     @lower.setter
-    def lower(self, arg0: float) -> None:
+    def lower(self, arg0: typing.SupportsFloat) -> None:
         ...
     @property
     def upper(self) -> float:
@@ -141,7 +143,7 @@ class Interval:
         Upper bound.
         """
     @upper.setter
-    def upper(self, arg0: float) -> None:
+    def upper(self, arg0: typing.SupportsFloat) -> None:
         ...
 class Intrinsics:
     """
@@ -155,7 +157,7 @@ class Intrinsics:
                 scanlines (list of Scanline): Array of scanlines describing the sensor geometry.
         
     """
-    def __init__(self, scanline_count: int) -> None:
+    def __init__(self, scanline_count: typing.SupportsInt) -> None:
         """
         Construct with a given number of scanlines.
         """
@@ -187,12 +189,12 @@ class IntrinsicsDetailed:
         
     """
     @typing.overload
-    def __init__(self, scanline_count: int) -> None:
+    def __init__(self, scanline_count: typing.SupportsInt) -> None:
         """
         Construct with a given number of scanlines.
         """
     @typing.overload
-    def __init__(self, scanline_count: int, vertical_iterations: int, unassigned_points: int, points_count: int, end_reason: EndReason) -> None:
+    def __init__(self, scanline_count: typing.SupportsInt, vertical_iterations: typing.SupportsInt, unassigned_points: typing.SupportsInt, points_count: typing.SupportsInt, end_reason: EndReason) -> None:
         """
         Full constructor with all statistics.
         """
@@ -212,7 +214,7 @@ class IntrinsicsDetailed:
         Total number of points.
         """
     @points_count.setter
-    def points_count(self, arg0: int) -> None:
+    def points_count(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def scanlines(self) -> list[ScanlineDetailed]:
@@ -225,7 +227,7 @@ class IntrinsicsDetailed:
         Number of unassigned points.
         """
     @unassigned_points.setter
-    def unassigned_points(self, arg0: int) -> None:
+    def unassigned_points(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def vertical_iterations(self) -> int:
@@ -233,7 +235,7 @@ class IntrinsicsDetailed:
         Number of vertical iterations performed.
         """
     @vertical_iterations.setter
-    def vertical_iterations(self, arg0: int) -> None:
+    def vertical_iterations(self, arg0: typing.SupportsInt) -> None:
         ...
 class RangeImage:
     """
@@ -254,7 +256,7 @@ class RangeImage:
                 The (width, height, initial_value) constructor initializes all pixels to the given value.
         
     """
-    def __array__(self, **kwargs) -> numpy.ndarray[numpy.float64]:
+    def __array__(self, **kwargs) -> numpy.typing.NDArray[numpy.float64]:
         ...
     def __getitem__(self, arg0: tuple) -> float:
         ...
@@ -264,12 +266,12 @@ class RangeImage:
         Default constructor (empty image).
         """
     @typing.overload
-    def __init__(self, width: int, height: int) -> None:
+    def __init__(self, width: typing.SupportsInt, height: typing.SupportsInt) -> None:
         """
         Construct with width and height. Reserves space for pixels but does not initialize them.
         """
     @typing.overload
-    def __init__(self, width: int, height: int, initial_value: float) -> None:
+    def __init__(self, width: typing.SupportsInt, height: typing.SupportsInt, initial_value: typing.SupportsFloat) -> None:
         """
         Construct with width, height, and initial pixel value.
         """
@@ -279,7 +281,7 @@ class RangeImage:
     @typing.overload
     def __repr__(self) -> str:
         ...
-    def __setitem__(self, arg0: tuple, arg1: float) -> None:
+    def __setitem__(self, arg0: tuple, arg1: typing.SupportsFloat) -> None:
         ...
     @property
     def height(self) -> int:
@@ -316,7 +318,7 @@ class Scanline:
         Azimuthal offset.
         """
     @azimuthal_offset.setter
-    def azimuthal_offset(self, arg0: float) -> None:
+    def azimuthal_offset(self, arg0: typing.SupportsFloat) -> None:
         ...
     @property
     def horizontal_offset(self) -> float:
@@ -324,7 +326,7 @@ class Scanline:
         Horizontal spatial offset.
         """
     @horizontal_offset.setter
-    def horizontal_offset(self, arg0: float) -> None:
+    def horizontal_offset(self, arg0: typing.SupportsFloat) -> None:
         ...
     @property
     def resolution(self) -> int:
@@ -332,7 +334,7 @@ class Scanline:
         Horizontal resolution.
         """
     @resolution.setter
-    def resolution(self, arg0: int) -> None:
+    def resolution(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def vertical_angle(self) -> float:
@@ -340,7 +342,7 @@ class Scanline:
         Vertical angle.
         """
     @vertical_angle.setter
-    def vertical_angle(self, arg0: float) -> None:
+    def vertical_angle(self, arg0: typing.SupportsFloat) -> None:
         ...
     @property
     def vertical_offset(self) -> float:
@@ -348,7 +350,7 @@ class Scanline:
         Vertical spatial offset.
         """
     @vertical_offset.setter
-    def vertical_offset(self, arg0: float) -> None:
+    def vertical_offset(self, arg0: typing.SupportsFloat) -> None:
         ...
 class ScanlineAngleBounds:
     """
@@ -414,7 +416,7 @@ class ScanlineDetailed:
         Azimuthal offset.
         """
     @azimuthal_offset.setter
-    def azimuthal_offset(self, arg0: float) -> None:
+    def azimuthal_offset(self, arg0: typing.SupportsFloat) -> None:
         ...
     @property
     def horizontal_heuristic(self) -> bool:
@@ -430,7 +432,7 @@ class ScanlineDetailed:
         Horizontal offset.
         """
     @horizontal_offset.setter
-    def horizontal_offset(self, arg0: float) -> None:
+    def horizontal_offset(self, arg0: typing.SupportsFloat) -> None:
         ...
     @property
     def hough_hash(self) -> int:
@@ -438,7 +440,7 @@ class ScanlineDetailed:
         Hash value for Hough voting.
         """
     @hough_hash.setter
-    def hough_hash(self, arg0: int) -> None:
+    def hough_hash(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def hough_votes(self) -> int:
@@ -446,7 +448,7 @@ class ScanlineDetailed:
         Number of Hough transform votes.
         """
     @hough_votes.setter
-    def hough_votes(self, arg0: int) -> None:
+    def hough_votes(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def points_count(self) -> int:
@@ -454,7 +456,7 @@ class ScanlineDetailed:
         Number of points assigned to this scanline.
         """
     @points_count.setter
-    def points_count(self, arg0: int) -> None:
+    def points_count(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def resolution(self) -> int:
@@ -462,7 +464,7 @@ class ScanlineDetailed:
         Number of points in the scanline.
         """
     @resolution.setter
-    def resolution(self, arg0: int) -> None:
+    def resolution(self, arg0: typing.SupportsInt) -> None:
         ...
     @property
     def theoretical_angle_bounds(self) -> ScanlineAngleBounds:
@@ -478,7 +480,7 @@ class ScanlineDetailed:
         Estimated uncertainty.
         """
     @uncertainty.setter
-    def uncertainty(self, arg0: float) -> None:
+    def uncertainty(self, arg0: typing.SupportsFloat) -> None:
         ...
     @property
     def vertical_angle(self) -> ValueConfInterval:
@@ -534,7 +536,7 @@ class ValueConfInterval:
         The value.
         """
     @value.setter
-    def value(self, arg0: float) -> None:
+    def value(self, arg0: typing.SupportsFloat) -> None:
         ...
 def error_message(code: ErrorCode) -> str:
     """
@@ -545,7 +547,7 @@ def error_message(code: ErrorCode) -> str:
             Returns:
                 str: Error message.
     """
-def estimate_intrinsics(x: list[float], y: list[float], z: list[float]) -> Intrinsics:
+def estimate_intrinsics(x: collections.abc.Sequence[typing.SupportsFloat], y: collections.abc.Sequence[typing.SupportsFloat], z: collections.abc.Sequence[typing.SupportsFloat]) -> Intrinsics:
     """
             Estimate sensor intrinsics from point cloud coordinates given as float vectors.
     
@@ -556,7 +558,7 @@ def estimate_intrinsics(x: list[float], y: list[float], z: list[float]) -> Intri
             Returns:
                 Intrinsics: Estimated sensor intrinsics.
     """
-def estimate_intrinsics_detailed(x: list[float], y: list[float], z: list[float]) -> IntrinsicsDetailed:
+def estimate_intrinsics_detailed(x: collections.abc.Sequence[typing.SupportsFloat], y: collections.abc.Sequence[typing.SupportsFloat], z: collections.abc.Sequence[typing.SupportsFloat]) -> IntrinsicsDetailed:
     """
             Estimate detailed sensor intrinsics (including algorithm execution info) from point cloud coordinates given as float vectors.
     
@@ -585,7 +587,7 @@ def intrinsics_from_json_str(json: str) -> Intrinsics:
             Returns:
                 Intrinsics: Parsed intrinsics.
     """
-def intrinsics_to_json_file(intrinsics: Intrinsics, output_path: str, indent: int = -1) -> None:
+def intrinsics_to_json_file(intrinsics: Intrinsics, output_path: str, indent: typing.SupportsInt = -1) -> None:
     """
             Write intrinsics to a JSON file.
     
@@ -596,7 +598,7 @@ def intrinsics_to_json_file(intrinsics: Intrinsics, output_path: str, indent: in
             Raises:
                 RuntimeError: If writing fails.
     """
-def intrinsics_to_json_str(intrinsics: Intrinsics, indent: int = -1) -> str:
+def intrinsics_to_json_str(intrinsics: Intrinsics, indent: typing.SupportsInt = -1) -> str:
     """
             Convert intrinsics to a JSON string.
     
@@ -606,7 +608,7 @@ def intrinsics_to_json_str(intrinsics: Intrinsics, indent: int = -1) -> str:
             Returns:
                 str: JSON string.
     """
-def project_to_range_image(intrinsics: Intrinsics, x: list[float], y: list[float], z: list[float]) -> RangeImage:
+def project_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[typing.SupportsFloat], y: collections.abc.Sequence[typing.SupportsFloat], z: collections.abc.Sequence[typing.SupportsFloat]) -> RangeImage:
     """
             Project a point cloud to a range image using given intrinsics.
     

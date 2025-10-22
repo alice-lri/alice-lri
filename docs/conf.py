@@ -20,6 +20,28 @@ extensions = [
 ]
 
 autodoc_typehints = 'description'
+# Don't add module names to documented objects (cleaner display)
+add_module_names = False
+# Use simpler type representations
+autodoc_typehints_format = 'short'
+# Custom processing to simplify type hints
+def process_signature(app, what, name, obj, options, signature, return_annotation):
+    if signature:
+        # Replace verbose type hints with simpler ones
+        signature = signature.replace('alice_lri._alice_lri.', 'alice_lri.')
+        signature = signature.replace('collections.abc.Sequence[typing.SupportsFloat]', 'Sequence[float]')
+        signature = signature.replace('typing.SupportsFloat', 'float')
+        signature = signature.replace('typing.SupportsInt', 'int')
+    if return_annotation:
+        return_annotation = return_annotation.replace('alice_lri._alice_lri.', 'alice_lri.')
+        return_annotation = return_annotation.replace('collections.abc.Sequence[typing.SupportsFloat]', 'Sequence[float]')
+        return_annotation = return_annotation.replace('typing.SupportsFloat', 'float')
+        return_annotation = return_annotation.replace('typing.SupportsInt', 'int')
+    return (signature, return_annotation)
+
+def setup(app):
+    app.connect('autodoc-process-signature', process_signature)
+
 napoleon_google_docstring = True
 napoleon_numpy_docstring = True
 
