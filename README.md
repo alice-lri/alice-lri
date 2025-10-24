@@ -184,5 +184,13 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 If you use this library in your research, please cite:
 
 ```bibtex
-TODO
+@misc{soutullo2025alicelrigeneralmethodlossless,
+      title={ALICE-LRI: A General Method for Lossless Range Image Generation for Spinning LiDAR Sensors without Calibration Metadata}, 
+      author={Samuel Soutullo and Miguel Yermo and David L. Vilariño and Óscar G. Lorenzo and José C. Cabaleiro and Francisco F. Rivera},
+      year={2025},
+      eprint={2510.20708},
+      archivePrefix={arXiv},
+      primaryClass={cs.CV},
+      url={https://arxiv.org/abs/2510.20708}, 
+}
 ```
