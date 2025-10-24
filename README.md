@@ -6,7 +6,7 @@
 [![PyPI](https://img.shields.io/pypi/v/alice-lri.svg)](https://pypi.org/project/alice-lri/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-ALICE-LRI is a C++ and Python library for lossless range image generation and reconstruction from spinning 3D LiDAR point clouds. It achieves losslessness by automatically estimating all intrinsic sensor parameters from data, so you do not need calibration files or manufacturer metadata. This enables accurate, sensor-agnostic projection to range images and full recovery of 3D LiDAR data.
+ALICE-LRI (Automatic LiDAR Intrinsic Calibration Estimation for Lossless Range Images) is a C++ and Python library for lossless range image generation and reconstruction from spinning 3D LiDAR point clouds. It achieves losslessness by automatically estimating all intrinsic sensor parameters from data, so you do not need calibration files or manufacturer metadata. This enables accurate, sensor-agnostic projection to range images and full recovery of 3D LiDAR data.
 
 This repository is the **core library** of the ALICE-LRI ecosystem, providing the main C++ and Python implementation. It is part of a family of repositories grouped in the [ALICE-LRI GitHub Organization](https://github.com/alice-lri), which together enable reproducible research, experiments, and applications based on ALICE-LRI.
 
@@ -184,7 +184,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduc
 If you use this library in your research, please cite:
 
 ```bibtex
-@misc{soutullo2025alicelrigeneralmethodlossless,
+@misc{soutullo2025alicelri,
       title={ALICE-LRI: A General Method for Lossless Range Image Generation for Spinning LiDAR Sensors without Calibration Metadata}, 
       author={Samuel Soutullo and Miguel Yermo and David L. Vilariño and Óscar G. Lorenzo and José C. Cabaleiro and Francisco F. Rivera},
       year={2025},
@@ -194,3 +194,5 @@ If you use this library in your research, please cite:
       url={https://arxiv.org/abs/2510.20708}, 
 }
 ```
+
+**Link to paper**: https://arxiv.org/abs/2510.20708
