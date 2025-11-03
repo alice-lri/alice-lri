@@ -211,7 +211,18 @@ PYBIND11_MODULE(_alice_lri, m) {
             if (row >= ri.height() || col >= ri.width())
                 throw py::index_error("Index out of bounds");
             return ri(row, col);
-        }, py::is_operator())
+        }, py::is_operator(), R"doc(
+            Get pixel value at the specified position.
+
+            Args:
+                row (int): Row index (0 to height-1).
+                col (int): Column index (0 to width-1).
+            Returns:
+                float: Pixel value at [row, col].
+            
+            Example:
+                >>> value = range_image[i, j]
+        )doc")
         .def("__setitem__", [](alice_lri::RangeImage &ri, py::tuple idx, double value) {
             if (idx.size() != 2)
                 throw py::index_error("Need 2 indices");
@@ -220,7 +231,17 @@ PYBIND11_MODULE(_alice_lri, m) {
             if (row >= ri.height() || col >= ri.width())
                 throw py::index_error("Index out of bounds");
             ri(row, col) = value;
-        }, py::is_operator())
+        }, py::is_operator(), R"doc(
+            Set pixel value at the specified position.
+
+            Args:
+                row (int): Row index (0 to height-1).
+                col (int): Column index (0 to width-1).
+                value (float): Value to set.
+            
+            Example:
+                >>> range_image[i, j] = 10.5
+        )doc")
         .def("__array__", [](py::object self, py::kwargs kwargs) {
             auto& ri = self.cast<const alice_lri::RangeImage&>();
             return py::array_t<double>(
@@ -229,12 +250,21 @@ PYBIND11_MODULE(_alice_lri, m) {
                 ri.data(),                                         // pointer to data
                 self                                              // keep alive
             );
-        })
-        .def("__repr__", [](const alice_lri::RangeImage& self) {
-            std::ostringstream oss;
-            oss << "RangeImage(width=" << self.width() << ", height=" << self.height() << ")";
-            return oss.str();
-        });
+        }, R"doc(
+            Convert RangeImage to a NumPy array (zero-copy view).
+
+            Returns:
+                numpy.ndarray: A 2D array view of the range image data.
+            
+            Note:
+                The returned array is a view of the underlying data, so modifications
+                to the array will affect the original RangeImage.
+            
+            Example:
+                >>> import numpy as np
+                >>> array = np.asarray(range_image)
+                >>> max_range = np.max(array)
+        )doc");
 
     m.def("estimate_intrinsics", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
         // Convert std::vector to AliceArray
