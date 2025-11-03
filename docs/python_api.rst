@@ -26,6 +26,15 @@ Types commonly used when interacting with ALICE-LRI.
 .. autoclass:: alice_lri.RangeImage
    :members:
    :undoc-members:
+   :special-members: __getitem__, __setitem__, __array__
+
+   **Indexing and Array Access**
+
+   This class supports indexing syntax for getting and setting pixel values:
+
+   - ``value = range_image[row, col]`` — Get pixel value at position (row, col)
+   - ``range_image[row, col] = value`` — Set pixel value at position (row, col)
+   - ``array = np.asarray(range_image)`` — Convert to NumPy array (zero-copy view)
 
 Additional Resources
 --------------------
