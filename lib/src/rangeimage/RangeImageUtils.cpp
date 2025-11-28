@@ -191,7 +191,7 @@ namespace alice_lri::RangeImageUtils {
 
             const int32_t flatIdx = row * width + col;
 
-            if (rangeImageData[flatIdx] != emptyValue) {
+            if (rangeImageData[flatIdx] != emptyValue && !(std::isnan(rangeImageData[flatIdx]) && std::isnan(emptyValue))) {
                 LOG_WARN("Overwriting pixel at (", row, ", ", col, ") with range ", ranges(pointIdx),
                          " (previously: ", rangeImage(row, col), "). Losslessness not achieved!");
             }
