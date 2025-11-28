@@ -305,15 +305,15 @@ PYBIND11_MODULE(_alice_lri, m) {
 
     m.def("project_to_range_image", [&unwrap_result](
         const alice_lri::Intrinsics& intrinsics, const std::vector<double>& x, const std::vector<double>& y,
-        const std::vector<double>& z
+        const std::vector<double>& z, double empty_value
     ) {
         // Convert std::vector to AliceArray
         alice_lri::PointCloud::Double cloud;
         cloud.x = alice_lri::AliceArray<double>(x.data(), x.size());
         cloud.y = alice_lri::AliceArray<double>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
-        return unwrap_result(alice_lri::projectToRangeImage(intrinsics, cloud));
-    }, py::arg("intrinsics"), py::arg("x"), py::arg("y"), py::arg("z"), R"doc(
+        return unwrap_result(alice_lri::projectToRangeImage(intrinsics, cloud, empty_value));
+    }, py::arg("intrinsics"), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("empty_value") = 0.0, R"doc(
         Project a point cloud to a range image using given intrinsics.
 
         Args:
@@ -321,13 +321,14 @@ PYBIND11_MODULE(_alice_lri, m) {
             x (list of float): X coordinates.
             y (list of float): Y coordinates.
             z (list of float): Z coordinates.
+            empty_value (float, optional): Initial value for pixels (default 0.0).
         Returns:
             RangeImage: Projected range image.
     )doc");
 
     m.def("project_values_to_range_image", [&unwrap_result](
         const alice_lri::Intrinsics& intrinsics, const std::vector<double>& x, const std::vector<double>& y,
-        const std::vector<double>& z, const std::vector<double>& values
+        const std::vector<double>& z, const std::vector<double>& values, double empty_value
     ) {
         // Convert std::vector to AliceArray
         alice_lri::PointCloud::Double cloud;
@@ -335,8 +336,8 @@ PYBIND11_MODULE(_alice_lri, m) {
         cloud.y = alice_lri::AliceArray<double>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
         alice_lri::AliceArray<double> vals(values.data(), values.size());
-        return unwrap_result(alice_lri::projectValuesToRangeImage(intrinsics, cloud, vals));
-    }, py::arg("intrinsics"), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("values"), R"doc(
+        return unwrap_result(alice_lri::projectValuesToRangeImage(intrinsics, cloud, vals, empty_value));
+    }, py::arg("intrinsics"), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("values"), py::arg("empty_value") = 0.0, R"doc(
         Project a point cloud to a range image using given intrinsics and custom scalar values.
 
         Args:
@@ -345,6 +346,7 @@ PYBIND11_MODULE(_alice_lri, m) {
             y (list of float): Y coordinates.
             z (list of float): Z coordinates.
             values (list of float): Scalar values to project.
+            empty_value (float, optional): Initial value for pixels (default 0.0).
         Returns:
             RangeImage: Projected range image.
     )doc");

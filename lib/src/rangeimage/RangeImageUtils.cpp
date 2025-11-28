@@ -13,23 +13,26 @@ namespace alice_lri::RangeImageUtils {
     template<typename Scalar>
     RangeImage computeRangeImage(
         const Intrinsics &intrinsics, const Eigen::ArrayX<Scalar> &x, const Eigen::ArrayX<Scalar> &y,
-        const Eigen::ArrayX<Scalar> &z, const std::optional<Eigen::ArrayX<Scalar>>& values = std::nullopt
+        const Eigen::ArrayX<Scalar> &z, const std::optional<Eigen::ArrayX<Scalar>> &values = std::nullopt,
+        double emptyValue = 0.0
     );
 
     template<typename Scalar>
     int32_t findBestScanline(
-        std::span<Scanline const> scanlines, const Eigen::ArrayX<Scalar> &ranges, const Eigen::ArrayX<Scalar> &phis, int32_t pointIdx
+        std::span<Scanline const> scanlines, const Eigen::ArrayX<Scalar> &ranges, const Eigen::ArrayX<Scalar> &phis,
+        int32_t pointIdx
     );
 
     template<typename Scalar>
     RangeImage buildProjection(
         const Intrinsics &intrinsics, const Eigen::ArrayXi &scanlinesByPoints, const Eigen::ArrayX<Scalar> &ranges,
-        const Eigen::ArrayXd &correctedThetas, const std::optional<Eigen::ArrayX<Scalar>>& values = std::nullopt
+        const Eigen::ArrayXd &correctedThetas, const std::optional<Eigen::ArrayX<Scalar>> &values = std::nullopt,
+        double emptyValue = 0.0
     );
 
     inline int32_t calculateLcmHorizontalResolution(const Intrinsics &intrinsics);
 
-    RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) {
+    RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points, const double emptyValue) {
         PROFILE_SCOPE("RangeImageUtils::projectToRangeImage");
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
@@ -37,11 +40,11 @@ namespace alice_lri::RangeImageUtils {
         const Eigen::ArrayXf y = Eigen::Map<const Eigen::ArrayXf>(points.y.data(), size);
         const Eigen::ArrayXf z = Eigen::Map<const Eigen::ArrayXf>(points.z.data(), size);
 
-        return computeRangeImage(intrinsics, x, y, z);
+        return computeRangeImage(intrinsics, x, y, z, std::optional<Eigen::ArrayXf>(std::nullopt), emptyValue);
     }
 
     RangeImage projectValuesToRangeImage(
-        const Intrinsics &intrinsics, const PointCloud::Float &points, const AliceArray<float> &values
+        const Intrinsics &intrinsics, const PointCloud::Float &points, const AliceArray<float> &values, const double emptyValue
     ) {
         PROFILE_SCOPE("RangeImageUtils::projectValuesToRangeImage");
         const auto size = static_cast<Eigen::Index>(points.x.size());
@@ -51,10 +54,10 @@ namespace alice_lri::RangeImageUtils {
         const Eigen::ArrayXf z = Eigen::Map<const Eigen::ArrayXf>(points.z.data(), size);
         const Eigen::ArrayXf v = Eigen::Map<const Eigen::ArrayXf>(values.data(), size);
 
-        return computeRangeImage(intrinsics, x, y, z, std::make_optional(v));
+        return computeRangeImage(intrinsics, x, y, z, std::make_optional(v), emptyValue);
     }
 
-    RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points) {
+    RangeImage projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points, const double emptyValue) {
         PROFILE_SCOPE("RangeImageUtils::projectToRangeImage");
         const auto size = static_cast<Eigen::Index>(points.x.size());
 
@@ -62,11 +65,11 @@ namespace alice_lri::RangeImageUtils {
         const Eigen::ArrayXd y = Eigen::Map<const Eigen::ArrayXd>(points.y.data(), size);
         const Eigen::ArrayXd z = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
 
-        return computeRangeImage(intrinsics, x, y, z);
+        return computeRangeImage(intrinsics, x, y, z, std::optional<Eigen::ArrayXd>(std::nullopt), emptyValue);
     }
 
     RangeImage projectValuesToRangeImage(
-        const Intrinsics &intrinsics, const PointCloud::Double &points, const AliceArray<double> &values
+        const Intrinsics &intrinsics, const PointCloud::Double &points, const AliceArray<double> &values, const double emptyValue
     ) {
         PROFILE_SCOPE("RangeImageUtils::projectValuesToRangeImage");
         const auto size = static_cast<Eigen::Index>(points.x.size());
@@ -76,7 +79,7 @@ namespace alice_lri::RangeImageUtils {
         const Eigen::ArrayXd z = Eigen::Map<const Eigen::ArrayXd>(points.z.data(), size);
         const Eigen::ArrayXd v = Eigen::Map<const Eigen::ArrayXd>(values.data(), size);
 
-        return computeRangeImage(intrinsics, x, y, z, std::make_optional(v));
+        return computeRangeImage(intrinsics, x, y, z, std::make_optional(v), emptyValue);
     }
 
     PointCloud::Double unProjectToPointCloud(const Intrinsics &intrinsics, const RangeImage &image) {
@@ -114,7 +117,7 @@ namespace alice_lri::RangeImageUtils {
     template<typename Scalar>
     RangeImage computeRangeImage(
         const Intrinsics &intrinsics, const Eigen::ArrayX<Scalar> &x, const Eigen::ArrayX<Scalar> &y,
-        const Eigen::ArrayX<Scalar> &z, const std::optional<Eigen::ArrayX<Scalar>>& values
+        const Eigen::ArrayX<Scalar> &z, const std::optional<Eigen::ArrayX<Scalar>> &values, const double emptyValue
     ) {
         const Eigen::ArrayX<Scalar> rangesXySquared = x.square() + y.square();
         const Eigen::ArrayX<Scalar> ranges = (rangesXySquared + z.square()).sqrt();
@@ -141,7 +144,7 @@ namespace alice_lri::RangeImageUtils {
 
         Utils::positiveFmodInplace(correctedThetas, Constant::TWO_PI);
 
-        return buildProjection(intrinsics, scanlinesByPoints, ranges, correctedThetas, values);
+        return buildProjection(intrinsics, scanlinesByPoints, ranges, correctedThetas, values, emptyValue);
     }
 
     template<typename Scalar>
@@ -171,11 +174,11 @@ namespace alice_lri::RangeImageUtils {
     template<typename Scalar>
     RangeImage buildProjection(
         const Intrinsics &intrinsics, const Eigen::ArrayXi &scanlinesByPoints, const Eigen::ArrayX<Scalar> &ranges,
-        const Eigen::ArrayXd &correctedThetas, const std::optional<Eigen::ArrayX<Scalar>>& values
+        const Eigen::ArrayXd &correctedThetas, const std::optional<Eigen::ArrayX<Scalar>> &values, const double emptyValue
     ) {
         const int32_t width = calculateLcmHorizontalResolution(intrinsics);
         const int32_t height = static_cast<int32_t>(intrinsics.scanlines.size());
-        RangeImage rangeImage(width, height, 0);
+        RangeImage rangeImage(width, height, emptyValue);
         double *rangeImageData = rangeImage.data();
 
         for (int32_t pointIdx = 0; pointIdx < ranges.size(); ++pointIdx) {
@@ -188,12 +191,12 @@ namespace alice_lri::RangeImageUtils {
 
             const int32_t flatIdx = row * width + col;
 
-            if (rangeImageData[flatIdx] != 0) {
+            if (rangeImageData[flatIdx] != emptyValue) {
                 LOG_WARN("Overwriting pixel at (", row, ", ", col, ") with range ", ranges(pointIdx),
                          " (previously: ", rangeImage(row, col), "). Losslessness not achieved!");
             }
 
-            rangeImageData[flatIdx] = values ? (*values)(pointIdx) : ranges(pointIdx);
+            rangeImageData[flatIdx] = values.has_value() ? (*values)(pointIdx) : ranges(pointIdx);
         }
 
         return rangeImage;

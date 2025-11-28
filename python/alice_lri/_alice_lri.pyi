@@ -592,7 +592,7 @@ def intrinsics_to_json_str(intrinsics: Intrinsics, indent: typing.SupportsInt = 
             Returns:
                 str: JSON string.
     """
-def project_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[typing.SupportsFloat], y: collections.abc.Sequence[typing.SupportsFloat], z: collections.abc.Sequence[typing.SupportsFloat]) -> RangeImage:
+def project_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[typing.SupportsFloat], y: collections.abc.Sequence[typing.SupportsFloat], z: collections.abc.Sequence[typing.SupportsFloat], empty_value: typing.SupportsFloat = 0.0) -> RangeImage:
     """
             Project a point cloud to a range image using given intrinsics.
     
@@ -601,10 +601,11 @@ def project_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[t
                 x (list of float): X coordinates.
                 y (list of float): Y coordinates.
                 z (list of float): Z coordinates.
+                empty_value (float, optional): Initial value for pixels (default 0.0).
             Returns:
                 RangeImage: Projected range image.
     """
-def project_values_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[typing.SupportsFloat], y: collections.abc.Sequence[typing.SupportsFloat], z: collections.abc.Sequence[typing.SupportsFloat], values: collections.abc.Sequence[typing.SupportsFloat]) -> RangeImage:
+def project_values_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[typing.SupportsFloat], y: collections.abc.Sequence[typing.SupportsFloat], z: collections.abc.Sequence[typing.SupportsFloat], values: collections.abc.Sequence[typing.SupportsFloat], empty_value: typing.SupportsFloat = 0.0) -> RangeImage:
     """
             Project a point cloud to a range image using given intrinsics and custom scalar values.
     
@@ -614,6 +615,7 @@ def project_values_to_range_image(intrinsics: Intrinsics, x: collections.abc.Seq
                 y (list of float): Y coordinates.
                 z (list of float): Z coordinates.
                 values (list of float): Scalar values to project.
+                empty_value (float, optional): Initial value for pixels (default 0.0).
             Returns:
                 RangeImage: Projected range image.
     """

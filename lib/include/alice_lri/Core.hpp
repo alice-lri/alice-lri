@@ -41,35 +41,39 @@ namespace alice_lri {
      * @brief Project a point cloud to a range image using given intrinsics (float).
      * @param intrinsics Sensor intrinsics.
      * @param points Input point cloud (float precision).
+     * @param emptyValue Value for empty pixels (default 0.0).
      * @return Result containing RangeImage or error status.
      */
-    ALICE_LRI_API Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) noexcept;
+    ALICE_LRI_API Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points, double emptyValue = 0.0) noexcept;
 
     /**
      * @brief Project a point cloud to a range image using given intrinsics (double).
      * @param intrinsics Sensor intrinsics.
      * @param points Input point cloud (double precision).
+     * @param emptyValue Value for empty pixels (default 0.0).
      * @return Result containing RangeImage or error status.
      */
-    ALICE_LRI_API Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points) noexcept;
+    ALICE_LRI_API Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points, double emptyValue = 0.0) noexcept;
     
     /**
      * @brief Project a point cloud to a range image using given intrinsics and custom values (float).
      * @param intrinsics Sensor intrinsics.
      * @param points Input point cloud (float precision).
      * @param values Custom values to project (float precision).
+     * @param emptyValue Value for empty pixels (default 0.0).
      * @return Result containing RangeImage or error status.
      */
-    ALICE_LRI_API Result<RangeImage> projectValuesToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points, const AliceArray<float> &values) noexcept;
+    ALICE_LRI_API Result<RangeImage> projectValuesToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points, const AliceArray<float> &values, double emptyValue = 0.0) noexcept;
 
     /**
      * @brief Project a point cloud to a range image using given intrinsics and custom values (double).
      * @param intrinsics Sensor intrinsics.
      * @param points Input point cloud (double precision).
      * @param values Custom values to project (double precision).
+     * @param emptyValue Value for empty pixels (default 0.0).
      * @return Result containing RangeImage or error status.
      */
-    ALICE_LRI_API Result<RangeImage> projectValuesToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points, const AliceArray<double> &values) noexcept;
+    ALICE_LRI_API Result<RangeImage> projectValuesToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points, const AliceArray<double> &values, double emptyValue = 0.0) noexcept;
 
     /**
      * @brief Unproject a range image to a double point cloud using given intrinsics.
