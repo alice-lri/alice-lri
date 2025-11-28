@@ -6,7 +6,7 @@ import collections.abc
 import numpy
 import numpy.typing
 import typing
-__all__: list[str] = ['ALL_ASSIGNED', 'EMPTY_POINT_CLOUD', 'EndReason', 'ErrorCode', 'INTERNAL_ERROR', 'Interval', 'Intrinsics', 'IntrinsicsDetailed', 'MAX_ITERATIONS', 'MISMATCHED_SIZES', 'NONE', 'NO_MORE_PEAKS', 'RANGES_XY_ZERO', 'RangeImage', 'Scanline', 'ScanlineAngleBounds', 'ScanlineDetailed', 'ValueConfInterval', 'error_message', 'estimate_intrinsics', 'estimate_intrinsics_detailed', 'intrinsics_from_json_file', 'intrinsics_from_json_str', 'intrinsics_to_json_file', 'intrinsics_to_json_str', 'project_to_range_image', 'unproject_to_point_cloud']
+__all__: list[str] = ['ALL_ASSIGNED', 'EMPTY_POINT_CLOUD', 'EndReason', 'ErrorCode', 'INTERNAL_ERROR', 'Interval', 'Intrinsics', 'IntrinsicsDetailed', 'MAX_ITERATIONS', 'MISMATCHED_SIZES', 'NONE', 'NO_MORE_PEAKS', 'RANGES_XY_ZERO', 'RangeImage', 'Scanline', 'ScanlineAngleBounds', 'ScanlineDetailed', 'ValueConfInterval', 'error_message', 'estimate_intrinsics', 'estimate_intrinsics_detailed', 'intrinsics_from_json_file', 'intrinsics_from_json_str', 'intrinsics_to_json_file', 'intrinsics_to_json_str', 'project_to_range_image', 'project_values_to_range_image', 'unproject_to_point_cloud']
 class EndReason:
     """
     
@@ -601,6 +601,19 @@ def project_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[t
                 x (list of float): X coordinates.
                 y (list of float): Y coordinates.
                 z (list of float): Z coordinates.
+            Returns:
+                RangeImage: Projected range image.
+    """
+def project_values_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[typing.SupportsFloat], y: collections.abc.Sequence[typing.SupportsFloat], z: collections.abc.Sequence[typing.SupportsFloat], values: collections.abc.Sequence[typing.SupportsFloat]) -> RangeImage:
+    """
+            Project a point cloud to a range image using given intrinsics and custom scalar values.
+    
+            Args:
+                intrinsics (Intrinsics): Sensor intrinsics (see estimate_intrinsics).
+                x (list of float): X coordinates.
+                y (list of float): Y coordinates.
+                z (list of float): Z coordinates.
+                values (list of float): Scalar values to project.
             Returns:
                 RangeImage: Projected range image.
     """

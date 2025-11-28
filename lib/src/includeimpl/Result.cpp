@@ -6,7 +6,7 @@ namespace alice_lri {
             case ErrorCode::NONE:
                 return AliceString();
             case ErrorCode::MISMATCHED_SIZES:
-                return AliceString("Input cloud X, Y and Z sizes do not match");
+                return AliceString("Sizes of X, Y and Z (or other values if provided) do not match");
             case ErrorCode::EMPTY_POINT_CLOUD:
                 return AliceString("Point cloud is empty");
             case ErrorCode::RANGES_XY_ZERO:

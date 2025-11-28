@@ -325,6 +325,30 @@ PYBIND11_MODULE(_alice_lri, m) {
             RangeImage: Projected range image.
     )doc");
 
+    m.def("project_values_to_range_image", [&unwrap_result](
+        const alice_lri::Intrinsics& intrinsics, const std::vector<double>& x, const std::vector<double>& y,
+        const std::vector<double>& z, const std::vector<double>& values
+    ) {
+        // Convert std::vector to AliceArray
+        alice_lri::PointCloud::Double cloud;
+        cloud.x = alice_lri::AliceArray<double>(x.data(), x.size());
+        cloud.y = alice_lri::AliceArray<double>(y.data(), y.size());
+        cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
+        alice_lri::AliceArray<double> vals(values.data(), values.size());
+        return unwrap_result(alice_lri::projectValuesToRangeImage(intrinsics, cloud, vals));
+    }, py::arg("intrinsics"), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("values"), R"doc(
+        Project a point cloud to a range image using given intrinsics and custom scalar values.
+
+        Args:
+            intrinsics (Intrinsics): Sensor intrinsics (see estimate_intrinsics).
+            x (list of float): X coordinates.
+            y (list of float): Y coordinates.
+            z (list of float): Z coordinates.
+            values (list of float): Scalar values to project.
+        Returns:
+            RangeImage: Projected range image.
+    )doc");
+
     m.def("unproject_to_point_cloud", [](const alice_lri::Intrinsics& intrinsics, const alice_lri::RangeImage& ri) {
         auto cloud = alice_lri::unProjectToPointCloud(intrinsics, ri);
         // Convert AliceArray to std::vector for Python convenience
