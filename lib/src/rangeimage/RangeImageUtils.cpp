@@ -1,6 +1,7 @@
 #include "RangeImageUtils.h"
 #include <numbers>
 #include <numeric>
+#include <optional>
 #include <span>
 #include <Eigen/Core>
 #include "alice_lri/Structs.hpp"
