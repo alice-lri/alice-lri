@@ -9,6 +9,8 @@
 
 namespace py = pybind11;
 
+// TODO on python remove the RangeImage class and just use np.ndarray
+
 PYBIND11_MODULE(_alice_lri, m) {
     m.doc() = "Python bindings for the ALICE-LRI C++ library";
 
