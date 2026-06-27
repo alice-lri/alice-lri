@@ -112,27 +112,59 @@ namespace alice_lri {
         return result;
     }
 
-    Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points) noexcept {
+    Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points, double emptyValue) noexcept {
         try {
             const auto validationStatus = validateInput(points.x, points.y, points.z);
             if (!validationStatus) {
                 return Result<RangeImage>(validationStatus);
             }
 
-            return Result(RangeImageUtils::projectToRangeImage(intrinsics, points));
+            return Result(RangeImageUtils::projectToRangeImage(intrinsics, points, emptyValue));
         } catch (const std::exception &e) {
             return Result<RangeImage>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }
     }
 
-    Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points) noexcept {
+    Result<RangeImage> projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points, double emptyValue) noexcept {
         try {
             const auto validationStatus = validateInput(points.x, points.y, points.z);
             if (!validationStatus) {
                 return Result<RangeImage>(validationStatus);
             }
 
-            return Result(RangeImageUtils::projectToRangeImage(intrinsics, points));
+            return Result(RangeImageUtils::projectToRangeImage(intrinsics, points, emptyValue));
+        } catch (const std::exception &e) {
+            return Result<RangeImage>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+        }
+    }
+
+    Result<RangeImage> projectValuesToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points, const AliceArray<float> &values, double emptyValue) noexcept {
+        try {
+            const auto validationStatus = validateInput(points.x, points.y, points.z);
+            if (!validationStatus) {
+                return Result<RangeImage>(validationStatus);
+            }
+            if (points.x.size() != values.size()) {
+                 return Result<RangeImage>(Status::buildError(ErrorCode::MISMATCHED_SIZES));
+            }
+
+            return Result(RangeImageUtils::projectValuesToRangeImage(intrinsics, points, values, emptyValue));
+        } catch (const std::exception &e) {
+            return Result<RangeImage>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
+        }
+    }
+
+    Result<RangeImage> projectValuesToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points, const AliceArray<double> &values, double emptyValue) noexcept {
+        try {
+            const auto validationStatus = validateInput(points.x, points.y, points.z);
+            if (!validationStatus) {
+                return Result<RangeImage>(validationStatus);
+            }
+            if (points.x.size() != values.size()) {
+                 return Result<RangeImage>(Status::buildError(ErrorCode::MISMATCHED_SIZES));
+            }
+
+            return Result(RangeImageUtils::projectValuesToRangeImage(intrinsics, points, values, emptyValue));
         } catch (const std::exception &e) {
             return Result<RangeImage>(Status::buildError(ErrorCode::INTERNAL_ERROR, AliceString(e.what())));
         }

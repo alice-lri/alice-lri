@@ -12,7 +12,16 @@ Common entry points for typical workflows.
 
 .. autofunction:: alice_lri.project_to_range_image
 
+.. autofunction:: alice_lri.project_values_to_range_image
+
 .. autofunction:: alice_lri.unproject_to_point_cloud
+
+Custom Scalar Images
+--------------------
+
+Use ``project_values_to_range_image`` when you need the ALICE-LRI pixel layout but want each occupied pixel to store a per-point scalar other than range, such as intensity, labels, confidence scores, or residuals. The point coordinates still define the row and column, while ``values`` defines the stored pixel value. The optional ``empty_value`` argument initializes pixels with no corresponding point.
+
+For point-cloud reconstruction, keep using ``project_to_range_image`` so pixels store geometric ranges.
 
 Main Data Structures
 --------------------

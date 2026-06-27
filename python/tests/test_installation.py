@@ -12,6 +12,7 @@ def test_available_functions():
         'estimate_intrinsics',
         'estimate_intrinsics_detailed',
         'project_to_range_image',
+        'project_values_to_range_image',
         'unproject_to_point_cloud',
         'intrinsics_to_json_str',
         'intrinsics_from_json_str',
@@ -84,9 +85,36 @@ def test_small_data_functionality():
         else:
             print(f"Expected computational error (not an installation issue): {e}")
 
+def test_project_values_to_range_image():
+    """Test projection of custom scalar values on a simple one-scanline grid"""
+    intrinsics = alice_lri.Intrinsics(1)
+
+    ri = alice_lri.project_values_to_range_image(
+        intrinsics,
+        [-1.0],
+        [0.0],
+        [0.0],
+        [10.0],
+        empty_value=-1.0,
+    )
+
+    assert ri.width == 1
+    assert ri.height == 1
+    assert ri[0, 0] == pytest.approx(10.0)
+
+    with pytest.raises(RuntimeError, match="Sizes"):
+        alice_lri.project_values_to_range_image(
+            intrinsics,
+            [-1.0, 1.0],
+            [0.0, 0.0],
+            [0.0, 0.0],
+            [10.0],
+        )
+
 if __name__ == "__main__":
     test_package_import()
     test_available_functions()
     test_basic_data_structures()
     test_small_data_functionality()
+    test_project_values_to_range_image()
     print("All basic installation tests passed!")
