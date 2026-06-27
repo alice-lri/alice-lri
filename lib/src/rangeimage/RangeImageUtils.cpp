@@ -3,6 +3,7 @@
 #include <numeric>
 #include <optional>
 #include <span>
+#include <vector>
 #include <Eigen/Core>
 #include "alice_lri/Structs.hpp"
 #include "utils/logger/Logger.h"
@@ -180,6 +181,7 @@ namespace alice_lri::RangeImageUtils {
         const int32_t width = calculateLcmHorizontalResolution(intrinsics);
         const int32_t height = static_cast<int32_t>(intrinsics.scanlines.size());
         RangeImage rangeImage(width, height, emptyValue);
+        std::vector<uint8_t> occupied(static_cast<size_t>(width) * height, 0);
         double *rangeImageData = rangeImage.data();
 
         for (int32_t pointIdx = 0; pointIdx < ranges.size(); ++pointIdx) {
@@ -192,12 +194,13 @@ namespace alice_lri::RangeImageUtils {
 
             const int32_t flatIdx = row * width + col;
 
-            if (rangeImageData[flatIdx] != emptyValue && !(std::isnan(rangeImageData[flatIdx]) && std::isnan(emptyValue))) {
+            if (occupied[flatIdx]) {
                 LOG_WARN("Overwriting pixel at (", row, ", ", col, ") with range ", ranges(pointIdx),
                          " (previously: ", rangeImage(row, col), "). Losslessness not achieved!");
             }
 
             rangeImageData[flatIdx] = values.has_value() ? (*values)(pointIdx) : ranges(pointIdx);
+            occupied[flatIdx] = 1;
         }
 
         return rangeImage;

@@ -20,11 +20,19 @@ Intrinsics Estimation
 Range Image Projection
 ^^^^^^^^^^^^^^^^^^^^^^^
 
-.. doxygenfunction:: alice_lri::projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points)
+.. doxygenfunction:: alice_lri::projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points, double emptyValue)
    :project: ALICE-LRI
 
-.. doxygenfunction:: alice_lri::projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points)
+.. doxygenfunction:: alice_lri::projectToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points, double emptyValue)
    :project: ALICE-LRI
+
+.. doxygenfunction:: alice_lri::projectValuesToRangeImage(const Intrinsics &intrinsics, const PointCloud::Float &points, const AliceArray<float> &values, double emptyValue)
+   :project: ALICE-LRI
+
+.. doxygenfunction:: alice_lri::projectValuesToRangeImage(const Intrinsics &intrinsics, const PointCloud::Double &points, const AliceArray<double> &values, double emptyValue)
+   :project: ALICE-LRI
+
+Use ``projectValuesToRangeImage`` to reuse the ALICE-LRI pixel layout while storing per-point scalar values other than range, such as intensity, labels, confidence scores, or residuals. Use ``projectToRangeImage`` when the resulting image is intended for point-cloud reconstruction.
 
 Point Cloud Reconstruction
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
