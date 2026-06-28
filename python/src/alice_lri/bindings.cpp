@@ -3,13 +3,13 @@
 #include <pybind11/numpy.h>
 #include <string>
 #include <vector>
+#include <limits>
+#include <utility>
 #include <alice_lri/Core.hpp>
 #include <sstream>
 #include <iostream>
 
 namespace py = pybind11;
-
-// TODO on python remove the RangeImage class and just use np.ndarray
 
 PYBIND11_MODULE(_alice_lri, m) {
     m.doc() = "Python bindings for the ALICE-LRI C++ library";
@@ -182,91 +182,46 @@ PYBIND11_MODULE(_alice_lri, m) {
             return oss.str();
         });
 
-    // RangeImage class
-    py::class_<alice_lri::RangeImage>(m, "RangeImage", R"doc(
-        Represents a 2D range image with pixel data.
+    auto range_image_to_numpy = [](alice_lri::RangeImage ri) {
+        auto* owned = new alice_lri::RangeImage(std::move(ri));
+        auto owner = py::capsule(owned, [](void* ptr) {
+            delete static_cast<alice_lri::RangeImage*>(ptr);
+        });
 
-        Args:
-            width (int): Image width.
-            height (int): Image height.
-            initial_value (float, optional): Initial value for all pixels (if provided).
+        return py::array_t<double>(
+            {static_cast<py::ssize_t>(owned->height()), static_cast<py::ssize_t>(owned->width())},
+            {static_cast<py::ssize_t>(sizeof(double) * owned->width()), static_cast<py::ssize_t>(sizeof(double))},
+            owned->data(),
+            owner
+        );
+    };
 
-        Note:
-            The (width, height) constructor only reserves space for pixels but does not initialize them.
-            The (width, height, initial_value) constructor initializes all pixels to the given value.
-    )doc")
-        .def(py::init<>(), "Default constructor (empty image).")
-        .def(py::init<uint32_t, uint32_t>(), py::arg("width"), py::arg("height"), "Construct with width and height. Reserves space for pixels but does not initialize them.")
-        .def(py::init<uint32_t, uint32_t, double>(), py::arg("width"), py::arg("height"), py::arg("initial_value"), "Construct with width, height, and initial pixel value.")
-        .def_property_readonly("width", &alice_lri::RangeImage::width, "Image width.")
-        .def_property_readonly("height", &alice_lri::RangeImage::height, "Image height.")
-        .def("__repr__", [](const alice_lri::RangeImage& self) {
-            std::ostringstream oss;
-            oss << "RangeImage(width=" << self.width() << ", height=" << self.height() << ")";
-            return oss.str();
-        })
-        .def("__getitem__", [](const alice_lri::RangeImage &ri, py::tuple idx) -> double {
-            if (idx.size() != 2)
-                throw py::index_error("Need 2 indices");
-            size_t row = idx[0].cast<size_t>();
-            size_t col = idx[1].cast<size_t>();
-            if (row >= ri.height() || col >= ri.width())
-                throw py::index_error("Index out of bounds");
-            return ri(row, col);
-        }, py::is_operator(), R"doc(
-            Get pixel value at the specified position.
+    auto numpy_to_range_image = [](const py::array_t<double, py::array::c_style | py::array::forcecast>& array) {
+        const auto info = array.request();
+        if (info.ndim != 2) {
+            throw std::runtime_error("Range image must be a 2D NumPy array.");
+        }
+        if (info.shape[0] < 0 || info.shape[1] < 0) {
+            throw std::runtime_error("Range image shape must be non-negative.");
+        }
+        if (info.shape[0] > std::numeric_limits<uint32_t>::max() ||
+            info.shape[1] > std::numeric_limits<uint32_t>::max()) {
+            throw std::runtime_error("Range image dimensions exceed the supported range.");
+        }
 
-            Args:
-                row (int): Row index (0 to height-1).
-                col (int): Column index (0 to width-1).
-            Returns:
-                float: Pixel value at [row, col].
-            
-            Example:
-                >>> value = range_image[i, j]
-        )doc")
-        .def("__setitem__", [](alice_lri::RangeImage &ri, py::tuple idx, double value) {
-            if (idx.size() != 2)
-                throw py::index_error("Need 2 indices");
-            size_t row = idx[0].cast<size_t>();
-            size_t col = idx[1].cast<size_t>();
-            if (row >= ri.height() || col >= ri.width())
-                throw py::index_error("Index out of bounds");
-            ri(row, col) = value;
-        }, py::is_operator(), R"doc(
-            Set pixel value at the specified position.
+        const auto height = static_cast<uint32_t>(info.shape[0]);
+        const auto width = static_cast<uint32_t>(info.shape[1]);
+        alice_lri::RangeImage ri(width, height, 0.0);
+        auto view = array.unchecked<2>();
 
-            Args:
-                row (int): Row index (0 to height-1).
-                col (int): Column index (0 to width-1).
-                value (float): Value to set.
-            
-            Example:
-                >>> range_image[i, j] = 10.5
-        )doc")
-        .def("__array__", [](py::object self, py::kwargs kwargs) {
-            auto& ri = self.cast<const alice_lri::RangeImage&>();
-            return py::array_t<double>(
-                {ri.height(), ri.width()},                        // shape
-                {sizeof(double) * ri.width(), sizeof(double)},    // C-order strides
-                ri.data(),                                         // pointer to data
-                self                                              // keep alive
-            );
-        }, R"doc(
-            Convert RangeImage to a NumPy array (zero-copy view).
+        for (py::ssize_t row = 0; row < static_cast<py::ssize_t>(height); ++row) {
+            for (py::ssize_t col = 0; col < static_cast<py::ssize_t>(width); ++col) {
+                ri(static_cast<uint32_t>(row), static_cast<uint32_t>(col)) = view(row, col);
+            }
+        }
 
-            Returns:
-                numpy.ndarray: A 2D array view of the range image data.
-            
-            Note:
-                The returned array is a view of the underlying data, so modifications
-                to the array will affect the original RangeImage.
-            
-            Example:
-                >>> import numpy as np
-                >>> array = np.asarray(range_image)
-                >>> max_range = np.max(array)
-        )doc");
+        return ri;
+    };
 
     m.def("estimate_intrinsics", [&unwrap_result](const std::vector<double>& x, const std::vector<double>& y, const std::vector<double>& z) {
         // Convert std::vector to AliceArray
@@ -305,7 +260,7 @@ PYBIND11_MODULE(_alice_lri, m) {
             IntrinsicsDetailed: Detailed estimated intrinsics and statistics.
     )doc");
 
-    m.def("project_to_range_image", [&unwrap_result](
+    m.def("project_to_range_image", [&range_image_to_numpy](
         const alice_lri::Intrinsics& intrinsics, const std::vector<double>& x, const std::vector<double>& y,
         const std::vector<double>& z, double empty_value
     ) {
@@ -314,7 +269,11 @@ PYBIND11_MODULE(_alice_lri, m) {
         cloud.x = alice_lri::AliceArray<double>(x.data(), x.size());
         cloud.y = alice_lri::AliceArray<double>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
-        return unwrap_result(alice_lri::projectToRangeImage(intrinsics, cloud, empty_value));
+        auto result = alice_lri::projectToRangeImage(intrinsics, cloud, empty_value);
+        if (!result.ok()) {
+            throw std::runtime_error(std::string(result.status().message.c_str()));
+        }
+        return range_image_to_numpy(std::move(result).value());
     }, py::arg("intrinsics"), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("empty_value") = 0.0, R"doc(
         Project a point cloud to a range image using given intrinsics.
 
@@ -325,10 +284,10 @@ PYBIND11_MODULE(_alice_lri, m) {
             z (list of float): Z coordinates.
             empty_value (float, optional): Initial value for pixels (default 0.0).
         Returns:
-            RangeImage: Projected range image.
+            numpy.ndarray: Projected range image as a 2D float64 array.
     )doc");
 
-    m.def("project_values_to_range_image", [&unwrap_result](
+    m.def("project_values_to_range_image", [&range_image_to_numpy](
         const alice_lri::Intrinsics& intrinsics, const std::vector<double>& x, const std::vector<double>& y,
         const std::vector<double>& z, const std::vector<double>& values, double empty_value
     ) {
@@ -338,7 +297,11 @@ PYBIND11_MODULE(_alice_lri, m) {
         cloud.y = alice_lri::AliceArray<double>(y.data(), y.size());
         cloud.z = alice_lri::AliceArray<double>(z.data(), z.size());
         alice_lri::AliceArray<double> vals(values.data(), values.size());
-        return unwrap_result(alice_lri::projectValuesToRangeImage(intrinsics, cloud, vals, empty_value));
+        auto result = alice_lri::projectValuesToRangeImage(intrinsics, cloud, vals, empty_value);
+        if (!result.ok()) {
+            throw std::runtime_error(std::string(result.status().message.c_str()));
+        }
+        return range_image_to_numpy(std::move(result).value());
     }, py::arg("intrinsics"), py::arg("x"), py::arg("y"), py::arg("z"), py::arg("values"), py::arg("empty_value") = 0.0, R"doc(
         Project a point cloud to a range image using given intrinsics and custom scalar values.
 
@@ -350,22 +313,26 @@ PYBIND11_MODULE(_alice_lri, m) {
             values (list of float): Scalar values to project.
             empty_value (float, optional): Initial value for pixels (default 0.0).
         Returns:
-            RangeImage: Projected range image.
+            numpy.ndarray: Projected range image as a 2D float64 array.
     )doc");
 
-    m.def("unproject_to_point_cloud", [](const alice_lri::Intrinsics& intrinsics, const alice_lri::RangeImage& ri) {
+    m.def("unproject_to_point_cloud", [&numpy_to_range_image](
+        const alice_lri::Intrinsics& intrinsics,
+        const py::array_t<double, py::array::c_style | py::array::forcecast>& range_image
+    ) {
+        const auto ri = numpy_to_range_image(range_image);
         auto cloud = alice_lri::unProjectToPointCloud(intrinsics, ri);
         // Convert AliceArray to std::vector for Python convenience
         std::vector<double> x_vec(cloud.x.begin(), cloud.x.end());
         std::vector<double> y_vec(cloud.y.begin(), cloud.y.end());
         std::vector<double> z_vec(cloud.z.begin(), cloud.z.end());
         return py::make_tuple(x_vec, y_vec, z_vec);
-    }, py::arg("intrinsics"), py::arg("ri"), R"doc(
+    }, py::arg("intrinsics"), py::arg("range_image"), R"doc(
         Unproject a range image to a 3D point cloud using given intrinsics.
 
         Args:
             intrinsics (Intrinsics): Sensor intrinsics.
-            ri (RangeImage): Input range image.
+            range_image (numpy.ndarray): Input 2D float array with range values.
         Returns:
             tuple: (x, y, z) coordinate lists.
     )doc");

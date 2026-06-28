@@ -6,7 +6,7 @@ import collections.abc
 import numpy
 import numpy.typing
 import typing
-__all__: list[str] = ['ALL_ASSIGNED', 'EMPTY_POINT_CLOUD', 'EndReason', 'ErrorCode', 'INTERNAL_ERROR', 'Interval', 'Intrinsics', 'IntrinsicsDetailed', 'MAX_ITERATIONS', 'MISMATCHED_SIZES', 'NONE', 'NO_MORE_PEAKS', 'RANGES_XY_ZERO', 'RangeImage', 'Scanline', 'ScanlineAngleBounds', 'ScanlineDetailed', 'ValueConfInterval', 'error_message', 'estimate_intrinsics', 'estimate_intrinsics_detailed', 'intrinsics_from_json_file', 'intrinsics_from_json_str', 'intrinsics_to_json_file', 'intrinsics_to_json_str', 'project_to_range_image', 'project_values_to_range_image', 'unproject_to_point_cloud']
+__all__: list[str] = ['ALL_ASSIGNED', 'EMPTY_POINT_CLOUD', 'EndReason', 'ErrorCode', 'INTERNAL_ERROR', 'Interval', 'Intrinsics', 'IntrinsicsDetailed', 'MAX_ITERATIONS', 'MISMATCHED_SIZES', 'NONE', 'NO_MORE_PEAKS', 'RANGES_XY_ZERO', 'Scanline', 'ScanlineAngleBounds', 'ScanlineDetailed', 'ValueConfInterval', 'error_message', 'estimate_intrinsics', 'estimate_intrinsics_detailed', 'intrinsics_from_json_file', 'intrinsics_from_json_str', 'intrinsics_to_json_file', 'intrinsics_to_json_str', 'project_to_range_image', 'project_values_to_range_image', 'unproject_to_point_cloud']
 class EndReason:
     """
     
@@ -223,89 +223,6 @@ class IntrinsicsDetailed:
     @vertical_iterations.setter
     def vertical_iterations(self, arg0: typing.SupportsInt | typing.SupportsIndex) -> None:
         ...
-class RangeImage:
-    """
-    
-            Represents a 2D range image with pixel data.
-    
-            Args:
-                width (int): Image width.
-                height (int): Image height.
-                initial_value (float, optional): Initial value for all pixels (if provided).
-    
-            Note:
-                The (width, height) constructor only reserves space for pixels but does not initialize them.
-                The (width, height, initial_value) constructor initializes all pixels to the given value.
-        
-    """
-    def __array__(self, **kwargs) -> numpy.typing.NDArray[numpy.float64]:
-        """
-                    Convert RangeImage to a NumPy array (zero-copy view).
-        
-                    Returns:
-                        numpy.ndarray: A 2D array view of the range image data.
-                    
-                    Note:
-                        The returned array is a view of the underlying data, so modifications
-                        to the array will affect the original RangeImage.
-                    
-                    Example:
-                        >>> import numpy as np
-                        >>> array = np.asarray(range_image)
-                        >>> max_range = np.max(array)
-        """
-    def __getitem__(self, arg0: tuple) -> float:
-        """
-                    Get pixel value at the specified position.
-        
-                    Args:
-                        row (int): Row index (0 to height-1).
-                        col (int): Column index (0 to width-1).
-                    Returns:
-                        float: Pixel value at [row, col].
-                    
-                    Example:
-                        >>> value = range_image[i, j]
-        """
-    @typing.overload
-    def __init__(self) -> None:
-        """
-        Default constructor (empty image).
-        """
-    @typing.overload
-    def __init__(self, width: typing.SupportsInt | typing.SupportsIndex, height: typing.SupportsInt | typing.SupportsIndex) -> None:
-        """
-        Construct with width and height. Reserves space for pixels but does not initialize them.
-        """
-    @typing.overload
-    def __init__(self, width: typing.SupportsInt | typing.SupportsIndex, height: typing.SupportsInt | typing.SupportsIndex, initial_value: typing.SupportsFloat | typing.SupportsIndex) -> None:
-        """
-        Construct with width, height, and initial pixel value.
-        """
-    def __repr__(self) -> str:
-        ...
-    def __setitem__(self, arg0: tuple, arg1: typing.SupportsFloat | typing.SupportsIndex) -> None:
-        """
-                    Set pixel value at the specified position.
-        
-                    Args:
-                        row (int): Row index (0 to height-1).
-                        col (int): Column index (0 to width-1).
-                        value (float): Value to set.
-                    
-                    Example:
-                        >>> range_image[i, j] = 10.5
-        """
-    @property
-    def height(self) -> int:
-        """
-        Image height.
-        """
-    @property
-    def width(self) -> int:
-        """
-        Image width.
-        """
 class Scanline:
     """
     
@@ -592,7 +509,7 @@ def intrinsics_to_json_str(intrinsics: Intrinsics, indent: typing.SupportsInt | 
             Returns:
                 str: JSON string.
     """
-def project_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], y: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], z: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], empty_value: typing.SupportsFloat | typing.SupportsIndex = 0.0) -> RangeImage:
+def project_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], y: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], z: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], empty_value: typing.SupportsFloat | typing.SupportsIndex = 0.0) -> numpy.typing.NDArray[numpy.float64]:
     """
             Project a point cloud to a range image using given intrinsics.
     
@@ -603,9 +520,9 @@ def project_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[t
                 z (list of float): Z coordinates.
                 empty_value (float, optional): Initial value for pixels (default 0.0).
             Returns:
-                RangeImage: Projected range image.
+                numpy.ndarray: Projected range image as a 2D float64 array.
     """
-def project_values_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], y: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], z: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], values: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], empty_value: typing.SupportsFloat | typing.SupportsIndex = 0.0) -> RangeImage:
+def project_values_to_range_image(intrinsics: Intrinsics, x: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], y: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], z: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], values: collections.abc.Sequence[typing.SupportsFloat | typing.SupportsIndex], empty_value: typing.SupportsFloat | typing.SupportsIndex = 0.0) -> numpy.typing.NDArray[numpy.float64]:
     """
             Project a point cloud to a range image using given intrinsics and custom scalar values.
     
@@ -617,15 +534,15 @@ def project_values_to_range_image(intrinsics: Intrinsics, x: collections.abc.Seq
                 values (list of float): Scalar values to project.
                 empty_value (float, optional): Initial value for pixels (default 0.0).
             Returns:
-                RangeImage: Projected range image.
+                numpy.ndarray: Projected range image as a 2D float64 array.
     """
-def unproject_to_point_cloud(intrinsics: Intrinsics, ri: RangeImage) -> tuple[list[float], list[float], list[float]]:
+def unproject_to_point_cloud(intrinsics: Intrinsics, range_image: typing.Annotated[numpy.typing.ArrayLike, numpy.float64]) -> tuple[list[float], list[float], list[float]]:
     """
             Unproject a range image to a 3D point cloud using given intrinsics.
     
             Args:
                 intrinsics (Intrinsics): Sensor intrinsics.
-                ri (RangeImage): Input range image.
+                range_image (numpy.ndarray): Input 2D float array with range values.
             Returns:
                 tuple: (x, y, z) coordinate lists.
     """

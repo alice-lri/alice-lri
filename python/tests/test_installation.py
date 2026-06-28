@@ -1,5 +1,6 @@
 import pytest
 import alice_lri
+import numpy as np
 
 def test_package_import():
     """Test that the package can be imported"""
@@ -32,7 +33,7 @@ def test_basic_data_structures():
     try:
         # Test classes from bindings.cpp
         assert hasattr(alice_lri, 'Intrinsics')
-        assert hasattr(alice_lri, 'RangeImage')
+        assert not hasattr(alice_lri, 'RangeImage')
         assert hasattr(alice_lri, 'Scanline')
         assert hasattr(alice_lri, 'Interval')
         assert hasattr(alice_lri, 'ValueConfInterval')
@@ -57,11 +58,6 @@ def test_small_data_functionality():
 
         assert callable(alice_lri.estimate_intrinsics)
         print("estimate_intrinsics function is callable")
-
-        ri = alice_lri.RangeImage(10, 10)
-        assert ri.width == 10
-        assert ri.height == 10
-        print("RangeImage creation works")
 
         intrinsics = alice_lri.Intrinsics(5)
         print("Intrinsics creation works")
@@ -98,8 +94,9 @@ def test_project_values_to_range_image():
         empty_value=-1.0,
     )
 
-    assert ri.width == 1
-    assert ri.height == 1
+    assert isinstance(ri, np.ndarray)
+    assert ri.dtype == np.float64
+    assert ri.shape == (1, 1)
     assert ri[0, 0] == pytest.approx(10.0)
 
     with pytest.raises(RuntimeError, match="Sizes"):
@@ -111,10 +108,40 @@ def test_project_values_to_range_image():
             [10.0],
         )
 
+def test_range_image_projection_uses_numpy_arrays():
+    """Test that Python range image APIs use NumPy arrays at the boundary"""
+    intrinsics = alice_lri.Intrinsics(1)
+
+    ri = alice_lri.project_to_range_image(
+        intrinsics,
+        [-1.0],
+        [0.0],
+        [0.0],
+        empty_value=-1.0,
+    )
+
+    assert isinstance(ri, np.ndarray)
+    assert ri.dtype == np.float64
+    assert ri.flags.writeable
+    assert ri.shape == (1, 1)
+    assert ri[0, 0] == pytest.approx(1.0)
+
+    ri[0, 0] = 2.0
+    assert ri[0, 0] == pytest.approx(2.0)
+
+    x, y, z = alice_lri.unproject_to_point_cloud(intrinsics, ri)
+    assert x == pytest.approx([-2.0])
+    assert y == pytest.approx([0.0])
+    assert z == pytest.approx([0.0])
+
+    with pytest.raises(RuntimeError, match="2D"):
+        alice_lri.unproject_to_point_cloud(intrinsics, np.array([1.0]))
+
 if __name__ == "__main__":
     test_package_import()
     test_available_functions()
     test_basic_data_structures()
     test_small_data_functionality()
     test_project_values_to_range_image()
+    test_range_image_projection_uses_numpy_arrays()
     print("All basic installation tests passed!")
