@@ -26,6 +26,7 @@ Quick Python Example
 
    # Project to range image
    range_image = alice_lri.project_to_range_image(intrinsics, x, y, z)
+   first_pixel = range_image[0, 0]
 
    # Reconstruct point cloud
    rx, ry, rz = alice_lri.unproject_to_point_cloud(intrinsics, range_image)

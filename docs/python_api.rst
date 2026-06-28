@@ -23,6 +23,18 @@ Use ``project_values_to_range_image`` when you need the ALICE-LRI pixel layout b
 
 For point-cloud reconstruction, keep using ``project_to_range_image`` so pixels store geometric ranges.
 
+Range Image Arrays
+------------------
+
+Python range images are represented as 2D ``numpy.ndarray`` objects with ``float64`` values and shape ``(height, width)``. ``project_to_range_image`` and ``project_values_to_range_image`` return arrays directly, and ``unproject_to_point_cloud`` accepts a 2D array as input.
+
+Arrays returned by ALICE-LRI are writable and support standard NumPy indexing:
+
+.. code-block:: python
+
+   value = range_image[0, 0]
+   range_image[0, 0] = value
+
 Main Data Structures
 --------------------
 
@@ -31,19 +43,6 @@ Types commonly used when interacting with ALICE-LRI.
 .. autoclass:: alice_lri.Intrinsics
    :members:
    :undoc-members:
-
-.. autoclass:: alice_lri.RangeImage
-   :members:
-   :undoc-members:
-   :special-members: __getitem__, __setitem__, __array__
-
-   **Indexing and Array Access**
-
-   This class supports indexing syntax for getting and setting pixel values:
-
-   - ``value = range_image[row, col]`` — Get pixel value at position (row, col)
-   - ``range_image[row, col] = value`` — Set pixel value at position (row, col)
-   - ``array = np.asarray(range_image)`` — Convert to NumPy array (zero-copy view)
 
 Additional Resources
 --------------------
